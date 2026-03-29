@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>UVEL App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 40px;
+    }
+    button {
+      padding: 15px;
+      margin: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .ride { background: #22c55e; }
+    .driver { background: #3b82f6; }
+    .admin { background: #f59e0b; }
+    .box {
+      margin-top: 30px;
+      padding: 20px;
+      background: #1e293b;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🚗 UVEL Platform</h1>
+<p>Community Transport System</p>
+
+<button class="ride" onclick="show('ride')">Ride App</button>
+<button class="driver" onclick="show('driver')">Driver App</button>
+<button class="admin" onclick="show('admin')">Admin Panel</button>
+
+<div class="box" id="content">
+  <p>Select a system</p>
+</div>
+
+<script>
+function show(type){
+  let content = document.getElementById("content");
+
+  if(type === "ride"){
+    content.innerHTML = `
+      <h2>Ride App</h2>
+      <p>Book a ride</p>
+      <input placeholder="Pickup"><br><br>
+      <input placeholder="Destination"><br><br>
+      <button>Request Ride</button>
+    `;
+  }
+
+  if(type === "driver"){
+    content.innerHTML = `
+      <h2>Driver App</h2>
+      <p>Driver Status</p>
+      <button>Go Online</button>
+      <button>Go Offline</button>
+    `;
+  }
+
+  if(type === "admin"){
+    content.innerHTML = `
+      <h2>Admin Panel</h2>
+      <p>System Overview</p>
+      <p>Users: 120</p>
+      <p>Drivers: 45</p>
+      <p>Trips Today: 89</p>
+    `;
+  }
+}
+</script>
+
+</body>
+</html>
