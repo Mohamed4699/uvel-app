@@ -1,83 +1,116 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>UVEL App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial;
-      background: #0f172a;
-      color: white;
-      text-align: center;
-      padding: 40px;
-    }
-    button {
-      padding: 15px;
-      margin: 10px;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .ride { background: #22c55e; }
-    .driver { background: #3b82f6; }
-    .admin { background: #f59e0b; }
-    .box {
-      margin-top: 30px;
-      padding: 20px;
-      background: #1e293b;
-      border-radius: 10px;
-    }
-  </style>
+<title>UVEL Platform</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0b1c2c;
+  color: white;
+}
+
+/* HEADER */
+.header {
+  text-align: center;
+  padding: 40px;
+}
+
+.header h1 {
+  font-size: 32px;
+}
+
+.buttons {
+  margin-top: 20px;
+}
+
+button {
+  padding: 12px 20px;
+  margin: 10px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.ride { background: #22c55e; color: white; }
+.driver { background: #3b82f6; color: white; }
+.admin { background: #f59e0b; color: white; }
+
+/* SECTIONS */
+.section {
+  display: none;
+  background: #132b45;
+  margin: 30px auto;
+  padding: 30px;
+  border-radius: 15px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0px 5px 20px rgba(0,0,0,0.3);
+}
+
+input {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: none;
+}
+
+/* ACTIVE */
+.active {
+  display: block;
+}
+</style>
+
+<script>
+function show(section) {
+  document.getElementById("ride").classList.remove("active");
+  document.getElementById("driver").classList.remove("active");
+  document.getElementById("admin").classList.remove("active");
+
+  document.getElementById(section).classList.add("active");
+}
+</script>
+
 </head>
 
 <body>
 
-<h1>🚗 UVEL Platform</h1>
-<p>Community Transport System</p>
+<div class="header">
+  <h1>🚗 UVEL Platform</h1>
+  <p>Reliable Community Transport</p>
 
-<button class="ride" onclick="show('ride')">Ride App</button>
-<button class="driver" onclick="show('driver')">Driver App</button>
-<button class="admin" onclick="show('admin')">Admin Panel</button>
-
-<div class="box" id="content">
-  <p>Select a system</p>
+  <div class="buttons">
+    <button class="ride" onclick="show('ride')">Ride App</button>
+    <button class="driver" onclick="show('driver')">Driver App</button>
+    <button class="admin" onclick="show('admin')">Admin Panel</button>
+  </div>
 </div>
 
-<script>
-function show(type){
-  let content = document.getElementById("content");
+<!-- RIDE -->
+<div id="ride" class="section active">
+  <h2>Book a Ride</h2>
+  <input placeholder="Pickup location">
+  <input placeholder="Destination">
+  <button class="ride">Request Ride</button>
+</div>
 
-  if(type === "ride"){
-    content.innerHTML = `
-      <h2>Ride App</h2>
-      <p>Book a ride</p>
-      <input placeholder="Pickup"><br><br>
-      <input placeholder="Destination"><br><br>
-      <button>Request Ride</button>
-    `;
-  }
+<!-- DRIVER -->
+<div id="driver" class="section">
+  <h2>Driver Status</h2>
+  <button class="driver">Go Online</button>
+  <button>Go Offline</button>
+</div>
 
-  if(type === "driver"){
-    content.innerHTML = `
-      <h2>Driver App</h2>
-      <p>Driver Status</p>
-      <button>Go Online</button>
-      <button>Go Offline</button>
-    `;
-  }
-
-  if(type === "admin"){
-    content.innerHTML = `
-      <h2>Admin Panel</h2>
-      <p>System Overview</p>
-      <p>Users: 120</p>
-      <p>Drivers: 45</p>
-      <p>Trips Today: 89</p>
-    `;
-  }
-}
-</script>
+<!-- ADMIN -->
+<div id="admin" class="section">
+  <h2>System Overview</h2>
+  <p>Users: 120</p>
+  <p>Drivers: 45</p>
+  <p>Trips Today: 89</p>
+</div>
 
 </body>
 </html>
