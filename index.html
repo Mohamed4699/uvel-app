@@ -1,351 +1,116 @@
-import React, { useMemo, useState } from "react";
+<!DOCTYPE html>
+<html>
+<head>
+<title>UVEL Platform</title>
 
-const initialBookings = [
-  {
-    id: "UV-1001",
-    passenger: "Sarah M",
-    pickup: "Liverpool, NSW",
-    destination: "Westmead Hospital",
-    date: "2026-04-05",
-    time: "10:30",
-    status: "Pending",
-    driver: "Unassigned",
-    fare: "$42.00",
-    notes: "Wheelchair access needed",
-  },
-  {
-    id: "UV-1002",
-    passenger: "Ahmed K",
-    pickup: "Bankstown, NSW",
-    destination: "TAFE NSW",
-    date: "2026-04-05",
-    time: "12:00",
-    status: "Assigned",
-    driver: "Michael R",
-    fare: "$28.00",
-    notes: "Student transport",
-  },
-];
-
-const drivers = ["Michael R", "Olivia T", "Daniel P", "Nadia S"];
-
-function SectionCard({ children, className = "" }) {
-  return (
-    <div className={`rounded-3xl bg-white p-6 shadow-lg ring-1 ring-slate-200 ${className}`}>
-      {children}
-    </div>
-  );
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0b1c2c;
+  color: white;
 }
 
-function Stat({ label, value }) {
-  return (
-    <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-      <div className="text-sm text-slate-500">{label}</div>
-      <div className="mt-2 text-2xl font-bold text-slate-900">{value}</div>
-    </div>
-  );
+/* HEADER */
+.header {
+  text-align: center;
+  padding: 40px;
 }
 
-export default function UvelRealBookingSystem() {
-  const [tab, setTab] = useState("rider");
-  const [bookings, setBookings] = useState(initialBookings);
-  const [form, setForm] = useState({
-    passenger: "",
-    pickup: "",
-    destination: "",
-    date: "",
-    time: "",
-    notes: "",
-  });
-  const [driverStatus, setDriverStatus] = useState("Offline");
-  const [driverName] = useState("Michael R");
-
-  const pendingCount = useMemo(
-    () => bookings.filter((b) => b.status === "Pending").length,
-    [bookings]
-  );
-  const assignedCount = useMemo(
-    () => bookings.filter((b) => b.status === "Assigned").length,
-    [bookings]
-  );
-  const completedCount = useMemo(
-    () => bookings.filter((b) => b.status === "Completed").length,
-    [bookings]
-  );
-
-  const myTrips = useMemo(
-    () => bookings.filter((b) => b.driver === driverName || b.driver === "Unassigned"),
-    [bookings, driverName]
-  );
-
-  function createBooking(e) {
-    e.preventDefault();
-    if (!form.passenger || !form.pickup || !form.destination || !form.date || !form.time) return;
-
-    const nextId = `UV-${1000 + bookings.length + 1}`;
-    const newBooking = {
-      id: nextId,
-      passenger: form.passenger,
-      pickup: form.pickup,
-      destination: form.destination,
-      date: form.date,
-      time: form.time,
-      status: "Pending",
-      driver: "Unassigned",
-      fare: "$35.00",
-      notes: form.notes || "No notes",
-    };
-
-    setBookings([newBooking, ...bookings]);
-    setForm({ passenger: "", pickup: "", destination: "", date: "", time: "", notes: "" });
-    setTab("admin");
-  }
-
-  function assignDriver(id, driver) {
-    setBookings((current) =>
-      current.map((b) => (b.id === id ? { ...b, driver, status: "Assigned" } : b))
-    );
-  }
-
-  function markComplete(id) {
-    setBookings((current) =>
-      current.map((b) => (b.id === id ? { ...b, status: "Completed" } : b))
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 rounded-[2rem] bg-gradient-to-r from-slate-900 via-sky-950 to-teal-700 p-8 text-white shadow-2xl">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="text-sm uppercase tracking-[0.25em] text-teal-200">UVEL</div>
-              <h1 className="mt-2 text-4xl font-bold">Real Booking System Demo</h1>
-              <p className="mt-3 max-w-3xl text-slate-200">
-                A working MVP showing rider booking, driver assignment, and admin booking management.
-              </p>
-            </div>
-            <div className="grid grid-cols-3 gap-2 rounded-2xl bg-white/10 p-2 backdrop-blur">
-              {[
-                ["rider", "Rider App"],
-                ["driver", "Driver App"],
-                ["admin", "Admin Panel"],
-              ].map(([key, label]) => (
-                <button
-                  key={key}
-                  onClick={() => setTab(key)}
-                  className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                    tab === key ? "bg-white text-slate-900 shadow" : "text-white hover:bg-white/10"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-6 grid gap-4 md:grid-cols-4">
-          <Stat label="Total Bookings" value={bookings.length} />
-          <Stat label="Pending" value={pendingCount} />
-          <Stat label="Assigned" value={assignedCount} />
-          <Stat label="Completed" value={completedCount} />
-        </div>
-
-        {tab === "rider" && (
-          <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-            <SectionCard>
-              <h2 className="text-2xl font-bold">Book a Ride</h2>
-              <p className="mt-2 text-slate-600">
-                Create a transport booking for medical appointments, community access, work, or education.
-              </p>
-              <form onSubmit={createBooking} className="mt-6 grid gap-4">
-                <input
-                  className="rounded-2xl border border-slate-300 px-4 py-3 outline-none ring-0 focus:border-teal-500"
-                  placeholder="Passenger name"
-                  value={form.passenger}
-                  onChange={(e) => setForm({ ...form, passenger: e.target.value })}
-                />
-                <input
-                  className="rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-teal-500"
-                  placeholder="Pickup location"
-                  value={form.pickup}
-                  onChange={(e) => setForm({ ...form, pickup: e.target.value })}
-                />
-                <input
-                  className="rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-teal-500"
-                  placeholder="Destination"
-                  value={form.destination}
-                  onChange={(e) => setForm({ ...form, destination: e.target.value })}
-                />
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <input
-                    type="date"
-                    className="rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-teal-500"
-                    value={form.date}
-                    onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  />
-                  <input
-                    type="time"
-                    className="rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-teal-500"
-                    value={form.time}
-                    onChange={(e) => setForm({ ...form, time: e.target.value })}
-                  />
-                </div>
-                <textarea
-                  className="min-h-28 rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-teal-500"
-                  placeholder="Booking notes"
-                  value={form.notes}
-                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                />
-                <button className="rounded-2xl bg-teal-600 px-5 py-4 font-semibold text-white shadow-lg shadow-teal-200 transition hover:bg-teal-700">
-                  Create Booking
-                </button>
-              </form>
-            </SectionCard>
-
-            <SectionCard>
-              <h3 className="text-xl font-bold">Recent Bookings</h3>
-              <div className="mt-5 space-y-4">
-                {bookings.slice(0, 4).map((booking) => (
-                  <div key={booking.id} className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="font-semibold">{booking.passenger}</div>
-                        <div className="mt-1 text-sm text-slate-600">{booking.pickup} → {booking.destination}</div>
-                        <div className="mt-1 text-xs text-slate-500">{booking.date} at {booking.time}</div>
-                      </div>
-                      <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">{booking.status}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </SectionCard>
-          </div>
-        )}
-
-        {tab === "driver" && (
-          <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <SectionCard>
-              <h2 className="text-2xl font-bold">Driver Console</h2>
-              <p className="mt-2 text-slate-600">Manage availability and accept or complete jobs.</p>
-              <div className="mt-6 rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-200">
-                <div className="text-sm text-slate-500">Driver</div>
-                <div className="mt-1 text-xl font-bold">{driverName}</div>
-                <div className="mt-4 text-sm text-slate-500">Status</div>
-                <div className="mt-2 inline-flex rounded-full bg-teal-100 px-4 py-2 font-semibold text-teal-700">{driverStatus}</div>
-                <div className="mt-5 flex gap-3">
-                  <button
-                    onClick={() => setDriverStatus("Online")}
-                    className="rounded-2xl bg-teal-600 px-4 py-3 font-semibold text-white"
-                  >
-                    Go Online
-                  </button>
-                  <button
-                    onClick={() => setDriverStatus("Offline")}
-                    className="rounded-2xl bg-slate-900 px-4 py-3 font-semibold text-white"
-                  >
-                    Go Offline
-                  </button>
-                </div>
-              </div>
-            </SectionCard>
-
-            <SectionCard>
-              <h3 className="text-xl font-bold">Available Trips</h3>
-              <div className="mt-5 space-y-4">
-                {myTrips.map((booking) => (
-                  <div key={booking.id} className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                      <div>
-                        <div className="font-semibold">{booking.id} · {booking.passenger}</div>
-                        <div className="mt-1 text-sm text-slate-600">{booking.pickup} → {booking.destination}</div>
-                        <div className="mt-1 text-sm text-slate-500">{booking.date} at {booking.time}</div>
-                        <div className="mt-1 text-sm text-slate-500">Fare {booking.fare}</div>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {booking.driver === "Unassigned" && (
-                          <button
-                            onClick={() => assignDriver(booking.id, driverName)}
-                            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
-                          >
-                            Accept Trip
-                          </button>
-                        )}
-                        {booking.driver === driverName && booking.status !== "Completed" && (
-                          <button
-                            onClick={() => markComplete(booking.id)}
-                            className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
-                          >
-                            Complete Trip
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </SectionCard>
-          </div>
-        )}
-
-        {tab === "admin" && (
-          <SectionCard>
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Booking Management</h2>
-                <p className="mt-2 text-slate-600">View new bookings, assign drivers, and monitor service status.</p>
-              </div>
-            </div>
-            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 text-slate-500">
-                  <tr>
-                    <th className="px-4 py-3">Booking</th>
-                    <th className="px-4 py-3">Route</th>
-                    <th className="px-4 py-3">Time</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Driver</th>
-                    <th className="px-4 py-3">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bookings.map((booking) => (
-                    <tr key={booking.id} className="border-t border-slate-200 bg-white">
-                      <td className="px-4 py-3">
-                        <div className="font-semibold">{booking.id}</div>
-                        <div className="text-slate-500">{booking.passenger}</div>
-                      </td>
-                      <td className="px-4 py-3">{booking.pickup} → {booking.destination}</td>
-                      <td className="px-4 py-3">{booking.date}<br />{booking.time}</td>
-                      <td className="px-4 py-3">
-                        <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">{booking.status}</span>
-                      </td>
-                      <td className="px-4 py-3">{booking.driver}</td>
-                      <td className="px-4 py-3">
-                        {booking.status === "Pending" ? (
-                          <select
-                            className="rounded-xl border border-slate-300 px-3 py-2"
-                            defaultValue=""
-                            onChange={(e) => e.target.value && assignDriver(booking.id, e.target.value)}
-                          >
-                            <option value="" disabled>Assign driver</option>
-                            {drivers.map((driver) => (
-                              <option key={driver} value={driver}>{driver}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <span className="text-slate-500">No action</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </SectionCard>
-        )}
-      </div>
-    </div>
-  );
+.header h1 {
+  font-size: 32px;
 }
+
+.buttons {
+  margin-top: 20px;
+}
+
+button {
+  padding: 12px 20px;
+  margin: 10px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.ride { background: #22c55e; color: white; }
+.driver { background: #3b82f6; color: white; }
+.admin { background: #f59e0b; color: white; }
+
+/* SECTIONS */
+.section {
+  display: none;
+  background: #132b45;
+  margin: 30px auto;
+  padding: 30px;
+  border-radius: 15px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0px 5px 20px rgba(0,0,0,0.3);
+}
+
+input {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: none;
+}
+
+/* ACTIVE */
+.active {
+  display: block;
+}
+</style>
+
+<script>
+function show(section) {
+  document.getElementById("ride").classList.remove("active");
+  document.getElementById("driver").classList.remove("active");
+  document.getElementById("admin").classList.remove("active");
+
+  document.getElementById(section).classList.add("active");
+}
+</script>
+
+</head>
+
+<body>
+
+<div class="header">
+  <h1>🚗 UVEL Platform</h1>
+  <p>Reliable Community Transport</p>
+
+  <div class="buttons">
+    <button class="ride" onclick="show('ride')">Ride App</button>
+    <button class="driver" onclick="show('driver')">Driver App</button>
+    <button class="admin" onclick="show('admin')">Admin Panel</button>
+  </div>
+</div>
+
+<!-- RIDE -->
+<div id="ride" class="section active">
+  <h2>Book a Ride</h2>
+  <input placeholder="Pickup location">
+  <input placeholder="Destination">
+  <button class="ride">Request Ride</button>
+</div>
+
+<!-- DRIVER -->
+<div id="driver" class="section">
+  <h2>Driver Status</h2>
+  <button class="driver">Go Online</button>
+  <button>Go Offline</button>
+</div>
+
+<!-- ADMIN -->
+<div id="admin" class="section">
+  <h2>System Overview</h2>
+  <p>Users: 120</p>
+  <p>Drivers: 45</p>
+  <p>Trips Today: 89</p>
+</div>
+
+</body>
+</html>
