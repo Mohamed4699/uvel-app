@@ -54,6 +54,7 @@
 
     .buttons {
       margin-top: 25px;
+      text-align: center;
     }
 
     button {
@@ -204,7 +205,8 @@
       color: #22c55e;
     }
 
-    .success-box {
+    .success-box,
+    .auth-message {
       display: none;
       margin-top: 15px;
       background: #16a34a;
@@ -214,12 +216,14 @@
       font-weight: bold;
     }
 
-    .driver-toolbar {
-      display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 12px;
-      align-items: center;
-      margin-top: 20px;
+    .error-box {
+      display: none;
+      margin-top: 15px;
+      background: #b91c1c;
+      color: white;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: bold;
     }
 
     .driver-selected {
@@ -325,7 +329,7 @@
     }
 
     .login-box {
-      max-width: 520px;
+      max-width: 620px;
       margin: 30px auto;
       background: #132b45;
       border-radius: 18px;
@@ -345,6 +349,7 @@
       color: #d1d5db;
       font-size: 14px;
       margin-top: 10px;
+      line-height: 1.6;
     }
 
     @media (max-width: 950px) {
@@ -367,9 +372,8 @@
 
     @media (max-width: 700px) {
       .form-grid,
-      .driver-toolbar,
-      .admin-filters,
-      .login-grid {
+      .login-grid,
+      .admin-filters {
         grid-template-columns: 1fr;
       }
 
@@ -400,9 +404,10 @@
       .buttons,
       .admin-filters,
       .export-bar,
-      .driver-toolbar,
-      .success-box,
       .topbar,
+      .success-box,
+      .auth-message,
+      .error-box,
       .login-box,
       button,
       select,
@@ -454,7 +459,7 @@
 
     <div id="sessionBar" class="topbar" style="display:none;">
       <div class="role-badge" id="roleBadge">Role: Guest</div>
-      <button class="logout-btn" onclick="logout()">Logout</button>
+      <button class="logout-btn" onclick="logoutUser()">Logout</button>
     </div>
 
     <div class="buttons" id="navButtons" style="display:none;">
@@ -465,15 +470,18 @@
   </div>
 
   <div id="loginSection" class="login-box">
-    <h2>Login to UVEL</h2>
+    <h2>Login / Register</h2>
+
     <div class="login-grid">
-      <select id="roleSelector">
+      <input id="authEmail" type="email" placeholder="Email address">
+      <input id="authPassword" type="password" placeholder="Password">
+      <select id="authRole">
         <option value="">Select role</option>
         <option value="Passenger">Passenger</option>
         <option value="Driver">Driver</option>
         <option value="Admin">Admin</option>
       </select>
-      <select id="loginDriverName">
+      <select id="authDriverName">
         <option value="">Driver name (only for Driver role)</option>
         <option value="Michael">Michael</option>
         <option value="Olivia">Olivia</option>
@@ -481,11 +489,16 @@
         <option value="Nadia">Nadia</option>
       </select>
     </div>
-    <button class="driver" onclick="login()">Login</button>
+
+    <button class="driver" onclick="registerUser()">Register</button>
+    <button class="ride" onclick="loginUser()">Login</button>
+
+    <div id="authMessage" class="auth-message">Success</div>
+    <div id="authError" class="error-box">Error</div>
+
     <div class="helper-text">
-      Passenger = booking only<br>
-      Driver = only own dashboard<br>
-      Admin = full dashboard
+      Register once, then log in with the same email and password.<br>
+      Driver users must choose a driver name during registration.
     </div>
   </div>
 
@@ -505,25 +518,11 @@
 
   <div id="driver" class="section">
     <h2>Driver Dashboard</h2>
-
-    <div class="driver-toolbar">
-      <select id="driverSelector">
-        <option value="">Select your driver name</option>
-        <option value="Michael">Michael</option>
-        <option value="Olivia">Olivia</option>
-        <option value="Daniel">Daniel</option>
-        <option value="Nadia">Nadia</option>
-      </select>
-
-      <button class="driver" onclick="driverLogin()">Open Dashboard</button>
-      <button class="secondary-btn" onclick="driverLogout()">Switch Driver</button>
-    </div>
-
     <div id="driverSelectedText" class="driver-selected">No driver selected.</div>
 
     <h3 style="margin-top: 25px;">My Assigned Trips</h3>
     <div id="driverTrips">
-      <p class="empty-text">Select a driver to view trips.</p>
+      <p class="empty-text">No assigned trips yet.</p>
     </div>
   </div>
 
@@ -626,8 +625,17 @@
       deleteDoc,
       query,
       orderBy,
-      onSnapshot
+      onSnapshot,
+      setDoc,
+      getDoc
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA1vVdTnIew6pZQU3CrqGJkbhd9m79Md_Q",
@@ -640,11 +648,30 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    const drivers = ["Michael", "Olivia", "Daniel", "Nadia"];
     let liveBookings = [];
-    let currentDriver = localStorage.getItem("uvelCurrentDriver") || "";
-    let currentRole = localStorage.getItem("uvelRole") || "";
+    let currentRole = "";
+    let currentDriver = "";
+    let currentUser = null;
+
+    function showMessage(text) {
+      const box = document.getElementById("authMessage");
+      const error = document.getElementById("authError");
+      error.style.display = "none";
+      box.textContent = text;
+      box.style.display = "block";
+      setTimeout(() => { box.style.display = "none"; }, 2500);
+    }
+
+    function showError(text) {
+      const box = document.getElementById("authError");
+      const success = document.getElementById("authMessage");
+      success.style.display = "none";
+      box.textContent = text;
+      box.style.display = "block";
+      setTimeout(() => { box.style.display = "none"; }, 3500);
+    }
 
     function getStatusClass(status) {
       if (status === "Assigned") return "assigned";
@@ -671,7 +698,6 @@
       document.getElementById("pendingBookings").textContent = pending;
       document.getElementById("assignedBookings").textContent = assigned;
       document.getElementById("completedBookings").textContent = completed;
-
       document.getElementById("todayTrips").textContent = todayTrips;
       document.getElementById("todayPending").textContent = todayPending;
       document.getElementById("todayCompleted").textContent = todayCompleted;
@@ -679,10 +705,6 @@
 
     function updateDriverHeader() {
       const text = document.getElementById("driverSelectedText");
-      const selector = document.getElementById("driverSelector");
-
-      selector.value = currentDriver;
-
       if (currentDriver) {
         text.textContent = "Logged in as: " + currentDriver;
       } else {
@@ -745,6 +767,7 @@
     }
 
     window.exportActiveBookingsCSV = function() {
+      if (currentRole !== "Admin") return;
       const activeBookings = getFilteredActiveBookings();
 
       const rows = [
@@ -764,6 +787,7 @@
     };
 
     window.exportCompletedTripsCSV = function() {
+      if (currentRole !== "Admin") return;
       const completedTrips = getCompletedTrips();
 
       const rows = [
@@ -785,9 +809,7 @@
     window.printAdminReport = function() {
       if (currentRole !== "Admin") return;
       show("admin");
-      setTimeout(() => {
-        window.print();
-      }, 200);
+      setTimeout(() => window.print(), 200);
     };
 
     window.renderAdminBookings = function() {
@@ -804,6 +826,7 @@
       let html = "";
 
       activeBookings.forEach((booking) => {
+        const drivers = ["Michael", "Olivia", "Daniel", "Nadia"];
         let driverOptions = '<option value="">Assign driver</option>';
         drivers.forEach((driver) => {
           driverOptions += `<option value="${driver}">${driver}</option>`;
@@ -880,7 +903,7 @@
       const driverTrips = document.getElementById("driverTrips");
 
       if (!currentDriver) {
-        driverTrips.innerHTML = '<p class="empty-text">Select a driver to view trips.</p>';
+        driverTrips.innerHTML = '<p class="empty-text">No driver selected.</p>';
         return;
       }
 
@@ -939,7 +962,7 @@
       const driverNavBtn = document.getElementById("driverNavBtn");
       const adminNavBtn = document.getElementById("adminNavBtn");
 
-      if (!currentRole) {
+      if (!currentUser || !currentRole) {
         sessionBar.style.display = "none";
         navButtons.style.display = "none";
         loginSection.style.display = "block";
@@ -959,51 +982,60 @@
       driverNavBtn.style.display = currentRole === "Driver" ? "inline-block" : "none";
       adminNavBtn.style.display = currentRole === "Admin" ? "inline-block" : "none";
 
-      if (currentRole === "Passenger") {
-        show("ride");
-      } else if (currentRole === "Driver") {
-        show("driver");
-      } else if (currentRole === "Admin") {
-        show("admin");
-      }
+      if (currentRole === "Passenger") show("ride");
+      if (currentRole === "Driver") show("driver");
+      if (currentRole === "Admin") show("admin");
     }
 
-    window.login = function() {
-      const role = document.getElementById("roleSelector").value;
-      const driverName = document.getElementById("loginDriverName").value;
+    window.registerUser = async function() {
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value;
+      const role = document.getElementById("authRole").value;
+      const driverName = document.getElementById("authDriverName").value;
 
-      if (!role) {
-        alert("Please select a role.");
+      if (!email || !password || !role) {
+        showError("Please fill email, password, and role.");
         return;
       }
 
       if (role === "Driver" && !driverName) {
-        alert("Please select a driver name.");
+        showError("Please select a driver name for Driver role.");
         return;
       }
 
-      currentRole = role;
-      localStorage.setItem("uvelRole", currentRole);
-
-      if (role === "Driver") {
-        currentDriver = driverName;
-        localStorage.setItem("uvelCurrentDriver", currentDriver);
-      } else {
-        currentDriver = "";
-        localStorage.removeItem("uvelCurrentDriver");
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, "users", cred.user.uid), {
+          email,
+          role,
+          driverName: role === "Driver" ? driverName : "",
+          createdAt: Date.now()
+        });
+        showMessage("Registration successful. You are now logged in.");
+      } catch (error) {
+        showError(error.message);
       }
-
-      updateDriverHeader();
-      applyRoleUI();
     };
 
-    window.logout = function() {
-      currentRole = "";
-      currentDriver = "";
-      localStorage.removeItem("uvelRole");
-      localStorage.removeItem("uvelCurrentDriver");
-      applyRoleUI();
-      updateDriverHeader();
+    window.loginUser = async function() {
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value;
+
+      if (!email || !password) {
+        showError("Please enter email and password.");
+        return;
+      }
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        showMessage("Login successful.");
+      } catch (error) {
+        showError(error.message);
+      }
+    };
+
+    window.logoutUser = async function() {
+      await signOut(auth);
     };
 
     window.clearAdminFilters = function() {
@@ -1018,7 +1050,6 @@
       document.getElementById("ride").classList.remove("active");
       document.getElementById("driver").classList.remove("active");
       document.getElementById("admin").classList.remove("active");
-      document.getElementById("sectionSafeRide")?.remove?.();
 
       document.getElementById("ride").style.display = "none";
       document.getElementById("driver").style.display = "none";
@@ -1037,28 +1068,6 @@
         renderTripHistory();
         renderAdminBookings();
       }
-    };
-
-    window.driverLogin = function() {
-      const selected = document.getElementById("driverSelector").value;
-
-      if (!selected) {
-        alert("Please select a driver name.");
-        return;
-      }
-
-      currentDriver = selected;
-      localStorage.setItem("uvelCurrentDriver", currentDriver);
-      updateDriverHeader();
-      applyRoleUI();
-      renderDriverTrips();
-    };
-
-    window.driverLogout = function() {
-      currentDriver = "";
-      localStorage.removeItem("uvelCurrentDriver");
-      updateDriverHeader();
-      renderDriverTrips();
     };
 
     window.requestRide = async function() {
@@ -1084,7 +1093,8 @@
         tripDate,
         status: "Pending",
         driver: "Unassigned",
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        createdBy: currentUser ? currentUser.uid : ""
       });
 
       document.getElementById("passengerName").value = "";
@@ -1126,10 +1136,41 @@
       await deleteDoc(doc(db, "bookings", bookingId));
     };
 
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+
+      if (!user) {
+        currentRole = "";
+        currentDriver = "";
+        applyRoleUI();
+        updateDriverHeader();
+        return;
+      }
+
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+
+        if (!userDoc.exists()) {
+          currentRole = "";
+          currentDriver = "";
+          showError("No user profile found.");
+          applyRoleUI();
+          return;
+        }
+
+        const profile = userDoc.data();
+        currentRole = profile.role || "";
+        currentDriver = profile.driverName || "";
+
+        applyRoleUI();
+        updateDriverHeader();
+      } catch (error) {
+        showError(error.message);
+      }
+    });
+
     window.onload = function() {
-      updateDriverHeader();
       startRealtimeListener();
-      applyRoleUI();
 
       document.addEventListener("input", function(event) {
         if (event.target && event.target.id === "searchInput") {
