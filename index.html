@@ -98,7 +98,7 @@
       padding: 30px;
       border-radius: 18px;
       width: 90%;
-      max-width: 900px;
+      max-width: 980px;
       text-align: center;
       box-shadow: 0px 5px 20px rgba(0,0,0,0.3);
     }
@@ -128,7 +128,8 @@
     }
 
     .booking-card,
-    .driver-card {
+    .driver-card,
+    .history-card {
       background: #0f2236;
       border-radius: 12px;
       padding: 15px;
@@ -137,7 +138,8 @@
     }
 
     .booking-card p,
-    .driver-card p {
+    .driver-card p,
+    .history-card p {
       margin: 6px 0;
       color: #e5e7eb;
       font-size: 15px;
@@ -168,7 +170,8 @@
     }
 
     #bookingList,
-    #driverTrips {
+    #driverTrips,
+    #tripHistoryList {
       margin-top: 20px;
       text-align: left;
     }
@@ -258,9 +261,32 @@
       color: white;
     }
 
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+      margin-top: 25px;
+      align-items: start;
+    }
+
+    .panel-box {
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .panel-box h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
     @media (max-width: 900px) {
       .admin-stats {
         grid-template-columns: repeat(2, 1fr);
+      }
+
+      .admin-grid {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -361,9 +387,20 @@
       </div>
     </div>
 
-    <h3 style="margin-top: 25px;">Booking Requests</h3>
-    <div id="bookingList">
-      <p class="empty-text">No bookings yet.</p>
+    <div class="admin-grid">
+      <div class="panel-box">
+        <h3>Active Booking Requests</h3>
+        <div id="bookingList">
+          <p class="empty-text">No bookings yet.</p>
+        </div>
+      </div>
+
+      <div class="panel-box">
+        <h3>Completed Trip History</h3>
+        <div id="tripHistoryList">
+          <p class="empty-text">No completed trips yet.</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -438,17 +475,18 @@
 
     function renderAdminBookings() {
       const bookingList = document.getElementById("bookingList");
+      const activeBookings = liveBookings.filter(b => b.status !== "Completed");
 
       updateAdminStats();
 
-      if (liveBookings.length === 0) {
-        bookingList.innerHTML = '<p class="empty-text">No bookings yet.</p>';
+      if (activeBookings.length === 0) {
+        bookingList.innerHTML = '<p class="empty-text">No active bookings right now.</p>';
         return;
       }
 
       let html = "";
 
-      liveBookings.forEach((booking) => {
+      activeBookings.forEach((booking) => {
         let driverOptions = '<option value="">Assign driver</option>';
         drivers.forEach((driver) => {
           driverOptions += `<option value="${driver}">${driver}</option>`;
@@ -491,6 +529,34 @@
       });
 
       bookingList.innerHTML = html;
+    }
+
+    function renderTripHistory() {
+      const tripHistoryList = document.getElementById("tripHistoryList");
+      const completedTrips = liveBookings.filter(b => b.status === "Completed");
+
+      if (completedTrips.length === 0) {
+        tripHistoryList.innerHTML = '<p class="empty-text">No completed trips yet.</p>';
+        return;
+      }
+
+      let html = "";
+
+      completedTrips.forEach((trip) => {
+        html += `
+          <div class="history-card">
+            <p><strong>Booking ID:</strong> ${trip.id}</p>
+            <p><strong>Passenger:</strong> ${trip.passengerName || "Not provided"}</p>
+            <p><strong>Pickup:</strong> ${trip.pickup}</p>
+            <p><strong>Destination:</strong> ${trip.destination}</p>
+            <p><strong>Date:</strong> ${trip.tripDate || "Not provided"}</p>
+            <p><strong>Driver:</strong> ${trip.driver}</p>
+            <span class="status completed">${trip.status}</span>
+          </div>
+        `;
+      });
+
+      tripHistoryList.innerHTML = html;
     }
 
     function renderDriverTrips() {
@@ -539,6 +605,7 @@
         }));
 
         renderAdminBookings();
+        renderTripHistory();
         renderDriverTrips();
       }, (error) => {
         console.error("Realtime listener error:", error);
@@ -558,6 +625,7 @@
 
       if (section === "admin") {
         updateAdminStats();
+        renderTripHistory();
       }
     };
 
