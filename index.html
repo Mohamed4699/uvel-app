@@ -56,6 +56,11 @@
       color: white;
     }
 
+    .secondary-btn {
+      background: #ffffff;
+      color: #111827;
+    }
+
     .section {
       display: none;
       background: #132b45;
@@ -63,7 +68,7 @@
       padding: 30px;
       border-radius: 18px;
       width: 90%;
-      max-width: 420px;
+      max-width: 500px;
       text-align: center;
       box-shadow: 0px 5px 20px rgba(0,0,0,0.3);
     }
@@ -106,6 +111,42 @@
       color: #22c55e;
     }
 
+    .booking-card {
+      background: #0f2236;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
+      text-align: left;
+    }
+
+    .booking-card p {
+      margin: 6px 0;
+      color: #e5e7eb;
+      font-size: 15px;
+    }
+
+    .status {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      background: #f59e0b;
+      color: #111827;
+    }
+
+    #bookingList {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .empty-text {
+      color: #d1d5db;
+      font-size: 15px;
+      text-align: center;
+    }
+
     @media (max-width: 600px) {
       .header h1 {
         font-size: 32px;
@@ -123,12 +164,75 @@
   </style>
 
   <script>
+    let bookings = [];
+
     function show(section) {
       document.getElementById("ride").classList.remove("active");
       document.getElementById("driver").classList.remove("active");
       document.getElementById("admin").classList.remove("active");
 
       document.getElementById(section).classList.add("active");
+
+      if (section === "admin") {
+        showBookings();
+      }
+    }
+
+    function requestRide() {
+      const pickup = document.getElementById("pickup").value.trim();
+      const destination = document.getElementById("destination").value.trim();
+
+      if (!pickup || !destination) {
+        alert("Please fill in pickup and destination.");
+        return;
+      }
+
+      const booking = {
+        id: "UV-" + (1001 + bookings.length),
+        pickup: pickup,
+        destination: destination,
+        status: "Pending"
+      };
+
+      bookings.push(booking);
+
+      document.getElementById("pickup").value = "";
+      document.getElementById("destination").value = "";
+
+      alert("Ride Requested Successfully ✅");
+      showBookings();
+    }
+
+    function showBookings() {
+      const bookingList = document.getElementById("bookingList");
+
+      if (bookings.length === 0) {
+        bookingList.innerHTML = '<p class="empty-text">No bookings yet.</p>';
+        return;
+      }
+
+      let html = "";
+
+      bookings.forEach((b) => {
+        html += `
+          <div class="booking-card">
+            <p><strong>Booking ID:</strong> ${b.id}</p>
+            <p><strong>Pickup:</strong> ${b.pickup}</p>
+            <p><strong>Destination:</strong> ${b.destination}</p>
+            <span class="status">${b.status}</span>
+          </div>
+        `;
+      });
+
+      bookingList.innerHTML = html;
+    }
+
+    function goOnline() {
+      alert("Driver is now Online ✅");
+    }
+
+    function goOffline() {
+      alert("Driver is now Offline ✅");
     }
   </script>
 </head>
@@ -149,16 +253,16 @@
   <!-- RIDE -->
   <div id="ride" class="section active">
     <h2>Book a Ride</h2>
-    <input type="text" placeholder="Pickup location">
-    <input type="text" placeholder="Destination">
-    <button class="ride">Request Ride</button>
+    <input id="pickup" type="text" placeholder="Pickup location">
+    <input id="destination" type="text" placeholder="Destination">
+    <button class="ride" onclick="requestRide()">Request Ride</button>
   </div>
 
   <!-- DRIVER -->
   <div id="driver" class="section">
     <h2>Driver Status</h2>
-    <button class="driver">Go Online</button>
-    <button>Go Offline</button>
+    <button class="driver" onclick="goOnline()">Go Online</button>
+    <button class="secondary-btn" onclick="goOffline()">Go Offline</button>
   </div>
 
   <!-- ADMIN -->
@@ -167,6 +271,11 @@
     <p>Users: 120</p>
     <p>Drivers: 45</p>
     <p>Trips Today: 89</p>
+
+    <h3 style="margin-top: 25px;">Booking Requests</h3>
+    <div id="bookingList">
+      <p class="empty-text">No bookings yet.</p>
+    </div>
   </div>
 
   <!-- HOW IT WORKS -->
