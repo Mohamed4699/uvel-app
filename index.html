@@ -1,121 +1,182 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>UVEL Platform</title>
+  <title>UVEL Platform</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #0b1c2c;
-  color: white;
-}
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1c2c;
+      color: white;
+    }
 
-/* HEADER */
-.header {
-  text-align: center;
-  padding: 40px;
-}
+    .header {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
 
-.header h1 {
-  font-size: 32px;
-}
+    .header h1 {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
 
-.buttons {
-  margin-top: 20px;
-}
+    .header p {
+      font-size: 18px;
+      margin: 0;
+    }
 
-button {
-  padding: 12px 20px;
-  margin: 10px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: bold;
-}
+    .buttons {
+      margin-top: 25px;
+    }
 
-.ride { background: #22c55e; color: white; }
-.driver { background: #3b82f6; color: white; }
-.admin { background: #f59e0b; color: white; }
+    button {
+      padding: 12px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 15px;
+    }
 
-  <div style="margin-top:60px; text-align:center;">
-  <h2>How UVEL Works</h2>
-  <p>Book → Assign Driver → Ride → Complete</p>
-</div>
-  
-/* SECTIONS */
-.section {
-  display: none;
-  background: #132b45;
-  margin: 30px auto;
-  padding: 30px;
-  border-radius: 15px;
-  width: 300px;
-  text-align: center;
-  box-shadow: 0px 5px 20px rgba(0,0,0,0.3);
-}
+    .ride {
+      background: #22c55e;
+      color: white;
+    }
 
-input {
-  width: 90%;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 8px;
-  border: none;
-}
+    .driver {
+      background: #3b82f6;
+      color: white;
+    }
 
-/* ACTIVE */
-.active {
-  display: block;
-}
-</style>
+    .admin {
+      background: #f59e0b;
+      color: white;
+    }
 
-<script>
-function show(section) {
-  document.getElementById("ride").classList.remove("active");
-  document.getElementById("driver").classList.remove("active");
-  document.getElementById("admin").classList.remove("active");
+    .section {
+      display: none;
+      background: #132b45;
+      margin: 30px auto;
+      padding: 30px;
+      border-radius: 18px;
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0px 5px 20px rgba(0,0,0,0.3);
+    }
 
-  document.getElementById(section).classList.add("active");
-}
-</script>
+    input {
+      width: 90%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+      font-size: 15px;
+    }
 
+    .active {
+      display: block;
+    }
+
+    .info-section {
+      margin: 60px auto 40px;
+      text-align: center;
+      width: 90%;
+      max-width: 700px;
+    }
+
+    .info-section h2 {
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .info-section p {
+      font-size: 17px;
+      color: #d1d5db;
+      line-height: 1.6;
+    }
+
+    .steps {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #22c55e;
+    }
+
+    @media (max-width: 600px) {
+      .header h1 {
+        font-size: 32px;
+      }
+
+      .section {
+        width: 92%;
+        padding: 24px 18px;
+      }
+
+      button {
+        width: auto;
+      }
+    }
+  </style>
+
+  <script>
+    function show(section) {
+      document.getElementById("ride").classList.remove("active");
+      document.getElementById("driver").classList.remove("active");
+      document.getElementById("admin").classList.remove("active");
+
+      document.getElementById(section).classList.add("active");
+    }
+  </script>
 </head>
 
 <body>
 
-<div class="header">
-  <h1>🚗 UVEL Platform</h1>
-  <p>Reliable Community Transport</p>
+  <div class="header">
+    <h1>🚗 UVEL Platform</h1>
+    <p>Reliable Community Transport</p>
 
-  <div class="buttons">
-    <button class="ride" onclick="show('ride')">Ride App</button>
-    <button class="driver" onclick="show('driver')">Driver App</button>
-    <button class="admin" onclick="show('admin')">Admin Panel</button>
+    <div class="buttons">
+      <button class="ride" onclick="show('ride')">Ride App</button>
+      <button class="driver" onclick="show('driver')">Driver App</button>
+      <button class="admin" onclick="show('admin')">Admin Panel</button>
+    </div>
   </div>
-</div>
 
-<!-- RIDE -->
-<div id="ride" class="section active">
-  <h2>Book a Ride</h2>
-  <input placeholder="Pickup location">
-  <input placeholder="Destination">
-  <button class="ride">Request Ride</button>
-</div>
+  <!-- RIDE -->
+  <div id="ride" class="section active">
+    <h2>Book a Ride</h2>
+    <input type="text" placeholder="Pickup location">
+    <input type="text" placeholder="Destination">
+    <button class="ride">Request Ride</button>
+  </div>
 
-<!-- DRIVER -->
-<div id="driver" class="section">
-  <h2>Driver Status</h2>
-  <button class="driver">Go Online</button>
-  <button>Go Offline</button>
-</div>
+  <!-- DRIVER -->
+  <div id="driver" class="section">
+    <h2>Driver Status</h2>
+    <button class="driver">Go Online</button>
+    <button>Go Offline</button>
+  </div>
 
-<!-- ADMIN -->
-<div id="admin" class="section">
-  <h2>System Overview</h2>
-  <p>Users: 120</p>
-  <p>Drivers: 45</p>
-  <p>Trips Today: 89</p>
-</div>
+  <!-- ADMIN -->
+  <div id="admin" class="section">
+    <h2>System Overview</h2>
+    <p>Users: 120</p>
+    <p>Drivers: 45</p>
+    <p>Trips Today: 89</p>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="info-section">
+    <h2>How UVEL Works</h2>
+    <p>UVEL helps passengers, drivers, and administrators manage community transport in one simple platform.</p>
+    <div class="steps">
+      Book → Assign Driver → Ride → Complete
+    </div>
+  </div>
 
 </body>
 </html>
