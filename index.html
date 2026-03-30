@@ -164,7 +164,11 @@
   </style>
 
   <script>
-    let bookings = [];
+    let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+
+    function saveBookings() {
+      localStorage.setItem("bookings", JSON.stringify(bookings));
+    }
 
     function show(section) {
       document.getElementById("ride").classList.remove("active");
@@ -195,6 +199,7 @@
       };
 
       bookings.push(booking);
+      saveBookings();
 
       document.getElementById("pickup").value = "";
       document.getElementById("destination").value = "";
@@ -204,6 +209,7 @@
     }
 
     function showBookings() {
+      bookings = JSON.parse(localStorage.getItem("bookings")) || [];
       const bookingList = document.getElementById("bookingList");
 
       if (bookings.length === 0) {
@@ -234,6 +240,10 @@
     function goOffline() {
       alert("Driver is now Offline ✅");
     }
+
+    window.onload = function () {
+      showBookings();
+    };
   </script>
 </head>
 
