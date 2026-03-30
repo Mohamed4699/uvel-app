@@ -27,6 +27,31 @@
       margin: 0;
     }
 
+    .topbar {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .role-badge {
+      background: #0f2236;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-weight: bold;
+    }
+
+    .logout-btn {
+      background: #ef4444;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
     .buttons {
       margin-top: 25px;
     }
@@ -299,6 +324,29 @@
       margin: 0;
     }
 
+    .login-box {
+      max-width: 520px;
+      margin: 30px auto;
+      background: #132b45;
+      border-radius: 18px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0px 5px 20px rgba(0,0,0,0.3);
+    }
+
+    .login-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .helper-text {
+      color: #d1d5db;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
     @media (max-width: 950px) {
       .admin-stats {
         grid-template-columns: repeat(2, 1fr);
@@ -320,7 +368,8 @@
     @media (max-width: 700px) {
       .form-grid,
       .driver-toolbar,
-      .admin-filters {
+      .admin-filters,
+      .login-grid {
         grid-template-columns: 1fr;
       }
 
@@ -328,9 +377,11 @@
         font-size: 32px;
       }
 
-      .section {
+      .section,
+      .login-box {
         width: 92%;
         padding: 24px 18px;
+        box-sizing: border-box;
       }
     }
 
@@ -351,6 +402,8 @@
       .export-bar,
       .driver-toolbar,
       .success-box,
+      .topbar,
+      .login-box,
       button,
       select,
       input {
@@ -399,10 +452,40 @@
     <h1>🚗 UVEL Platform</h1>
     <p>Reliable Community Transport</p>
 
-    <div class="buttons">
-      <button class="ride" onclick="show('ride')">Ride App</button>
-      <button class="driver" onclick="show('driver')">Driver App</button>
-      <button class="admin" onclick="show('admin')">Admin Panel</button>
+    <div id="sessionBar" class="topbar" style="display:none;">
+      <div class="role-badge" id="roleBadge">Role: Guest</div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="buttons" id="navButtons" style="display:none;">
+      <button class="ride" id="rideNavBtn" onclick="show('ride')">Ride App</button>
+      <button class="driver" id="driverNavBtn" onclick="show('driver')">Driver App</button>
+      <button class="admin" id="adminNavBtn" onclick="show('admin')">Admin Panel</button>
+    </div>
+  </div>
+
+  <div id="loginSection" class="login-box">
+    <h2>Login to UVEL</h2>
+    <div class="login-grid">
+      <select id="roleSelector">
+        <option value="">Select role</option>
+        <option value="Passenger">Passenger</option>
+        <option value="Driver">Driver</option>
+        <option value="Admin">Admin</option>
+      </select>
+      <select id="loginDriverName">
+        <option value="">Driver name (only for Driver role)</option>
+        <option value="Michael">Michael</option>
+        <option value="Olivia">Olivia</option>
+        <option value="Daniel">Daniel</option>
+        <option value="Nadia">Nadia</option>
+      </select>
+    </div>
+    <button class="driver" onclick="login()">Login</button>
+    <div class="helper-text">
+      Passenger = booking only<br>
+      Driver = only own dashboard<br>
+      Admin = full dashboard
     </div>
   </div>
 
@@ -433,7 +516,7 @@
       </select>
 
       <button class="driver" onclick="driverLogin()">Open Dashboard</button>
-      <button class="secondary-btn" onclick="driverLogout()">Logout</button>
+      <button class="secondary-btn" onclick="driverLogout()">Switch Driver</button>
     </div>
 
     <div id="driverSelectedText" class="driver-selected">No driver selected.</div>
@@ -561,6 +644,7 @@
     const drivers = ["Michael", "Olivia", "Daniel", "Nadia"];
     let liveBookings = [];
     let currentDriver = localStorage.getItem("uvelCurrentDriver") || "";
+    let currentRole = localStorage.getItem("uvelRole") || "";
 
     function getStatusClass(status) {
       if (status === "Assigned") return "assigned";
@@ -699,6 +783,7 @@
     };
 
     window.printAdminReport = function() {
+      if (currentRole !== "Admin") return;
       show("admin");
       setTimeout(() => {
         window.print();
@@ -844,6 +929,83 @@
       });
     }
 
+    function applyRoleUI() {
+      const sessionBar = document.getElementById("sessionBar");
+      const navButtons = document.getElementById("navButtons");
+      const loginSection = document.getElementById("loginSection");
+      const roleBadge = document.getElementById("roleBadge");
+
+      const rideNavBtn = document.getElementById("rideNavBtn");
+      const driverNavBtn = document.getElementById("driverNavBtn");
+      const adminNavBtn = document.getElementById("adminNavBtn");
+
+      if (!currentRole) {
+        sessionBar.style.display = "none";
+        navButtons.style.display = "none";
+        loginSection.style.display = "block";
+
+        document.getElementById("ride").style.display = "none";
+        document.getElementById("driver").style.display = "none";
+        document.getElementById("admin").style.display = "none";
+        return;
+      }
+
+      sessionBar.style.display = "flex";
+      navButtons.style.display = "block";
+      loginSection.style.display = "none";
+      roleBadge.textContent = "Role: " + currentRole + (currentRole === "Driver" && currentDriver ? " (" + currentDriver + ")" : "");
+
+      rideNavBtn.style.display = currentRole === "Passenger" ? "inline-block" : "none";
+      driverNavBtn.style.display = currentRole === "Driver" ? "inline-block" : "none";
+      adminNavBtn.style.display = currentRole === "Admin" ? "inline-block" : "none";
+
+      if (currentRole === "Passenger") {
+        show("ride");
+      } else if (currentRole === "Driver") {
+        show("driver");
+      } else if (currentRole === "Admin") {
+        show("admin");
+      }
+    }
+
+    window.login = function() {
+      const role = document.getElementById("roleSelector").value;
+      const driverName = document.getElementById("loginDriverName").value;
+
+      if (!role) {
+        alert("Please select a role.");
+        return;
+      }
+
+      if (role === "Driver" && !driverName) {
+        alert("Please select a driver name.");
+        return;
+      }
+
+      currentRole = role;
+      localStorage.setItem("uvelRole", currentRole);
+
+      if (role === "Driver") {
+        currentDriver = driverName;
+        localStorage.setItem("uvelCurrentDriver", currentDriver);
+      } else {
+        currentDriver = "";
+        localStorage.removeItem("uvelCurrentDriver");
+      }
+
+      updateDriverHeader();
+      applyRoleUI();
+    };
+
+    window.logout = function() {
+      currentRole = "";
+      currentDriver = "";
+      localStorage.removeItem("uvelRole");
+      localStorage.removeItem("uvelCurrentDriver");
+      applyRoleUI();
+      updateDriverHeader();
+    };
+
     window.clearAdminFilters = function() {
       document.getElementById("searchInput").value = "";
       document.getElementById("statusFilter").value = "All";
@@ -856,6 +1018,13 @@
       document.getElementById("ride").classList.remove("active");
       document.getElementById("driver").classList.remove("active");
       document.getElementById("admin").classList.remove("active");
+      document.getElementById("sectionSafeRide")?.remove?.();
+
+      document.getElementById("ride").style.display = "none";
+      document.getElementById("driver").style.display = "none";
+      document.getElementById("admin").style.display = "none";
+
+      document.getElementById(section).style.display = "block";
       document.getElementById(section).classList.add("active");
 
       if (section === "driver") {
@@ -881,6 +1050,7 @@
       currentDriver = selected;
       localStorage.setItem("uvelCurrentDriver", currentDriver);
       updateDriverHeader();
+      applyRoleUI();
       renderDriverTrips();
     };
 
@@ -892,6 +1062,11 @@
     };
 
     window.requestRide = async function() {
+      if (currentRole !== "Passenger") {
+        alert("Only Passenger can create bookings.");
+        return;
+      }
+
       const passengerName = document.getElementById("passengerName").value.trim();
       const pickup = document.getElementById("pickup").value.trim();
       const destination = document.getElementById("destination").value.trim();
@@ -925,6 +1100,7 @@
     };
 
     window.assignDriver = async function(bookingId, driverName) {
+      if (currentRole !== "Admin") return;
       if (!driverName) return;
 
       await updateDoc(doc(db, "bookings", bookingId), {
@@ -934,12 +1110,16 @@
     };
 
     window.completeTrip = async function(bookingId) {
+      if (currentRole !== "Admin") return;
+
       await updateDoc(doc(db, "bookings", bookingId), {
         status: "Completed"
       });
     };
 
     window.deleteBooking = async function(bookingId) {
+      if (currentRole !== "Admin") return;
+
       const confirmDelete = confirm("Are you sure you want to delete this booking?");
       if (!confirmDelete) return;
 
@@ -949,6 +1129,7 @@
     window.onload = function() {
       updateDriverHeader();
       startRealtimeListener();
+      applyRoleUI();
 
       document.addEventListener("input", function(event) {
         if (event.target && event.target.id === "searchInput") {
