@@ -280,6 +280,26 @@
       margin-bottom: 10px;
     }
 
+    .admin-filters {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: 12px;
+      margin-top: 15px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+
+    .filter-btn {
+      background: #1e40af;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 0;
+    }
+
     @media (max-width: 900px) {
       .admin-stats {
         grid-template-columns: repeat(2, 1fr);
@@ -288,11 +308,16 @@
       .admin-grid {
         grid-template-columns: 1fr;
       }
+
+      .admin-filters {
+        grid-template-columns: 1fr 1fr;
+      }
     }
 
     @media (max-width: 700px) {
       .form-grid,
-      .driver-toolbar {
+      .driver-toolbar,
+      .admin-filters {
         grid-template-columns: 1fr;
       }
 
@@ -390,6 +415,25 @@
     <div class="admin-grid">
       <div class="panel-box">
         <h3>Active Booking Requests</h3>
+
+        <div class="admin-filters">
+          <input id="searchInput" type="text" placeholder="Search passenger, pickup, destination, booking ID">
+          <select id="statusFilter" onchange="renderAdminBookings()">
+            <option value="All">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Assigned">Assigned</option>
+          </select>
+          <select id="driverFilter" onchange="renderAdminBookings()">
+            <option value="All">All Drivers</option>
+            <option value="Unassigned">Unassigned</option>
+            <option value="Michael">Michael</option>
+            <option value="Olivia">Olivia</option>
+            <option value="Daniel">Daniel</option>
+            <option value="Nadia">Nadia</option>
+          </select>
+          <button class="filter-btn" onclick="clearAdminFilters()">Clear</button>
+        </div>
+
         <div id="bookingList">
           <p class="empty-text">No bookings yet.</p>
         </div>
@@ -473,14 +517,39 @@
       }
     }
 
-    function renderAdminBookings() {
+    function getFilteredActiveBookings() {
+      const searchValue = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
+      const statusValue = document.getElementById("statusFilter")?.value || "All";
+      const driverValue = document.getElementById("driverFilter")?.value || "All";
+
+      return liveBookings
+        .filter(b => b.status !== "Completed")
+        .filter(b => {
+          if (statusValue !== "All" && b.status !== statusValue) return false;
+          if (driverValue !== "All" && b.driver !== driverValue) return false;
+
+          if (!searchValue) return true;
+
+          const text = `
+            ${b.id || ""}
+            ${b.passengerName || ""}
+            ${b.pickup || ""}
+            ${b.destination || ""}
+            ${b.driver || ""}
+          `.toLowerCase();
+
+          return text.includes(searchValue);
+        });
+    }
+
+    window.renderAdminBookings = function() {
       const bookingList = document.getElementById("bookingList");
-      const activeBookings = liveBookings.filter(b => b.status !== "Completed");
+      const activeBookings = getFilteredActiveBookings();
 
       updateAdminStats();
 
       if (activeBookings.length === 0) {
-        bookingList.innerHTML = '<p class="empty-text">No active bookings right now.</p>';
+        bookingList.innerHTML = '<p class="empty-text">No matching active bookings found.</p>';
         return;
       }
 
@@ -529,7 +598,7 @@
       });
 
       bookingList.innerHTML = html;
-    }
+    };
 
     function renderTripHistory() {
       const tripHistoryList = document.getElementById("tripHistoryList");
@@ -612,6 +681,13 @@
       });
     }
 
+    window.clearAdminFilters = function() {
+      document.getElementById("searchInput").value = "";
+      document.getElementById("statusFilter").value = "All";
+      document.getElementById("driverFilter").value = "All";
+      renderAdminBookings();
+    };
+
     window.show = function(section) {
       document.getElementById("ride").classList.remove("active");
       document.getElementById("driver").classList.remove("active");
@@ -626,6 +702,7 @@
       if (section === "admin") {
         updateAdminStats();
         renderTripHistory();
+        renderAdminBookings();
       }
     };
 
@@ -708,6 +785,12 @@
     window.onload = function() {
       updateDriverHeader();
       startRealtimeListener();
+
+      document.addEventListener("input", function(event) {
+        if (event.target && event.target.id === "searchInput") {
+          renderAdminBookings();
+        }
+      });
     };
   </script>
 
