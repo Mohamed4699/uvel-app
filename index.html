@@ -71,6 +71,33 @@
       font-size: 14px;
       font-weight: bold;
       margin-top: 10px;
+      margin-right: 8px;
+    }
+
+    .assign-btn {
+      background: #3b82f6;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      margin-top: 10px;
+      margin-right: 8px;
+    }
+
+    .complete-btn {
+      background: #16a34a;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      margin-top: 10px;
+      margin-right: 8px;
     }
 
     .section {
@@ -80,12 +107,12 @@
       padding: 30px;
       border-radius: 18px;
       width: 90%;
-      max-width: 500px;
+      max-width: 560px;
       text-align: center;
       box-shadow: 0px 5px 20px rgba(0,0,0,0.3);
     }
 
-    input {
+    input, select {
       width: 90%;
       padding: 12px;
       margin: 10px 0;
@@ -144,8 +171,21 @@
       border-radius: 20px;
       font-size: 13px;
       font-weight: bold;
+    }
+
+    .pending {
       background: #f59e0b;
       color: #111827;
+    }
+
+    .assigned {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .completed {
+      background: #16a34a;
+      color: white;
     }
 
     #bookingList {
@@ -157,6 +197,25 @@
       color: #d1d5db;
       font-size: 15px;
       text-align: center;
+    }
+
+    .driver-list {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .driver-card {
+      background: #0f2236;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
+      text-align: left;
+    }
+
+    .driver-card p {
+      margin: 6px 0;
+      color: #e5e7eb;
+      font-size: 15px;
     }
 
     @media (max-width: 600px) {
@@ -178,6 +237,13 @@
   <script>
     let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
 
+    const drivers = [
+      "Michael",
+      "Olivia",
+      "Daniel",
+      "Nadia"
+    ];
+
     function saveBookings() {
       localStorage.setItem("bookings", JSON.stringify(bookings));
     }
@@ -191,6 +257,10 @@
 
       if (section === "admin") {
         showBookings();
+      }
+
+      if (section === "driver") {
+        showDriverTrips();
       }
     }
 
@@ -207,7 +277,8 @@
         id: "UV-" + (1001 + bookings.length),
         pickup: pickup,
         destination: destination,
-        status: "Pending"
+        status: "Pending",
+        driver: "Unassigned"
       };
 
       bookings.push(booking);
@@ -218,6 +289,12 @@
 
       alert("Ride Requested Successfully ✅");
       showBookings();
+    }
+
+    function getStatusClass(status) {
+      if (status === "Assigned") return "assigned";
+      if (status === "Completed") return "completed";
+      return "pending";
     }
 
     function showBookings() {
@@ -232,12 +309,40 @@
       let html = "";
 
       bookings.forEach((b, index) => {
+        let driverOptions = '<option value="">Assign driver</option>';
+
+        drivers.forEach((driver) => {
+          driverOptions += `<option value="${driver}">${driver}</option>`;
+        });
+
+        let assignControl = "";
+        let completeControl = "";
+
+        if (b.status === "Pending") {
+          assignControl = `
+            <br>
+            <select onchange="assignDriver(${index}, this.value)">
+              ${driverOptions}
+            </select>
+          `;
+        }
+
+        if (b.status === "Assigned") {
+          completeControl = `
+            <br>
+            <button class="complete-btn" onclick="completeTrip(${index})">Mark Completed</button>
+          `;
+        }
+
         html += `
           <div class="booking-card">
             <p><strong>Booking ID:</strong> ${b.id}</p>
             <p><strong>Pickup:</strong> ${b.pickup}</p>
             <p><strong>Destination:</strong> ${b.destination}</p>
-            <span class="status">${b.status}</span>
+            <p><strong>Driver:</strong> ${b.driver}</p>
+            <span class="status ${getStatusClass(b.status)}">${b.status}</span>
+            ${assignControl}
+            ${completeControl}
             <br>
             <button class="delete-btn" onclick="deleteBooking(${index})">Delete</button>
           </div>
@@ -245,6 +350,23 @@
       });
 
       bookingList.innerHTML = html;
+    }
+
+    function assignDriver(index, driverName) {
+      if (!driverName) return;
+
+      bookings[index].driver = driverName;
+      bookings[index].status = "Assigned";
+      saveBookings();
+      showBookings();
+      showDriverTrips();
+    }
+
+    function completeTrip(index) {
+      bookings[index].status = "Completed";
+      saveBookings();
+      showBookings();
+      showDriverTrips();
     }
 
     function deleteBooking(index) {
@@ -256,6 +378,7 @@
       bookings.splice(index, 1);
       saveBookings();
       showBookings();
+      showDriverTrips();
     }
 
     function goOnline() {
@@ -266,8 +389,37 @@
       alert("Driver is now Offline ✅");
     }
 
+    function showDriverTrips() {
+      const driverTrips = document.getElementById("driverTrips");
+      bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+
+      const assignedTrips = bookings.filter((b) => b.status === "Assigned");
+
+      if (assignedTrips.length === 0) {
+        driverTrips.innerHTML = '<p class="empty-text">No assigned trips yet.</p>';
+        return;
+      }
+
+      let html = "";
+
+      assignedTrips.forEach((trip) => {
+        html += `
+          <div class="driver-card">
+            <p><strong>Booking ID:</strong> ${trip.id}</p>
+            <p><strong>Pickup:</strong> ${trip.pickup}</p>
+            <p><strong>Destination:</strong> ${trip.destination}</p>
+            <p><strong>Assigned Driver:</strong> ${trip.driver}</p>
+            <span class="status assigned">${trip.status}</span>
+          </div>
+        `;
+      });
+
+      driverTrips.innerHTML = html;
+    }
+
     window.onload = function () {
       showBookings();
+      showDriverTrips();
     };
   </script>
 </head>
@@ -298,6 +450,11 @@
     <h2>Driver Status</h2>
     <button class="driver" onclick="goOnline()">Go Online</button>
     <button class="secondary-btn" onclick="goOffline()">Go Offline</button>
+
+    <h3 style="margin-top: 25px;">Assigned Trips</h3>
+    <div id="driverTrips" class="driver-list">
+      <p class="empty-text">No assigned trips yet.</p>
+    </div>
   </div>
 
   <!-- ADMIN -->
