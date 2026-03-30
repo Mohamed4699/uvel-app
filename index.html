@@ -236,6 +236,13 @@
       grid-template-columns: repeat(4, 1fr);
       gap: 15px;
       margin-top: 25px;
+      margin-bottom: 20px;
+    }
+
+    .today-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
       margin-bottom: 25px;
     }
 
@@ -282,7 +289,7 @@
 
     .admin-filters {
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr auto;
+      grid-template-columns: 2fr 1fr 1fr 1fr auto;
       gap: 12px;
       margin-top: 15px;
       margin-bottom: 10px;
@@ -300,9 +307,13 @@
       margin: 0;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 950px) {
       .admin-stats {
         grid-template-columns: repeat(2, 1fr);
+      }
+
+      .today-stats {
+        grid-template-columns: 1fr;
       }
 
       .admin-grid {
@@ -412,6 +423,21 @@
       </div>
     </div>
 
+    <div class="today-stats">
+      <div class="stat-card">
+        <h4>Today's Trips</h4>
+        <p id="todayTrips">0</p>
+      </div>
+      <div class="stat-card">
+        <h4>Today's Pending</h4>
+        <p id="todayPending">0</p>
+      </div>
+      <div class="stat-card">
+        <h4>Today's Completed</h4>
+        <p id="todayCompleted">0</p>
+      </div>
+    </div>
+
     <div class="admin-grid">
       <div class="panel-box">
         <h3>Active Booking Requests</h3>
@@ -431,6 +457,7 @@
             <option value="Daniel">Daniel</option>
             <option value="Nadia">Nadia</option>
           </select>
+          <input id="dateFilter" type="date" onchange="renderAdminBookings()">
           <button class="filter-btn" onclick="clearAdminFilters()">Clear</button>
         </div>
 
@@ -492,16 +519,29 @@
       return "pending";
     }
 
+    function todayString() {
+      return new Date().toISOString().split("T")[0];
+    }
+
     function updateAdminStats() {
       const total = liveBookings.length;
       const pending = liveBookings.filter(b => b.status === "Pending").length;
       const assigned = liveBookings.filter(b => b.status === "Assigned").length;
       const completed = liveBookings.filter(b => b.status === "Completed").length;
 
+      const today = todayString();
+      const todayTrips = liveBookings.filter(b => b.tripDate === today).length;
+      const todayPending = liveBookings.filter(b => b.tripDate === today && b.status === "Pending").length;
+      const todayCompleted = liveBookings.filter(b => b.tripDate === today && b.status === "Completed").length;
+
       document.getElementById("totalBookings").textContent = total;
       document.getElementById("pendingBookings").textContent = pending;
       document.getElementById("assignedBookings").textContent = assigned;
       document.getElementById("completedBookings").textContent = completed;
+
+      document.getElementById("todayTrips").textContent = todayTrips;
+      document.getElementById("todayPending").textContent = todayPending;
+      document.getElementById("todayCompleted").textContent = todayCompleted;
     }
 
     function updateDriverHeader() {
@@ -521,12 +561,14 @@
       const searchValue = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
       const statusValue = document.getElementById("statusFilter")?.value || "All";
       const driverValue = document.getElementById("driverFilter")?.value || "All";
+      const dateValue = document.getElementById("dateFilter")?.value || "";
 
       return liveBookings
         .filter(b => b.status !== "Completed")
         .filter(b => {
           if (statusValue !== "All" && b.status !== statusValue) return false;
           if (driverValue !== "All" && b.driver !== driverValue) return false;
+          if (dateValue && b.tripDate !== dateValue) return false;
 
           if (!searchValue) return true;
 
@@ -685,6 +727,7 @@
       document.getElementById("searchInput").value = "";
       document.getElementById("statusFilter").value = "All";
       document.getElementById("driverFilter").value = "All";
+      document.getElementById("dateFilter").value = "";
       renderAdminBookings();
     };
 
