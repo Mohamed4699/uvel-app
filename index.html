@@ -41,25 +41,10 @@
       font-size: 15px;
     }
 
-    .ride {
-      background: #22c55e;
-      color: white;
-    }
-
-    .driver {
-      background: #3b82f6;
-      color: white;
-    }
-
-    .admin {
-      background: #f59e0b;
-      color: white;
-    }
-
-    .secondary-btn {
-      background: #ffffff;
-      color: #111827;
-    }
+    .ride { background: #22c55e; color: white; }
+    .driver { background: #3b82f6; color: white; }
+    .admin { background: #f59e0b; color: white; }
+    .secondary-btn { background: #ffffff; color: #111827; }
 
     .delete-btn {
       background: #ef4444;
@@ -103,9 +88,7 @@
       box-shadow: 0px 5px 20px rgba(0,0,0,0.3);
     }
 
-    .active {
-      display: block;
-    }
+    .active { display: block; }
 
     .form-grid {
       display: grid;
@@ -154,20 +137,9 @@
       font-weight: bold;
     }
 
-    .pending {
-      background: #f59e0b;
-      color: #111827;
-    }
-
-    .assigned {
-      background: #3b82f6;
-      color: white;
-    }
-
-    .completed {
-      background: #16a34a;
-      color: white;
-    }
+    .pending { background: #f59e0b; color: #111827; }
+    .assigned { background: #3b82f6; color: white; }
+    .completed { background: #16a34a; color: white; }
 
     #bookingList,
     #driverTrips,
@@ -307,6 +279,26 @@
       margin: 0;
     }
 
+    .export-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .export-btn {
+      background: #0ea5e9;
+      color: white;
+      margin: 0;
+    }
+
+    .pdf-btn {
+      background: #7c3aed;
+      color: white;
+      margin: 0;
+    }
+
     @media (max-width: 950px) {
       .admin-stats {
         grid-template-columns: repeat(2, 1fr);
@@ -345,6 +337,57 @@
     @media (max-width: 500px) {
       .admin-stats {
         grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+
+      .buttons,
+      .admin-filters,
+      .export-bar,
+      .driver-toolbar,
+      .success-box,
+      button,
+      select,
+      input {
+        display: none !important;
+      }
+
+      .section,
+      .panel-box,
+      .booking-card,
+      .history-card,
+      .driver-card,
+      .stat-card {
+        box-shadow: none !important;
+        background: white !important;
+        color: black !important;
+        border: 1px solid #ddd !important;
+      }
+
+      .booking-card p,
+      .history-card p,
+      .driver-card p,
+      .stat-card h4,
+      .stat-card p,
+      .header p,
+      .info-section p {
+        color: black !important;
+      }
+
+      .section {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+      }
+
+      #ride, #driver {
+        display: none !important;
       }
     }
   </style>
@@ -459,6 +502,12 @@
           </select>
           <input id="dateFilter" type="date" onchange="renderAdminBookings()">
           <button class="filter-btn" onclick="clearAdminFilters()">Clear</button>
+        </div>
+
+        <div class="export-bar">
+          <button class="export-btn" onclick="exportActiveBookingsCSV()">Export Active CSV</button>
+          <button class="export-btn" onclick="exportCompletedTripsCSV()">Export Completed CSV</button>
+          <button class="pdf-btn" onclick="printAdminReport()">Export PDF</button>
         </div>
 
         <div id="bookingList">
@@ -584,6 +633,78 @@
         });
     }
 
+    function getCompletedTrips() {
+      return liveBookings.filter(b => b.status === "Completed");
+    }
+
+    function downloadCSV(filename, rows) {
+      if (!rows.length) {
+        alert("No data to export.");
+        return;
+      }
+
+      const escapeCell = (value) => {
+        const stringValue = String(value ?? "");
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      };
+
+      const csvContent = rows.map(row => row.map(escapeCell).join(",")).join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+
+      URL.revokeObjectURL(url);
+    }
+
+    window.exportActiveBookingsCSV = function() {
+      const activeBookings = getFilteredActiveBookings();
+
+      const rows = [
+        ["Booking ID", "Passenger", "Pickup", "Destination", "Date", "Driver", "Status"],
+        ...activeBookings.map(b => [
+          b.id || "",
+          b.passengerName || "",
+          b.pickup || "",
+          b.destination || "",
+          b.tripDate || "",
+          b.driver || "",
+          b.status || ""
+        ])
+      ];
+
+      downloadCSV("uvel-active-bookings.csv", rows);
+    };
+
+    window.exportCompletedTripsCSV = function() {
+      const completedTrips = getCompletedTrips();
+
+      const rows = [
+        ["Booking ID", "Passenger", "Pickup", "Destination", "Date", "Driver", "Status"],
+        ...completedTrips.map(b => [
+          b.id || "",
+          b.passengerName || "",
+          b.pickup || "",
+          b.destination || "",
+          b.tripDate || "",
+          b.driver || "",
+          b.status || ""
+        ])
+      ];
+
+      downloadCSV("uvel-completed-trips.csv", rows);
+    };
+
+    window.printAdminReport = function() {
+      show("admin");
+      setTimeout(() => {
+        window.print();
+      }, 200);
+    };
+
     window.renderAdminBookings = function() {
       const bookingList = document.getElementById("bookingList");
       const activeBookings = getFilteredActiveBookings();
@@ -644,7 +765,7 @@
 
     function renderTripHistory() {
       const tripHistoryList = document.getElementById("tripHistoryList");
-      const completedTrips = liveBookings.filter(b => b.status === "Completed");
+      const completedTrips = getCompletedTrips();
 
       if (completedTrips.length === 0) {
         tripHistoryList.innerHTML = '<p class="empty-text">No completed trips yet.</p>';
