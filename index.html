@@ -61,6 +61,18 @@
       color: #111827;
     }
 
+    .delete-btn {
+      background: #ef4444;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
     .section {
       display: none;
       background: #132b45;
@@ -219,18 +231,31 @@
 
       let html = "";
 
-      bookings.forEach((b) => {
+      bookings.forEach((b, index) => {
         html += `
           <div class="booking-card">
             <p><strong>Booking ID:</strong> ${b.id}</p>
             <p><strong>Pickup:</strong> ${b.pickup}</p>
             <p><strong>Destination:</strong> ${b.destination}</p>
             <span class="status">${b.status}</span>
+            <br>
+            <button class="delete-btn" onclick="deleteBooking(${index})">Delete</button>
           </div>
         `;
       });
 
       bookingList.innerHTML = html;
+    }
+
+    function deleteBooking(index) {
+      const confirmDelete = confirm("Are you sure you want to delete this booking?");
+      if (!confirmDelete) {
+        return;
+      }
+
+      bookings.splice(index, 1);
+      saveBookings();
+      showBookings();
     }
 
     function goOnline() {
