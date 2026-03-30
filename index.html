@@ -214,8 +214,23 @@
       font-weight: bold;
     }
 
+    .driver-toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .driver-selected {
+      margin-top: 18px;
+      font-size: 16px;
+      color: #d1d5db;
+    }
+
     @media (max-width: 700px) {
-      .form-grid {
+      .form-grid,
+      .driver-toolbar {
         grid-template-columns: 1fr;
       }
 
@@ -244,7 +259,6 @@
     </div>
   </div>
 
-  <!-- RIDE -->
   <div id="ride" class="section active">
     <h2>Book a Ride</h2>
 
@@ -259,19 +273,30 @@
     <div id="successBox" class="success-box">Ride requested successfully ✅</div>
   </div>
 
-  <!-- DRIVER -->
   <div id="driver" class="section">
-    <h2>Driver Status</h2>
-    <button class="driver" onclick="goOnline()">Go Online</button>
-    <button class="secondary-btn" onclick="goOffline()">Go Offline</button>
+    <h2>Driver Dashboard</h2>
 
-    <h3 style="margin-top: 25px;">Assigned Trips</h3>
+    <div class="driver-toolbar">
+      <select id="driverSelector">
+        <option value="">Select your driver name</option>
+        <option value="Michael">Michael</option>
+        <option value="Olivia">Olivia</option>
+        <option value="Daniel">Daniel</option>
+        <option value="Nadia">Nadia</option>
+      </select>
+
+      <button class="driver" onclick="driverLogin()">Open Dashboard</button>
+      <button class="secondary-btn" onclick="driverLogout()">Logout</button>
+    </div>
+
+    <div id="driverSelectedText" class="driver-selected">No driver selected.</div>
+
+    <h3 style="margin-top: 25px;">My Assigned Trips</h3>
     <div id="driverTrips">
-      <p class="empty-text">No assigned trips yet.</p>
+      <p class="empty-text">Select a driver to view trips.</p>
     </div>
   </div>
 
-  <!-- ADMIN -->
   <div id="admin" class="section">
     <h2>System Overview</h2>
     <p>Users: 120</p>
@@ -284,7 +309,6 @@
     </div>
   </div>
 
-  <!-- HOW IT WORKS -->
   <div class="info-section">
     <h2>How UVEL Works</h2>
     <p>UVEL helps passengers, drivers, and administrators manage community transport in one simple platform.</p>
@@ -321,11 +345,25 @@
 
     const drivers = ["Michael", "Olivia", "Daniel", "Nadia"];
     let liveBookings = [];
+    let currentDriver = localStorage.getItem("uvelCurrentDriver") || "";
 
     function getStatusClass(status) {
       if (status === "Assigned") return "assigned";
       if (status === "Completed") return "completed";
       return "pending";
+    }
+
+    function updateDriverHeader() {
+      const text = document.getElementById("driverSelectedText");
+      const selector = document.getElementById("driverSelector");
+
+      selector.value = currentDriver;
+
+      if (currentDriver) {
+        text.textContent = "Logged in as: " + currentDriver;
+      } else {
+        text.textContent = "No driver selected.";
+      }
     }
 
     function renderAdminBookings() {
@@ -385,10 +423,18 @@
 
     function renderDriverTrips() {
       const driverTrips = document.getElementById("driverTrips");
-      const assignedTrips = liveBookings.filter((trip) => trip.status === "Assigned");
+
+      if (!currentDriver) {
+        driverTrips.innerHTML = '<p class="empty-text">Select a driver to view trips.</p>';
+        return;
+      }
+
+      const assignedTrips = liveBookings.filter(
+        (trip) => trip.status === "Assigned" && trip.driver === currentDriver
+      );
 
       if (assignedTrips.length === 0) {
-        driverTrips.innerHTML = '<p class="empty-text">No assigned trips yet.</p>';
+        driverTrips.innerHTML = `<p class="empty-text">No trips assigned to ${currentDriver} yet.</p>`;
         return;
       }
 
@@ -432,6 +478,32 @@
       document.getElementById("driver").classList.remove("active");
       document.getElementById("admin").classList.remove("active");
       document.getElementById(section).classList.add("active");
+
+      if (section === "driver") {
+        updateDriverHeader();
+        renderDriverTrips();
+      }
+    };
+
+    window.driverLogin = function() {
+      const selected = document.getElementById("driverSelector").value;
+
+      if (!selected) {
+        alert("Please select a driver name.");
+        return;
+      }
+
+      currentDriver = selected;
+      localStorage.setItem("uvelCurrentDriver", currentDriver);
+      updateDriverHeader();
+      renderDriverTrips();
+    };
+
+    window.driverLogout = function() {
+      currentDriver = "";
+      localStorage.removeItem("uvelCurrentDriver");
+      updateDriverHeader();
+      renderDriverTrips();
     };
 
     window.requestRide = async function() {
@@ -489,15 +561,8 @@
       await deleteDoc(doc(db, "bookings", bookingId));
     };
 
-    window.goOnline = function() {
-      alert("Driver is now Online ✅");
-    };
-
-    window.goOffline = function() {
-      alert("Driver is now Offline ✅");
-    };
-
     window.onload = function() {
+      updateDriverHeader();
       startRealtimeListener();
     };
   </script>
