@@ -299,12 +299,12 @@
       getFirestore,
       collection,
       addDoc,
-      getDocs,
       doc,
       updateDoc,
       deleteDoc,
       query,
-      orderBy
+      orderBy,
+      onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -320,16 +320,118 @@
     const db = getFirestore(app);
 
     const drivers = ["Michael", "Olivia", "Daniel", "Nadia"];
+    let liveBookings = [];
+
+    function getStatusClass(status) {
+      if (status === "Assigned") return "assigned";
+      if (status === "Completed") return "completed";
+      return "pending";
+    }
+
+    function renderAdminBookings() {
+      const bookingList = document.getElementById("bookingList");
+
+      if (liveBookings.length === 0) {
+        bookingList.innerHTML = '<p class="empty-text">No bookings yet.</p>';
+        return;
+      }
+
+      let html = "";
+
+      liveBookings.forEach((booking) => {
+        let driverOptions = '<option value="">Assign driver</option>';
+        drivers.forEach((driver) => {
+          driverOptions += `<option value="${driver}">${driver}</option>`;
+        });
+
+        let assignControl = "";
+        let completeControl = "";
+
+        if (booking.status === "Pending") {
+          assignControl = `
+            <br>
+            <select class="assign-select" onchange="assignDriver('${booking.id}', this.value)">
+              ${driverOptions}
+            </select>
+          `;
+        }
+
+        if (booking.status === "Assigned") {
+          completeControl = `
+            <br>
+            <button class="complete-btn" onclick="completeTrip('${booking.id}')">Mark Completed</button>
+          `;
+        }
+
+        html += `
+          <div class="booking-card">
+            <p><strong>Booking ID:</strong> ${booking.id}</p>
+            <p><strong>Passenger:</strong> ${booking.passengerName || "Not provided"}</p>
+            <p><strong>Pickup:</strong> ${booking.pickup}</p>
+            <p><strong>Destination:</strong> ${booking.destination}</p>
+            <p><strong>Date:</strong> ${booking.tripDate || "Not provided"}</p>
+            <p><strong>Driver:</strong> ${booking.driver}</p>
+            <span class="status ${getStatusClass(booking.status)}">${booking.status}</span>
+            ${assignControl}
+            ${completeControl}
+            <br>
+            <button class="delete-btn" onclick="deleteBooking('${booking.id}')">Delete</button>
+          </div>
+        `;
+      });
+
+      bookingList.innerHTML = html;
+    }
+
+    function renderDriverTrips() {
+      const driverTrips = document.getElementById("driverTrips");
+      const assignedTrips = liveBookings.filter((trip) => trip.status === "Assigned");
+
+      if (assignedTrips.length === 0) {
+        driverTrips.innerHTML = '<p class="empty-text">No assigned trips yet.</p>';
+        return;
+      }
+
+      let html = "";
+
+      assignedTrips.forEach((trip) => {
+        html += `
+          <div class="driver-card">
+            <p><strong>Booking ID:</strong> ${trip.id}</p>
+            <p><strong>Passenger:</strong> ${trip.passengerName || "Not provided"}</p>
+            <p><strong>Pickup:</strong> ${trip.pickup}</p>
+            <p><strong>Destination:</strong> ${trip.destination}</p>
+            <p><strong>Date:</strong> ${trip.tripDate || "Not provided"}</p>
+            <p><strong>Assigned Driver:</strong> ${trip.driver}</p>
+            <span class="status assigned">${trip.status}</span>
+          </div>
+        `;
+      });
+
+      driverTrips.innerHTML = html;
+    }
+
+    function startRealtimeListener() {
+      const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"));
+
+      onSnapshot(q, (snapshot) => {
+        liveBookings = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data()
+        }));
+
+        renderAdminBookings();
+        renderDriverTrips();
+      }, (error) => {
+        console.error("Realtime listener error:", error);
+      });
+    }
 
     window.show = function(section) {
       document.getElementById("ride").classList.remove("active");
       document.getElementById("driver").classList.remove("active");
       document.getElementById("admin").classList.remove("active");
-
       document.getElementById(section).classList.add("active");
-
-      if (section === "admin") showBookings();
-      if (section === "driver") showDriverTrips();
     };
 
     window.requestRide = async function() {
@@ -363,74 +465,6 @@
       setTimeout(() => {
         successBox.style.display = "none";
       }, 2000);
-
-      await showBookings();
-    };
-
-    function getStatusClass(status) {
-      if (status === "Assigned") return "assigned";
-      if (status === "Completed") return "completed";
-      return "pending";
-    }
-
-    window.showBookings = async function() {
-      const bookingList = document.getElementById("bookingList");
-      const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        bookingList.innerHTML = '<p class="empty-text">No bookings yet.</p>';
-        return;
-      }
-
-      let html = "";
-
-      querySnapshot.forEach((docSnap) => {
-        const b = docSnap.data();
-        const bookingId = docSnap.id;
-
-        let driverOptions = '<option value="">Assign driver</option>';
-        drivers.forEach((driver) => {
-          driverOptions += `<option value="${driver}">${driver}</option>`;
-        });
-
-        let assignControl = "";
-        let completeControl = "";
-
-        if (b.status === "Pending") {
-          assignControl = `
-            <br>
-            <select class="assign-select" onchange="assignDriver('${bookingId}', this.value)">
-              ${driverOptions}
-            </select>
-          `;
-        }
-
-        if (b.status === "Assigned") {
-          completeControl = `
-            <br>
-            <button class="complete-btn" onclick="completeTrip('${bookingId}')">Mark Completed</button>
-          `;
-        }
-
-        html += `
-          <div class="booking-card">
-            <p><strong>Booking ID:</strong> ${bookingId}</p>
-            <p><strong>Passenger:</strong> ${b.passengerName || "Not provided"}</p>
-            <p><strong>Pickup:</strong> ${b.pickup}</p>
-            <p><strong>Destination:</strong> ${b.destination}</p>
-            <p><strong>Date:</strong> ${b.tripDate || "Not provided"}</p>
-            <p><strong>Driver:</strong> ${b.driver}</p>
-            <span class="status ${getStatusClass(b.status)}">${b.status}</span>
-            ${assignControl}
-            ${completeControl}
-            <br>
-            <button class="delete-btn" onclick="deleteBooking('${bookingId}')">Delete</button>
-          </div>
-        `;
-      });
-
-      bookingList.innerHTML = html;
     };
 
     window.assignDriver = async function(bookingId, driverName) {
@@ -440,18 +474,12 @@
         driver: driverName,
         status: "Assigned"
       });
-
-      await showBookings();
-      await showDriverTrips();
     };
 
     window.completeTrip = async function(bookingId) {
       await updateDoc(doc(db, "bookings", bookingId), {
         status: "Completed"
       });
-
-      await showBookings();
-      await showDriverTrips();
     };
 
     window.deleteBooking = async function(bookingId) {
@@ -459,8 +487,6 @@
       if (!confirmDelete) return;
 
       await deleteDoc(doc(db, "bookings", bookingId));
-      await showBookings();
-      await showDriverTrips();
     };
 
     window.goOnline = function() {
@@ -471,44 +497,8 @@
       alert("Driver is now Offline ✅");
     };
 
-    window.showDriverTrips = async function() {
-      const driverTrips = document.getElementById("driverTrips");
-      const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
-
-      let html = "";
-      let hasAssignedTrips = false;
-
-      querySnapshot.forEach((docSnap) => {
-        const trip = docSnap.data();
-
-        if (trip.status === "Assigned") {
-          hasAssignedTrips = true;
-          html += `
-            <div class="driver-card">
-              <p><strong>Booking ID:</strong> ${docSnap.id}</p>
-              <p><strong>Passenger:</strong> ${trip.passengerName || "Not provided"}</p>
-              <p><strong>Pickup:</strong> ${trip.pickup}</p>
-              <p><strong>Destination:</strong> ${trip.destination}</p>
-              <p><strong>Date:</strong> ${trip.tripDate || "Not provided"}</p>
-              <p><strong>Assigned Driver:</strong> ${trip.driver}</p>
-              <span class="status assigned">${trip.status}</span>
-            </div>
-          `;
-        }
-      });
-
-      if (!hasAssignedTrips) {
-        driverTrips.innerHTML = '<p class="empty-text">No assigned trips yet.</p>';
-        return;
-      }
-
-      driverTrips.innerHTML = html;
-    };
-
-    window.onload = async function() {
-      await showBookings();
-      await showDriverTrips();
+    window.onload = function() {
+      startRealtimeListener();
     };
   </script>
 
