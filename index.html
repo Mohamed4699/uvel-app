@@ -1,10 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>UVEL Platform</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UVEL Platform</title>
   <style>
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -18,22 +21,26 @@
     }
 
     .header h1 {
-      font-size: 40px;
-      margin-bottom: 10px;
+      font-size: 42px;
+      margin: 0 0 10px;
     }
 
     .header p {
       font-size: 18px;
       margin: 0;
+      color: #d7e6f7;
     }
 
     .buttons {
       margin-top: 25px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     button {
       padding: 12px 20px;
-      margin: 10px;
       border: none;
       border-radius: 10px;
       cursor: pointer;
@@ -41,43 +48,33 @@
       font-size: 15px;
     }
 
-    .ride {
-      background: #22c55e;
-      color: white;
-    }
-
-    .driver {
-      background: #3b82f6;
-      color: white;
-    }
-
-    .admin {
-      background: #f59e0b;
-      color: white;
-    }
-
-    .secondary-btn {
-      background: #ffffff;
-      color: #111827;
-    }
-
+    .ride { background: #22c55e; color: white; }
+    .driver { background: #3b82f6; color: white; }
+    .admin { background: #f59e0b; color: white; }
+    .secondary-btn { background: #ffffff; color: #111827; }
     .delete-btn {
       background: #ef4444;
       color: white;
       padding: 8px 12px;
-      border-radius: 8px;
       font-size: 14px;
       margin-top: 10px;
       margin-right: 8px;
     }
-
+    .assign-btn {
+      background: #2563eb;
+      color: white;
+      padding: 8px 12px;
+      font-size: 14px;
+      margin-top: 10px;
+      margin-right: 8px;
+    }
     .complete-btn {
       background: #16a34a;
       color: white;
       padding: 8px 12px;
-      border-radius: 8px;
       font-size: 14px;
       margin-top: 10px;
+      margin-right: 8px;
     }
 
     .section {
@@ -86,23 +83,53 @@
       margin: 30px auto;
       padding: 30px;
       border-radius: 18px;
-      width: 90%;
-      max-width: 560px;
+      width: 92%;
+      max-width: 760px;
       text-align: center;
-      box-shadow: 0px 5px 20px rgba(0,0,0,0.3);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
     }
 
-    .active {
-      display: block;
+    .active { display: block; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
     }
 
     input, select {
-      width: 90%;
+      width: 100%;
       padding: 12px;
       margin: 10px 0;
       border-radius: 8px;
       border: none;
       font-size: 15px;
+    }
+
+    .info-section {
+      margin: 60px auto 40px;
+      text-align: center;
+      width: 90%;
+      max-width: 780px;
+    }
+
+    .info-section h2 {
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .info-section p {
+      font-size: 17px;
+      color: #d1d5db;
+      line-height: 1.6;
+    }
+
+    .steps {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #22c55e;
     }
 
     .booking-card,
@@ -145,66 +172,63 @@
       color: white;
     }
 
-    #bookingList,
-    #driverTrips {
-      margin-top: 20px;
-      text-align: left;
-    }
-
     .empty-text {
       color: #d1d5db;
       font-size: 15px;
       text-align: center;
     }
 
-    .info-section {
-      margin: 60px auto 40px;
-      text-align: center;
-      width: 90%;
-      max-width: 700px;
-    }
-
-    .info-section h2 {
-      margin-bottom: 10px;
-      font-size: 28px;
-    }
-
-    .info-section p {
-      font-size: 17px;
-      color: #d1d5db;
-      line-height: 1.6;
-    }
-
-    .steps {
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
       margin-top: 20px;
-      font-size: 18px;
+    }
+
+    .stat-box {
+      background: #0f2236;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .stat-box h4 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: #d1d5db;
+    }
+
+    .stat-box p {
+      margin: 0;
+      font-size: 24px;
       font-weight: bold;
-      color: #22c55e;
     }
 
     .success-box {
       display: none;
-      margin-top: 15px;
       background: #16a34a;
       color: white;
       padding: 12px;
       border-radius: 10px;
+      margin-top: 15px;
       font-weight: bold;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
+      .form-row,
+      .admin-stats {
+        grid-template-columns: 1fr;
+      }
+
       .header h1 {
-        font-size: 32px;
+        font-size: 34px;
       }
 
       .section {
-        width: 92%;
-        padding: 24px 18px;
+        padding: 22px 16px;
       }
     }
   </style>
 </head>
-
 <body>
 
   <div class="header">
@@ -218,33 +242,57 @@
     </div>
   </div>
 
-  <!-- RIDE -->
   <div id="ride" class="section active">
     <h2>Book a Ride</h2>
-    <input id="pickup" type="text" placeholder="Pickup location">
-    <input id="destination" type="text" placeholder="Destination">
+
+    <div class="form-row">
+      <input id="riderName" type="text" placeholder="Passenger name">
+      <input id="pickup" type="text" placeholder="Pickup location">
+    </div>
+
+    <div class="form-row">
+      <input id="destination" type="text" placeholder="Destination">
+      <input id="tripDate" type="date">
+    </div>
+
     <button class="ride" onclick="requestRide()">Request Ride</button>
-    <div id="successBox" class="success-box">Ride requested successfully ✅</div>
+
+    <div id="successBox" class="success-box">Booking created successfully ✅</div>
   </div>
 
-  <!-- DRIVER -->
   <div id="driver" class="section">
-    <h2>Driver Status</h2>
-    <button class="driver" onclick="goOnline()">Go Online</button>
-    <button class="secondary-btn" onclick="goOffline()">Go Offline</button>
+    <h2>Driver Console</h2>
 
-    <h3 style="margin-top: 25px;">Assigned Trips</h3>
+    <select id="driverFilter" onchange="showDriverTrips()">
+      <option value="All">Show all assigned drivers</option>
+      <option value="Michael">Michael</option>
+      <option value="Olivia">Olivia</option>
+      <option value="Daniel">Daniel</option>
+      <option value="Nadia">Nadia</option>
+    </select>
+
     <div id="driverTrips">
       <p class="empty-text">No assigned trips yet.</p>
     </div>
   </div>
 
-  <!-- ADMIN -->
   <div id="admin" class="section">
     <h2>System Overview</h2>
-    <p>Users: 120</p>
-    <p>Drivers: 45</p>
-    <p>Trips Today: 89</p>
+
+    <div class="admin-stats">
+      <div class="stat-box">
+        <h4>Total Bookings</h4>
+        <p id="totalBookings">0</p>
+      </div>
+      <div class="stat-box">
+        <h4>Pending</h4>
+        <p id="pendingBookings">0</p>
+      </div>
+      <div class="stat-box">
+        <h4>Completed</h4>
+        <p id="completedBookings">0</p>
+      </div>
+    </div>
 
     <h3 style="margin-top: 25px;">Booking Requests</h3>
     <div id="bookingList">
@@ -252,7 +300,6 @@
     </div>
   </div>
 
-  <!-- HOW IT WORKS -->
   <div class="info-section">
     <h2>How UVEL Works</h2>
     <p>UVEL helps passengers, drivers, and administrators manage community transport in one simple platform.</p>
@@ -261,33 +308,16 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      getDocs,
-      doc,
-      updateDoc,
-      deleteDoc
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyA1vVdTnIew6pZQU3CrqGJkbhd9m79Md_Q",
-      authDomain: "uvel-platform.firebaseapp.com",
-      projectId: "uvel-platform",
-      storageBucket: "uvel-platform.firebasestorage.app",
-      messagingSenderId: "95958245890",
-      appId: "1:95958245890:web:2afc9544e7ea16b395bd1b"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  <script>
+    let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
 
     const drivers = ["Michael", "Olivia", "Daniel", "Nadia"];
 
-    window.show = function(section) {
+    function saveBookings() {
+      localStorage.setItem("bookings", JSON.stringify(bookings));
+    }
+
+    function show(section) {
       document.getElementById("ride").classList.remove("active");
       document.getElementById("driver").classList.remove("active");
       document.getElementById("admin").classList.remove("active");
@@ -296,27 +326,36 @@
 
       if (section === "admin") showBookings();
       if (section === "driver") showDriverTrips();
-    };
+    }
 
-    window.requestRide = async function() {
+    function requestRide() {
+      const riderName = document.getElementById("riderName").value.trim();
       const pickup = document.getElementById("pickup").value.trim();
       const destination = document.getElementById("destination").value.trim();
+      const tripDate = document.getElementById("tripDate").value;
 
-      if (!pickup || !destination) {
-        alert("Please fill in pickup and destination.");
+      if (!riderName || !pickup || !destination || !tripDate) {
+        alert("Please fill all booking fields.");
         return;
       }
 
-      await addDoc(collection(db, "bookings"), {
+      const booking = {
+        id: "UV-" + (1001 + bookings.length),
+        riderName: riderName,
         pickup: pickup,
         destination: destination,
+        tripDate: tripDate,
         status: "Pending",
-        driver: "Unassigned",
-        createdAt: Date.now()
-      });
+        driver: "Unassigned"
+      };
 
+      bookings.push(booking);
+      saveBookings();
+
+      document.getElementById("riderName").value = "";
       document.getElementById("pickup").value = "";
       document.getElementById("destination").value = "";
+      document.getElementById("tripDate").value = "";
 
       const successBox = document.getElementById("successBox");
       successBox.style.display = "block";
@@ -324,8 +363,8 @@
         successBox.style.display = "none";
       }, 2000);
 
-      await showBookings();
-    };
+      showBookings();
+    }
 
     function getStatusClass(status) {
       if (status === "Assigned") return "assigned";
@@ -333,21 +372,27 @@
       return "pending";
     }
 
-    window.showBookings = async function() {
-      const bookingList = document.getElementById("bookingList");
-      const querySnapshot = await getDocs(collection(db, "bookings"));
+    function updateStats() {
+      document.getElementById("totalBookings").textContent = bookings.length;
+      document.getElementById("pendingBookings").textContent =
+        bookings.filter(b => b.status === "Pending").length;
+      document.getElementById("completedBookings").textContent =
+        bookings.filter(b => b.status === "Completed").length;
+    }
 
-      if (querySnapshot.empty) {
+    function showBookings() {
+      bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+      const bookingList = document.getElementById("bookingList");
+
+      if (bookings.length === 0) {
         bookingList.innerHTML = '<p class="empty-text">No bookings yet.</p>';
+        updateStats();
         return;
       }
 
       let html = "";
 
-      querySnapshot.forEach((docSnap) => {
-        const b = docSnap.data();
-        const bookingId = docSnap.id;
-
+      bookings.forEach((b, index) => {
         let driverOptions = '<option value="">Assign driver</option>';
         drivers.forEach((driver) => {
           driverOptions += `<option value="${driver}">${driver}</option>`;
@@ -359,7 +404,7 @@
         if (b.status === "Pending") {
           assignControl = `
             <br>
-            <select onchange="assignDriver('${bookingId}', this.value)">
+            <select onchange="assignDriver(${index}, this.value)">
               ${driverOptions}
             </select>
           `;
@@ -368,103 +413,96 @@
         if (b.status === "Assigned") {
           completeControl = `
             <br>
-            <button class="complete-btn" onclick="completeTrip('${bookingId}')">Mark Completed</button>
+            <button class="complete-btn" onclick="completeTrip(${index})">Mark Completed</button>
           `;
         }
 
         html += `
           <div class="booking-card">
-            <p><strong>Booking ID:</strong> ${bookingId}</p>
+            <p><strong>Booking ID:</strong> ${b.id}</p>
+            <p><strong>Passenger:</strong> ${b.riderName}</p>
             <p><strong>Pickup:</strong> ${b.pickup}</p>
             <p><strong>Destination:</strong> ${b.destination}</p>
+            <p><strong>Date:</strong> ${b.tripDate}</p>
             <p><strong>Driver:</strong> ${b.driver}</p>
             <span class="status ${getStatusClass(b.status)}">${b.status}</span>
             ${assignControl}
             ${completeControl}
             <br>
-            <button class="delete-btn" onclick="deleteBooking('${bookingId}')">Delete</button>
+            <button class="delete-btn" onclick="deleteBooking(${index})">Delete</button>
           </div>
         `;
       });
 
       bookingList.innerHTML = html;
-    };
+      updateStats();
+    }
 
-    window.assignDriver = async function(bookingId, driverName) {
+    function assignDriver(index, driverName) {
       if (!driverName) return;
+      bookings[index].driver = driverName;
+      bookings[index].status = "Assigned";
+      saveBookings();
+      showBookings();
+      showDriverTrips();
+    }
 
-      await updateDoc(doc(db, "bookings", bookingId), {
-        driver: driverName,
-        status: "Assigned"
-      });
+    function completeTrip(index) {
+      bookings[index].status = "Completed";
+      saveBookings();
+      showBookings();
+      showDriverTrips();
+    }
 
-      await showBookings();
-      await showDriverTrips();
-    };
-
-    window.completeTrip = async function(bookingId) {
-      await updateDoc(doc(db, "bookings", bookingId), {
-        status: "Completed"
-      });
-
-      await showBookings();
-      await showDriverTrips();
-    };
-
-    window.deleteBooking = async function(bookingId) {
+    function deleteBooking(index) {
       const confirmDelete = confirm("Are you sure you want to delete this booking?");
       if (!confirmDelete) return;
 
-      await deleteDoc(doc(db, "bookings", bookingId));
-      await showBookings();
-      await showDriverTrips();
-    };
+      bookings.splice(index, 1);
+      saveBookings();
+      showBookings();
+      showDriverTrips();
+    }
 
-    window.goOnline = function() {
-      alert("Driver is now Online ✅");
-    };
-
-    window.goOffline = function() {
-      alert("Driver is now Offline ✅");
-    };
-
-    window.showDriverTrips = async function() {
+    function showDriverTrips() {
+      bookings = JSON.parse(localStorage.getItem("bookings")) || [];
       const driverTrips = document.getElementById("driverTrips");
-      const querySnapshot = await getDocs(collection(db, "bookings"));
+      const selectedDriver = document.getElementById("driverFilter").value;
 
-      let html = "";
-      let hasAssignedTrips = false;
+      let filteredTrips = bookings.filter((b) => b.status === "Assigned");
 
-      querySnapshot.forEach((docSnap) => {
-        const trip = docSnap.data();
+      if (selectedDriver !== "All") {
+        filteredTrips = filteredTrips.filter((b) => b.driver === selectedDriver);
+      }
 
-        if (trip.status === "Assigned") {
-          hasAssignedTrips = true;
-          html += `
-            <div class="driver-card">
-              <p><strong>Booking ID:</strong> ${docSnap.id}</p>
-              <p><strong>Pickup:</strong> ${trip.pickup}</p>
-              <p><strong>Destination:</strong> ${trip.destination}</p>
-              <p><strong>Assigned Driver:</strong> ${trip.driver}</p>
-              <span class="status assigned">${trip.status}</span>
-            </div>
-          `;
-        }
-      });
-
-      if (!hasAssignedTrips) {
+      if (filteredTrips.length === 0) {
         driverTrips.innerHTML = '<p class="empty-text">No assigned trips yet.</p>';
         return;
       }
 
-      driverTrips.innerHTML = html;
-    };
+      let html = "";
 
-    window.onload = async function() {
-      await showBookings();
-      await showDriverTrips();
+      filteredTrips.forEach((trip) => {
+        html += `
+          <div class="driver-card">
+            <p><strong>Booking ID:</strong> ${trip.id}</p>
+            <p><strong>Passenger:</strong> ${trip.riderName}</p>
+            <p><strong>Pickup:</strong> ${trip.pickup}</p>
+            <p><strong>Destination:</strong> ${trip.destination}</p>
+            <p><strong>Date:</strong> ${trip.tripDate}</p>
+            <p><strong>Assigned Driver:</strong> ${trip.driver}</p>
+            <span class="status assigned">${trip.status}</span>
+          </div>
+        `;
+      });
+
+      driverTrips.innerHTML = html;
+    }
+
+    window.onload = function () {
+      showBookings();
+      showDriverTrips();
     };
   </script>
-
 </body>
-</html>
+</htm
