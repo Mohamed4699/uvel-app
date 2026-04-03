@@ -608,10 +608,63 @@
     }
 
     .admin-filters {
+      display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr auto;
-      margin-top: 14px;
-      margin-bottom: 12px;
+      gap: 12px;
+      margin-top: 15px;
+      margin-bottom: 10px;
       align-items: center;
+    }
+
+    .assign-select {
+      width: 100%;
+      max-width: 240px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(15, 23, 42, 0.95);
+      color: #ffffff;
+      font-weight: 600;
+      margin-top: 10px;
+      appearance: none;
+    }
+
+    .assign-select option {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
+    .admin-filters select {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.15);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .admin-filters select option {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
+    .admin-filters input {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.15);
+      color: #ffffff;
+    }
+
+    .admin-filters input::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .admin-filters select:focus,
+    .admin-filters input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 2px rgba(56,189,248,0.2);
+      outline: none;
     }
 
     .export-bar {
