@@ -364,92 +364,30 @@
       line-height: 1.6;
     }
 
-    .map-box {
-      position: relative;
+    .real-map {
       margin-top: 14px;
-      height: 280px;
+      height: 320px;
       border-radius: 18px;
       overflow: hidden;
       border: 1px solid rgba(255,255,255,0.08);
-      background:
-        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px),
-        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-        radial-gradient(circle at 20% 20%, rgba(20,184,166,0.12), transparent 25%),
-        radial-gradient(circle at 80% 70%, rgba(59,130,246,0.12), transparent 25%),
-        #0b1326;
-      background-size: 42px 42px, 42px 42px, auto, auto, auto;
+      background: #0b1326;
     }
 
-    .map-road {
-      position: absolute;
-      background: rgba(255,255,255,0.12);
-      border-radius: 999px;
+    .leaflet-container {
+      background: #0b1326;
     }
 
-    .map-road.horizontal-1 { left: 8%; right: 10%; top: 26%; height: 8px; }
-    .map-road.horizontal-2 { left: 15%; right: 8%; top: 62%; height: 8px; }
-    .map-road.vertical-1 { top: 10%; bottom: 12%; left: 28%; width: 8px; }
-    .map-road.vertical-2 { top: 18%; bottom: 8%; left: 68%; width: 8px; }
-
-    .map-route {
-      position: absolute;
-      left: 18%;
-      top: 60%;
-      width: 52%;
-      height: 4px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, #14b8a6, #38bdf8);
-      box-shadow: 0 0 16px rgba(56,189,248,0.28);
-    }
-
-    .map-pin,
-    .map-car {
-      position: absolute;
-      width: 34px;
-      height: 34px;
+    .custom-map-marker {
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: 16px;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.28);
+      border: 2px solid #ffffff;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
     }
 
-    .map-pin.pickup {
-      left: 16%;
-      top: 54%;
-      background: rgba(34,197,94,0.18);
-      border: 1px solid rgba(34,197,94,0.35);
-    }
-
-    .map-pin.dropoff {
-      left: 66%;
-      top: 54%;
-      background: rgba(239,68,68,0.18);
-      border: 1px solid rgba(239,68,68,0.35);
-    }
-
-    .map-car {
-      left: 40%;
-      top: 50%;
-      background: rgba(59,130,246,0.2);
-      border: 1px solid rgba(59,130,246,0.35);
-      animation: carMove 4s ease-in-out infinite alternate;
-    }
-
-    .map-label {
-      position: absolute;
-      padding: 8px 10px;
-      font-size: 12px;
-      border-radius: 12px;
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #fff;
-      font-weight: 700;
-    }
-
-    .map-label.pickup { left: 12%; top: 69%; }
-    .map-label.dropoff { left: 61%; top: 69%; }
-    .map-label.driver { left: 36%; top: 38%; }
+    .marker-pickup { background: #22c55e; }
+    .marker-dropoff { background: #ef4444; }
+    .marker-driver { background: #3b82f6; }
 
     .map-legend {
       display: flex;
@@ -1043,6 +981,7 @@
       .hero-copy h2 { font-size: 24px; }
     }
   </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 </head>
 <body>
   <div class="app-shell">
@@ -1126,21 +1065,9 @@
             </div>
 
             <div class="map-panel">
-              <h3>Live Trip Map Demo</h3>
-              <p>Simulated pickup, dropoff, and driver movement so UVEL feels closer to a real transport platform demo.</p>
-              <div class="map-box">
-                <div class="map-road horizontal-1"></div>
-                <div class="map-road horizontal-2"></div>
-                <div class="map-road vertical-1"></div>
-                <div class="map-road vertical-2"></div>
-                <div class="map-route"></div>
-                <div class="map-pin pickup">📍</div>
-                <div class="map-pin dropoff">🏁</div>
-                <div class="map-car">🚗</div>
-                <div class="map-label pickup">Pickup</div>
-                <div class="map-label dropoff">Destination</div>
-                <div class="map-label driver">Driver en route</div>
-              </div>
+              <h3>Live Trip Map</h3>
+              <p>Interactive map using Leaflet with live markers for pickup, destination, and driver location.</p>
+              <div id="liveMap" class="real-map"></div>
               <div class="map-legend">
                 <span><span class="dot" style="background:#22c55e"></span>Pickup</span>
                 <span><span class="dot" style="background:#ef4444"></span>Destination</span>
@@ -2031,6 +1958,7 @@
         renderAdminDrivers();
         renderAdminPassengers();
         renderAdminRecentActivity();
+        setTimeout(() => initLiveMap(), 120);
       }
     };
 
@@ -2368,6 +2296,73 @@
     if (event.target === modal) {
       window.closeEdit();
     }
+  });
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+  let uvelMap;
+  let pickupMarker;
+  let dropoffMarker;
+  let driverMarker;
+  let routeLine;
+  let mapAnimationIndex = 0;
+  let mapAnimationTimer;
+
+  function makeDivIcon(className) {
+    return L.divIcon({
+      className: '',
+      html: `<div class="custom-map-marker ${className}"></div>`,
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    });
+  }
+
+  function initLiveMap() {
+    const mapEl = document.getElementById('liveMap');
+    if (!mapEl || typeof L === 'undefined') return;
+    if (uvelMap) {
+      setTimeout(() => uvelMap.invalidateSize(), 200);
+      return;
+    }
+
+    uvelMap = L.map('liveMap').setView([-33.8688, 151.2093], 11);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(uvelMap);
+
+    const pickup = [-33.9173, 151.2313];
+    const dropoff = [-33.8688, 151.2093];
+    const driverPath = [
+      [-33.9300, 151.2450],
+      [-33.9240, 151.2390],
+      [-33.9200, 151.2360],
+      [-33.9173, 151.2313],
+      [-33.9070, 151.2240],
+      [-33.8950, 151.2170],
+      [-33.8820, 151.2130],
+      [-33.8688, 151.2093]
+    ];
+
+    pickupMarker = L.marker(pickup, { icon: makeDivIcon('marker-pickup') }).addTo(uvelMap).bindPopup('Pickup');
+    dropoffMarker = L.marker(dropoff, { icon: makeDivIcon('marker-dropoff') }).addTo(uvelMap).bindPopup('Destination');
+    driverMarker = L.marker(driverPath[0], { icon: makeDivIcon('marker-driver') }).addTo(uvelMap).bindPopup('Driver');
+
+    routeLine = L.polyline(driverPath, { weight: 4, opacity: 0.9 }).addTo(uvelMap);
+    uvelMap.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+
+    if (mapAnimationTimer) clearInterval(mapAnimationTimer);
+    mapAnimationTimer = setInterval(() => {
+      mapAnimationIndex = (mapAnimationIndex + 1) % driverPath.length;
+      driverMarker.setLatLng(driverPath[mapAnimationIndex]);
+    }, 1800);
+
+    setTimeout(() => uvelMap.invalidateSize(), 250);
+  }
+
+  window.addEventListener('resize', () => {
+    if (uvelMap) uvelMap.invalidateSize();
   });
 </script>
 </body>
