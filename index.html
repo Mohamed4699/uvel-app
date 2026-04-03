@@ -1485,6 +1485,7 @@
 
             <div class="action-row">
               <button class="driver" onclick='openEdit(JSON.parse(decodeURIComponent("${safeBooking}")))'>Edit</button>
+              ${booking.status === "Pending" ? `<button class="start-btn" onclick="autoAssignDriver('${booking.id}')">⭐ Auto Assign</button>` : ``}
               ${startControl}
               ${completeControl}
               <button class="delete-btn" onclick="deleteBooking('${booking.id}')">Delete</button>
@@ -1915,6 +1916,19 @@
       if (currentRole !== "Admin" || !driverName) return;
       await updateDoc(doc(db, "bookings", bookingId), {
         driver: driverName,
+        status: "Assigned"
+      });
+    };
+
+    window.autoAssignDriver = async function(bookingId) {
+      if (currentRole !== "Admin") return;
+      const driver = getRecommendedDriver();
+      if (!driver) {
+        alert("No available drivers");
+        return;
+      }
+      await updateDoc(doc(db, "bookings", bookingId), {
+        driver,
         status: "Assigned"
       });
     };
