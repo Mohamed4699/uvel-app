@@ -473,8 +473,32 @@
       font-family: inherit;
     }
 
+    select {
+      background: rgba(15, 23, 42, 0.95);
+      color: #ffffff;
+      border: 1px solid rgba(255,255,255,0.16);
+      font-weight: 600;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, #cbd5e1 50%), linear-gradient(135deg, #cbd5e1 50%, transparent 50%);
+      background-position: calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px);
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      padding-right: 38px;
+    }
+
+    select option {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
     input::placeholder,
     textarea::placeholder { color: #9fb0c8; }
+
+    select:invalid {
+      color: #cbd5e1;
+    }
 
     input:focus,
     select:focus,
