@@ -769,8 +769,8 @@
           </div>
 
           <div class="hero-actions">
-            <button class="hero-button" onclick="show('ride')">Open Passenger View</button>
-            <button class="hero-button" onclick="show('admin')">Open Admin View</button>
+            <button class="hero-button" id="heroPassengerBtn" onclick="show('ride')" style="display:none;">Open Passenger View</button>
+            <button class="hero-button" id="heroAdminBtn" onclick="show('admin')" style="display:none;">Open Admin View</button>
           </div>
         </div>
 
@@ -1061,6 +1061,24 @@
         admin: "adminNavBtn"
       }[section];
       if (match) document.getElementById(match)?.classList.add("active-link");
+    }
+
+    function canAccessSection(section) {
+      if (!currentUser || !currentRole) return false;
+      if (section === "ride") return currentRole === "Passenger";
+      if (section === "driver") return currentRole === "Driver";
+      if (section === "admin") return currentRole === "Admin";
+      return false;
+    }
+
+    function updateQuickActions() {
+      const passengerBtn = document.getElementById("heroPassengerBtn");
+      const adminBtn = document.getElementById("heroAdminBtn");
+
+      if (!passengerBtn || !adminBtn) return;
+
+      passengerBtn.style.display = currentRole === "Passenger" ? "inline-block" : "none";
+      adminBtn.style.display = currentRole === "Admin" ? "inline-block" : "none";
     }
 
     function updateAdminStats() {
@@ -1399,6 +1417,7 @@
         document.getElementById("ride").style.display = "none";
         document.getElementById("driver").style.display = "none";
         document.getElementById("admin").style.display = "none";
+        updateQuickActions();
         return;
       }
 
@@ -1410,6 +1429,8 @@
       rideNavBtn.style.display = currentRole === "Passenger" ? "flex" : "none";
       driverNavBtn.style.display = currentRole === "Driver" ? "flex" : "none";
       adminNavBtn.style.display = currentRole === "Admin" ? "flex" : "none";
+
+      updateQuickActions();
 
       if (currentRole === "Passenger") show("ride");
       if (currentRole === "Driver") show("driver");
@@ -1477,6 +1498,10 @@
     };
 
     window.show = function(section) {
+      if (!canAccessSection(section)) {
+        return;
+      }
+
       ["ride", "driver", "admin"].forEach(id => {
         document.getElementById(id).classList.remove("active");
         document.getElementById(id).style.display = "none";
