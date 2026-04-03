@@ -1337,6 +1337,7 @@
     let driverUsers = [];
     let allUsers = [];
     let currentRole = "";
+    let selectedAdminBookingId = "";
     let currentDriver = "";
     let currentUser = null;
 
@@ -1530,6 +1531,11 @@
       downloadCSV("uvel-completed-trips.csv", rows);
     };
 
+    window.focusBookingOnMap = function(bookingId) {
+      selectedAdminBookingId = bookingId;
+      initLiveMap();
+    };
+
     window.printAdminReport = function() {
       if (currentRole !== "Admin") return;
       show("admin");
@@ -1554,8 +1560,17 @@
       let html = "";
 
       activeBookings.forEach((booking) => {
+        let assignControl = "";
         let startControl = "";
         let completeControl = "";
+
+        if (booking.status === "Pending") {
+          assignControl = `
+            <div class="driver-combobox">
+              <input class="driver-input" placeholder="Search driver..." oninput="filterDriverOptions(this, '${booking.id}')" onclick="toggleDriverList('${booking.id}', true)" />
+              <div class="driver-list" id="driverList-${booking.id}"></div>
+            </div>`;
+        }
 
         if (booking.status === "Assigned") {
           startControl = `<button class="start-btn" onclick="startTrip('${booking.id}')">Start Trip</button>`;
@@ -1578,18 +1593,13 @@
             <p><strong>Time:</strong> ${booking.tripTime || "Not provided"}</p>
             <p><strong>Driver:</strong> ${booking.driver}</p>
             <p><strong>Notes:</strong> ${booking.notes || "None"}</p>
-
             <div class="status-row">
               <span class="status ${getStatusClass(booking.status)}">${booking.status}</span>
-              ${booking.status === "Pending" ? `
-                <div class="driver-combobox">
-                  <input class="driver-input" placeholder="Search driver..." oninput="filterDriverOptions(this, '${booking.id}')" onclick="toggleDriverList('${booking.id}', true)" />
-                  <div class="driver-list" id="driverList-${booking.id}"></div>
-                </div>` : ''}
+              ${assignControl}
             </div>
-
             <div class="action-row">
               <button class="driver" onclick='openEdit(JSON.parse(decodeURIComponent("${safeBooking}")))'>Edit</button>
+              <button class="hero-button" style="padding:9px 12px;" onclick="focusBookingOnMap('${booking.id}')">Show on Map</button>
               ${booking.status === "Pending" ? `<button class="start-btn" onclick="autoAssignDriver('${booking.id}')">⭐ Auto Assign</button>` : ``}
               ${startControl}
               ${completeControl}
@@ -2345,6 +2355,64 @@
     });
   }
 
+  function hashStringToNumber(str) {
+    let hash = 0;
+    const text = String(str || 'uvel');
+    for (let i = 0; i < text.length; i++) {
+      hash = ((hash << 5) - hash) + text.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  }
+
+  function getTripMapData(trip) {
+    const baseLat = -33.8688;
+    const baseLng = 151.2093;
+    const seed = hashStringToNumber(trip?.id || trip?.pickup || trip?.destination || 'uvel');
+    const offsetA = ((seed % 700) / 10000) + 0.01;
+    const offsetB = (((Math.floor(seed / 7)) % 700) / 10000) + 0.01;
+    const offsetC = (((Math.floor(seed / 13)) % 500) / 10000) + 0.006;
+    const offsetD = (((Math.floor(seed / 17)) % 500) / 10000) + 0.006;
+
+    const pickup = [baseLat + offsetA, baseLng + offsetC];
+    const dropoff = [baseLat - offsetB, baseLng - offsetD];
+
+    const steps = 8;
+    const path = [];
+    for (let i = 0; i < steps; i++) {
+      const t = i / (steps - 1);
+      const curve = Math.sin(t * Math.PI) * 0.01;
+      path.push([
+        pickup[0] + (dropoff[0] - pickup[0]) * t + curve * 0.35,
+        pickup[1] + (dropoff[1] - pickup[1]) * t - curve * 0.2
+      ]);
+    }
+
+    return { pickup, dropoff, path };
+  }
+
+  function getPassengerSelectedTrip() {
+    if (!currentUser || currentRole !== 'Passenger') return null;
+    const myTrips = liveBookings.filter(trip => trip.createdBy === currentUser.uid);
+    return myTrips[0] || null;
+  }
+
+  function getDriverSelectedTrip() {
+    if (!currentDriver || currentRole !== 'Driver') return null;
+    const myTrips = liveBookings.filter(trip => trip.driver === currentDriver && (trip.status === 'Assigned' || trip.status === 'In Progress' || trip.status === 'Completed'));
+    return myTrips[0] || null;
+  }
+
+  function getAdminSelectedTrip() {
+    const active = getFilteredActiveBookings();
+    if (!active.length) return null;
+    if (selectedAdminBookingId) {
+      const found = active.find(t => t.id === selectedAdminBookingId);
+      if (found) return found;
+    }
+    return active[0] || null;
+  }
+
   function createDemoPath() {
     return [
       [-33.9300, 151.2450],
@@ -2358,106 +2426,125 @@
     ];
   }
 
+  function clearMapTimer(role) {
+    if (role === 'admin' && mapAnimationTimer) clearInterval(mapAnimationTimer);
+    if (role === 'passenger' && passengerMapTimer) clearInterval(passengerMapTimer);
+    if (role === 'driver' && driverMapTimer) clearInterval(driverMapTimer);
+  }
+
+  function startMapAnimation(role, marker, path) {
+    clearMapTimer(role);
+    let index = 0;
+    const timer = setInterval(() => {
+      index = (index + 1) % path.length;
+      marker.setLatLng(path[index]);
+    }, 1800);
+
+    if (role === 'admin') mapAnimationTimer = timer;
+    if (role === 'passenger') passengerMapTimer = timer;
+    if (role === 'driver') driverMapTimer = timer;
+  }
+
+  function updateExistingMap(mapObj, pickupMk, dropoffMk, driverMk, route, tripMap, role) {
+    pickupMk.setLatLng(tripMap.pickup);
+    dropoffMk.setLatLng(tripMap.dropoff);
+    driverMk.setLatLng(tripMap.path[0]);
+    route.setLatLngs(tripMap.path);
+    mapObj.fitBounds(route.getBounds(), { padding: [30, 30] });
+    startMapAnimation(role, driverMk, tripMap.path);
+  }
+
   function initLiveMap() {
     const mapEl = document.getElementById('liveMap');
     if (!mapEl || typeof L === 'undefined') return;
+    const selectedTrip = getAdminSelectedTrip();
+    if (!selectedTrip) return;
+    const tripMap = getTripMapData(selectedTrip);
     if (uvelMap) {
+      updateExistingMap(uvelMap, pickupMarker, dropoffMarker, driverMarker, routeLine, tripMap, 'admin');
       setTimeout(() => uvelMap.invalidateSize(), 200);
       return;
     }
 
-    uvelMap = L.map('liveMap').setView([-33.8688, 151.2093], 11);
+    uvelMap = L.map('liveMap').setView(tripMap.dropoff, 11);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap'
     }).addTo(uvelMap);
 
-    const pickup = [-33.9173, 151.2313];
-    const dropoff = [-33.8688, 151.2093];
-    const driverPath = createDemoPath();
+    const pickup = tripMap.pickup;
+    const dropoff = tripMap.dropoff;
+    const driverPath = tripMap.path;
 
     pickupMarker = L.marker(pickup, { icon: makeDivIcon('marker-pickup') }).addTo(uvelMap).bindPopup('Pickup');
     dropoffMarker = L.marker(dropoff, { icon: makeDivIcon('marker-dropoff') }).addTo(uvelMap).bindPopup('Destination');
     driverMarker = L.marker(driverPath[0], { icon: makeDivIcon('marker-driver') }).addTo(uvelMap).bindPopup('Driver');
-
     routeLine = L.polyline(driverPath, { weight: 4, opacity: 0.9 }).addTo(uvelMap);
     uvelMap.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
-
-    if (mapAnimationTimer) clearInterval(mapAnimationTimer);
-    mapAnimationTimer = setInterval(() => {
-      mapAnimationIndex = (mapAnimationIndex + 1) % driverPath.length;
-      driverMarker.setLatLng(driverPath[mapAnimationIndex]);
-    }, 1800);
-
+    startMapAnimation('admin', driverMarker, driverPath);
     setTimeout(() => uvelMap.invalidateSize(), 250);
   }
 
   function initPassengerMap() {
     const mapEl = document.getElementById('passengerMap');
     if (!mapEl || typeof L === 'undefined') return;
+    const selectedTrip = getPassengerSelectedTrip();
+    if (!selectedTrip) return;
+    const tripMap = getTripMapData(selectedTrip);
     if (passengerMap) {
+      updateExistingMap(passengerMap, passengerPickupMarker, passengerDropoffMarker, passengerDriverMarker, passengerRouteLine, tripMap, 'passenger');
       setTimeout(() => passengerMap.invalidateSize(), 200);
       return;
     }
 
-    passengerMap = L.map('passengerMap').setView([-33.8688, 151.2093], 11);
+    passengerMap = L.map('passengerMap').setView(tripMap.dropoff, 11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap'
     }).addTo(passengerMap);
 
-    const pickup = [-33.9173, 151.2313];
-    const dropoff = [-33.8688, 151.2093];
-    const driverPath = createDemoPath();
+    const pickup = tripMap.pickup;
+    const dropoff = tripMap.dropoff;
+    const driverPath = tripMap.path;
 
     passengerPickupMarker = L.marker(pickup, { icon: makeDivIcon('marker-pickup') }).addTo(passengerMap).bindPopup('Pickup');
     passengerDropoffMarker = L.marker(dropoff, { icon: makeDivIcon('marker-dropoff') }).addTo(passengerMap).bindPopup('Destination');
     passengerDriverMarker = L.marker(driverPath[0], { icon: makeDivIcon('marker-driver') }).addTo(passengerMap).bindPopup('Driver');
-
     passengerRouteLine = L.polyline(driverPath, { weight: 4, opacity: 0.9 }).addTo(passengerMap);
     passengerMap.fitBounds(passengerRouteLine.getBounds(), { padding: [30, 30] });
-
-    if (passengerMapTimer) clearInterval(passengerMapTimer);
-    passengerMapTimer = setInterval(() => {
-      passengerMapIndex = (passengerMapIndex + 1) % driverPath.length;
-      passengerDriverMarker.setLatLng(driverPath[passengerMapIndex]);
-    }, 1800);
-
+    startMapAnimation('passenger', passengerDriverMarker, driverPath);
     setTimeout(() => passengerMap.invalidateSize(), 250);
   }
 
   function initDriverMap() {
     const mapEl = document.getElementById('driverMap');
     if (!mapEl || typeof L === 'undefined') return;
+    const selectedTrip = getDriverSelectedTrip();
+    if (!selectedTrip) return;
+    const tripMap = getTripMapData(selectedTrip);
     if (driverMap) {
+      updateExistingMap(driverMap, driverPickupMarker, driverDropoffMarker, driverDriverMarker, driverRouteLine, tripMap, 'driver');
       setTimeout(() => driverMap.invalidateSize(), 200);
       return;
     }
 
-    driverMap = L.map('driverMap').setView([-33.8688, 151.2093], 11);
+    driverMap = L.map('driverMap').setView(tripMap.dropoff, 11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap'
     }).addTo(driverMap);
 
-    const pickup = [-33.9173, 151.2313];
-    const dropoff = [-33.8688, 151.2093];
-    const driverPath = createDemoPath();
+    const pickup = tripMap.pickup;
+    const dropoff = tripMap.dropoff;
+    const driverPath = tripMap.path;
 
     driverPickupMarker = L.marker(pickup, { icon: makeDivIcon('marker-pickup') }).addTo(driverMap).bindPopup('Pickup');
     driverDropoffMarker = L.marker(dropoff, { icon: makeDivIcon('marker-dropoff') }).addTo(driverMap).bindPopup('Destination');
     driverDriverMarker = L.marker(driverPath[0], { icon: makeDivIcon('marker-driver') }).addTo(driverMap).bindPopup('Driver');
-
     driverRouteLine = L.polyline(driverPath, { weight: 4, opacity: 0.9 }).addTo(driverMap);
     driverMap.fitBounds(driverRouteLine.getBounds(), { padding: [30, 30] });
-
-    if (driverMapTimer) clearInterval(driverMapTimer);
-    driverMapTimer = setInterval(() => {
-      driverMapIndex = (driverMapIndex + 1) % driverPath.length;
-      driverDriverMarker.setLatLng(driverPath[driverMapIndex]);
-    }, 1800);
-
+    startMapAnimation('driver', driverDriverMarker, driverPath);
     setTimeout(() => driverMap.invalidateSize(), 250);
   }
 
