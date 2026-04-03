@@ -634,6 +634,22 @@
       color: #ffffff;
     }
 
+    .driver-combobox { position: relative; max-width: 260px; margin-top:10px; }
+    .driver-input {
+      width: 100%; padding: 12px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(15,23,42,0.95); color:#fff; font-weight:600;
+    }
+    .driver-list {
+      position: absolute; top: 100%; left:0; right:0;
+      background:#0f172a; border:1px solid rgba(255,255,255,0.12);
+      border-radius: 12px; margin-top:6px; max-height:180px; overflow:auto; display:none; z-index:20;
+    }
+    .driver-item {
+      padding:10px 12px; cursor:pointer; color:#fff; font-size:14px;
+    }
+    .driver-item:hover { background:#1e293b; }
+
     .admin-filters select {
       padding: 10px 14px;
       border-radius: 12px;
@@ -1422,22 +1438,8 @@
       let html = "";
 
       activeBookings.forEach((booking) => {
-        let driverOptions = '<option value="">Assign driver</option>';
-        driverUsers.forEach((driver) => {
-          driverOptions += `<option value="${driver}">${driver}</option>`;
-        });
-
-        let assignControl = "";
         let startControl = "";
         let completeControl = "";
-
-        if (booking.status === "Pending") {
-          assignControl = `
-            <select class="assign-select" onchange="assignDriver('${booking.id}', this.value)" style="width:100%; max-width:240px; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.06); color:white; margin-top:10px;">
-              ${driverOptions}
-            </select>
-          `;
-        }
 
         if (booking.status === "Assigned") {
           startControl = `<button class="start-btn" onclick="startTrip('${booking.id}')">Start Trip</button>`;
@@ -1460,12 +1462,18 @@
             <p><strong>Time:</strong> ${booking.tripTime || "Not provided"}</p>
             <p><strong>Driver:</strong> ${booking.driver}</p>
             <p><strong>Notes:</strong> ${booking.notes || "None"}</p>
+
             <div class="status-row">
               <span class="status ${getStatusClass(booking.status)}">${booking.status}</span>
-              ${assignControl}
+              ${booking.status === "Pending" ? `
+                <div class="driver-combobox">
+                  <input class="driver-input" placeholder="Search driver..." oninput="filterDriverOptions(this, '${booking.id}')" onclick="toggleDriverList('${booking.id}', true)" />
+                  <div class="driver-list" id="driverList-${booking.id}"></div>
+                </div>` : ''}
             </div>
+
             <div class="action-row">
-              <button class="driver" style="padding:9px 12px; border-radius:10px;" onclick='openEdit(JSON.parse(decodeURIComponent("${safeBooking}")))'>Edit</button>
+              <button class="driver" onclick='openEdit(JSON.parse(decodeURIComponent("${safeBooking}")))'>Edit</button>
               ${startControl}
               ${completeControl}
               <button class="delete-btn" onclick="deleteBooking('${booking.id}')">Delete</button>
@@ -1475,6 +1483,7 @@
       });
 
       bookingList.innerHTML = html;
+      initDriverLists(activeBookings);
     };
 
     function renderTripHistory() {
@@ -1934,6 +1943,48 @@
         status: updatedStatus
       });
     };
+
+    function initDriverLists(bookings) {
+      bookings.forEach(b => {
+        const list = document.getElementById(`driverList-${b.id}`);
+        if (!list) return;
+        list.innerHTML = '';
+        driverUsers.forEach(d => {
+          const item = document.createElement('div');
+          item.className = 'driver-item';
+          item.textContent = d;
+          item.onclick = () => {
+            assignDriver(b.id, d);
+            list.style.display = 'none';
+          };
+          list.appendChild(item);
+        });
+      });
+    }
+
+    function filterDriverOptions(input, bookingId) {
+      const list = document.getElementById(`driverList-${bookingId}`);
+      const val = input.value.toLowerCase();
+      list.style.display = 'block';
+      list.innerHTML = '';
+      driverUsers
+        .filter(d => d.toLowerCase().includes(val))
+        .forEach(d => {
+          const item = document.createElement('div');
+          item.className = 'driver-item';
+          item.textContent = d;
+          item.onclick = () => {
+            assignDriver(bookingId, d);
+            list.style.display = 'none';
+          };
+          list.appendChild(item);
+        });
+    }
+
+    function toggleDriverList(id, show) {
+      const list = document.getElementById(`driverList-${id}`);
+      if (list) list.style.display = show ? 'block' : 'none';
+    }
 
     window.deleteBooking = async function(bookingId) {
       if (currentRole !== "Admin") return;
