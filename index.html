@@ -6,161 +6,320 @@
   <style>
     :root {
       --bg: #07111f;
-      --panel: #0d1b2f;
-      --panel-2: #10233d;
-      --card: rgba(255,255,255,0.06);
-      --card-border: rgba(255,255,255,0.09);
+      --bg-2: #0b1730;
+      --panel: rgba(13,27,47,0.9);
+      --panel-soft: rgba(255,255,255,0.05);
+      --panel-border: rgba(255,255,255,0.08);
       --text: #f8fafc;
-      --muted: #a8b3c7;
+      --muted: #9eb0ca;
+      --line: rgba(255,255,255,0.08);
       --green: #22c55e;
       --blue: #3b82f6;
       --amber: #f59e0b;
       --purple: #8b5cf6;
       --red: #ef4444;
       --teal: #14b8a6;
-      --shadow: 0 18px 45px rgba(0,0,0,0.28);
-      --radius: 22px;
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --shadow: 0 24px 50px rgba(0,0,0,0.3);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
       font-family: Inter, Arial, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(20,184,166,0.16), transparent 28%),
-        radial-gradient(circle at top right, rgba(59,130,246,0.18), transparent 30%),
-        linear-gradient(180deg, #07111f 0%, #0a1630 42%, #0b1c2c 100%);
       color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(20,184,166,0.14), transparent 28%),
+        radial-gradient(circle at top right, rgba(59,130,246,0.18), transparent 28%),
+        linear-gradient(180deg, #06101d 0%, #08162a 45%, #0a1630 100%);
       min-height: 100vh;
     }
 
-    .shell {
-      width: min(1280px, 94%);
+    .app-shell {
+      width: min(1380px, 96%);
       margin: 0 auto;
-      padding: 28px 0 40px;
+      padding: 22px 0 30px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 22px;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 20px;
+      align-self: start;
+      background: linear-gradient(180deg, rgba(13,27,47,0.98), rgba(11,23,48,0.94));
+      border: 1px solid var(--panel-border);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .logo-box {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      background: linear-gradient(135deg, rgba(20,184,166,0.2), rgba(59,130,246,0.22));
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .logo-wrap h1 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: -0.03em;
+    }
+
+    .logo-wrap p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .nav-title {
+      margin: 0 0 12px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .side-nav {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .side-link {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 1px solid transparent;
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border-radius: 16px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      transition: 0.18s ease;
+      text-align: left;
+    }
+
+    .side-link:hover,
+    .side-link.active-link {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(20,184,166,0.18);
+      transform: translateY(-1px);
+    }
+
+    .side-link small {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .side-card {
+      margin-top: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .side-card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .side-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .logout-btn {
+      width: 100%;
+      margin-top: 14px;
+      background: rgba(239,68,68,0.16);
+      color: white;
+      padding: 12px 16px;
+      border: 1px solid rgba(239,68,68,0.22);
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .main {
+      min-width: 0;
     }
 
     .hero {
       position: relative;
       overflow: hidden;
-      background: linear-gradient(135deg, rgba(16,35,61,0.96), rgba(10,22,48,0.96));
-      border: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(135deg, rgba(13,27,47,0.96), rgba(11,23,48,0.94));
+      border: 1px solid var(--panel-border);
       border-radius: 30px;
       box-shadow: var(--shadow);
-      padding: 28px;
-      margin-bottom: 24px;
+      padding: 26px;
+      margin-bottom: 20px;
     }
 
-    .hero::before {
+    .hero::after {
       content: "";
       position: absolute;
-      inset: auto -80px -90px auto;
-      width: 260px;
-      height: 260px;
-      background: radial-gradient(circle, rgba(20,184,166,0.22), transparent 62%);
+      inset: auto -60px -70px auto;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(20,184,166,0.24), transparent 62%);
       pointer-events: none;
     }
 
     .hero-top {
       display: flex;
       justify-content: space-between;
-      gap: 18px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
       gap: 16px;
-    }
-
-    .brand-icon {
-      width: 58px;
-      height: 58px;
-      border-radius: 18px;
-      display: grid;
-      place-items: center;
-      font-size: 28px;
-      background: linear-gradient(135deg, rgba(20,184,166,0.18), rgba(59,130,246,0.22));
-      border: 1px solid rgba(255,255,255,0.09);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-    }
-
-    .brand-copy h1 {
-      margin: 0;
-      font-size: clamp(32px, 4vw, 46px);
-      letter-spacing: -0.03em;
-    }
-
-    .brand-copy p {
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 16px;
-    }
-
-    .hero-right {
-      display: flex;
+      align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-      justify-content: flex-end;
-    }
-
-    .pill {
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: var(--text);
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .logout-btn {
-      background: rgba(239,68,68,0.16);
-      color: white;
-      padding: 10px 16px;
-      border: 1px solid rgba(239,68,68,0.22);
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 700;
-    }
-
-    .hero-bottom {
-      margin-top: 24px;
-      display: grid;
-      grid-template-columns: 1.4fr 0.9fr;
-      gap: 18px;
-      align-items: center;
     }
 
     .hero-copy h2 {
-      margin: 0 0 12px;
-      font-size: clamp(24px, 3vw, 34px);
-      letter-spacing: -0.02em;
-      line-height: 1.15;
+      margin: 0;
+      font-size: clamp(28px, 3vw, 40px);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
     }
 
     .hero-copy p {
-      margin: 0;
+      margin: 10px 0 0;
       color: var(--muted);
       line-height: 1.7;
-      max-width: 720px;
+      max-width: 760px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .hero-button {
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .hero-grid {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .workflow-card,
+    .chart-card,
+    .panel,
+    .login-box,
+    .stat-card,
+    .booking-card,
+    .driver-card,
+    .history-card,
+    .rider-card,
+    .mini-panel,
+    .form-card,
+    .list-card,
+    .panel-box {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      box-shadow: var(--shadow);
+    }
+
+    .workflow-card,
+    .chart-card,
+    .form-card,
+    .list-card,
+    .mini-panel,
+    .panel-box,
+    .stat-card,
+    .booking-card,
+    .driver-card,
+    .history-card,
+    .rider-card,
+    .login-box,
+    .section {
+      border-radius: var(--radius-lg);
+    }
+
+    .workflow-card,
+    .chart-card {
+      padding: 18px;
+    }
+
+    .workflow-card h3,
+    .chart-card h3,
+    .form-card h3,
+    .list-card h3,
+    .mini-panel h3,
+    .panel-box h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .workflow-card p,
+    .chart-card p,
+    .form-card p,
+    .list-card p,
+    .mini-panel p,
+    .panel-box p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
     }
 
     .hero-steps {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 10px;
+      margin-top: 16px;
     }
 
     .step-chip {
       background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid var(--line);
       border-radius: 18px;
       padding: 16px 14px;
       text-align: center;
@@ -175,86 +334,57 @@
       font-size: 15px;
     }
 
-    .nav-wrap {
-      display: flex;
-      justify-content: center;
-      margin: 20px 0 26px;
-    }
-
-    .nav-buttons {
-      display: inline-flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
-      padding: 10px;
+    .mini-chart {
+      margin-top: 16px;
+      height: 170px;
       border-radius: 18px;
-      box-shadow: var(--shadow);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid var(--line);
+      padding: 14px;
+      position: relative;
+      overflow: hidden;
     }
 
-    button {
-      padding: 12px 18px;
-      border: none;
+    .chart-grid {
+      position: absolute;
+      inset: 14px;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 100% 34px, 44px 100%;
       border-radius: 14px;
-      cursor: pointer;
+    }
+
+    .chart-svg {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
       font-weight: 700;
-      font-size: 14px;
-      transition: transform 0.18s ease, opacity 0.18s ease;
     }
 
-    button:hover {
-      transform: translateY(-1px);
-      opacity: 0.96;
-    }
-
-    .ride { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
-    .driver { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
-    .admin { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
-    .delete-btn { background: rgba(239,68,68,0.18); color: white; padding: 8px 12px; border-radius: 10px; font-size: 13px; margin-top: 10px; margin-right: 8px; border: 1px solid rgba(239,68,68,0.2); }
-    .complete-btn { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 8px 12px; border-radius: 10px; font-size: 13px; margin-top: 10px; margin-right: 8px; }
-    .start-btn { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 8px 12px; border-radius: 10px; font-size: 13px; margin-top: 10px; margin-right: 8px; }
-    .filter-btn { background: linear-gradient(135deg, #1d4ed8, #1e40af); color: white; padding: 12px 16px; border-radius: 12px; margin: 0; }
-    .export-btn { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; margin: 0; }
-    .pdf-btn { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; margin: 0; }
-
-    .panel,
-    .login-box,
-    .stat-card,
-    .booking-card,
-    .driver-card,
-    .history-card,
-    .rider-card,
-    .mini-panel {
-      background: rgba(13,27,47,0.88);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--card-border);
-      box-shadow: var(--shadow);
-    }
-
-    .login-box,
-    .section {
-      border-radius: 28px;
-    }
-
-    .login-box {
-      max-width: 720px;
-      margin: 0 auto 24px;
-      padding: 28px;
-      text-align: center;
-    }
-
-    .login-box h2 {
-      margin-top: 0;
-      margin-bottom: 10px;
-      font-size: 28px;
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
     }
 
     .section {
       display: none;
-      padding: 26px;
-      background: rgba(13,27,47,0.72);
-      border: 1px solid rgba(255,255,255,0.08);
-      margin-bottom: 24px;
+      padding: 22px;
+      margin-bottom: 20px;
+      background: rgba(13,27,47,0.7);
+      border: 1px solid var(--panel-border);
     }
 
     .active { display: block; }
@@ -265,11 +395,10 @@
       gap: 16px;
       align-items: flex-start;
       flex-wrap: wrap;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
-    .section-head h2,
-    .section-head h3 {
+    .section-head h2 {
       margin: 0;
       font-size: 28px;
       letter-spacing: -0.02em;
@@ -279,7 +408,7 @@
       margin: 6px 0 0;
       color: var(--muted);
       line-height: 1.6;
-      max-width: 700px;
+      max-width: 760px;
     }
 
     .section-badge {
@@ -289,16 +418,21 @@
       border: 1px solid rgba(20,184,166,0.18);
       color: #d5fffb;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
+    }
+
+    .login-box {
+      max-width: 760px;
+      margin: 0 auto 20px;
+      padding: 28px;
+      text-align: center;
     }
 
     .login-grid,
     .form-grid,
     .admin-filters,
     .today-stats,
-    .admin-stats,
-    .driver-summary,
-    .rider-summary {
+    .admin-stats {
       display: grid;
       gap: 14px;
     }
@@ -309,40 +443,29 @@
       margin-top: 18px;
     }
 
+    .ride-layout,
+    .driver-layout {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 20px;
+      align-items: start;
+    }
+
     .form-card,
     .list-card,
-    .mini-panel {
+    .mini-panel,
+    .panel-box {
       background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 22px;
       padding: 18px;
     }
 
-    .form-card h3,
-    .list-card h3,
-    .mini-panel h3 {
-      margin: 0 0 8px;
-      font-size: 20px;
-      letter-spacing: -0.02em;
-    }
-
-    .form-card p,
-    .list-card p,
-    .mini-panel p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .full-width {
-      grid-column: 1 / -1;
-    }
+    .full-width { grid-column: 1 / -1; }
 
     input, select, textarea {
       width: 100%;
       padding: 14px 15px;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid var(--line);
       background: rgba(255,255,255,0.06);
       color: var(--text);
       font-size: 15px;
@@ -351,9 +474,7 @@
     }
 
     input::placeholder,
-    textarea::placeholder {
-      color: #9fb0c8;
-    }
+    textarea::placeholder { color: #9fb0c8; }
 
     input:focus,
     select:focus,
@@ -362,18 +483,47 @@
       box-shadow: 0 0 0 3px rgba(20,184,166,0.14);
     }
 
-    textarea {
-      min-height: 96px;
-      resize: vertical;
+    textarea { min-height: 96px; resize: vertical; }
+
+    .primary,
+    .ride,
+    .driver,
+    .admin,
+    .export-btn,
+    .pdf-btn,
+    .filter-btn,
+    .start-btn,
+    .complete-btn,
+    .delete-btn,
+    .request-btn {
+      border: none;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform 0.18s ease, opacity 0.18s ease;
     }
 
-    .ride-layout,
-    .driver-layout {
-      display: grid;
-      grid-template-columns: 0.95fr 1.05fr;
-      gap: 20px;
-      align-items: start;
-    }
+    .ride:hover,
+    .driver:hover,
+    .admin:hover,
+    .export-btn:hover,
+    .pdf-btn:hover,
+    .filter-btn:hover,
+    .start-btn:hover,
+    .complete-btn:hover,
+    .delete-btn:hover,
+    .request-btn:hover,
+    .hero-button:hover { transform: translateY(-1px); opacity: 0.97; }
+
+    .ride,
+    .request-btn { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 13px 18px; border-radius: 14px; }
+    .driver { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 13px 18px; border-radius: 14px; }
+    .admin { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 13px 18px; border-radius: 14px; }
+    .export-btn { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; padding: 12px 16px; border-radius: 12px; }
+    .pdf-btn { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; padding: 12px 16px; border-radius: 12px; }
+    .filter-btn { background: linear-gradient(135deg, #1d4ed8, #1e40af); color: white; padding: 12px 16px; border-radius: 12px; }
+    .start-btn { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 9px 12px; border-radius: 10px; }
+    .complete-btn { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 9px 12px; border-radius: 10px; }
+    .delete-btn { background: rgba(239,68,68,0.18); color: white; padding: 9px 12px; border-radius: 10px; border: 1px solid rgba(239,68,68,0.2); }
 
     .ride-submit {
       margin-top: 14px;
@@ -387,7 +537,7 @@
       margin-top: 14px;
       padding: 13px 14px;
       border-radius: 14px;
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .success-box,
@@ -403,39 +553,35 @@
       color: #ffe1e1;
     }
 
-    .helper-text {
+    .helper-text,
+    .muted-note,
+    .driver-selected,
+    .footer-note {
       color: var(--muted);
-      font-size: 14px;
-      margin-top: 12px;
       line-height: 1.7;
     }
 
-    .admin-stats {
-      grid-template-columns: repeat(5, 1fr);
-      margin-top: 10px;
-      margin-bottom: 18px;
-    }
+    .helper-text { font-size: 14px; margin-top: 12px; }
+    .muted-note { font-size: 13px; margin-top: 8px; }
+    .driver-selected { margin-top: 8px; font-size: 15px; }
+    .footer-note { text-align: center; font-size: 14px; padding: 4px 0 10px; }
 
-    .today-stats {
-      grid-template-columns: repeat(4, 1fr);
-      margin-bottom: 22px;
-    }
+    .admin-stats { grid-template-columns: repeat(5, 1fr); margin-bottom: 18px; }
+    .today-stats { grid-template-columns: repeat(4, 1fr); margin-bottom: 20px; }
 
     .stat-card {
-      border-radius: 22px;
-      padding: 20px;
-      text-align: left;
       position: relative;
       overflow: hidden;
+      padding: 20px;
     }
 
     .stat-card::after {
       content: "";
       position: absolute;
-      right: -20px;
-      bottom: -20px;
-      width: 90px;
-      height: 90px;
+      right: -22px;
+      bottom: -22px;
+      width: 96px;
+      height: 96px;
       border-radius: 50%;
       background: rgba(255,255,255,0.05);
     }
@@ -444,7 +590,7 @@
       margin: 0;
       font-size: 14px;
       color: var(--muted);
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .stat-card p {
@@ -461,18 +607,6 @@
       align-items: start;
     }
 
-    .panel-box {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 24px;
-      padding: 18px;
-    }
-
-    .panel-box h3 {
-      margin: 0 0 8px;
-      font-size: 21px;
-    }
-
     .admin-filters {
       grid-template-columns: 2fr 1fr 1fr 1fr auto;
       margin-top: 14px;
@@ -482,27 +616,19 @@
 
     .export-bar {
       display: flex;
-      flex-wrap: wrap;
       gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .driver-selected {
-      margin-top: 2px;
-      font-size: 15px;
-      color: var(--muted);
+      flex-wrap: wrap;
+      margin-bottom: 12px;
     }
 
     .booking-card,
     .driver-card,
     .history-card,
     .rider-card {
-      border-radius: 20px;
-      padding: 18px;
-      margin-top: 14px;
-      text-align: left;
       position: relative;
       overflow: hidden;
+      padding: 18px;
+      margin-top: 14px;
     }
 
     .booking-card::before,
@@ -513,7 +639,7 @@
       position: absolute;
       inset: 0 auto 0 0;
       width: 4px;
-      background: linear-gradient(180deg, rgba(20,184,166,0.8), rgba(59,130,246,0.75));
+      background: linear-gradient(180deg, rgba(20,184,166,0.85), rgba(59,130,246,0.85));
     }
 
     .booking-card p,
@@ -525,19 +651,12 @@
       font-size: 14px;
     }
 
-    .status-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
-
+    .status-row,
     .action-row {
       display: flex;
+      align-items: center;
+      gap: 10px;
       flex-wrap: wrap;
-      gap: 8px;
       margin-top: 10px;
     }
 
@@ -559,10 +678,7 @@
     #bookingList,
     #driverTrips,
     #tripHistoryList,
-    #riderTrips {
-      margin-top: 16px;
-      text-align: left;
-    }
+    #riderTrips { margin-top: 16px; text-align: left; }
 
     .empty-text {
       color: var(--muted);
@@ -571,299 +687,297 @@
       padding: 26px 10px;
     }
 
-    .muted-note {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 8px;
-    }
-
-    .footer-note {
-      text-align: center;
-      color: var(--muted);
-      font-size: 14px;
-      padding: 6px 0 20px;
-    }
-
-    @media (max-width: 1100px) {
-      .hero-bottom,
+    @media (max-width: 1180px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .hero-grid,
       .ride-layout,
       .driver-layout,
-      .admin-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .admin-stats {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .today-stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      .admin-grid { grid-template-columns: 1fr; }
+      .admin-stats { grid-template-columns: repeat(3, 1fr); }
+      .today-stats { grid-template-columns: repeat(2, 1fr); }
     }
 
-    @media (max-width: 850px) {
-      .admin-filters,
+    @media (max-width: 860px) {
       .login-grid,
       .form-grid,
-      .hero-steps {
-        grid-template-columns: 1fr;
-      }
-
+      .admin-filters,
+      .hero-steps { grid-template-columns: 1fr; }
       .admin-stats,
-      .today-stats {
-        grid-template-columns: 1fr 1fr;
-      }
+      .today-stats { grid-template-columns: 1fr 1fr; }
     }
 
     @media (max-width: 620px) {
-      .shell {
-        width: min(95%, 100%);
-      }
-
+      .app-shell { width: min(96%, 100%); }
+      .sidebar,
       .hero,
       .login-box,
-      .section {
-        padding: 20px;
-        border-radius: 22px;
-      }
-
-      .hero-copy h2,
-      .section-head h2,
-      .section-head h3 {
-        font-size: 24px;
-      }
-
+      .section { padding: 18px; border-radius: 22px; }
       .admin-stats,
-      .today-stats {
-        grid-template-columns: 1fr;
-      }
-
-      .nav-buttons {
-        width: 100%;
-        justify-content: center;
-      }
+      .today-stats { grid-template-columns: 1fr; }
+      .section-head h2,
+      .hero-copy h2 { font-size: 24px; }
     }
   </style>
 </head>
 <body>
-  <div class="shell">
-    <div class="hero">
-      <div class="hero-top">
-        <div class="brand">
-          <div class="brand-icon">🚗</div>
-          <div class="brand-copy">
-            <h1>UVEL Platform</h1>
-            <p>Community transport, NDIS-ready workflows, and real-time trip management in one system.</p>
-          </div>
-        </div>
-
-        <div class="hero-right">
-          <div id="sessionBar" style="display:none; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-            <div class="pill" id="roleBadge">Role: Guest</div>
-            <button class="logout-btn" onclick="logoutUser()">Logout</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="hero-bottom">
-        <div class="hero-copy">
-          <h2>Built for modern community transport operations.</h2>
-          <p>
-            UVEL helps passengers, drivers, and administrators coordinate bookings, support NDIS-style needs,
-            track trip progress, and manage transport like a real service platform instead of a simple demo page.
-          </p>
-        </div>
-
-        <div class="hero-steps">
-          <div class="step-chip"><strong>Book</strong>Passenger creates ride</div>
-          <div class="step-chip"><strong>Assign</strong>Admin selects driver</div>
-          <div class="step-chip"><strong>Start</strong>Driver begins trip</div>
-          <div class="step-chip"><strong>Complete</strong>Trip closes in system</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="nav-wrap">
-      <div class="nav-buttons" id="navButtons" style="display:none;">
-        <button class="ride" id="rideNavBtn" onclick="show('ride')">Ride App</button>
-        <button class="driver" id="driverNavBtn" onclick="show('driver')">Driver App</button>
-        <button class="admin" id="adminNavBtn" onclick="show('admin')">Admin Panel</button>
-      </div>
-    </div>
-
-    <div id="loginSection" class="login-box">
-      <div class="section-head" style="margin-bottom:14px;">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="logo-wrap">
+        <div class="logo-box">🚗</div>
         <div>
-          <h2>Login / Register</h2>
-          <p>Access the platform as a passenger, driver, or administrator.</p>
+          <h1>UVEL</h1>
+          <p>Reliable community transport</p>
         </div>
-        <div class="section-badge">Secure Firebase Auth</div>
       </div>
 
-      <div class="login-grid">
-        <input id="authEmail" type="email" placeholder="Email address">
-        <input id="authPassword" type="password" placeholder="Password">
-        <select id="authRole">
-          <option value="">Select role</option>
-          <option value="Passenger">Passenger</option>
-          <option value="Driver">Driver</option>
-          <option value="Admin">Admin</option>
-        </select>
-        <input id="authDriverName" type="text" placeholder="Driver name (only for Driver role)">
+      <div class="nav-title">Workspace</div>
+      <div class="side-nav" id="navButtons" style="display:none;">
+        <button class="side-link" id="rideNavBtn" onclick="show('ride')">
+          <span>Ride App</span><small>Passenger</small>
+        </button>
+        <button class="side-link" id="driverNavBtn" onclick="show('driver')">
+          <span>Driver App</span><small>Trips</small>
+        </button>
+        <button class="side-link" id="adminNavBtn" onclick="show('admin')">
+          <span>Admin Panel</span><small>Dispatch</small>
+        </button>
       </div>
 
-      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:18px;">
-        <button class="driver" onclick="registerUser()">Register</button>
-        <button class="ride" onclick="loginUser()">Login</button>
+      <div id="sessionBar" style="display:none;">
+        <div class="pill" id="roleBadge">Role: Guest</div>
+        <button class="logout-btn" onclick="logoutUser()">Logout</button>
       </div>
 
-      <div id="authMessage" class="auth-message">Success</div>
-      <div id="authError" class="error-box">Error</div>
-
-      <div class="helper-text">
-        Register once, then log in with the same email and password.<br>
-        Driver users must enter a driver name during registration.
-      </div>
-    </div>
-
-    <div id="ride" class="section active">
-      <div class="section-head">
-        <div>
-          <h2>Ride App</h2>
-          <p>Create a trip request with transport type, time, and support notes. Passengers can also track all trips in one place.</p>
-        </div>
-        <div class="section-badge">Passenger View</div>
+      <div class="side-card">
+        <h3>Operations Flow</h3>
+        <p>Book trips, assign drivers, start rides, complete trips, and keep transport records in one dashboard.</p>
       </div>
 
-      <div class="ride-layout">
-        <div class="form-card">
-          <h3>Book a Ride</h3>
-          <p>Enter trip details below to create a new booking.</p>
+      <div class="side-card">
+        <h3>Why it looks better now</h3>
+        <p>Sidebar navigation, dashboard layout, and analytics cards make the MVP feel much closer to a real startup product.</p>
+      </div>
+    </aside>
 
-          <div class="form-grid">
-            <input id="passengerName" type="text" placeholder="Passenger name">
-            <select id="tripType">
-              <option value="Normal">Normal</option>
-              <option value="NDIS">NDIS</option>
-            </select>
-            <input id="pickup" type="text" placeholder="Pickup location">
-            <input id="destination" type="text" placeholder="Destination">
-            <input id="tripDate" type="date">
-            <input id="tripTime" type="time">
-            <textarea id="tripNotes" class="full-width" placeholder="Notes (wheelchair, assistance, escort, special instructions)"></textarea>
+    <main class="main">
+      <div class="hero">
+        <div class="hero-top">
+          <div class="hero-copy">
+            <h2>Modern transport operations for community and NDIS-ready services.</h2>
+            <p>UVEL now has a more realistic product dashboard with sidebar navigation, analytics visuals, cleaner hierarchy, and stronger SaaS-style presentation.</p>
           </div>
 
-          <button class="ride ride-submit" onclick="requestRide()">Request Ride</button>
-          <div id="successBox" class="success-box">Ride requested successfully ✅</div>
-          <div class="muted-note">Tip: Add support details so dispatch and drivers can prepare better.</div>
-        </div>
-
-        <div class="list-card">
-          <h3>My Trips</h3>
-          <p>See current and past trip activity with driver and status updates.</p>
-          <div id="riderTrips">
-            <p class="empty-text">No trips yet.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="driver" class="section">
-      <div class="section-head">
-        <div>
-          <h2>Driver App</h2>
-          <p>Drivers can view assigned work, start trips, and complete trips directly from their dashboard.</p>
-          <div id="driverSelectedText" class="driver-selected">No driver selected.</div>
-        </div>
-        <div class="section-badge">Driver View</div>
-      </div>
-
-      <div class="driver-layout">
-        <div class="mini-panel">
-          <h3>Driver Workflow</h3>
-          <p>Keep operations simple: receive assigned trip, start trip, then complete when finished.</p>
-          <div class="hero-steps" style="margin-top:14px; grid-template-columns:repeat(3,1fr);">
-            <div class="step-chip"><strong>Assigned</strong>Ready to begin</div>
-            <div class="step-chip"><strong>In Progress</strong>Passenger onboard</div>
-            <div class="step-chip"><strong>Completed</strong>Trip closed</div>
+          <div class="hero-actions">
+            <button class="hero-button" onclick="show('ride')">Open Passenger View</button>
+            <button class="hero-button" onclick="show('admin')">Open Admin View</button>
           </div>
         </div>
 
-        <div class="list-card">
-          <h3>My Trips</h3>
-          <p>Only trips assigned to this driver are shown below.</p>
-          <div id="driverTrips">
-            <p class="empty-text">No assigned trips yet.</p>
+        <div class="hero-grid">
+          <div class="workflow-card">
+            <h3>Operational Workflow</h3>
+            <p>Clear booking lifecycle from request to trip completion.</p>
+            <div class="hero-steps">
+              <div class="step-chip"><strong>Book</strong>Passenger submits request</div>
+              <div class="step-chip"><strong>Assign</strong>Admin selects driver</div>
+              <div class="step-chip"><strong>Start</strong>Driver begins trip</div>
+              <div class="step-chip"><strong>Complete</strong>Trip is finished</div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Trips Overview</h3>
+            <p>Simple dashboard visual to make the MVP feel like a live product.</p>
+            <div class="mini-chart">
+              <div class="chart-grid"></div>
+              <svg class="chart-svg" viewBox="0 0 320 150" preserveAspectRatio="none">
+                <polyline fill="none" stroke="#14b8a6" stroke-width="4" points="10,120 55,105 100,92 145,98 190,68 235,58 280,48 310,28" />
+                <polyline fill="none" stroke="#3b82f6" stroke-width="4" points="10,132 55,120 100,110 145,88 190,98 235,78 280,64 310,56" />
+              </svg>
+            </div>
+            <div class="chart-legend">
+              <span><span class="dot" style="background:#14b8a6"></span>Total rides</span>
+              <span><span class="dot" style="background:#3b82f6"></span>Completed rides</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div id="admin" class="section">
-      <div class="section-head">
-        <div>
-          <h2>Admin Panel</h2>
-          <p>Manage active bookings, assign drivers, monitor status, and export transport records.</p>
-        </div>
-        <div class="section-badge">Operations View</div>
-      </div>
-
-      <div class="admin-stats">
-        <div class="stat-card"><h4>Total Bookings</h4><p id="totalBookings">0</p></div>
-        <div class="stat-card"><h4>Pending</h4><p id="pendingBookings">0</p></div>
-        <div class="stat-card"><h4>Assigned</h4><p id="assignedBookings">0</p></div>
-        <div class="stat-card"><h4>In Progress</h4><p id="progressBookings">0</p></div>
-        <div class="stat-card"><h4>Completed</h4><p id="completedBookings">0</p></div>
-      </div>
-
-      <div class="today-stats">
-        <div class="stat-card"><h4>Today's Trips</h4><p id="todayTrips">0</p></div>
-        <div class="stat-card"><h4>Today's Pending</h4><p id="todayPending">0</p></div>
-        <div class="stat-card"><h4>Today's Assigned</h4><p id="todayAssigned">0</p></div>
-        <div class="stat-card"><h4>Today's Completed</h4><p id="todayCompleted">0</p></div>
-      </div>
-
-      <div class="admin-grid">
-        <div class="panel-box">
-          <h3>Active Booking Requests</h3>
-
-          <div class="admin-filters">
-            <input id="searchInput" type="text" placeholder="Search passenger, pickup, destination, booking ID">
-            <select id="statusFilter" onchange="renderAdminBookings()">
-              <option value="All">All Statuses</option>
-              <option value="Pending">Pending</option>
-              <option value="Assigned">Assigned</option>
-              <option value="In Progress">In Progress</option>
-            </select>
-            <select id="driverFilter" onchange="renderAdminBookings()">
-              <option value="All">All Drivers</option>
-              <option value="Unassigned">Unassigned</option>
-            </select>
-            <input id="dateFilter" type="date" onchange="renderAdminBookings()">
-            <button class="filter-btn" onclick="clearAdminFilters()">Clear</button>
+      <div id="loginSection" class="login-box">
+        <div class="section-head" style="margin-bottom:14px;">
+          <div>
+            <h2>Login / Register</h2>
+            <p>Access the platform as a passenger, driver, or administrator.</p>
           </div>
-
-          <div class="export-bar">
-            <button class="export-btn" onclick="exportActiveBookingsCSV()">Export Active CSV</button>
-            <button class="export-btn" onclick="exportCompletedTripsCSV()">Export Completed CSV</button>
-            <button class="pdf-btn" onclick="printAdminReport()">Export PDF</button>
-          </div>
-
-          <div id="bookingList">
-            <p class="empty-text">No bookings yet.</p>
-          </div>
+          <div class="section-badge">Secure Firebase Auth</div>
         </div>
 
-        <div class="panel-box">
-          <h3>Completed Trip History</h3>
-          <div id="tripHistoryList">
-            <p class="empty-text">No completed trips yet.</p>
+        <div class="login-grid">
+          <input id="authEmail" type="email" placeholder="Email address">
+          <input id="authPassword" type="password" placeholder="Password">
+          <select id="authRole">
+            <option value="">Select role</option>
+            <option value="Passenger">Passenger</option>
+            <option value="Driver">Driver</option>
+            <option value="Admin">Admin</option>
+          </select>
+          <input id="authDriverName" type="text" placeholder="Driver name (only for Driver role)">
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:18px;">
+          <button class="driver" onclick="registerUser()">Register</button>
+          <button class="ride" onclick="loginUser()">Login</button>
+        </div>
+
+        <div id="authMessage" class="auth-message">Success</div>
+        <div id="authError" class="error-box">Error</div>
+
+        <div class="helper-text">
+          Register once, then log in with the same email and password.<br>
+          Driver users must enter a driver name during registration.
+        </div>
+      </div>
+
+      <div id="ride" class="section active">
+        <div class="section-head">
+          <div>
+            <h2>Ride App</h2>
+            <p>Create a trip request with transport type, time, and support notes. Passengers can also track all trips in one place.</p>
+          </div>
+          <div class="section-badge">Passenger View</div>
+        </div>
+
+        <div class="ride-layout">
+          <div class="form-card">
+            <h3>Book a Ride</h3>
+            <p>Enter trip details below to create a new booking.</p>
+
+            <div class="form-grid">
+              <input id="passengerName" type="text" placeholder="Passenger name">
+              <select id="tripType">
+                <option value="Normal">Normal</option>
+                <option value="NDIS">NDIS</option>
+              </select>
+              <input id="pickup" type="text" placeholder="Pickup location">
+              <input id="destination" type="text" placeholder="Destination">
+              <input id="tripDate" type="date">
+              <input id="tripTime" type="time">
+              <textarea id="tripNotes" class="full-width" placeholder="Notes (wheelchair, assistance, escort, special instructions)"></textarea>
+            </div>
+
+            <button class="request-btn ride-submit" onclick="requestRide()">Request Ride</button>
+            <div id="successBox" class="success-box">Ride requested successfully ✅</div>
+            <div class="muted-note">Tip: Add support details so dispatch and drivers can prepare better.</div>
+          </div>
+
+          <div class="list-card">
+            <h3>My Trips</h3>
+            <p>See current and past trip activity with driver and status updates.</p>
+            <div id="riderTrips">
+              <p class="empty-text">No trips yet.</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="footer-note">UVEL startup-style MVP UI — cleaner layout, stronger hierarchy, and more realistic SaaS presentation.</div>
+      <div id="driver" class="section">
+        <div class="section-head">
+          <div>
+            <h2>Driver App</h2>
+            <p>Drivers can view assigned work, start trips, and complete trips directly from their dashboard.</p>
+            <div id="driverSelectedText" class="driver-selected">No driver selected.</div>
+          </div>
+          <div class="section-badge">Driver View</div>
+        </div>
+
+        <div class="driver-layout">
+          <div class="mini-panel">
+            <h3>Driver Workflow</h3>
+            <p>Keep operations simple: receive assigned trip, start trip, then complete when finished.</p>
+            <div class="hero-steps" style="margin-top:14px; grid-template-columns:repeat(3,1fr);">
+              <div class="step-chip"><strong>Assigned</strong>Ready to begin</div>
+              <div class="step-chip"><strong>In Progress</strong>Passenger onboard</div>
+              <div class="step-chip"><strong>Completed</strong>Trip closed</div>
+            </div>
+          </div>
+
+          <div class="list-card">
+            <h3>My Trips</h3>
+            <p>Only trips assigned to this driver are shown below.</p>
+            <div id="driverTrips">
+              <p class="empty-text">No assigned trips yet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="admin" class="section">
+        <div class="section-head">
+          <div>
+            <h2>Admin Panel</h2>
+            <p>Manage active bookings, assign drivers, monitor status, and export transport records.</p>
+          </div>
+          <div class="section-badge">Operations View</div>
+        </div>
+
+        <div class="admin-stats">
+          <div class="stat-card"><h4>Total Bookings</h4><p id="totalBookings">0</p></div>
+          <div class="stat-card"><h4>Pending</h4><p id="pendingBookings">0</p></div>
+          <div class="stat-card"><h4>Assigned</h4><p id="assignedBookings">0</p></div>
+          <div class="stat-card"><h4>In Progress</h4><p id="progressBookings">0</p></div>
+          <div class="stat-card"><h4>Completed</h4><p id="completedBookings">0</p></div>
+        </div>
+
+        <div class="today-stats">
+          <div class="stat-card"><h4>Today's Trips</h4><p id="todayTrips">0</p></div>
+          <div class="stat-card"><h4>Today's Pending</h4><p id="todayPending">0</p></div>
+          <div class="stat-card"><h4>Today's Assigned</h4><p id="todayAssigned">0</p></div>
+          <div class="stat-card"><h4>Today's Completed</h4><p id="todayCompleted">0</p></div>
+        </div>
+
+        <div class="admin-grid">
+          <div class="panel-box">
+            <h3>Active Booking Requests</h3>
+
+            <div class="admin-filters">
+              <input id="searchInput" type="text" placeholder="Search passenger, pickup, destination, booking ID">
+              <select id="statusFilter" onchange="renderAdminBookings()">
+                <option value="All">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Assigned">Assigned</option>
+                <option value="In Progress">In Progress</option>
+              </select>
+              <select id="driverFilter" onchange="renderAdminBookings()">
+                <option value="All">All Drivers</option>
+                <option value="Unassigned">Unassigned</option>
+              </select>
+              <input id="dateFilter" type="date" onchange="renderAdminBookings()">
+              <button class="filter-btn" onclick="clearAdminFilters()">Clear</button>
+            </div>
+
+            <div class="export-bar">
+              <button class="export-btn" onclick="exportActiveBookingsCSV()">Export Active CSV</button>
+              <button class="export-btn" onclick="exportCompletedTripsCSV()">Export Completed CSV</button>
+              <button class="pdf-btn" onclick="printAdminReport()">Export PDF</button>
+            </div>
+
+            <div id="bookingList">
+              <p class="empty-text">No bookings yet.</p>
+            </div>
+          </div>
+
+          <div class="panel-box">
+            <h3>Completed Trip History</h3>
+            <div id="tripHistoryList">
+              <p class="empty-text">No completed trips yet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">UVEL upgraded again — now with startup-style sidebar navigation and dashboard analytics visuals.</div>
+    </main>
   </div>
 
   <script type="module">
@@ -936,6 +1050,17 @@
 
     function todayString() {
       return new Date().toISOString().split("T")[0];
+    }
+
+    function setActiveNav(section) {
+      const ids = ["rideNavBtn", "driverNavBtn", "adminNavBtn"];
+      ids.forEach(id => document.getElementById(id)?.classList.remove("active-link"));
+      const match = {
+        ride: "rideNavBtn",
+        driver: "driverNavBtn",
+        admin: "adminNavBtn"
+      }[section];
+      if (match) document.getElementById(match)?.classList.add("active-link");
     }
 
     function updateAdminStats() {
@@ -1204,9 +1329,7 @@
             <p><strong>Date:</strong> ${trip.tripDate || "Not provided"}</p>
             <p><strong>Time:</strong> ${trip.tripTime || "Not provided"}</p>
             <p><strong>Notes:</strong> ${trip.notes || "None"}</p>
-            <div class="status-row">
-              <span class="status ${getStatusClass(trip.status)}">${trip.status}</span>
-            </div>
+            <div class="status-row"><span class="status ${getStatusClass(trip.status)}">${trip.status}</span></div>
             <div class="action-row">${actionButton}</div>
           </div>
         `;
@@ -1279,14 +1402,14 @@
         return;
       }
 
-      sessionBar.style.display = "flex";
-      navButtons.style.display = "inline-flex";
+      sessionBar.style.display = "block";
+      navButtons.style.display = "grid";
       loginSection.style.display = "none";
       roleBadge.textContent = "Role: " + currentRole + (currentRole === "Driver" && currentDriver ? " (" + currentDriver + ")" : "");
 
-      rideNavBtn.style.display = currentRole === "Passenger" ? "inline-block" : "none";
-      driverNavBtn.style.display = currentRole === "Driver" ? "inline-block" : "none";
-      adminNavBtn.style.display = currentRole === "Admin" ? "inline-block" : "none";
+      rideNavBtn.style.display = currentRole === "Passenger" ? "flex" : "none";
+      driverNavBtn.style.display = currentRole === "Driver" ? "flex" : "none";
+      adminNavBtn.style.display = currentRole === "Admin" ? "flex" : "none";
 
       if (currentRole === "Passenger") show("ride");
       if (currentRole === "Driver") show("driver");
@@ -1361,6 +1484,7 @@
 
       document.getElementById(section).style.display = "block";
       document.getElementById(section).classList.add("active");
+      setActiveNav(section);
 
       if (section === "driver") {
         updateDriverHeader();
