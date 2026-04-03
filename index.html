@@ -1789,5 +1789,89 @@
       });
     };
   </script>
+  <!-- Edit Booking Modal -->
+  <div id="editModal" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:#fff; border-radius:12px; padding:20px; width:420px; max-width:95%;">
+      <h3 style="margin-bottom:12px;">Edit Booking</h3>
+      <input type="hidden" id="editId" />
+      <label>Pickup</label>
+      <input id="editPickup" class="input" />
+      <label>Destination</label>
+      <input id="editDestination" class="input" />
+      <label>Date</label>
+      <input id="editDate" type="date" class="input" />
+      <label>Time</label>
+      <input id="editTime" type="time" class="input" />
+      <label>Trip Type</label>
+      <select id="editType" class="input"><option>Normal</option><option>NDIS</option></select>
+      <label>Notes</label>
+      <input id="editNotes" class="input" />
+      <label>Driver</label>
+      <select id="editDriver" class="input"></select>
+      <div style="display:flex; gap:10px; margin-top:15px;">
+        <button class="btn" onclick="saveEdit()">Save</button>
+        <button class="btn" onclick="closeEdit()" style="background:#ccc;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  function openEdit(trip) {
+    document.getElementById('editModal').style.display = 'flex';
+    document.getElementById('editId').value = trip.id;
+    document.getElementById('editPickup').value = trip.pickup || '';
+    document.getElementById('editDestination').value = trip.destination || '';
+    document.getElementById('editDate').value = trip.tripDate || '';
+    document.getElementById('editTime').value = trip.tripTime || '';
+    document.getElementById('editType').value = trip.tripType || 'Normal';
+    document.getElementById('editNotes').value = trip.notes || '';
+
+    const driverSelect = document.getElementById('editDriver');
+    driverSelect.innerHTML = '<option value="">Unassigned</option>';
+    driverUsers.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = d;
+      if (trip.driver === d) opt.selected = true;
+      driverSelect.appendChild(opt);
+    });
+  }
+
+  function closeEdit() {
+    document.getElementById('editModal').style.display = 'none';
+  }
+
+  async function saveEdit() {
+    const id = document.getElementById('editId').value;
+    await updateDoc(doc(db, 'bookings', id), {
+      pickup: document.getElementById('editPickup').value,
+      destination: document.getElementById('editDestination').value,
+      tripDate: document.getElementById('editDate').value,
+      tripTime: document.getElementById('editTime').value,
+      tripType: document.getElementById('editType').value,
+      notes: document.getElementById('editNotes').value,
+      driver: document.getElementById('editDriver').value || ''
+    });
+    closeEdit();
+  }
+
+  // inject Edit button into admin bookings render
+  const originalRenderAdminBookings = renderAdminBookings;
+  renderAdminBookings = function() {
+    originalRenderAdminBookings();
+    const list = document.getElementById('bookingList');
+    if (!list) return;
+    Array.from(list.querySelectorAll('.booking-card')).forEach((card, i) => {
+      const trip = liveBookings[i];
+      if (!trip) return;
+      const btn = document.createElement('button');
+      btn.textContent = 'Edit';
+      btn.className = 'btn';
+      btn.style.marginTop = '8px';
+      btn.onclick = () => openEdit(trip);
+      card.appendChild(btn);
+    });
+  };
+</script>
 </body>
 </html>
