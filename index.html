@@ -1214,6 +1214,7 @@
         .filter(u => u.role === "Driver" && u.driverName)
         .map(u => u.driverName)
         .sort((a, b) => a.localeCompare(b));
+      window.driverUsersForEdit = [...driverUsers];
       populateDriverFilter();
       renderAdminDrivers();
       renderAdminPassengers();
@@ -1283,6 +1284,8 @@
           completeControl = `<button class="complete-btn" onclick="completeTrip('${booking.id}')">Mark Completed</button>`;
         }
 
+        const safeBooking = encodeURIComponent(JSON.stringify(booking).replace(/'/g, "&#39;"));
+
         html += `
           <div class="booking-card">
             <p><strong>Booking ID:</strong> ${booking.id}</p>
@@ -1299,6 +1302,7 @@
               ${assignControl}
             </div>
             <div class="action-row">
+              <button class="driver" style="padding:9px 12px; border-radius:10px;" onclick='openEdit(JSON.parse(decodeURIComponent("${safeBooking}")))'>Edit</button>
               ${startControl}
               ${completeControl}
               <button class="delete-btn" onclick="deleteBooking('${booking.id}')">Delete</button>
@@ -1738,6 +1742,36 @@
       });
     };
 
+    window.saveEditBooking = async function() {
+      if (currentRole !== "Admin") return;
+
+      const id = document.getElementById('editId').value;
+      const pickup = document.getElementById('editPickup').value.trim();
+      const destination = document.getElementById('editDestination').value.trim();
+      const tripDate = document.getElementById('editDate').value;
+      const tripTime = document.getElementById('editTime').value;
+      const tripType = document.getElementById('editType').value;
+      const notes = document.getElementById('editNotes').value.trim();
+      const driver = document.getElementById('editDriver').value || 'Unassigned';
+
+      if (!id || !pickup || !destination || !tripDate || !tripTime) {
+        throw new Error('Please fill pickup, destination, date, and time.');
+      }
+
+      const updatedStatus = driver === 'Unassigned' ? 'Pending' : 'Assigned';
+
+      await updateDoc(doc(db, 'bookings', id), {
+        pickup,
+        destination,
+        tripDate,
+        tripTime,
+        tripType,
+        notes,
+        driver,
+        status: updatedStatus
+      });
+    };
+
     window.deleteBooking = async function(bookingId) {
       if (currentRole !== "Admin") return;
       const confirmDelete = confirm("Are you sure you want to delete this booking?");
@@ -1816,9 +1850,12 @@
   </div>
 
 <script>
-  function openEdit(trip) {
-    document.getElementById('editModal').style.display = 'flex';
-    document.getElementById('editId').value = trip.id;
+  window.openEdit = function(trip) {
+    if (!trip) return;
+    const modal = document.getElementById('editModal');
+    if (!modal) return;
+
+    document.getElementById('editId').value = trip.id || '';
     document.getElementById('editPickup').value = trip.pickup || '';
     document.getElementById('editDestination').value = trip.destination || '';
     document.getElementById('editDate').value = trip.tripDate || '';
@@ -1828,50 +1865,48 @@
 
     const driverSelect = document.getElementById('editDriver');
     driverSelect.innerHTML = '<option value="">Unassigned</option>';
-    driverUsers.forEach(d => {
+
+    const drivers = window.driverUsersForEdit || [];
+    drivers.forEach(d => {
       const opt = document.createElement('option');
       opt.value = d;
       opt.textContent = d;
       if (trip.driver === d) opt.selected = true;
       driverSelect.appendChild(opt);
     });
-  }
 
-  function closeEdit() {
-    document.getElementById('editModal').style.display = 'none';
-  }
+    if (!trip.driver || trip.driver === 'Unassigned') {
+      driverSelect.value = '';
+    }
 
-  async function saveEdit() {
-    const id = document.getElementById('editId').value;
-    await updateDoc(doc(db, 'bookings', id), {
-      pickup: document.getElementById('editPickup').value,
-      destination: document.getElementById('editDestination').value,
-      tripDate: document.getElementById('editDate').value,
-      tripTime: document.getElementById('editTime').value,
-      tripType: document.getElementById('editType').value,
-      notes: document.getElementById('editNotes').value,
-      driver: document.getElementById('editDriver').value || ''
-    });
-    closeEdit();
-  }
-
-  // inject Edit button into admin bookings render
-  const originalRenderAdminBookings = renderAdminBookings;
-  renderAdminBookings = function() {
-    originalRenderAdminBookings();
-    const list = document.getElementById('bookingList');
-    if (!list) return;
-    Array.from(list.querySelectorAll('.booking-card')).forEach((card, i) => {
-      const trip = liveBookings[i];
-      if (!trip) return;
-      const btn = document.createElement('button');
-      btn.textContent = 'Edit';
-      btn.className = 'btn';
-      btn.style.marginTop = '8px';
-      btn.onclick = () => openEdit(trip);
-      card.appendChild(btn);
-    });
+    modal.style.display = 'flex';
   };
+
+  window.closeEdit = function() {
+    const modal = document.getElementById('editModal');
+    if (modal) modal.style.display = 'none';
+  };
+
+  window.saveEdit = async function() {
+    try {
+      if (!window.saveEditBooking) {
+        alert('Edit function not ready. Please refresh the page.');
+        return;
+      }
+      await window.saveEditBooking();
+      window.closeEdit();
+    } catch (error) {
+      alert('Failed to save booking: ' + error.message);
+      console.error(error);
+    }
+  };
+
+  window.addEventListener('click', function(event) {
+    const modal = document.getElementById('editModal');
+    if (event.target === modal) {
+      window.closeEdit();
+    }
+  });
 </script>
 </body>
 </html>
