@@ -1147,6 +1147,11 @@
 
           <div class="list-card">
             <h3>My Trips</h3>
+            <div class="map-panel" style="margin-top:14px;">
+              <h3 style="font-size:18px;">Passenger Live Map</h3>
+              <p>Track pickup, destination, and driver location for the current trip.</p>
+              <div id="passengerMap" class="real-map"></div>
+            </div>
             <p>See current and past trip activity with driver and status updates.</p>
             <div id="riderTrips">
               <p class="empty-text">No trips yet.</p>
@@ -1179,6 +1184,11 @@
           <div class="list-card">
             <h3>My Trips</h3>
             <p>Only trips assigned to this driver are shown below.</p>
+            <div class="map-panel" style="margin-top:14px;">
+              <h3 style="font-size:18px;">Driver Route Map</h3>
+              <p>View the live route from pickup to destination.</p>
+              <div id="driverMap" class="real-map"></div>
+            </div>
             <div id="driverTrips">
               <p class="empty-text">No assigned trips yet.</p>
             </div>
@@ -1947,9 +1957,11 @@
       if (section === "driver") {
         updateDriverHeader();
         renderDriverTrips();
+        setTimeout(() => initDriverMap(), 120);
       }
       if (section === "ride") {
         renderRiderTrips();
+        setTimeout(() => initPassengerMap(), 120);
       }
       if (section === "admin") {
         updateAdminStats();
@@ -2308,6 +2320,22 @@
   let mapAnimationIndex = 0;
   let mapAnimationTimer;
 
+  let passengerMap;
+  let passengerPickupMarker;
+  let passengerDropoffMarker;
+  let passengerDriverMarker;
+  let passengerRouteLine;
+  let passengerMapTimer;
+  let passengerMapIndex = 0;
+
+  let driverMap;
+  let driverPickupMarker;
+  let driverDropoffMarker;
+  let driverDriverMarker;
+  let driverRouteLine;
+  let driverMapTimer;
+  let driverMapIndex = 0;
+
   function makeDivIcon(className) {
     return L.divIcon({
       className: '',
@@ -2315,6 +2343,19 @@
       iconSize: [18, 18],
       iconAnchor: [9, 9]
     });
+  }
+
+  function createDemoPath() {
+    return [
+      [-33.9300, 151.2450],
+      [-33.9240, 151.2390],
+      [-33.9200, 151.2360],
+      [-33.9173, 151.2313],
+      [-33.9070, 151.2240],
+      [-33.8950, 151.2170],
+      [-33.8820, 151.2130],
+      [-33.8688, 151.2093]
+    ];
   }
 
   function initLiveMap() {
@@ -2334,16 +2375,7 @@
 
     const pickup = [-33.9173, 151.2313];
     const dropoff = [-33.8688, 151.2093];
-    const driverPath = [
-      [-33.9300, 151.2450],
-      [-33.9240, 151.2390],
-      [-33.9200, 151.2360],
-      [-33.9173, 151.2313],
-      [-33.9070, 151.2240],
-      [-33.8950, 151.2170],
-      [-33.8820, 151.2130],
-      [-33.8688, 151.2093]
-    ];
+    const driverPath = createDemoPath();
 
     pickupMarker = L.marker(pickup, { icon: makeDivIcon('marker-pickup') }).addTo(uvelMap).bindPopup('Pickup');
     dropoffMarker = L.marker(dropoff, { icon: makeDivIcon('marker-dropoff') }).addTo(uvelMap).bindPopup('Destination');
@@ -2361,8 +2393,78 @@
     setTimeout(() => uvelMap.invalidateSize(), 250);
   }
 
+  function initPassengerMap() {
+    const mapEl = document.getElementById('passengerMap');
+    if (!mapEl || typeof L === 'undefined') return;
+    if (passengerMap) {
+      setTimeout(() => passengerMap.invalidateSize(), 200);
+      return;
+    }
+
+    passengerMap = L.map('passengerMap').setView([-33.8688, 151.2093], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(passengerMap);
+
+    const pickup = [-33.9173, 151.2313];
+    const dropoff = [-33.8688, 151.2093];
+    const driverPath = createDemoPath();
+
+    passengerPickupMarker = L.marker(pickup, { icon: makeDivIcon('marker-pickup') }).addTo(passengerMap).bindPopup('Pickup');
+    passengerDropoffMarker = L.marker(dropoff, { icon: makeDivIcon('marker-dropoff') }).addTo(passengerMap).bindPopup('Destination');
+    passengerDriverMarker = L.marker(driverPath[0], { icon: makeDivIcon('marker-driver') }).addTo(passengerMap).bindPopup('Driver');
+
+    passengerRouteLine = L.polyline(driverPath, { weight: 4, opacity: 0.9 }).addTo(passengerMap);
+    passengerMap.fitBounds(passengerRouteLine.getBounds(), { padding: [30, 30] });
+
+    if (passengerMapTimer) clearInterval(passengerMapTimer);
+    passengerMapTimer = setInterval(() => {
+      passengerMapIndex = (passengerMapIndex + 1) % driverPath.length;
+      passengerDriverMarker.setLatLng(driverPath[passengerMapIndex]);
+    }, 1800);
+
+    setTimeout(() => passengerMap.invalidateSize(), 250);
+  }
+
+  function initDriverMap() {
+    const mapEl = document.getElementById('driverMap');
+    if (!mapEl || typeof L === 'undefined') return;
+    if (driverMap) {
+      setTimeout(() => driverMap.invalidateSize(), 200);
+      return;
+    }
+
+    driverMap = L.map('driverMap').setView([-33.8688, 151.2093], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(driverMap);
+
+    const pickup = [-33.9173, 151.2313];
+    const dropoff = [-33.8688, 151.2093];
+    const driverPath = createDemoPath();
+
+    driverPickupMarker = L.marker(pickup, { icon: makeDivIcon('marker-pickup') }).addTo(driverMap).bindPopup('Pickup');
+    driverDropoffMarker = L.marker(dropoff, { icon: makeDivIcon('marker-dropoff') }).addTo(driverMap).bindPopup('Destination');
+    driverDriverMarker = L.marker(driverPath[0], { icon: makeDivIcon('marker-driver') }).addTo(driverMap).bindPopup('Driver');
+
+    driverRouteLine = L.polyline(driverPath, { weight: 4, opacity: 0.9 }).addTo(driverMap);
+    driverMap.fitBounds(driverRouteLine.getBounds(), { padding: [30, 30] });
+
+    if (driverMapTimer) clearInterval(driverMapTimer);
+    driverMapTimer = setInterval(() => {
+      driverMapIndex = (driverMapIndex + 1) % driverPath.length;
+      driverDriverMarker.setLatLng(driverPath[driverMapIndex]);
+    }, 1800);
+
+    setTimeout(() => driverMap.invalidateSize(), 250);
+  }
+
   window.addEventListener('resize', () => {
     if (uvelMap) uvelMap.invalidateSize();
+    if (passengerMap) passengerMap.invalidateSize();
+    if (driverMap) driverMap.invalidateSize();
   });
 </script>
 </body>
