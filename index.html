@@ -974,6 +974,32 @@
             </div>
           </div>
         </div>
+
+        <div class="admin-grid" style="margin-top:20px;">
+          <div class="panel-box">
+            <h3>Driver Management</h3>
+            <p style="margin-bottom:12px;">See all registered drivers and their current trip load.</p>
+            <div id="adminDriversList">
+              <p class="empty-text">No drivers found.</p>
+            </div>
+          </div>
+
+          <div class="panel-box">
+            <h3>Passenger Management</h3>
+            <p style="margin-bottom:12px;">See all registered passengers and how many bookings they created.</p>
+            <div id="adminPassengersList">
+              <p class="empty-text">No passengers found.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-box" style="margin-top:20px;">
+          <h3>Recent User Activity</h3>
+          <p style="margin-bottom:12px;">Quick view of recent passenger bookings and assigned drivers.</p>
+          <div id="adminRecentActivityList">
+            <p class="empty-text">No activity yet.</p>
+          </div>
+        </div>
       </div>
 
       <div class="footer-note">UVEL upgraded again — now with startup-style sidebar navigation and dashboard analytics visuals.</div>
@@ -1019,6 +1045,7 @@
 
     let liveBookings = [];
     let driverUsers = [];
+    let allUsers = [];
     let currentRole = "";
     let currentDriver = "";
     let currentUser = null;
@@ -1182,12 +1209,14 @@
 
     async function loadDrivers() {
       const snap = await getDocs(collection(db, "users"));
-      driverUsers = snap.docs
-        .map(d => d.data())
+      allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      driverUsers = allUsers
         .filter(u => u.role === "Driver" && u.driverName)
         .map(u => u.driverName)
         .sort((a, b) => a.localeCompare(b));
       populateDriverFilter();
+      renderAdminDrivers();
+      renderAdminPassengers();
     }
 
     window.exportActiveBookingsCSV = function() {
@@ -1388,6 +1417,100 @@
       riderTrips.innerHTML = html;
     }
 
+    function renderAdminDrivers() {
+      const list = document.getElementById("adminDriversList");
+      if (!list) return;
+
+      const drivers = allUsers.filter(user => user.role === "Driver");
+      if (drivers.length === 0) {
+        list.innerHTML = '<p class="empty-text">No drivers found.</p>';
+        return;
+      }
+
+      let html = "";
+      drivers.forEach(driver => {
+        const name = driver.driverName || driver.email || "Driver";
+        const assignedTrips = liveBookings.filter(b => b.driver === name && b.status === "Assigned").length;
+        const progressTrips = liveBookings.filter(b => b.driver === name && b.status === "In Progress").length;
+        const completedTrips = liveBookings.filter(b => b.driver === name && b.status === "Completed").length;
+        const statusLabel = progressTrips > 0 ? "On Trip" : assignedTrips > 0 ? "Assigned" : "Available";
+        const statusClass = progressTrips > 0 ? "progress" : assignedTrips > 0 ? "assigned" : "completed";
+
+        html += `
+          <div class="driver-card">
+            <p><strong>Driver:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${driver.email || "Not provided"}</p>
+            <p><strong>Assigned Trips:</strong> ${assignedTrips}</p>
+            <p><strong>In Progress:</strong> ${progressTrips}</p>
+            <p><strong>Completed Trips:</strong> ${completedTrips}</p>
+            <div class="status-row">
+              <span class="status ${statusClass}">${statusLabel}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      list.innerHTML = html;
+    }
+
+    function renderAdminPassengers() {
+      const list = document.getElementById("adminPassengersList");
+      if (!list) return;
+
+      const passengers = allUsers.filter(user => user.role === "Passenger");
+      if (passengers.length === 0) {
+        list.innerHTML = '<p class="empty-text">No passengers found.</p>';
+        return;
+      }
+
+      let html = "";
+      passengers.forEach(passenger => {
+        const bookingCount = liveBookings.filter(b => b.createdBy === passenger.id).length;
+        const pendingCount = liveBookings.filter(b => b.createdBy === passenger.id && b.status !== "Completed").length;
+
+        html += `
+          <div class="rider-card">
+            <p><strong>Passenger Email:</strong> ${passenger.email || "Not provided"}</p>
+            <p><strong>Total Bookings:</strong> ${bookingCount}</p>
+            <p><strong>Active Bookings:</strong> ${pendingCount}</p>
+            <div class="status-row">
+              <span class="status ${bookingCount > 0 ? 'assigned' : 'pending'}">${bookingCount > 0 ? 'Active User' : 'No Trips Yet'}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      list.innerHTML = html;
+    }
+
+    function renderAdminRecentActivity() {
+      const list = document.getElementById("adminRecentActivityList");
+      if (!list) return;
+
+      const recent = liveBookings.slice(0, 8);
+      if (recent.length === 0) {
+        list.innerHTML = '<p class="empty-text">No activity yet.</p>';
+        return;
+      }
+
+      let html = "";
+      recent.forEach(item => {
+        html += `
+          <div class="booking-card">
+            <p><strong>Passenger:</strong> ${item.passengerName || "Not provided"}</p>
+            <p><strong>Trip:</strong> ${item.pickup || "-"} → ${item.destination || "-"}</p>
+            <p><strong>Date:</strong> ${item.tripDate || "Not provided"} ${item.tripTime ? 'at ' + item.tripTime : ''}</p>
+            <p><strong>Driver:</strong> ${item.driver || "Unassigned"}</p>
+            <div class="status-row">
+              <span class="status ${getStatusClass(item.status)}">${item.status}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      list.innerHTML = html;
+    }
+
     function startRealtimeListener() {
       const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"));
       onSnapshot(q, (snapshot) => {
@@ -1396,6 +1519,9 @@
         renderTripHistory();
         renderDriverTrips();
         renderRiderTrips();
+        renderAdminDrivers();
+        renderAdminPassengers();
+        renderAdminRecentActivity();
       }, (error) => {
         console.error("Realtime listener error:", error);
       });
@@ -1522,6 +1648,9 @@
         updateAdminStats();
         renderTripHistory();
         renderAdminBookings();
+        renderAdminDrivers();
+        renderAdminPassengers();
+        renderAdminRecentActivity();
       }
     };
 
