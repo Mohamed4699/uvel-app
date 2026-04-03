@@ -364,30 +364,14 @@
       line-height: 1.6;
     }
 
-    .real-map {
+    .real-map-frame {
       margin-top: 14px;
+      width: 100%;
       height: 320px;
-      border-radius: 18px;
-      overflow: hidden;
       border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
       background: #0b1326;
     }
-
-    .leaflet-container {
-      background: #0b1326;
-    }
-
-    .custom-map-marker {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 2px solid #ffffff;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-    }
-
-    .marker-pickup { background: #22c55e; }
-    .marker-dropoff { background: #ef4444; }
-    .marker-driver { background: #3b82f6; }
 
     .map-legend {
       display: flex;
@@ -981,8 +965,7 @@
       .hero-copy h2 { font-size: 24px; }
     }
   </style>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-</head>
+  </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
@@ -1067,7 +1050,7 @@
             <div class="map-panel">
               <h3>Live Trip Map</h3>
               <p>Interactive map using Leaflet with live markers for pickup, destination, and driver location.</p>
-              <div id="liveMap" class="real-map"></div>
+              <iframe id="liveMapFrame" class="real-map-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
               <div class="map-legend">
                 <span><span class="dot" style="background:#22c55e"></span>Pickup</span>
                 <span><span class="dot" style="background:#ef4444"></span>Destination</span>
@@ -1150,7 +1133,7 @@
             <div class="map-panel" style="margin-top:14px;">
               <h3 style="font-size:18px;">Passenger Live Map</h3>
               <p>Track pickup, destination, and driver location for the current trip.</p>
-              <div id="passengerMap" class="real-map"></div>
+              <iframe id="passengerMapFrame" class="real-map-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
             <p>See current and past trip activity with driver and status updates.</p>
             <div id="riderTrips">
@@ -1187,7 +1170,7 @@
             <div class="map-panel" style="margin-top:14px;">
               <h3 style="font-size:18px;">Driver Route Map</h3>
               <p>View the live route from pickup to destination.</p>
-              <div id="driverMap" class="real-map"></div>
+              <iframe id="driverMapFrame" class="real-map-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
             <div id="driverTrips">
               <p class="empty-text">No assigned trips yet.</p>
@@ -1337,6 +1320,7 @@
     let driverUsers = [];
     let allUsers = [];
     let currentRole = "";
+    window.selectedAdminBookingIdForMaps = "";
     let selectedAdminBookingId = "";
     let currentDriver = "";
     let currentUser = null;
@@ -1443,6 +1427,8 @@
       const allowedValues = ["All", "Unassigned", ...driverUsers];
       driverFilter.value = allowedValues.includes(currentValue) ? currentValue : "All";
     }
+
+    window.getFilteredActiveBookingsForMaps = function() { return getFilteredActiveBookings(); };
 
     function getFilteredActiveBookings() {
       const searchValue = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
@@ -1842,6 +1828,7 @@
       const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"));
       onSnapshot(q, (snapshot) => {
         liveBookings = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+        window.liveBookingsForMaps = liveBookings;
         renderAdminBookings();
         renderTripHistory();
         renderDriverTrips();
@@ -1967,11 +1954,11 @@
       if (section === "driver") {
         updateDriverHeader();
         renderDriverTrips();
-        setTimeout(() => initDriverMap(), 120);
+        setTimeout(() => refreshAllMaps(), 120);
       }
       if (section === "ride") {
         renderRiderTrips();
-        setTimeout(() => initPassengerMap(), 120);
+        setTimeout(() => refreshAllMaps(), 120);
       }
       if (section === "admin") {
         updateAdminStats();
@@ -1980,7 +1967,7 @@
         renderAdminDrivers();
         renderAdminPassengers();
         renderAdminRecentActivity();
-        setTimeout(() => initLiveMap(), 120);
+        setTimeout(() => refreshAllMaps(), 120);
       }
     };
 
@@ -2166,10 +2153,13 @@
 
     onAuthStateChanged(auth, async (user) => {
       currentUser = user;
+      window.currentUserForMaps = user;
 
       if (!user) {
         currentRole = "";
         currentDriver = "";
+        window.currentRoleForMaps = "";
+        window.currentDriverForMaps = "";
         applyRoleUI();
         updateDriverHeader();
         return;
@@ -2188,6 +2178,8 @@
         const profile = userDoc.data();
         currentRole = profile.role || "";
         currentDriver = profile.driverName || "";
+        window.currentRoleForMaps = currentRole;
+        window.currentDriverForMaps = currentDriver;
 
         await loadDrivers();
         applyRoleUI();
@@ -2210,9 +2202,7 @@
       // Try to initialize visible maps after page load
       setTimeout(() => {
         try {
-          initLiveMap();
-          initPassengerMap();
-          initDriverMap();
+          refreshAllMaps();
         } catch (e) {
           console.error('Map init error:', e);
         }
@@ -2331,41 +2321,7 @@
     }
   });
 </script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-  let uvelMap;
-  let pickupMarker;
-  let dropoffMarker;
-  let driverMarker;
-  let routeLine;
-  let mapAnimationIndex = 0;
-  let mapAnimationTimer;
-
-  let passengerMap;
-  let passengerPickupMarker;
-  let passengerDropoffMarker;
-  let passengerDriverMarker;
-  let passengerRouteLine;
-  let passengerMapTimer;
-  let passengerMapIndex = 0;
-
-  let driverMap;
-  let driverPickupMarker;
-  let driverDropoffMarker;
-  let driverDriverMarker;
-  let driverRouteLine;
-  let driverMapTimer;
-  let driverMapIndex = 0;
-
-  function makeDivIcon(className) {
-    return L.divIcon({
-      className: '',
-      html: `<div class="custom-map-marker ${className}"></div>`,
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
-    });
-  }
-
   function hashStringToNumber(str) {
     let hash = 0;
     const text = String(str || 'uvel');
@@ -2379,7 +2335,7 @@
   function getTripMapData(trip) {
     const baseLat = -33.8688;
     const baseLng = 151.2093;
-    const seed = hashStringToNumber(trip?.id || trip?.pickup || trip?.destination || 'uvel');
+    const seed = hashStringToNumber((trip && (trip.id || trip.pickup || trip.destination)) || 'uvel');
     const offsetA = ((seed % 700) / 10000) + 0.01;
     const offsetB = (((Math.floor(seed / 7)) % 700) / 10000) + 0.01;
     const offsetC = (((Math.floor(seed / 13)) % 500) / 10000) + 0.006;
@@ -2387,183 +2343,65 @@
 
     const pickup = [baseLat + offsetA, baseLng + offsetC];
     const dropoff = [baseLat - offsetB, baseLng - offsetD];
-
-    const steps = 8;
-    const path = [];
-    for (let i = 0; i < steps; i++) {
-      const t = i / (steps - 1);
-      const curve = Math.sin(t * Math.PI) * 0.01;
-      path.push([
-        pickup[0] + (dropoff[0] - pickup[0]) * t + curve * 0.35,
-        pickup[1] + (dropoff[1] - pickup[1]) * t - curve * 0.2
-      ]);
-    }
-
-    return { pickup, dropoff, path };
+    return { pickup, dropoff };
   }
 
   function getPassengerSelectedTrip() {
-    if (!currentUser || currentRole !== 'Passenger') return null;
-    const myTrips = liveBookings.filter(trip => trip.createdBy === currentUser.uid);
+    if (!window.currentUserForMaps || window.currentRoleForMaps !== 'Passenger') return null;
+    const myTrips = (window.liveBookingsForMaps || []).filter(trip => trip.createdBy === window.currentUserForMaps.uid);
     return myTrips[0] || null;
   }
 
   function getDriverSelectedTrip() {
-    if (!currentDriver || currentRole !== 'Driver') return null;
-    const myTrips = liveBookings.filter(trip => trip.driver === currentDriver && (trip.status === 'Assigned' || trip.status === 'In Progress' || trip.status === 'Completed'));
+    if (!window.currentDriverForMaps || window.currentRoleForMaps !== 'Driver') return null;
+    const myTrips = (window.liveBookingsForMaps || []).filter(trip => trip.driver === window.currentDriverForMaps && (trip.status === 'Assigned' || trip.status === 'In Progress' || trip.status === 'Completed'));
     return myTrips[0] || null;
   }
 
   function getAdminSelectedTrip() {
-    const active = getFilteredActiveBookings();
+    const active = (window.getFilteredActiveBookingsForMaps ? window.getFilteredActiveBookingsForMaps() : []).filter(Boolean);
     if (!active.length) return null;
-    if (selectedAdminBookingId) {
-      const found = active.find(t => t.id === selectedAdminBookingId);
+    if (window.selectedAdminBookingIdForMaps) {
+      const found = active.find(t => t.id === window.selectedAdminBookingIdForMaps);
       if (found) return found;
     }
     return active[0] || null;
   }
 
-  function createDemoPath() {
-    return [
-      [-33.9300, 151.2450],
-      [-33.9240, 151.2390],
-      [-33.9200, 151.2360],
-      [-33.9173, 151.2313],
-      [-33.9070, 151.2240],
-      [-33.8950, 151.2170],
-      [-33.8820, 151.2130],
-      [-33.8688, 151.2093]
-    ];
+  function buildMapEmbedUrl(trip) {
+    if (!trip) return '';
+    const mapData = getTripMapData(trip);
+    const p1 = mapData.pickup;
+    const p2 = mapData.dropoff;
+    const minLat = Math.min(p1[0], p2[0]) - 0.02;
+    const maxLat = Math.max(p1[0], p2[0]) + 0.02;
+    const minLng = Math.min(p1[1], p2[1]) - 0.02;
+    const maxLng = Math.max(p1[1], p2[1]) + 0.02;
+    const marker1 = `${p1[0]},${p1[1]}`;
+    const marker2 = `${p2[0]},${p2[1]}`;
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${minLng}%2C${minLat}%2C${maxLng}%2C${maxLat}&layer=mapnik&marker=${marker1}&marker=${marker2}`;
   }
 
-  function clearMapTimer(role) {
-    if (role === 'admin' && mapAnimationTimer) clearInterval(mapAnimationTimer);
-    if (role === 'passenger' && passengerMapTimer) clearInterval(passengerMapTimer);
-    if (role === 'driver' && driverMapTimer) clearInterval(driverMapTimer);
-  }
-
-  function startMapAnimation(role, marker, path) {
-    clearMapTimer(role);
-    let index = 0;
-    const timer = setInterval(() => {
-      index = (index + 1) % path.length;
-      marker.setLatLng(path[index]);
-    }, 1800);
-
-    if (role === 'admin') mapAnimationTimer = timer;
-    if (role === 'passenger') passengerMapTimer = timer;
-    if (role === 'driver') driverMapTimer = timer;
-  }
-
-  function updateExistingMap(mapObj, pickupMk, dropoffMk, driverMk, route, tripMap, role) {
-    pickupMk.setLatLng(tripMap.pickup);
-    dropoffMk.setLatLng(tripMap.dropoff);
-    driverMk.setLatLng(tripMap.path[0]);
-    route.setLatLngs(tripMap.path);
-    mapObj.fitBounds(route.getBounds(), { padding: [30, 30] });
-    startMapAnimation(role, driverMk, tripMap.path);
-  }
-
-  function initLiveMap() {
-    const mapEl = document.getElementById('liveMap');
-    if (!mapEl || typeof L === 'undefined') return;
-    const selectedTrip = getAdminSelectedTrip();
-    if (!selectedTrip) return;
-    const tripMap = getTripMapData(selectedTrip);
-    if (uvelMap) {
-      updateExistingMap(uvelMap, pickupMarker, dropoffMarker, driverMarker, routeLine, tripMap, 'admin');
-      setTimeout(() => uvelMap.invalidateSize(), 200);
+  function setFrameSrc(frameId, trip) {
+    const frame = document.getElementById(frameId);
+    if (!frame) return;
+    if (!trip) {
+      frame.removeAttribute('src');
       return;
     }
-
-    uvelMap = L.map('liveMap').setView(tripMap.dropoff, 11);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap'
-    }).addTo(uvelMap);
-
-    const pickup = tripMap.pickup;
-    const dropoff = tripMap.dropoff;
-    const driverPath = tripMap.path;
-
-    pickupMarker = L.marker(pickup, { icon: makeDivIcon('marker-pickup') }).addTo(uvelMap).bindPopup('Pickup');
-    dropoffMarker = L.marker(dropoff, { icon: makeDivIcon('marker-dropoff') }).addTo(uvelMap).bindPopup('Destination');
-    driverMarker = L.marker(driverPath[0], { icon: makeDivIcon('marker-driver') }).addTo(uvelMap).bindPopup('Driver');
-    routeLine = L.polyline(driverPath, { weight: 4, opacity: 0.9 }).addTo(uvelMap);
-    uvelMap.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
-    startMapAnimation('admin', driverMarker, driverPath);
-    setTimeout(() => uvelMap.invalidateSize(), 250);
+    frame.src = buildMapEmbedUrl(trip);
   }
 
-  function initPassengerMap() {
-    const mapEl = document.getElementById('passengerMap');
-    if (!mapEl || typeof L === 'undefined') return;
-    const selectedTrip = getPassengerSelectedTrip();
-    if (!selectedTrip) return;
-    const tripMap = getTripMapData(selectedTrip);
-    if (passengerMap) {
-      updateExistingMap(passengerMap, passengerPickupMarker, passengerDropoffMarker, passengerDriverMarker, passengerRouteLine, tripMap, 'passenger');
-      setTimeout(() => passengerMap.invalidateSize(), 200);
-      return;
-    }
-
-    passengerMap = L.map('passengerMap').setView(tripMap.dropoff, 11);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap'
-    }).addTo(passengerMap);
-
-    const pickup = tripMap.pickup;
-    const dropoff = tripMap.dropoff;
-    const driverPath = tripMap.path;
-
-    passengerPickupMarker = L.marker(pickup, { icon: makeDivIcon('marker-pickup') }).addTo(passengerMap).bindPopup('Pickup');
-    passengerDropoffMarker = L.marker(dropoff, { icon: makeDivIcon('marker-dropoff') }).addTo(passengerMap).bindPopup('Destination');
-    passengerDriverMarker = L.marker(driverPath[0], { icon: makeDivIcon('marker-driver') }).addTo(passengerMap).bindPopup('Driver');
-    passengerRouteLine = L.polyline(driverPath, { weight: 4, opacity: 0.9 }).addTo(passengerMap);
-    passengerMap.fitBounds(passengerRouteLine.getBounds(), { padding: [30, 30] });
-    startMapAnimation('passenger', passengerDriverMarker, driverPath);
-    setTimeout(() => passengerMap.invalidateSize(), 250);
+  function refreshAllMaps() {
+    setFrameSrc('liveMapFrame', getAdminSelectedTrip());
+    setFrameSrc('passengerMapFrame', getPassengerSelectedTrip());
+    setFrameSrc('driverMapFrame', getDriverSelectedTrip());
   }
 
-  function initDriverMap() {
-    const mapEl = document.getElementById('driverMap');
-    if (!mapEl || typeof L === 'undefined') return;
-    const selectedTrip = getDriverSelectedTrip();
-    if (!selectedTrip) return;
-    const tripMap = getTripMapData(selectedTrip);
-    if (driverMap) {
-      updateExistingMap(driverMap, driverPickupMarker, driverDropoffMarker, driverDriverMarker, driverRouteLine, tripMap, 'driver');
-      setTimeout(() => driverMap.invalidateSize(), 200);
-      return;
-    }
-
-    driverMap = L.map('driverMap').setView(tripMap.dropoff, 11);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap'
-    }).addTo(driverMap);
-
-    const pickup = tripMap.pickup;
-    const dropoff = tripMap.dropoff;
-    const driverPath = tripMap.path;
-
-    driverPickupMarker = L.marker(pickup, { icon: makeDivIcon('marker-pickup') }).addTo(driverMap).bindPopup('Pickup');
-    driverDropoffMarker = L.marker(dropoff, { icon: makeDivIcon('marker-dropoff') }).addTo(driverMap).bindPopup('Destination');
-    driverDriverMarker = L.marker(driverPath[0], { icon: makeDivIcon('marker-driver') }).addTo(driverMap).bindPopup('Driver');
-    driverRouteLine = L.polyline(driverPath, { weight: 4, opacity: 0.9 }).addTo(driverMap);
-    driverMap.fitBounds(driverRouteLine.getBounds(), { padding: [30, 30] });
-    startMapAnimation('driver', driverDriverMarker, driverPath);
-    setTimeout(() => driverMap.invalidateSize(), 250);
-  }
-
-  window.addEventListener('resize', () => {
-    if (uvelMap) uvelMap.invalidateSize();
-    if (passengerMap) passengerMap.invalidateSize();
-    if (driverMap) driverMap.invalidateSize();
-  });
+  window.focusBookingOnMap = function(bookingId) {
+    window.selectedAdminBookingIdForMaps = bookingId;
+    refreshAllMaps();
+  };
 </script>
 </body>
 </html>
