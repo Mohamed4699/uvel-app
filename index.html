@@ -2206,6 +2206,17 @@
           renderAdminBookings();
         }
       });
+
+      // Try to initialize visible maps after page load
+      setTimeout(() => {
+        try {
+          initLiveMap();
+          initPassengerMap();
+          initDriverMap();
+        } catch (e) {
+          console.error('Map init error:', e);
+        }
+      }, 800);
     };
   </script>
   <!-- Edit Booking Modal -->
