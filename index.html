@@ -1119,6 +1119,12 @@
           <div class="panel-box">
             <h3>Active Booking Requests</h3>
 
+            <div class="side-card" style="margin-top:0; margin-bottom:14px; background:rgba(20,184,166,0.08); border-color:rgba(20,184,166,0.14);">
+              <h3 style="font-size:16px; margin-bottom:6px;">Smart Driver Assignment</h3>
+              <p style="margin-bottom:10px;">UVEL recommends the least busy driver based on current active trips.</p>
+              <div class="pill" id="recommendedDriverPill">Recommended: --</div>
+            </div>
+
             <div class="admin-filters">
               <input id="searchInput" type="text" placeholder="Search passenger, pickup, destination, booking ID">
               <select id="statusFilter" onchange="renderAdminBookings()">
@@ -1427,6 +1433,11 @@
 
     window.renderAdminBookings = function() {
       const bookingList = document.getElementById("bookingList");
+      const recommendedDriver = getRecommendedDriver();
+      const recommendedDriverPill = document.getElementById("recommendedDriverPill");
+      if (recommendedDriverPill) {
+        recommendedDriverPill.textContent = recommendedDriver ? `Recommended: ${recommendedDriver}` : "Recommended: --";
+      }
       const activeBookings = getFilteredActiveBookings();
       updateAdminStats();
 
@@ -1593,6 +1604,29 @@
       riderTrips.innerHTML = html;
     }
 
+    function getDriverLoad(driverName) {
+      const assignedTrips = liveBookings.filter(b => b.driver === driverName && b.status === "Assigned").length;
+      const progressTrips = liveBookings.filter(b => b.driver === driverName && b.status === "In Progress").length;
+      const completedTrips = liveBookings.filter(b => b.driver === driverName && b.status === "Completed").length;
+      return {
+        assignedTrips,
+        progressTrips,
+        completedTrips,
+        totalActive: assignedTrips + progressTrips
+      };
+    }
+
+    function getRecommendedDriver() {
+      if (!driverUsers.length) return "";
+      const ranked = [...driverUsers].map(name => ({ name, ...getDriverLoad(name) }));
+      ranked.sort((a, b) => {
+        if (a.totalActive !== b.totalActive) return a.totalActive - b.totalActive;
+        if (a.progressTrips !== b.progressTrips) return a.progressTrips - b.progressTrips;
+        return a.name.localeCompare(b.name);
+      });
+      return ranked[0]?.name || "";
+    }
+
     function renderAdminDrivers() {
       const list = document.getElementById("adminDriversList");
       if (!list) return;
@@ -1619,6 +1653,7 @@
             <p><strong>Assigned Trips:</strong> ${assignedTrips}</p>
             <p><strong>In Progress:</strong> ${progressTrips}</p>
             <p><strong>Completed Trips:</strong> ${completedTrips}</p>
+            <p><strong>Active Load:</strong> ${assignedTrips + progressTrips}</p>
             <div class="status-row">
               <span class="status ${statusClass}">${statusLabel}</span>
             </div>
@@ -1949,10 +1984,12 @@
         const list = document.getElementById(`driverList-${b.id}`);
         if (!list) return;
         list.innerHTML = '';
+        const recommended = getRecommendedDriver();
         driverUsers.forEach(d => {
           const item = document.createElement('div');
           item.className = 'driver-item';
-          item.textContent = d;
+          const load = getDriverLoad(d);
+          item.textContent = d + (d === recommended ? ' ★ Recommended' : '') + ` (${load.totalActive} active)`;
           item.onclick = () => {
             assignDriver(b.id, d);
             list.style.display = 'none';
@@ -1967,12 +2004,14 @@
       const val = input.value.toLowerCase();
       list.style.display = 'block';
       list.innerHTML = '';
+      const recommended = getRecommendedDriver();
       driverUsers
         .filter(d => d.toLowerCase().includes(val))
         .forEach(d => {
           const item = document.createElement('div');
           item.className = 'driver-item';
-          item.textContent = d;
+          const load = getDriverLoad(d);
+          item.textContent = d + (d === recommended ? ' ★ Recommended' : '') + ` (${load.totalActive} active)`;
           item.onclick = () => {
             assignDriver(bookingId, d);
             list.style.display = 'none';
