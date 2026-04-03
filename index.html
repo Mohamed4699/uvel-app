@@ -687,6 +687,116 @@
       padding: 26px 10px;
     }
 
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .modal-content {
+      width: min(520px, 96%);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      color: #0f172a;
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+      border: 1px solid rgba(15,23,42,0.08);
+    }
+
+    .modal-content h3 {
+      margin: 0 0 14px;
+      color: #0f172a;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .modal-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .modal-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .modal-field label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea {
+      width: 100%;
+      padding: 12px 13px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 14px;
+      box-shadow: none;
+    }
+
+    .modal-content input::placeholder,
+    .modal-content textarea::placeholder {
+      color: #64748b;
+    }
+
+    .modal-content input:focus,
+    .modal-content select:focus,
+    .modal-content textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+      outline: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .modal-save {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      border: none;
+      padding: 11px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .modal-cancel {
+      background: #e2e8f0;
+      color: #0f172a;
+      border: none;
+      padding: 11px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    @media (max-width: 640px) {
+      .modal-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 1180px) {
       .app-shell { grid-template-columns: 1fr; }
       .sidebar { position: static; }
@@ -1824,27 +1934,54 @@
     };
   </script>
   <!-- Edit Booking Modal -->
-  <div id="editModal" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
-    <div class="modal-content" style="background:#fff; border-radius:12px; padding:20px; width:420px; max-width:95%;">
-      <h3 style="margin-bottom:12px;">Edit Booking</h3>
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <h3>Edit Booking</h3>
       <input type="hidden" id="editId" />
-      <label>Pickup</label>
-      <input id="editPickup" class="input" />
-      <label>Destination</label>
-      <input id="editDestination" class="input" />
-      <label>Date</label>
-      <input id="editDate" type="date" class="input" />
-      <label>Time</label>
-      <input id="editTime" type="time" class="input" />
-      <label>Trip Type</label>
-      <select id="editType" class="input"><option>Normal</option><option>NDIS</option></select>
-      <label>Notes</label>
-      <input id="editNotes" class="input" />
-      <label>Driver</label>
-      <select id="editDriver" class="input"></select>
-      <div style="display:flex; gap:10px; margin-top:15px;">
-        <button class="btn" onclick="saveEdit()">Save</button>
-        <button class="btn" onclick="closeEdit()" style="background:#ccc;">Cancel</button>
+
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label for="editPickup">Pickup</label>
+          <input id="editPickup" placeholder="Enter pickup location" />
+        </div>
+
+        <div class="modal-field">
+          <label for="editDestination">Destination</label>
+          <input id="editDestination" placeholder="Enter destination" />
+        </div>
+
+        <div class="modal-field">
+          <label for="editDate">Date</label>
+          <input id="editDate" type="date" />
+        </div>
+
+        <div class="modal-field">
+          <label for="editTime">Time</label>
+          <input id="editTime" type="time" />
+        </div>
+
+        <div class="modal-field">
+          <label for="editType">Trip Type</label>
+          <select id="editType">
+            <option>Normal</option>
+            <option>NDIS</option>
+          </select>
+        </div>
+
+        <div class="modal-field">
+          <label for="editDriver">Driver</label>
+          <select id="editDriver"></select>
+        </div>
+
+        <div class="modal-field full">
+          <label for="editNotes">Notes</label>
+          <textarea id="editNotes" placeholder="Wheelchair, assistance, escort, or other trip notes"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeEdit()">Cancel</button>
+        <button class="modal-save" onclick="saveEdit()">Save Changes</button>
       </div>
     </div>
   </div>
