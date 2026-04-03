@@ -3,7 +3,6 @@
 <head>
   <title>UVEL Platform</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
     body {
       margin: 0;
@@ -71,36 +70,10 @@
     .driver { background: #3b82f6; color: white; }
     .admin { background: #f59e0b; color: white; }
     .secondary-btn { background: #ffffff; color: #111827; }
-
-    .delete-btn {
-      background: #ef4444;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 14px;
-      margin-top: 10px;
-      margin-right: 8px;
-    }
-
-    .complete-btn {
-      background: #16a34a;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 14px;
-      margin-top: 10px;
-      margin-right: 8px;
-    }
-
-    .assign-select {
-      width: 100%;
-      max-width: 220px;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 8px;
-      border: none;
-      font-size: 14px;
-    }
+    .delete-btn { background: #ef4444; color: white; padding: 8px 12px; border-radius: 8px; font-size: 14px; margin-top: 10px; margin-right: 8px; }
+    .complete-btn { background: #16a34a; color: white; padding: 8px 12px; border-radius: 8px; font-size: 14px; margin-top: 10px; margin-right: 8px; }
+    .start-btn { background: #8b5cf6; color: white; padding: 8px 12px; border-radius: 8px; font-size: 14px; margin-top: 10px; margin-right: 8px; }
+    .assign-select { width: 100%; max-width: 220px; padding: 10px; margin-top: 10px; border-radius: 8px; border: none; font-size: 14px; }
 
     .section {
       display: none;
@@ -109,7 +82,7 @@
       padding: 30px;
       border-radius: 18px;
       width: 90%;
-      max-width: 980px;
+      max-width: 1080px;
       text-align: center;
       box-shadow: 0px 5px 20px rgba(0,0,0,0.3);
     }
@@ -123,13 +96,23 @@
       margin-top: 20px;
     }
 
-    input, select {
+    input, select, textarea {
       width: 100%;
       padding: 12px;
       border-radius: 8px;
       border: none;
       font-size: 15px;
       box-sizing: border-box;
+      font-family: inherit;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
     }
 
     .ride-submit {
@@ -138,7 +121,8 @@
 
     .booking-card,
     .driver-card,
-    .history-card {
+    .history-card,
+    .rider-card {
       background: #0f2236;
       border-radius: 12px;
       padding: 15px;
@@ -148,7 +132,8 @@
 
     .booking-card p,
     .driver-card p,
-    .history-card p {
+    .history-card p,
+    .rider-card p {
       margin: 6px 0;
       color: #e5e7eb;
       font-size: 15px;
@@ -165,11 +150,13 @@
 
     .pending { background: #f59e0b; color: #111827; }
     .assigned { background: #3b82f6; color: white; }
+    .progress { background: #8b5cf6; color: white; }
     .completed { background: #16a34a; color: white; }
 
     #bookingList,
     #driverTrips,
-    #tripHistoryList {
+    #tripHistoryList,
+    #riderTrips {
       margin-top: 20px;
       text-align: left;
     }
@@ -234,7 +221,7 @@
 
     .admin-stats {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 15px;
       margin-top: 25px;
       margin-bottom: 20px;
@@ -242,7 +229,7 @@
 
     .today-stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 15px;
       margin-bottom: 25px;
     }
@@ -297,36 +284,10 @@
       align-items: center;
     }
 
-    .filter-btn {
-      background: #1e40af;
-      color: white;
-      padding: 12px 16px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      margin: 0;
-    }
-
-    .export-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-    }
-
-    .export-btn {
-      background: #0ea5e9;
-      color: white;
-      margin: 0;
-    }
-
-    .pdf-btn {
-      background: #7c3aed;
-      color: white;
-      margin: 0;
-    }
+    .filter-btn { background: #1e40af; color: white; padding: 12px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; margin: 0; }
+    .export-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; margin-bottom: 10px; }
+    .export-btn { background: #0ea5e9; color: white; margin: 0; }
+    .pdf-btn { background: #7c3aed; color: white; margin: 0; }
 
     .login-box {
       max-width: 620px;
@@ -345,29 +306,13 @@
       margin-top: 20px;
     }
 
-    .helper-text {
-      color: #d1d5db;
-      font-size: 14px;
-      margin-top: 10px;
-      line-height: 1.6;
-    }
+    .helper-text { color: #d1d5db; font-size: 14px; margin-top: 10px; line-height: 1.6; }
 
     @media (max-width: 950px) {
-      .admin-stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .today-stats {
-        grid-template-columns: 1fr;
-      }
-
-      .admin-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .admin-filters {
-        grid-template-columns: 1fr 1fr;
-      }
+      .admin-stats { grid-template-columns: repeat(2, 1fr); }
+      .today-stats { grid-template-columns: repeat(2, 1fr); }
+      .admin-grid { grid-template-columns: 1fr; }
+      .admin-filters { grid-template-columns: 1fr 1fr; }
     }
 
     @media (max-width: 700px) {
@@ -377,10 +322,7 @@
         grid-template-columns: 1fr;
       }
 
-      .header h1 {
-        font-size: 32px;
-      }
-
+      .header h1 { font-size: 32px; }
       .section,
       .login-box {
         width: 92%;
@@ -390,69 +332,12 @@
     }
 
     @media (max-width: 500px) {
-      .admin-stats {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media print {
-      body {
-        background: white !important;
-        color: black !important;
-      }
-
-      .buttons,
-      .admin-filters,
-      .export-bar,
-      .topbar,
-      .success-box,
-      .auth-message,
-      .error-box,
-      .login-box,
-      button,
-      select,
-      input {
-        display: none !important;
-      }
-
-      .section,
-      .panel-box,
-      .booking-card,
-      .history-card,
-      .driver-card,
-      .stat-card {
-        box-shadow: none !important;
-        background: white !important;
-        color: black !important;
-        border: 1px solid #ddd !important;
-      }
-
-      .booking-card p,
-      .history-card p,
-      .driver-card p,
-      .stat-card h4,
-      .stat-card p,
-      .header p,
-      .info-section p {
-        color: black !important;
-      }
-
-      .section {
-        display: block !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-      }
-
-      #ride, #driver {
-        display: none !important;
-      }
+      .admin-stats,
+      .today-stats { grid-template-columns: 1fr; }
     }
   </style>
 </head>
-
 <body>
-
   <div class="header">
     <h1>🚗 UVEL Platform</h1>
     <p>Reliable Community Transport</p>
@@ -481,13 +366,7 @@
         <option value="Driver">Driver</option>
         <option value="Admin">Admin</option>
       </select>
-      <select id="authDriverName">
-        <option value="">Driver name (only for Driver role)</option>
-        <option value="Michael">Michael</option>
-        <option value="Olivia">Olivia</option>
-        <option value="Daniel">Daniel</option>
-        <option value="Nadia">Nadia</option>
-      </select>
+      <input id="authDriverName" type="text" placeholder="Driver name (only for Driver role)">
     </div>
 
     <button class="driver" onclick="registerUser()">Register</button>
@@ -498,7 +377,7 @@
 
     <div class="helper-text">
       Register once, then log in with the same email and password.<br>
-      Driver users must choose a driver name during registration.
+      Driver users must enter a driver name during registration.
     </div>
   </div>
 
@@ -507,20 +386,33 @@
 
     <div class="form-grid">
       <input id="passengerName" type="text" placeholder="Passenger name">
+      <select id="tripType">
+        <option value="Normal">Normal</option>
+        <option value="NDIS">NDIS</option>
+      </select>
       <input id="pickup" type="text" placeholder="Pickup location">
       <input id="destination" type="text" placeholder="Destination">
       <input id="tripDate" type="date">
+      <input id="tripTime" type="time">
+      <textarea id="tripNotes" class="full-width" placeholder="Notes (wheelchair, assistance, escort, special instructions)"></textarea>
     </div>
 
     <button class="ride ride-submit" onclick="requestRide()">Request Ride</button>
     <div id="successBox" class="success-box">Ride requested successfully ✅</div>
+
+    <div class="panel-box" style="margin-top: 25px; text-align:left;">
+      <h3>My Trips</h3>
+      <div id="riderTrips">
+        <p class="empty-text">No trips yet.</p>
+      </div>
+    </div>
   </div>
 
   <div id="driver" class="section">
     <h2>Driver Dashboard</h2>
     <div id="driverSelectedText" class="driver-selected">No driver selected.</div>
 
-    <h3 style="margin-top: 25px;">My Assigned Trips</h3>
+    <h3 style="margin-top: 25px;">My Trips</h3>
     <div id="driverTrips">
       <p class="empty-text">No assigned trips yet.</p>
     </div>
@@ -530,37 +422,18 @@
     <h2>System Overview</h2>
 
     <div class="admin-stats">
-      <div class="stat-card">
-        <h4>Total Bookings</h4>
-        <p id="totalBookings">0</p>
-      </div>
-      <div class="stat-card">
-        <h4>Pending</h4>
-        <p id="pendingBookings">0</p>
-      </div>
-      <div class="stat-card">
-        <h4>Assigned</h4>
-        <p id="assignedBookings">0</p>
-      </div>
-      <div class="stat-card">
-        <h4>Completed</h4>
-        <p id="completedBookings">0</p>
-      </div>
+      <div class="stat-card"><h4>Total Bookings</h4><p id="totalBookings">0</p></div>
+      <div class="stat-card"><h4>Pending</h4><p id="pendingBookings">0</p></div>
+      <div class="stat-card"><h4>Assigned</h4><p id="assignedBookings">0</p></div>
+      <div class="stat-card"><h4>In Progress</h4><p id="progressBookings">0</p></div>
+      <div class="stat-card"><h4>Completed</h4><p id="completedBookings">0</p></div>
     </div>
 
     <div class="today-stats">
-      <div class="stat-card">
-        <h4>Today's Trips</h4>
-        <p id="todayTrips">0</p>
-      </div>
-      <div class="stat-card">
-        <h4>Today's Pending</h4>
-        <p id="todayPending">0</p>
-      </div>
-      <div class="stat-card">
-        <h4>Today's Completed</h4>
-        <p id="todayCompleted">0</p>
-      </div>
+      <div class="stat-card"><h4>Today's Trips</h4><p id="todayTrips">0</p></div>
+      <div class="stat-card"><h4>Today's Pending</h4><p id="todayPending">0</p></div>
+      <div class="stat-card"><h4>Today's Assigned</h4><p id="todayAssigned">0</p></div>
+      <div class="stat-card"><h4>Today's Completed</h4><p id="todayCompleted">0</p></div>
     </div>
 
     <div class="admin-grid">
@@ -573,14 +446,11 @@
             <option value="All">All Statuses</option>
             <option value="Pending">Pending</option>
             <option value="Assigned">Assigned</option>
+            <option value="In Progress">In Progress</option>
           </select>
           <select id="driverFilter" onchange="renderAdminBookings()">
             <option value="All">All Drivers</option>
             <option value="Unassigned">Unassigned</option>
-            <option value="Michael">Michael</option>
-            <option value="Olivia">Olivia</option>
-            <option value="Daniel">Daniel</option>
-            <option value="Nadia">Nadia</option>
           </select>
           <input id="dateFilter" type="date" onchange="renderAdminBookings()">
           <button class="filter-btn" onclick="clearAdminFilters()">Clear</button>
@@ -609,9 +479,7 @@
   <div class="info-section">
     <h2>How UVEL Works</h2>
     <p>UVEL helps passengers, drivers, and administrators manage community transport in one simple platform.</p>
-    <div class="steps">
-      Book → Assign Driver → Ride → Complete
-    </div>
+    <div class="steps">Book → Assign Driver → Start Trip → Complete</div>
   </div>
 
   <script type="module">
@@ -627,7 +495,8 @@
       orderBy,
       onSnapshot,
       setDoc,
-      getDoc
+      getDoc,
+      getDocs
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import {
       getAuth,
@@ -651,6 +520,7 @@
     const auth = getAuth(app);
 
     let liveBookings = [];
+    let driverUsers = [];
     let currentRole = "";
     let currentDriver = "";
     let currentUser = null;
@@ -675,6 +545,7 @@
 
     function getStatusClass(status) {
       if (status === "Assigned") return "assigned";
+      if (status === "In Progress") return "progress";
       if (status === "Completed") return "completed";
       return "pending";
     }
@@ -687,29 +558,44 @@
       const total = liveBookings.length;
       const pending = liveBookings.filter(b => b.status === "Pending").length;
       const assigned = liveBookings.filter(b => b.status === "Assigned").length;
+      const progress = liveBookings.filter(b => b.status === "In Progress").length;
       const completed = liveBookings.filter(b => b.status === "Completed").length;
 
       const today = todayString();
       const todayTrips = liveBookings.filter(b => b.tripDate === today).length;
       const todayPending = liveBookings.filter(b => b.tripDate === today && b.status === "Pending").length;
+      const todayAssigned = liveBookings.filter(b => b.tripDate === today && b.status === "Assigned").length;
       const todayCompleted = liveBookings.filter(b => b.tripDate === today && b.status === "Completed").length;
 
       document.getElementById("totalBookings").textContent = total;
       document.getElementById("pendingBookings").textContent = pending;
       document.getElementById("assignedBookings").textContent = assigned;
+      document.getElementById("progressBookings").textContent = progress;
       document.getElementById("completedBookings").textContent = completed;
       document.getElementById("todayTrips").textContent = todayTrips;
       document.getElementById("todayPending").textContent = todayPending;
+      document.getElementById("todayAssigned").textContent = todayAssigned;
       document.getElementById("todayCompleted").textContent = todayCompleted;
     }
 
     function updateDriverHeader() {
       const text = document.getElementById("driverSelectedText");
-      if (currentDriver) {
-        text.textContent = "Logged in as: " + currentDriver;
-      } else {
-        text.textContent = "No driver selected.";
-      }
+      text.textContent = currentDriver ? "Logged in as: " + currentDriver : "No driver selected.";
+    }
+
+    function populateDriverFilter() {
+      const driverFilter = document.getElementById("driverFilter");
+      if (!driverFilter) return;
+
+      const currentValue = driverFilter.value || "All";
+      const options = ['<option value="All">All Drivers</option>', '<option value="Unassigned">Unassigned</option>'];
+
+      driverUsers.forEach(driver => {
+        options.push(`<option value="${driver}">${driver}</option>`);
+      });
+
+      driverFilter.innerHTML = options.join("");
+      driverFilter.value = options.some(o => o.includes(`value=\"${currentValue}\"`)) ? currentValue : "All";
     }
 
     function getFilteredActiveBookings() {
@@ -733,6 +619,8 @@
             ${b.pickup || ""}
             ${b.destination || ""}
             ${b.driver || ""}
+            ${b.tripType || ""}
+            ${b.notes || ""}
           `.toLowerCase();
 
           return text.includes(searchValue);
@@ -757,52 +645,40 @@
       const csvContent = rows.map(row => row.map(escapeCell).join(",")).join("\n");
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
-
       const link = document.createElement("a");
       link.href = url;
       link.download = filename;
       link.click();
-
       URL.revokeObjectURL(url);
+    }
+
+    async function loadDrivers() {
+      const snap = await getDocs(collection(db, "users"));
+      driverUsers = snap.docs
+        .map(d => d.data())
+        .filter(u => u.role === "Driver" && u.driverName)
+        .map(u => u.driverName)
+        .sort((a, b) => a.localeCompare(b));
+      populateDriverFilter();
     }
 
     window.exportActiveBookingsCSV = function() {
       if (currentRole !== "Admin") return;
       const activeBookings = getFilteredActiveBookings();
-
       const rows = [
-        ["Booking ID", "Passenger", "Pickup", "Destination", "Date", "Driver", "Status"],
-        ...activeBookings.map(b => [
-          b.id || "",
-          b.passengerName || "",
-          b.pickup || "",
-          b.destination || "",
-          b.tripDate || "",
-          b.driver || "",
-          b.status || ""
-        ])
+        ["Booking ID", "Passenger", "Type", "Pickup", "Destination", "Date", "Time", "Driver", "Status", "Notes"],
+        ...activeBookings.map(b => [b.id || "", b.passengerName || "", b.tripType || "", b.pickup || "", b.destination || "", b.tripDate || "", b.tripTime || "", b.driver || "", b.status || "", b.notes || ""])
       ];
-
       downloadCSV("uvel-active-bookings.csv", rows);
     };
 
     window.exportCompletedTripsCSV = function() {
       if (currentRole !== "Admin") return;
       const completedTrips = getCompletedTrips();
-
       const rows = [
-        ["Booking ID", "Passenger", "Pickup", "Destination", "Date", "Driver", "Status"],
-        ...completedTrips.map(b => [
-          b.id || "",
-          b.passengerName || "",
-          b.pickup || "",
-          b.destination || "",
-          b.tripDate || "",
-          b.driver || "",
-          b.status || ""
-        ])
+        ["Booking ID", "Passenger", "Type", "Pickup", "Destination", "Date", "Time", "Driver", "Status", "Notes"],
+        ...completedTrips.map(b => [b.id || "", b.passengerName || "", b.tripType || "", b.pickup || "", b.destination || "", b.tripDate || "", b.tripTime || "", b.driver || "", b.status || "", b.notes || ""])
       ];
-
       downloadCSV("uvel-completed-trips.csv", rows);
     };
 
@@ -815,7 +691,6 @@
     window.renderAdminBookings = function() {
       const bookingList = document.getElementById("bookingList");
       const activeBookings = getFilteredActiveBookings();
-
       updateAdminStats();
 
       if (activeBookings.length === 0) {
@@ -826,13 +701,13 @@
       let html = "";
 
       activeBookings.forEach((booking) => {
-        const drivers = ["Michael", "Olivia", "Daniel", "Nadia"];
         let driverOptions = '<option value="">Assign driver</option>';
-        drivers.forEach((driver) => {
+        driverUsers.forEach((driver) => {
           driverOptions += `<option value="${driver}">${driver}</option>`;
         });
 
         let assignControl = "";
+        let startControl = "";
         let completeControl = "";
 
         if (booking.status === "Pending") {
@@ -845,22 +720,27 @@
         }
 
         if (booking.status === "Assigned") {
-          completeControl = `
-            <br>
-            <button class="complete-btn" onclick="completeTrip('${booking.id}')">Mark Completed</button>
-          `;
+          startControl = `<br><button class="start-btn" onclick="startTrip('${booking.id}')">Start Trip</button>`;
+        }
+
+        if (booking.status === "In Progress") {
+          completeControl = `<br><button class="complete-btn" onclick="completeTrip('${booking.id}')">Mark Completed</button>`;
         }
 
         html += `
           <div class="booking-card">
             <p><strong>Booking ID:</strong> ${booking.id}</p>
             <p><strong>Passenger:</strong> ${booking.passengerName || "Not provided"}</p>
+            <p><strong>Trip Type:</strong> ${booking.tripType || "Normal"}</p>
             <p><strong>Pickup:</strong> ${booking.pickup}</p>
             <p><strong>Destination:</strong> ${booking.destination}</p>
             <p><strong>Date:</strong> ${booking.tripDate || "Not provided"}</p>
+            <p><strong>Time:</strong> ${booking.tripTime || "Not provided"}</p>
             <p><strong>Driver:</strong> ${booking.driver}</p>
+            <p><strong>Notes:</strong> ${booking.notes || "None"}</p>
             <span class="status ${getStatusClass(booking.status)}">${booking.status}</span>
             ${assignControl}
+            ${startControl}
             ${completeControl}
             <br>
             <button class="delete-btn" onclick="deleteBooking('${booking.id}')">Delete</button>
@@ -881,21 +761,22 @@
       }
 
       let html = "";
-
       completedTrips.forEach((trip) => {
         html += `
           <div class="history-card">
             <p><strong>Booking ID:</strong> ${trip.id}</p>
             <p><strong>Passenger:</strong> ${trip.passengerName || "Not provided"}</p>
+            <p><strong>Trip Type:</strong> ${trip.tripType || "Normal"}</p>
             <p><strong>Pickup:</strong> ${trip.pickup}</p>
             <p><strong>Destination:</strong> ${trip.destination}</p>
             <p><strong>Date:</strong> ${trip.tripDate || "Not provided"}</p>
+            <p><strong>Time:</strong> ${trip.tripTime || "Not provided"}</p>
             <p><strong>Driver:</strong> ${trip.driver}</p>
+            <p><strong>Notes:</strong> ${trip.notes || "None"}</p>
             <span class="status completed">${trip.status}</span>
           </div>
         `;
       });
-
       tripHistoryList.innerHTML = html;
     }
 
@@ -907,27 +788,37 @@
         return;
       }
 
-      const assignedTrips = liveBookings.filter(
-        (trip) => trip.status === "Assigned" && trip.driver === currentDriver
+      const myTrips = liveBookings.filter(
+        (trip) => trip.driver === currentDriver && (trip.status === "Assigned" || trip.status === "In Progress")
       );
 
-      if (assignedTrips.length === 0) {
+      if (myTrips.length === 0) {
         driverTrips.innerHTML = `<p class="empty-text">No trips assigned to ${currentDriver} yet.</p>`;
         return;
       }
 
       let html = "";
+      myTrips.forEach((trip) => {
+        let actionButton = "";
+        if (trip.status === "Assigned") {
+          actionButton = `<button class="start-btn" onclick="driverStartTrip('${trip.id}')">Start Trip</button>`;
+        }
+        if (trip.status === "In Progress") {
+          actionButton = `<button class="complete-btn" onclick="driverCompleteTrip('${trip.id}')">Complete Trip</button>`;
+        }
 
-      assignedTrips.forEach((trip) => {
         html += `
           <div class="driver-card">
             <p><strong>Booking ID:</strong> ${trip.id}</p>
             <p><strong>Passenger:</strong> ${trip.passengerName || "Not provided"}</p>
+            <p><strong>Trip Type:</strong> ${trip.tripType || "Normal"}</p>
             <p><strong>Pickup:</strong> ${trip.pickup}</p>
             <p><strong>Destination:</strong> ${trip.destination}</p>
             <p><strong>Date:</strong> ${trip.tripDate || "Not provided"}</p>
-            <p><strong>Assigned Driver:</strong> ${trip.driver}</p>
-            <span class="status assigned">${trip.status}</span>
+            <p><strong>Time:</strong> ${trip.tripTime || "Not provided"}</p>
+            <p><strong>Notes:</strong> ${trip.notes || "None"}</p>
+            <span class="status ${getStatusClass(trip.status)}">${trip.status}</span>
+            <br>${actionButton}
           </div>
         `;
       });
@@ -935,18 +826,46 @@
       driverTrips.innerHTML = html;
     }
 
+    function renderRiderTrips() {
+      const riderTrips = document.getElementById("riderTrips");
+      if (!currentUser || currentRole !== "Passenger") {
+        riderTrips.innerHTML = '<p class="empty-text">No trips yet.</p>';
+        return;
+      }
+
+      const myTrips = liveBookings.filter(trip => trip.createdBy === currentUser.uid);
+      if (myTrips.length === 0) {
+        riderTrips.innerHTML = '<p class="empty-text">No trips yet.</p>';
+        return;
+      }
+
+      let html = "";
+      myTrips.forEach((trip) => {
+        html += `
+          <div class="rider-card">
+            <p><strong>Booking ID:</strong> ${trip.id}</p>
+            <p><strong>Trip Type:</strong> ${trip.tripType || "Normal"}</p>
+            <p><strong>Pickup:</strong> ${trip.pickup}</p>
+            <p><strong>Destination:</strong> ${trip.destination}</p>
+            <p><strong>Date:</strong> ${trip.tripDate || "Not provided"}</p>
+            <p><strong>Time:</strong> ${trip.tripTime || "Not provided"}</p>
+            <p><strong>Driver:</strong> ${trip.driver || "Unassigned"}</p>
+            <p><strong>Notes:</strong> ${trip.notes || "None"}</p>
+            <span class="status ${getStatusClass(trip.status)}">${trip.status}</span>
+          </div>
+        `;
+      });
+      riderTrips.innerHTML = html;
+    }
+
     function startRealtimeListener() {
       const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"));
-
       onSnapshot(q, (snapshot) => {
-        liveBookings = snapshot.docs.map((docSnap) => ({
-          id: docSnap.id,
-          ...docSnap.data()
-        }));
-
+        liveBookings = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
         renderAdminBookings();
         renderTripHistory();
         renderDriverTrips();
+        renderRiderTrips();
       }, (error) => {
         console.error("Realtime listener error:", error);
       });
@@ -957,7 +876,6 @@
       const navButtons = document.getElementById("navButtons");
       const loginSection = document.getElementById("loginSection");
       const roleBadge = document.getElementById("roleBadge");
-
       const rideNavBtn = document.getElementById("rideNavBtn");
       const driverNavBtn = document.getElementById("driverNavBtn");
       const adminNavBtn = document.getElementById("adminNavBtn");
@@ -966,7 +884,6 @@
         sessionBar.style.display = "none";
         navButtons.style.display = "none";
         loginSection.style.display = "block";
-
         document.getElementById("ride").style.display = "none";
         document.getElementById("driver").style.display = "none";
         document.getElementById("admin").style.display = "none";
@@ -991,7 +908,7 @@
       const email = document.getElementById("authEmail").value.trim();
       const password = document.getElementById("authPassword").value;
       const role = document.getElementById("authRole").value;
-      const driverName = document.getElementById("authDriverName").value;
+      const driverName = document.getElementById("authDriverName").value.trim();
 
       if (!email || !password || !role) {
         showError("Please fill email, password, and role.");
@@ -999,7 +916,7 @@
       }
 
       if (role === "Driver" && !driverName) {
-        showError("Please select a driver name for Driver role.");
+        showError("Please enter a driver name for Driver role.");
         return;
       }
 
@@ -1011,6 +928,7 @@
           driverName: role === "Driver" ? driverName : "",
           createdAt: Date.now()
         });
+        await loadDrivers();
         showMessage("Registration successful. You are now logged in.");
       } catch (error) {
         showError(error.message);
@@ -1047,13 +965,10 @@
     };
 
     window.show = function(section) {
-      document.getElementById("ride").classList.remove("active");
-      document.getElementById("driver").classList.remove("active");
-      document.getElementById("admin").classList.remove("active");
-
-      document.getElementById("ride").style.display = "none";
-      document.getElementById("driver").style.display = "none";
-      document.getElementById("admin").style.display = "none";
+      ["ride", "driver", "admin"].forEach(id => {
+        document.getElementById(id).classList.remove("active");
+        document.getElementById(id).style.display = "none";
+      });
 
       document.getElementById(section).style.display = "block";
       document.getElementById(section).classList.add("active");
@@ -1062,7 +977,9 @@
         updateDriverHeader();
         renderDriverTrips();
       }
-
+      if (section === "ride") {
+        renderRiderTrips();
+      }
       if (section === "admin") {
         updateAdminStats();
         renderTripHistory();
@@ -1077,20 +994,26 @@
       }
 
       const passengerName = document.getElementById("passengerName").value.trim();
+      const tripType = document.getElementById("tripType").value;
       const pickup = document.getElementById("pickup").value.trim();
       const destination = document.getElementById("destination").value.trim();
       const tripDate = document.getElementById("tripDate").value;
+      const tripTime = document.getElementById("tripTime").value;
+      const notes = document.getElementById("tripNotes").value.trim();
 
-      if (!passengerName || !pickup || !destination || !tripDate) {
+      if (!passengerName || !pickup || !destination || !tripDate || !tripTime) {
         alert("Please fill all booking fields.");
         return;
       }
 
       await addDoc(collection(db, "bookings"), {
         passengerName,
+        tripType,
         pickup,
         destination,
         tripDate,
+        tripTime,
+        notes,
         status: "Pending",
         driver: "Unassigned",
         createdAt: Date.now(),
@@ -1098,30 +1021,51 @@
       });
 
       document.getElementById("passengerName").value = "";
+      document.getElementById("tripType").value = "Normal";
       document.getElementById("pickup").value = "";
       document.getElementById("destination").value = "";
       document.getElementById("tripDate").value = "";
+      document.getElementById("tripTime").value = "";
+      document.getElementById("tripNotes").value = "";
 
       const successBox = document.getElementById("successBox");
       successBox.style.display = "block";
-      setTimeout(() => {
-        successBox.style.display = "none";
-      }, 2000);
+      setTimeout(() => { successBox.style.display = "none"; }, 2000);
     };
 
     window.assignDriver = async function(bookingId, driverName) {
-      if (currentRole !== "Admin") return;
-      if (!driverName) return;
-
+      if (currentRole !== "Admin" || !driverName) return;
       await updateDoc(doc(db, "bookings", bookingId), {
         driver: driverName,
         status: "Assigned"
       });
     };
 
+    window.startTrip = async function(bookingId) {
+      if (currentRole !== "Admin") return;
+      await updateDoc(doc(db, "bookings", bookingId), {
+        status: "In Progress"
+      });
+    };
+
     window.completeTrip = async function(bookingId) {
       if (currentRole !== "Admin") return;
+      await updateDoc(doc(db, "bookings", bookingId), {
+        status: "Completed"
+      });
+    };
 
+    window.driverStartTrip = async function(bookingId) {
+      const booking = liveBookings.find(b => b.id === bookingId);
+      if (currentRole !== "Driver" || !booking || booking.driver !== currentDriver) return;
+      await updateDoc(doc(db, "bookings", bookingId), {
+        status: "In Progress"
+      });
+    };
+
+    window.driverCompleteTrip = async function(bookingId) {
+      const booking = liveBookings.find(b => b.id === bookingId);
+      if (currentRole !== "Driver" || !booking || booking.driver !== currentDriver) return;
       await updateDoc(doc(db, "bookings", bookingId), {
         status: "Completed"
       });
@@ -1129,10 +1073,8 @@
 
     window.deleteBooking = async function(bookingId) {
       if (currentRole !== "Admin") return;
-
       const confirmDelete = confirm("Are you sure you want to delete this booking?");
       if (!confirmDelete) return;
-
       await deleteDoc(doc(db, "bookings", bookingId));
     };
 
@@ -1149,7 +1091,6 @@
 
       try {
         const userDoc = await getDoc(doc(db, "users", user.uid));
-
         if (!userDoc.exists()) {
           currentRole = "";
           currentDriver = "";
@@ -1162,8 +1103,11 @@
         currentRole = profile.role || "";
         currentDriver = profile.driverName || "";
 
+        await loadDrivers();
         applyRoleUI();
         updateDriverHeader();
+        renderRiderTrips();
+        renderDriverTrips();
       } catch (error) {
         showError(error.message);
       }
@@ -1171,7 +1115,6 @@
 
     window.onload = function() {
       startRealtimeListener();
-
       document.addEventListener("input", function(event) {
         if (event.target && event.target.id === "searchInput") {
           renderAdminBookings();
@@ -1179,6 +1122,5 @@
       });
     };
   </script>
-
 </body>
 </html>
