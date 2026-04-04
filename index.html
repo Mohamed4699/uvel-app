@@ -1031,6 +1031,12 @@
             <div class="map-panel" style="margin-top:14px;">
               <h3 style="font-size:18px;">Driver Route Map</h3>
               <p>View the live route from pickup to destination.</p>
+              <div class="status-row" style="margin-top:10px; margin-bottom:6px;">
+                <span class="status assigned" id="gpsStatusBadge">GPS Off</span>
+                <button class="start-btn" type="button" onclick="startDriverTrackingManual()">Start Live GPS</button>
+                <button class="delete-btn" type="button" onclick="stopDriverTrackingManual()">Stop GPS</button>
+              </div>
+              <p id="gpsStatusText" class="muted-note">Driver GPS tracking is idle.</p>
               <div id="driverMapFrame" class="real-map-frame"></div>
             </div>
             <div id="driverTrips">
@@ -1230,6 +1236,9 @@
     let currentDriver = "";
     let currentUser = null;
     let editingBookingId = "";
+    let driverLocationWatchId = null;
+    let lastDriverLocationSentAt = 0;
+    let lastDriverLocation = null;
 
     const mapStore = {};
 
@@ -1256,6 +1265,140 @@
       if (status === "In Progress") return "progress";
       if (status === "Completed") return "completed";
       return "pending";
+    }
+
+
+    function updateGpsUI(mode, extra = "") {
+      const badge = document.getElementById("gpsStatusBadge");
+      const text = document.getElementById("gpsStatusText");
+      if (!badge || !text) return;
+
+      badge.className = "status assigned";
+      if (mode === "tracking") badge.className = "status completed";
+      if (mode === "waiting") badge.className = "status pending";
+      if (mode === "error") badge.className = "status pending";
+      if (mode === "off") badge.className = "status assigned";
+
+      badge.textContent = {
+        off: "GPS Off",
+        waiting: "GPS Waiting",
+        tracking: "GPS Live",
+        error: "GPS Error"
+      }[mode] || "GPS Off";
+
+      text.textContent = extra || {
+        off: "Driver GPS tracking is idle.",
+        waiting: "Trying to get live device location...",
+        tracking: "Live driver location is being sent to Firebase.",
+        error: "Could not access device GPS."
+      }[mode] || "Driver GPS tracking is idle.";
+    }
+
+    function getDriverTrackingBooking() {
+      if (!currentDriver) return null;
+      return liveBookings.find(trip => trip.driver === currentDriver && ["Assigned", "In Progress"].includes(trip.status)) || null;
+    }
+
+    function distanceMeters(a, b) {
+      if (!a || !b) return Number.MAX_SAFE_INTEGER;
+      const toRad = deg => deg * Math.PI / 180;
+      const R = 6371000;
+      const dLat = toRad(b.lat - a.lat);
+      const dLng = toRad(b.lng - a.lng);
+      const aa = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+      return 2 * R * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa));
+    }
+
+    async function pushDriverLocation(position) {
+      const booking = getDriverTrackingBooking();
+      if (!booking) {
+        updateGpsUI("off", "No assigned or active trip for live GPS tracking.");
+        return;
+      }
+
+      const coords = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+      const speedKmh = position.coords.speed != null && !Number.isNaN(position.coords.speed)
+        ? Math.max(0, position.coords.speed * 3.6)
+        : null;
+
+      const now = Date.now();
+      const movedEnough = !lastDriverLocation || distanceMeters(lastDriverLocation, coords) > 8;
+      const waitedEnough = now - lastDriverLocationSentAt > 4000;
+      if (!movedEnough && !waitedEnough) return;
+
+      lastDriverLocation = coords;
+      lastDriverLocationSentAt = now;
+
+      await updateDoc(doc(db, "bookings", booking.id), {
+        driverLat: coords.lat,
+        driverLng: coords.lng,
+        driverLocationUpdatedAt: new Date().toISOString(),
+        driverSpeedKmh: speedKmh,
+        driverTracking: true
+      });
+
+      updateGpsUI(
+        "tracking",
+        `Live GPS active. ${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}${speedKmh != null ? ` • ${speedKmh.toFixed(1)} km/h` : ""}`
+      );
+    }
+
+    function stopDriverLocationTracking(reason = "Driver GPS tracking is idle.") {
+      if (driverLocationWatchId != null && navigator.geolocation) {
+        navigator.geolocation.clearWatch(driverLocationWatchId);
+        driverLocationWatchId = null;
+      }
+      updateGpsUI("off", reason);
+    }
+
+    function syncDriverTrackingState() {
+      if (currentRole !== "Driver" || !currentUser) {
+        stopDriverLocationTracking("Driver GPS tracking is idle.");
+        return;
+      }
+
+      const activeBooking = getDriverTrackingBooking();
+      if (!activeBooking) {
+        stopDriverLocationTracking("No assigned or active trip for live GPS tracking.");
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        updateGpsUI("error", "This browser/device does not support geolocation.");
+        return;
+      }
+
+      if (driverLocationWatchId != null) return;
+
+      updateGpsUI("waiting", "Requesting device GPS permission...");
+      driverLocationWatchId = navigator.geolocation.watchPosition(
+        async position => {
+          try {
+            await pushDriverLocation(position);
+            refreshAllMaps();
+          } catch (error) {
+            console.error("GPS update failed:", error);
+            updateGpsUI("error", "Could not send live GPS location to Firebase.");
+          }
+        },
+        error => {
+          console.error("Geolocation error:", error);
+          stopDriverLocationTracking();
+          let message = "Could not access device GPS.";
+          if (error.code === 1) message = "Location permission denied. Allow location for the driver app.";
+          if (error.code === 2) message = "Location unavailable on this device right now.";
+          if (error.code === 3) message = "Location request timed out. Try again.";
+          updateGpsUI("error", message);
+        },
+        {
+          enableHighAccuracy: true,
+          maximumAge: 3000,
+          timeout: 10000
+        }
+      );
     }
 
     function todayString() {
@@ -1519,16 +1662,24 @@
         dashArray: "10, 8"
       }).addTo(store.map);
 
-      const startDriverPoint = {
+      const hasLiveDriver = typeof booking.driverLat === "number" && typeof booking.driverLng === "number";
+      const startDriverPoint = hasLiveDriver ? {
+        lat: booking.driverLat,
+        lng: booking.driverLng
+      } : {
         lat: pickupPoint.lat - 0.01,
         lng: pickupPoint.lng - 0.01
       };
 
+      const driverPopupBits = [`<strong>Driver</strong>`, booking.driver || "Assigned driver"];
+      if (booking.driverLocationUpdatedAt) driverPopupBits.push(`Updated: ${booking.driverLocationUpdatedAt}`);
+      if (booking.driverSpeedKmh != null) driverPopupBits.push(`Speed: ${Number(booking.driverSpeedKmh).toFixed(1)} km/h`);
+
       store.driverMarker = L.marker([startDriverPoint.lat, startDriverPoint.lng], { icon: driverIcon }).addTo(store.map)
-        .bindPopup(`<strong>Driver</strong><br>${booking.driver || "Assigned driver"}`);
+        .bindPopup(driverPopupBits.join("<br>"));
 
       fitMapToPoints(store, [pickupPoint, destinationPoint, startDriverPoint]);
-      if (animate) animateDriver(store, startDriverPoint, pickupPoint);
+      if (animate && !hasLiveDriver) animateDriver(store, startDriverPoint, pickupPoint);
     }
 
     function getCurrentPassengerBooking() {
@@ -1762,6 +1913,7 @@
         renderAdminDrivers();
         renderAdminPassengers();
         renderAdminRecentActivity();
+        syncDriverTrackingState();
         refreshAllMaps();
       }, (error) => {
         console.error("Realtime listener error:", error);
@@ -1896,18 +2048,22 @@
 
     window.startTrip = async function(bookingId) {
       await updateDoc(doc(db, "bookings", bookingId), { status: "In Progress" });
+      syncDriverTrackingState();
     };
 
     window.completeTrip = async function(bookingId) {
-      await updateDoc(doc(db, "bookings", bookingId), { status: "Completed" });
+      await updateDoc(doc(db, "bookings", bookingId), { status: "Completed", driverTracking: false });
+      syncDriverTrackingState();
     };
 
     window.driverStartTrip = async function(bookingId) {
       await updateDoc(doc(db, "bookings", bookingId), { status: "In Progress" });
+      syncDriverTrackingState();
     };
 
     window.driverCompleteTrip = async function(bookingId) {
-      await updateDoc(doc(db, "bookings", bookingId), { status: "Completed" });
+      await updateDoc(doc(db, "bookings", bookingId), { status: "Completed", driverTracking: false });
+      syncDriverTrackingState();
     };
 
     window.deleteBooking = async function(bookingId) {
@@ -2003,12 +2159,29 @@
     };
 
     window.logoutUser = async function() {
+      stopDriverLocationTracking("Driver GPS tracking is idle.");
       await signOut(auth);
       currentRole = "";
       currentDriver = "";
       currentUser = null;
       selectedAdminBookingId = "";
       applyRoleUI();
+    };
+
+    window.startDriverTrackingManual = function() {
+      syncDriverTrackingState();
+    };
+
+    window.stopDriverTrackingManual = async function() {
+      stopDriverLocationTracking("Driver GPS tracking stopped.");
+      const booking = getDriverTrackingBooking();
+      if (booking) {
+        try {
+          await updateDoc(doc(db, "bookings", booking.id), { driverTracking: false });
+        } catch (error) {
+          console.error(error);
+        }
+      }
     };
 
     window.requestRide = async function() {
@@ -2068,6 +2241,7 @@
       if (!user) {
         currentRole = "";
         currentDriver = "";
+        stopDriverLocationTracking("Driver GPS tracking is idle.");
         applyRoleUI();
         return;
       }
@@ -2085,6 +2259,7 @@
         updateDriverHeader();
         applyRoleUI();
         await loadDrivers();
+        syncDriverTrackingState();
         refreshAllMaps();
       } catch (error) {
         console.error(error);
@@ -2098,6 +2273,7 @@
     startRealtimeListener();
     updateDriverHeader();
     applyRoleUI();
+    updateGpsUI("off", "Driver GPS tracking is idle.");
 
     document.addEventListener("click", (event) => {
       document.querySelectorAll(".driver-list").forEach(list => {
