@@ -1,12 +1,14 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UVEL Full LocalStorage Version</title>
+  <title>UVEL Full Updated Version</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
     :root{
@@ -214,7 +216,6 @@
     .empty-text{color:var(--muted);font-size:15px;text-align:center;padding:26px 10px}
     .gps-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
     .gps-status{margin-top:8px;color:#9fdcff;font-size:14px}
-
     .driver-combobox{position:relative;max-width:260px;min-width:220px}
     .driver-input{
       width:100%;
@@ -247,7 +248,6 @@
       font-size:14px;
     }
     .driver-item:hover{background:#1e293b}
-
     .modal{
       position:fixed;
       inset:0;
@@ -278,7 +278,37 @@
     .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;flex-wrap:wrap}
     .modal-save{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;padding:11px 16px;border-radius:12px;font-weight:800;cursor:pointer}
     .modal-cancel{background:#e2e8f0;color:#0f172a;border:none;padding:11px 16px;border-radius:12px;font-weight:800;cursor:pointer}
-
+    #toastContainer{
+      position:fixed;
+      top:20px;
+      right:20px;
+      z-index:99999;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      pointer-events:none;
+    }
+    .toast{
+      min-width:280px;
+      max-width:360px;
+      background:linear-gradient(135deg, #0f172a, #1e293b);
+      color:white;
+      border:1px solid rgba(255,255,255,.12);
+      border-left:4px solid #22c55e;
+      border-radius:14px;
+      padding:14px 16px;
+      box-shadow:0 18px 40px rgba(0,0,0,.35);
+      animation:toastIn .25s ease;
+      font-size:14px;
+      line-height:1.5;
+      pointer-events:auto;
+    }
+    .toast-title{font-weight:800;margin-bottom:4px}
+    .toast-sub{color:#cbd5e1;font-size:13px}
+    @keyframes toastIn{
+      from{opacity:0;transform:translateY(-10px) translateX(10px)}
+      to{opacity:1;transform:translateY(0) translateX(0)}
+    }
     @media (max-width:1180px){
       .app-shell{grid-template-columns:1fr}
       .sidebar{position:static}
@@ -296,6 +326,7 @@
       .section-head h2,.hero-copy h2{font-size:24px}
     }
   </style>
+
 </head>
 <body>
   <div class="app-shell">
@@ -308,348 +339,351 @@
         </div>
       </div>
 
-      <div class="nav-title">Workspace</div>
-      <div class="side-nav" id="navButtons" style="display:none;">
-        <button class="side-link" id="rideNavBtn" onclick="showSection('ride')">
-          <span>Ride App</span><small>Passenger</small>
-        </button>
-        <button class="side-link" id="driverNavBtn" onclick="showSection('driver')">
-          <span>Driver App</span><small>Trips</small>
-        </button>
-        <button class="side-link" id="adminNavBtn" onclick="showSection('admin')">
-          <span>Admin Panel</span><small>Dispatch</small>
-        </button>
+```
+  <div class="nav-title">Workspace</div>
+  <div class="side-nav" id="navButtons" style="display:none;">
+    <button class="side-link" id="rideNavBtn" onclick="showSection('ride')">
+      <span>Ride App</span><small>Passenger</small>
+    </button>
+    <button class="side-link" id="driverNavBtn" onclick="showSection('driver')">
+      <span>Driver App</span><small>Trips</small>
+    </button>
+    <button class="side-link" id="adminNavBtn" onclick="showSection('admin')">
+      <span>Admin Panel</span><small>Dispatch</small>
+    </button>
+  </div>
+
+  <div id="sessionBar" style="display:none;">
+    <div class="pill" id="roleBadge">Role: Guest</div>
+    <button class="logout-btn" onclick="logoutUser()">Logout</button>
+  </div>
+
+  <div class="side-card">
+    <h3>Operations Flow</h3>
+    <p>Book trips, assign drivers, start rides, complete trips, track payments, and keep transport records in one dashboard.</p>
+  </div>
+
+  <div class="side-card">
+    <h3>Startup Upgrade</h3>
+    <p>This version includes NDIS invoice PDF export with ABN 14688659912, local sync, notifications, and admin controls.</p>
+  </div>
+</aside>
+
+<main class="main">
+  <div id="heroSection">
+    <div class="hero-top">
+      <div class="hero-copy">
+        <h2>Modern transport operations for community and NDIS-ready services.</h2>
+        <p>Passenger requests are saved locally and can be seen by Admin in another tab of the same browser.</p>
+      </div>
+    </div>
+
+    <div class="hero-grid">
+      <div class="workflow-card">
+        <h3>Operational Workflow</h3>
+        <p>Clear booking lifecycle from request to trip completion and payment tracking.</p>
+        <div class="hero-steps">
+          <div class="step-chip"><strong>Book</strong>Passenger submits request</div>
+          <div class="step-chip"><strong>Pending</strong>Admin receives request</div>
+          <div class="step-chip"><strong>Assign</strong>Admin selects driver</div>
+          <div class="step-chip"><strong>Complete</strong>Trip finalised</div>
+        </div>
       </div>
 
-      <div id="sessionBar" style="display:none;">
-        <div class="pill" id="roleBadge">Role: Guest</div>
-        <button class="logout-btn" onclick="logoutUser()">Logout</button>
-      </div>
-
-      <div class="side-card">
-        <h3>Operations Flow</h3>
-        <p>Book trips, assign drivers, start rides, complete trips, track payments, and keep transport records in one dashboard.</p>
-      </div>
-
-      <div class="side-card">
-        <h3>Startup Upgrade</h3>
-        <p>This version includes Edit, Auto Assign, searchable driver selector, localStorage sync, live maps, and GPS auto status.</p>
-      </div>
-    </aside>
-
-    <main class="main">
-      <div id="heroSection">
-        <div class="hero-top">
-          <div class="hero-copy">
-            <h2>Modern transport operations for community and NDIS-ready services.</h2>
-            <p>Passenger requests are saved locally and can be seen by Admin in another tab of the same browser.</p>
+      <div class="chart-card">
+        <h3>Admin Live Trip Map</h3>
+        <p>Admin-only map for active bookings and driver locations.</p>
+        <div id="liveMapFrame" class="real-map-frame"></div>
+        <div class="route-stats">
+          <div class="route-stat">
+            <h4>Route</h4>
+            <p id="liveRouteDistance">--</p>
+          </div>
+          <div class="route-stat">
+            <h4>ETA</h4>
+            <p id="liveRouteEta">--</p>
+          </div>
+          <div class="route-stat">
+            <h4>Driver to Pickup</h4>
+            <p id="liveDriverPickupEta">--</p>
           </div>
         </div>
+        <div class="route-message" id="liveRouteMessage">Waiting for active booking.</div>
+      </div>
+    </div>
+  </div>
 
-        <div class="hero-grid">
-          <div class="workflow-card">
-            <h3>Operational Workflow</h3>
-            <p>Clear booking lifecycle from request to trip completion and payment tracking.</p>
-            <div class="hero-steps">
-              <div class="step-chip"><strong>Book</strong>Passenger submits request</div>
-              <div class="step-chip"><strong>Pending</strong>Admin receives request</div>
-              <div class="step-chip"><strong>Assign</strong>Admin selects driver</div>
-              <div class="step-chip"><strong>Complete</strong>Trip finalised</div>
+  <div id="loginSection" class="login-box">
+    <div class="section-head" style="margin-bottom:14px;">
+      <div>
+        <h2>Login / Role Switch</h2>
+        <p>This single-file version uses role simulation plus localStorage. Use the same browser for Passenger and Admin.</p>
+      </div>
+      <div class="section-badge">LocalStorage Mode</div>
+    </div>
+
+    <div class="login-grid">
+      <input id="authName" type="text" placeholder="Your name">
+      <input id="authEmail" type="email" placeholder="Email address">
+      <select id="authRole">
+        <option value="">Select role</option>
+        <option value="Passenger">Passenger</option>
+        <option value="Driver">Driver</option>
+        <option value="Admin">Admin</option>
+      </select>
+      <input id="authDriverName" type="text" placeholder="Driver name (for Driver role)">
+    </div>
+
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:18px;">
+      <button class="ride" onclick="loginUser()">Enter App</button>
+      <button class="delete-btn" onclick="clearAllBookings()">Clear Saved Bookings</button>
+    </div>
+
+    <div id="authMessage" class="auth-message">Success</div>
+    <div id="authError" class="error-box">Error</div>
+
+    <div class="helper-text">
+      Test method:<br>
+      Passenger creates request → open another tab in same browser → login as Admin → Admin sees pending request.
+    </div>
+  </div>
+
+  <div id="ride" class="section">
+    <div class="section-head">
+      <div>
+        <h2>Ride App</h2>
+        <p>Create a trip request, view payment mode, and track your current trip.</p>
+      </div>
+      <div class="section-badge">Passenger View</div>
+    </div>
+
+    <div class="ride-layout">
+      <div>
+        <div class="form-card">
+          <h3>Book a Ride</h3>
+          <p>Enter trip details below to create a new booking.</p>
+
+          <div class="form-grid">
+            <input id="passengerName" type="text" placeholder="Passenger name">
+            <select id="tripType">
+              <option value="Normal">Normal</option>
+              <option value="NDIS">NDIS</option>
+            </select>
+            <input id="pickup" type="text" placeholder="Pickup location">
+            <input id="destination" type="text" placeholder="Destination">
+            <input id="tripDate" type="date">
+            <input id="tripTime" type="time">
+            <textarea id="tripNotes" class="full-width" placeholder="Notes (wheelchair, assistance, escort, special instructions)"></textarea>
+          </div>
+
+          <button class="request-btn ride-submit" onclick="requestRide()">Request Ride</button>
+          <div id="successBox" class="success-box">Ride requested successfully ✅</div>
+          <div class="muted-note">Requests now go to Admin as Pending first and are saved in localStorage.</div>
+        </div>
+
+        <div class="payments-panel">
+          <div class="payments-top">
+            <h3 style="margin:0;">Payments</h3>
+            <div class="pill" style="background:rgba(124,58,237,.18);border-color:rgba(124,58,237,.25);">Stripe-ready</div>
+          </div>
+          <p style="margin-top:10px;">Normal trips can be paid by card. NDIS trips are marked as referral / invoice and do not require card payment in this MVP.</p>
+          <div class="payments-grid">
+            <div class="payment-box">
+              <h4>Estimated fare</h4>
+              <p id="previewFare">AUD 0.00</p>
+            </div>
+            <div class="payment-box">
+              <h4>Payment mode</h4>
+              <p id="previewPaymentMode">Stripe card</p>
             </div>
           </div>
-
-          <div class="chart-card">
-            <h3>Admin Live Trip Map</h3>
-            <p>Admin-only map for active bookings and driver locations.</p>
-            <div id="liveMapFrame" class="real-map-frame"></div>
-            <div class="route-stats">
-              <div class="route-stat">
-                <h4>Route</h4>
-                <p id="liveRouteDistance">--</p>
-              </div>
-              <div class="route-stat">
-                <h4>ETA</h4>
-                <p id="liveRouteEta">--</p>
-              </div>
-              <div class="route-stat">
-                <h4>Driver to Pickup</h4>
-                <p id="liveDriverPickupEta">--</p>
-              </div>
-            </div>
-            <div class="route-message" id="liveRouteMessage">Waiting for active booking.</div>
-          </div>
+          <p class="muted-note" style="margin-top:12px;">NDIS still shows the real fare, but payment mode stays invoice / referral.</p>
         </div>
       </div>
 
-      <div id="loginSection" class="login-box">
-        <div class="section-head" style="margin-bottom:14px;">
-          <div>
-            <h2>Login / Role Switch</h2>
-            <p>This single-file version uses role simulation plus localStorage. Use the same browser for Passenger and Admin.</p>
+      <div class="list-card">
+        <h3>My Trips</h3>
+        <div class="map-panel" style="margin-top:14px;">
+          <h3 style="font-size:18px;">Passenger Live Map</h3>
+          <p>Track pickup, destination, and driver location for your current trip.</p>
+          <div id="passengerMapFrame" class="real-map-frame"></div>
+          <div class="route-stats">
+            <div class="route-stat">
+              <h4>Route</h4>
+              <p id="passengerRouteDistance">--</p>
+            </div>
+            <div class="route-stat">
+              <h4>ETA</h4>
+              <p id="passengerRouteEta">--</p>
+            </div>
+            <div class="route-stat">
+              <h4>Driver to Pickup</h4>
+              <p id="passengerDriverPickupEta">--</p>
+            </div>
           </div>
-          <div class="section-badge">LocalStorage Mode</div>
+          <div class="route-message" id="passengerRouteMessage">Waiting for your trip.</div>
+        </div>
+        <p>See current and past trip activity with driver, fare, and payment status.</p>
+        <div id="riderTrips">
+          <p class="empty-text">No trips yet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="driver" class="section">
+    <div class="section-head">
+      <div>
+        <h2>Driver App</h2>
+        <p>Drivers only receive trips after Admin assigns them.</p>
+        <div id="driverSelectedText" class="driver-selected">No driver selected.</div>
+      </div>
+      <div class="section-badge">Driver View</div>
+    </div>
+
+    <div class="driver-layout">
+      <div class="mini-panel">
+        <h3>Driver Workflow</h3>
+        <p>Receive assigned trip, track location, and let trip status update from GPS.</p>
+        <div class="hero-steps" style="margin-top:14px; grid-template-columns:repeat(4,1fr);">
+          <div class="step-chip"><strong>Assigned</strong>Ready to begin</div>
+          <div class="step-chip"><strong>En Route</strong>Heading to pickup</div>
+          <div class="step-chip"><strong>Arrived</strong>At pickup point</div>
+          <div class="step-chip"><strong>Complete</strong>Trip closed</div>
         </div>
 
-        <div class="login-grid">
-          <input id="authName" type="text" placeholder="Your name">
-          <input id="authEmail" type="email" placeholder="Email address">
-          <select id="authRole">
-            <option value="">Select role</option>
-            <option value="Passenger">Passenger</option>
-            <option value="Driver">Driver</option>
-            <option value="Admin">Admin</option>
+        <div class="gps-row">
+          <button class="driver" onclick="startGPS()">Start Live GPS</button>
+          <button class="delete-btn" onclick="stopGPS()">Stop GPS</button>
+          <div class="pill" style="background:rgba(20,184,166,.14);border-color:rgba(20,184,166,.18);">GPS LIVE</div>
+        </div>
+        <div class="gps-status" id="gpsStatusText">GPS stopped.</div>
+      </div>
+
+      <div class="list-card">
+        <h3>My Trips</h3>
+        <p>Only trips assigned by Admin are shown below.</p>
+        <div class="map-panel" style="margin-top:14px;">
+          <h3 style="font-size:18px;">Driver Route Map</h3>
+          <p>View the live route from pickup to destination.</p>
+          <div id="driverMapFrame" class="real-map-frame"></div>
+          <div class="route-stats">
+            <div class="route-stat">
+              <h4>Route</h4>
+              <p id="driverRouteDistance">--</p>
+            </div>
+            <div class="route-stat">
+              <h4>ETA</h4>
+              <p id="driverRouteEta">--</p>
+            </div>
+            <div class="route-stat">
+              <h4>Driver to Pickup</h4>
+              <p id="driverDriverPickupEta">--</p>
+            </div>
+          </div>
+          <div class="route-message" id="driverRouteMessage">Waiting for assigned trip.</div>
+        </div>
+        <div id="driverTrips">
+          <p class="empty-text">No assigned trips yet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="admin" class="section">
+    <div class="section-head">
+      <div>
+        <h2>Admin Panel</h2>
+        <p>Receive pending bookings, assign drivers, edit bookings, monitor statuses, review payment state, and export NDIS invoices.</p>
+      </div>
+      <div class="section-badge">Operations View</div>
+    </div>
+
+    <div class="admin-stats">
+      <div class="stat-card"><h4>Total Bookings</h4><p id="totalBookings">0</p></div>
+      <div class="stat-card"><h4>Pending</h4><p id="pendingBookings">0</p></div>
+      <div class="stat-card"><h4>Assigned</h4><p id="assignedBookings">0</p></div>
+      <div class="stat-card"><h4>In Progress</h4><p id="progressBookings">0</p></div>
+      <div class="stat-card"><h4>Completed</h4><p id="completedBookings">0</p></div>
+    </div>
+
+    <div class="today-stats">
+      <div class="stat-card"><h4>Today's Trips</h4><p id="todayTrips">0</p></div>
+      <div class="stat-card"><h4>Today's Pending</h4><p id="todayPending">0</p></div>
+      <div class="stat-card"><h4>Today's Assigned</h4><p id="todayAssigned">0</p></div>
+      <div class="stat-card"><h4>Today's Completed</h4><p id="todayCompleted">0</p></div>
+    </div>
+
+    <div class="admin-grid">
+      <div class="panel-box">
+        <h3>Active Booking Requests</h3>
+
+        <div class="side-card" style="margin-top:0; margin-bottom:14px; background:rgba(20,184,166,0.08); border-color:rgba(20,184,166,0.14);">
+          <h3 style="font-size:16px; margin-bottom:6px;">Smart Driver Assignment</h3>
+          <p style="margin-bottom:10px;">UVEL recommends the least busy driver based on current active trips.</p>
+          <div class="pill" id="recommendedDriverPill">Recommended: --</div>
+        </div>
+
+        <div class="admin-filters">
+          <input id="searchInput" type="text" placeholder="Search passenger, pickup, destination, booking ID" oninput="renderAdminBookings()">
+          <select id="statusFilter" onchange="renderAdminBookings()">
+            <option value="All">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Assigned">Assigned</option>
+            <option value="Driver En Route">Driver En Route</option>
+            <option value="Arrived">Arrived</option>
+            <option value="In Progress">In Progress</option>
           </select>
-          <input id="authDriverName" type="text" placeholder="Driver name (for Driver role)">
+          <select id="driverFilter" onchange="renderAdminBookings()">
+            <option value="All">All Drivers</option>
+            <option value="Unassigned">Unassigned</option>
+          </select>
+          <input id="dateFilter" type="date" onchange="renderAdminBookings()">
+          <button class="filter-btn" onclick="clearAdminFilters()">Clear</button>
         </div>
 
-        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:18px;">
-          <button class="ride" onclick="loginUser()">Enter App</button>
-          <button class="delete-btn" onclick="clearAllBookings()">Clear Saved Bookings</button>
+        <div class="export-bar">
+          <button class="export-btn" onclick="exportActiveBookingsCSV()">Export Active CSV</button>
+          <button class="export-btn" onclick="exportCompletedTripsCSV()">Export Completed CSV</button>
+          <button class="pdf-btn" onclick="printAdminReport()">Export PDF</button>
         </div>
 
-        <div id="authMessage" class="auth-message">Success</div>
-        <div id="authError" class="error-box">Error</div>
-
-        <div class="helper-text">
-          Test method:<br>
-          Passenger creates request → open another tab in same browser → login as Admin → Admin sees pending request.
-        </div>
-      </div>
-
-      <div id="ride" class="section">
-        <div class="section-head">
-          <div>
-            <h2>Ride App</h2>
-            <p>Create a trip request, view payment mode, and track your current trip.</p>
-          </div>
-          <div class="section-badge">Passenger View</div>
-        </div>
-
-        <div class="ride-layout">
-          <div>
-            <div class="form-card">
-              <h3>Book a Ride</h3>
-              <p>Enter trip details below to create a new booking.</p>
-
-              <div class="form-grid">
-                <input id="passengerName" type="text" placeholder="Passenger name">
-                <select id="tripType">
-                  <option value="Normal">Normal</option>
-                  <option value="NDIS">NDIS</option>
-                </select>
-                <input id="pickup" type="text" placeholder="Pickup location">
-                <input id="destination" type="text" placeholder="Destination">
-                <input id="tripDate" type="date">
-                <input id="tripTime" type="time">
-                <textarea id="tripNotes" class="full-width" placeholder="Notes (wheelchair, assistance, escort, special instructions)"></textarea>
-              </div>
-
-              <button class="request-btn ride-submit" onclick="requestRide()">Request Ride</button>
-              <div id="successBox" class="success-box">Ride requested successfully ✅</div>
-              <div class="muted-note">Requests now go to Admin as Pending first and are saved in localStorage.</div>
-            </div>
-
-            <div class="payments-panel">
-              <div class="payments-top">
-                <h3 style="margin:0;">Payments</h3>
-                <div class="pill" style="background:rgba(124,58,237,.18);border-color:rgba(124,58,237,.25);">Stripe-ready</div>
-              </div>
-              <p style="margin-top:10px;">Normal trips can be paid by card. NDIS trips are marked as referral / invoice and do not require card payment in this MVP.</p>
-              <div class="payments-grid">
-                <div class="payment-box">
-                  <h4>Estimated fare</h4>
-                  <p id="previewFare">AUD 0.00</p>
-                </div>
-                <div class="payment-box">
-                  <h4>Payment mode</h4>
-                  <p id="previewPaymentMode">Stripe card</p>
-                </div>
-              </div>
-              <p class="muted-note" style="margin-top:12px;">NDIS still shows the real fare, but payment mode stays invoice / referral.</p>
-            </div>
-          </div>
-
-          <div class="list-card">
-            <h3>My Trips</h3>
-            <div class="map-panel" style="margin-top:14px;">
-              <h3 style="font-size:18px;">Passenger Live Map</h3>
-              <p>Track pickup, destination, and driver location for your current trip.</p>
-              <div id="passengerMapFrame" class="real-map-frame"></div>
-              <div class="route-stats">
-                <div class="route-stat">
-                  <h4>Route</h4>
-                  <p id="passengerRouteDistance">--</p>
-                </div>
-                <div class="route-stat">
-                  <h4>ETA</h4>
-                  <p id="passengerRouteEta">--</p>
-                </div>
-                <div class="route-stat">
-                  <h4>Driver to Pickup</h4>
-                  <p id="passengerDriverPickupEta">--</p>
-                </div>
-              </div>
-              <div class="route-message" id="passengerRouteMessage">Waiting for your trip.</div>
-            </div>
-            <p>See current and past trip activity with driver, fare, and payment status.</p>
-            <div id="riderTrips">
-              <p class="empty-text">No trips yet.</p>
-            </div>
-          </div>
+        <div id="bookingList">
+          <p class="empty-text">No bookings yet.</p>
         </div>
       </div>
 
-      <div id="driver" class="section">
-        <div class="section-head">
-          <div>
-            <h2>Driver App</h2>
-            <p>Drivers only receive trips after Admin assigns them.</p>
-            <div id="driverSelectedText" class="driver-selected">No driver selected.</div>
-          </div>
-          <div class="section-badge">Driver View</div>
+      <div class="panel-box">
+        <h3>Completed Trip History</h3>
+        <div id="tripHistoryList">
+          <p class="empty-text">No completed trips yet.</p>
         </div>
+      </div>
+    </div>
 
-        <div class="driver-layout">
-          <div class="mini-panel">
-            <h3>Driver Workflow</h3>
-            <p>Receive assigned trip, track location, and let trip status update from GPS.</p>
-            <div class="hero-steps" style="margin-top:14px; grid-template-columns:repeat(4,1fr);">
-              <div class="step-chip"><strong>Assigned</strong>Ready to begin</div>
-              <div class="step-chip"><strong>En Route</strong>Heading to pickup</div>
-              <div class="step-chip"><strong>Arrived</strong>At pickup point</div>
-              <div class="step-chip"><strong>Complete</strong>Trip closed</div>
-            </div>
-
-            <div class="gps-row">
-              <button class="driver" onclick="startGPS()">Start Live GPS</button>
-              <button class="delete-btn" onclick="stopGPS()">Stop GPS</button>
-              <div class="pill" style="background:rgba(20,184,166,.14);border-color:rgba(20,184,166,.18);">GPS LIVE</div>
-            </div>
-            <div class="gps-status" id="gpsStatusText">GPS stopped.</div>
-          </div>
-
-          <div class="list-card">
-            <h3>My Trips</h3>
-            <p>Only trips assigned by Admin are shown below.</p>
-            <div class="map-panel" style="margin-top:14px;">
-              <h3 style="font-size:18px;">Driver Route Map</h3>
-              <p>View the live route from pickup to destination.</p>
-              <div id="driverMapFrame" class="real-map-frame"></div>
-              <div class="route-stats">
-                <div class="route-stat">
-                  <h4>Route</h4>
-                  <p id="driverRouteDistance">--</p>
-                </div>
-                <div class="route-stat">
-                  <h4>ETA</h4>
-                  <p id="driverRouteEta">--</p>
-                </div>
-                <div class="route-stat">
-                  <h4>Driver to Pickup</h4>
-                  <p id="driverDriverPickupEta">--</p>
-                </div>
-              </div>
-              <div class="route-message" id="driverRouteMessage">Waiting for assigned trip.</div>
-            </div>
-            <div id="driverTrips">
-              <p class="empty-text">No assigned trips yet.</p>
-            </div>
-          </div>
+    <div class="admin-grid" style="margin-top:20px;">
+      <div class="panel-box">
+        <h3>Driver Management</h3>
+        <p style="margin-bottom:12px;">See all drivers and their current trip load.</p>
+        <div id="adminDriversList">
+          <p class="empty-text">No drivers found.</p>
         </div>
       </div>
 
-      <div id="admin" class="section">
-        <div class="section-head">
-          <div>
-            <h2>Admin Panel</h2>
-            <p>Receive pending bookings, assign drivers, edit bookings, monitor statuses, and review payment state.</p>
-          </div>
-          <div class="section-badge">Operations View</div>
-        </div>
-
-        <div class="admin-stats">
-          <div class="stat-card"><h4>Total Bookings</h4><p id="totalBookings">0</p></div>
-          <div class="stat-card"><h4>Pending</h4><p id="pendingBookings">0</p></div>
-          <div class="stat-card"><h4>Assigned</h4><p id="assignedBookings">0</p></div>
-          <div class="stat-card"><h4>In Progress</h4><p id="progressBookings">0</p></div>
-          <div class="stat-card"><h4>Completed</h4><p id="completedBookings">0</p></div>
-        </div>
-
-        <div class="today-stats">
-          <div class="stat-card"><h4>Today's Trips</h4><p id="todayTrips">0</p></div>
-          <div class="stat-card"><h4>Today's Pending</h4><p id="todayPending">0</p></div>
-          <div class="stat-card"><h4>Today's Assigned</h4><p id="todayAssigned">0</p></div>
-          <div class="stat-card"><h4>Today's Completed</h4><p id="todayCompleted">0</p></div>
-        </div>
-
-        <div class="admin-grid">
-          <div class="panel-box">
-            <h3>Active Booking Requests</h3>
-
-            <div class="side-card" style="margin-top:0; margin-bottom:14px; background:rgba(20,184,166,0.08); border-color:rgba(20,184,166,0.14);">
-              <h3 style="font-size:16px; margin-bottom:6px;">Smart Driver Assignment</h3>
-              <p style="margin-bottom:10px;">UVEL recommends the least busy driver based on current active trips.</p>
-              <div class="pill" id="recommendedDriverPill">Recommended: --</div>
-            </div>
-
-            <div class="admin-filters">
-              <input id="searchInput" type="text" placeholder="Search passenger, pickup, destination, booking ID" oninput="renderAdminBookings()">
-              <select id="statusFilter" onchange="renderAdminBookings()">
-                <option value="All">All Statuses</option>
-                <option value="Pending">Pending</option>
-                <option value="Assigned">Assigned</option>
-                <option value="Driver En Route">Driver En Route</option>
-                <option value="Arrived">Arrived</option>
-                <option value="In Progress">In Progress</option>
-              </select>
-              <select id="driverFilter" onchange="renderAdminBookings()">
-                <option value="All">All Drivers</option>
-                <option value="Unassigned">Unassigned</option>
-              </select>
-              <input id="dateFilter" type="date" onchange="renderAdminBookings()">
-              <button class="filter-btn" onclick="clearAdminFilters()">Clear</button>
-            </div>
-
-            <div class="export-bar">
-              <button class="export-btn" onclick="exportActiveBookingsCSV()">Export Active CSV</button>
-              <button class="export-btn" onclick="exportCompletedTripsCSV()">Export Completed CSV</button>
-              <button class="pdf-btn" onclick="printAdminReport()">Export PDF</button>
-            </div>
-
-            <div id="bookingList">
-              <p class="empty-text">No bookings yet.</p>
-            </div>
-          </div>
-
-          <div class="panel-box">
-            <h3>Completed Trip History</h3>
-            <div id="tripHistoryList">
-              <p class="empty-text">No completed trips yet.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="admin-grid" style="margin-top:20px;">
-          <div class="panel-box">
-            <h3>Driver Management</h3>
-            <p style="margin-bottom:12px;">See all drivers and their current trip load.</p>
-            <div id="adminDriversList">
-              <p class="empty-text">No drivers found.</p>
-            </div>
-          </div>
-
-          <div class="panel-box">
-            <h3>Passenger Management</h3>
-            <p style="margin-bottom:12px;">See all passengers and how many bookings they created.</p>
-            <div id="adminPassengersList">
-              <p class="empty-text">No passengers found.</p>
-            </div>
-          </div>
+      <div class="panel-box">
+        <h3>Passenger Management</h3>
+        <p style="margin-bottom:12px;">See all passengers and how many bookings they created.</p>
+        <div id="adminPassengersList">
+          <p class="empty-text">No passengers found.</p>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div class="footer-note">UVEL full localStorage single-file version with Edit, Auto Assign, searchable driver selector, GPS auto status, and NDIS invoice pricing.</div>
-    </main>
+  <div class="footer-note">UVEL full localStorage single-file version with NDIS invoice PDF export, notifications, Edit, Auto Assign, searchable driver selector, GPS auto status, and NDIS invoice pricing.</div>
+</main>
+```
+
   </div>
 
   <div class="modal" id="editModal">
@@ -695,6 +729,8 @@
     </div>
   </div>
 
+  <div id="toastContainer"></div>
+
   <script>
     let liveBookings = [];
     let currentRole = "";
@@ -704,7 +740,8 @@
     let gpsWatchId = null;
     let editingBookingId = "";
 
-    const UVEL_BOOKINGS_KEY = "uvel_bookings_v2";
+    const UVEL_BOOKINGS_KEY = "uvel_bookings_v4";
+    const UVEL_ABN = "14688659912";
 
     function loadBookingsFromStorage() {
       try {
@@ -730,11 +767,62 @@
       refreshAllMaps();
     }
 
+    function showToast(title, message) {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.innerHTML = `
+        <div class="toast-title">${title}</div>
+        <div class="toast-sub">${message}</div>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(-6px)";
+        toast.style.transition = "all 0.2s ease";
+        setTimeout(() => toast.remove(), 200);
+      }, 3200);
+    }
+
     window.addEventListener("storage", (event) => {
       if (event.key === UVEL_BOOKINGS_KEY) {
+        const before = [...liveBookings];
         loadBookingsFromStorage();
         renderEverything();
         refreshAllMaps();
+
+        if (currentRole === "Admin") {
+          const oldIds = new Set(before.map(b => b.id));
+          const newBookings = liveBookings.filter(b => !oldIds.has(b.id));
+          newBookings.forEach(b => {
+            showToast("New Booking Request", `${b.passengerName} requested ${b.pickup} → ${b.destination}`);
+          });
+        }
+
+        if (currentRole === "Passenger" && currentUser) {
+          liveBookings
+            .filter(b => b.createdBy === currentUser.id && b.driver)
+            .forEach(b => {
+              const old = before.find(x => x.id === b.id);
+              if (old && !old.driver && b.driver) {
+                showToast("Driver Assigned", `${b.driver} has been assigned to your trip.`);
+              }
+            });
+        }
+
+        if (currentRole === "Driver" && currentDriver) {
+          liveBookings
+            .filter(b => b.driver === currentDriver)
+            .forEach(b => {
+              const old = before.find(x => x.id === b.id);
+              if (!old || old.driver !== currentDriver) {
+                showToast("New Assigned Trip", `${b.passengerName}: ${b.pickup} → ${b.destination}`);
+              }
+            });
+        }
       }
     });
 
@@ -851,7 +939,6 @@
           console.warn("Routing endpoint failed:", e);
         }
       }
-
       return null;
     }
 
@@ -1230,13 +1317,16 @@
       };
 
       liveBookings.unshift(booking);
+      syncAndRenderBookings();
 
       document.getElementById("successBox").style.display = "block";
       setTimeout(() => {
         document.getElementById("successBox").style.display = "none";
       }, 2500);
 
-      syncAndRenderBookings();
+      if (currentRole === "Passenger") {
+        showToast("Ride Requested", "Your request was sent to Admin as Pending.");
+      }
     }
 
     function getDriverLoad(driverName) {
@@ -1407,6 +1497,10 @@
             <button class="secondary" onclick="focusBookingOnMap('${booking.id}')">Show on Map</button>
             <button class="start-btn" onclick="moveBookingStatus('${booking.id}', 'In Progress')">Mark In Progress</button>
             <button class="complete-btn" onclick="moveBookingStatus('${booking.id}', 'Completed')">Mark Completed</button>
+            ${booking.tripType === "NDIS"
+              ? `<button class="pdf-btn" onclick="generateNDISInvoicePDF('${booking.id}')">Invoice PDF</button>`
+              : ""
+            }
             <button class="delete-btn" onclick="deleteBooking('${booking.id}')">Delete</button>
           </div>
         </div>
@@ -1429,6 +1523,31 @@
       booking.updatedAt = new Date().toISOString();
 
       syncAndRenderBookings();
+
+      if (currentRole === "Admin") {
+        showToast("Driver Assigned", `${driverName} assigned to ${booking.passengerName}.`);
+      }
+    }
+
+    function assignRecommendedDriver(bookingId) {
+      const booking = liveBookings.find(b => b.id === bookingId);
+      if (!booking) return;
+
+      const rec = getRecommendedDriver();
+      if (!rec) {
+        alert("No driver available.");
+        return;
+      }
+
+      booking.driver = rec;
+      booking.status = "Assigned";
+      booking.updatedAt = new Date().toISOString();
+
+      syncAndRenderBookings();
+
+      if (currentRole === "Admin") {
+        showToast("Auto Assign Complete", `${rec} assigned to ${booking.passengerName}.`);
+      }
     }
 
     function openEditBooking(bookingId) {
@@ -1477,6 +1596,94 @@
 
       closeEditModal();
       syncAndRenderBookings();
+
+      if (currentRole === "Admin") {
+        showToast("Booking Updated", `${booking.passengerName}'s trip details were updated.`);
+      }
+    }
+
+    function generateNDISInvoicePDF(bookingId) {
+      const booking = liveBookings.find(b => b.id === bookingId);
+      if (!booking) return;
+
+      if (booking.tripType !== "NDIS") {
+        alert("Invoice PDF is only for NDIS bookings.");
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const invoiceNumber = `INV-${booking.id}`;
+      const issueDate = new Date().toLocaleDateString();
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(22);
+      doc.text("UVEL", 20, 20);
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.text("Reliable community transport", 20, 27);
+      doc.text(`ABN: ${UVEL_ABN}`, 20, 33);
+
+      doc.setDrawColor(200, 210, 220);
+      doc.line(20, 38, 190, 38);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.text("NDIS Invoice", 20, 48);
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Invoice Number: ${invoiceNumber}`, 20, 58);
+      doc.text(`Issue Date: ${issueDate}`, 20, 65);
+      doc.text(`Payment Mode: NDIS / Invoice`, 20, 72);
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Participant Details", 20, 86);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Name: ${booking.passengerName || "-"}`, 20, 94);
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Trip Details", 20, 108);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Pickup: ${booking.pickup || "-"}`, 20, 116);
+      doc.text(`Destination: ${booking.destination || "-"}`, 20, 123);
+      doc.text(`Trip Date: ${booking.tripDate || "-"}`, 20, 130);
+      doc.text(`Trip Time: ${booking.tripTime || "-"}`, 20, 137);
+      doc.text(`Driver: ${booking.driver || "Unassigned"}`, 20, 144);
+      doc.text(`Status: ${booking.status || "-"}`, 20, 151);
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Charges", 20, 165);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Estimated Fare: AUD ${Number(booking.fareAUD || 0).toFixed(2)}`, 20, 173);
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Notes", 20, 187);
+      doc.setFont("helvetica", "normal");
+
+      const notesText = booking.notes && booking.notes.trim()
+        ? booking.notes
+        : "No additional notes provided.";
+
+      const splitNotes = doc.splitTextToSize(notesText, 170);
+      doc.text(splitNotes, 20, 195);
+
+      const footerY = 250;
+      doc.setDrawColor(220, 220, 220);
+      doc.line(20, footerY, 190, footerY);
+
+      doc.setFontSize(10);
+      doc.text("Generated by UVEL Admin Panel", 20, footerY + 8);
+      doc.text("For NDIS referral / invoice processing", 20, footerY + 14);
+      doc.text(`ABN: ${UVEL_ABN}`, 20, footerY + 20);
+
+      doc.save(`UVEL_NDIS_Invoice_${booking.id}.pdf`);
+
+      if (currentRole === "Admin") {
+        showToast("Invoice PDF Ready", `NDIS invoice downloaded for ${booking.passengerName}.`);
+      }
     }
 
     function renderTripHistory() {
@@ -1653,23 +1860,6 @@
       renderAdminPassengers();
     }
 
-    function assignRecommendedDriver(bookingId) {
-      const booking = liveBookings.find(b => b.id === bookingId);
-      if (!booking) return;
-
-      const rec = getRecommendedDriver();
-      if (!rec) {
-        alert("No driver available.");
-        return;
-      }
-
-      booking.driver = rec;
-      booking.status = "Assigned";
-      booking.updatedAt = new Date().toISOString();
-
-      syncAndRenderBookings();
-    }
-
     function moveBookingStatus(bookingId, status) {
       const booking = liveBookings.find(b => b.id === bookingId);
       if (!booking) return;
@@ -1678,15 +1868,28 @@
       booking.updatedAt = new Date().toISOString();
 
       if (status === "Completed") {
-        booking.paymentStatus = booking.tripType === "NDIS" ? "NDIS / Invoice" : booking.paymentStatus;
+        booking.paymentStatus = booking.tripType === "NDIS"
+          ? "NDIS / Invoice"
+          : booking.paymentStatus;
       }
 
       syncAndRenderBookings();
+
+      if (currentRole === "Admin") {
+        showToast("Status Updated", `${booking.passengerName} → ${status}`);
+      }
+
+      if (currentRole === "Driver") {
+        showToast("Trip Status", `Booking moved to ${status}`);
+      }
     }
 
     function deleteBooking(bookingId) {
       liveBookings = liveBookings.filter(b => b.id !== bookingId);
       syncAndRenderBookings();
+      if (currentRole === "Admin") {
+        showToast("Booking Deleted", `Booking ${bookingId} was removed.`);
+      }
     }
 
     function payWithStripe(bookingId) {
@@ -1702,6 +1905,10 @@
       booking.updatedAt = new Date().toISOString();
 
       syncAndRenderBookings();
+
+      if (currentRole === "Passenger") {
+        showToast("Payment Successful", `Payment recorded for booking ${booking.id}.`);
+      }
     }
 
     function clearAllBookings() {
@@ -1856,5 +2063,6 @@
       });
     });
   </script>
+
 </body>
 </html>
