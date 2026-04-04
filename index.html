@@ -398,6 +398,10 @@
       overflow: hidden;
     }
 
+    #heroMapPanel {
+      display: none;
+    }
+
     .route-meta {
       margin-top: 12px;
       display: grid;
@@ -937,7 +941,7 @@
               <span><span class="dot" style="background:#3b82f6"></span>Completed rides</span>
             </div>
 
-            <div class="map-panel">
+            <div class="map-panel" id="heroMapPanel">
               <h3>Live Trip Map</h3>
               <p>Interactive map with pickup, destination, and driver simulation.</p>
               <div id="liveMapFrame" class="real-map-frame"></div>
@@ -2051,6 +2055,12 @@
       });
     }
 
+    function updateHeroMapVisibility() {
+      const heroMapPanel = document.getElementById("heroMapPanel");
+      if (!heroMapPanel) return;
+      heroMapPanel.style.display = currentRole === "Admin" ? "block" : "none";
+    }
+
     function applyRoleUI() {
       const sessionBar = document.getElementById("sessionBar");
       const navButtons = document.getElementById("navButtons");
@@ -2071,6 +2081,7 @@
         driverSection.style.display = "none";
         adminSection.style.display = "none";
         updateQuickActions();
+        updateHeroMapVisibility();
         return;
       }
 
@@ -2078,6 +2089,7 @@
       navButtons.style.display = "grid";
       loginSection.style.display = "none";
       roleBadge.textContent = `Role: ${currentRole}${currentRole === 'Driver' && currentDriver ? ' (' + currentDriver + ')' : ''}`;
+      updateHeroMapVisibility();
 
       rideNavBtn.style.display = currentRole === "Passenger" ? "flex" : "none";
       driverNavBtn.style.display = currentRole === "Driver" ? "flex" : "none";
