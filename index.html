@@ -1611,24 +1611,48 @@
       const cacheKey = `${startPoint.lat.toFixed(5)},${startPoint.lng.toFixed(5)}->${endPoint.lat.toFixed(5)},${endPoint.lng.toFixed(5)}`;
       if (routeCache.has(cacheKey)) return routeCache.get(cacheKey);
 
-      try {
-        const url = `https://router.project-osrm.org/route/v1/driving/${startPoint.lng},${startPoint.lat};${endPoint.lng},${endPoint.lat}?overview=full&geometries=geojson&steps=false`;
-        const response = await fetch(url, { headers: { Accept: "application/json" } });
-        const data = await response.json();
-        if (!data || !data.routes || !data.routes.length) return null;
+      const baseUrls = [
+        `https://router.project-osrm.org/route/v1/driving/${startPoint.lng},${startPoint.lat};${endPoint.lng},${endPoint.lat}?overview=full&geometries=geojson&steps=false`,
+        `https://routing.openstreetmap.de/routed-car/route/v1/driving/${startPoint.lng},${startPoint.lat};${endPoint.lng},${endPoint.lat}?overview=full&geometries=geojson&steps=false`
+      ];
 
-        const best = data.routes[0];
-        const route = {
-          coordinates: (best.geometry?.coordinates || []).map(([lng, lat]) => [lat, lng]),
-          distanceKm: Number(best.distance || 0) / 1000,
-          durationMin: Number(best.duration || 0) / 60
-        };
-        routeCache.set(cacheKey, route);
-        return route;
-      } catch (error) {
-        console.error("Road routing failed:", error);
-        return null;
+      for (const url of baseUrls) {
+        try {
+          const response = await fetch(url, {
+            method: "GET",
+            mode: "cors",
+            cache: "no-store",
+            headers: { Accept: "application/json" }
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const data = await response.json();
+          if (!data || !data.routes || !data.routes.length) {
+            throw new Error("No routes returned");
+          }
+
+          const best = data.routes[0];
+          const coords = (best.geometry?.coordinates || []).map(([lng, lat]) => [lat, lng]);
+          if (!coords.length) {
+            throw new Error("Route geometry missing");
+          }
+
+          const route = {
+            coordinates: coords,
+            distanceKm: Number(best.distance || 0) / 1000,
+            durationMin: Number(best.duration || 0) / 60
+          };
+          routeCache.set(cacheKey, route);
+          return route;
+        } catch (error) {
+          console.warn("Routing endpoint failed:", url, error);
+        }
       }
+
+      return null;
     }
 
     function formatDistance(km) {
@@ -1738,8 +1762,11 @@
         return;
       }
 
-      const pickupPoint = await geocodeLocation(booking.pickup);
-      const destinationPoint = await geocodeLocation(booking.destination);
+      const pickupQuery = booking.pickup && booking.pickup.toLowerCase().includes("sydney") ? booking.pickup : `${booking.pickup}, Sydney, NSW, Australia`;
+      const destinationQuery = booking.destination && booking.destination.toLowerCase().includes("sydney") ? booking.destination : `${booking.destination}, Sydney, NSW, Australia`;
+
+      const pickupPoint = await geocodeLocation(pickupQuery);
+      const destinationPoint = await geocodeLocation(destinationQuery);
 
       if (!pickupPoint || !destinationPoint) {
         store.map.setView([-33.8688, 151.2093], 11);
@@ -1799,7 +1826,7 @@
       fitMapToPoints(store, fitPoints);
 
       setRouteMeta(mapId, {
-        tripDistanceKm: tripRoute?.distanceKm ?? null,
+        tripDistanceKm: tripRoute?.distanceKm ?? (L.latLng(pickupPoint.lat, pickupPoint.lng).distanceTo(L.latLng(destinationPoint.lat, destinationPoint.lng)) / 1000),
         etaMin: tripRoute?.durationMin ?? null,
         driverToPickupMin: driverApproachRoute?.durationMin ?? null
       });
