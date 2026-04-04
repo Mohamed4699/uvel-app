@@ -620,6 +620,81 @@
     .driver-selected { margin-top: 8px; font-size: 15px; }
     .footer-note { text-align: center; font-size: 14px; padding: 4px 0 10px; }
 
+    .payment-card {
+      margin-top: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .payment-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .payment-badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      background: rgba(124,58,237,0.18);
+      border: 1px solid rgba(124,58,237,0.28);
+      color: #efe7ff;
+    }
+
+    .payment-estimate-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .payment-kpi {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .payment-kpi strong {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .payment-kpi span {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .pay-btn {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      color: white;
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .payment-status-paid {
+      color: #d8ffe5;
+    }
+
+    .auto-status-note {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+
     .admin-stats { grid-template-columns: repeat(5, 1fr); margin-bottom: 18px; }
     .today-stats { grid-template-columns: repeat(4, 1fr); margin-bottom: 20px; }
 
@@ -1018,6 +1093,25 @@
             <button class="request-btn ride-submit" onclick="requestRide()">Request Ride</button>
             <div id="successBox" class="success-box">Ride requested successfully ✅</div>
             <div class="muted-note">Tip: Add support details so dispatch and drivers can prepare better.</div>
+            <div class="payment-card">
+              <div class="payment-head">
+                <h3>Payments</h3>
+                <span class="payment-badge">Stripe-ready</span>
+              </div>
+              <p class="muted-note" style="margin-top:0;">Normal trips can be paid by card. NDIS trips are marked as referral / invoice and do not require card payment in this MVP.</p>
+              <div class="payment-estimate-grid">
+                <div class="payment-kpi">
+                  <strong>Estimated fare</strong>
+                  <span id="fareEstimateValue">AUD --</span>
+                </div>
+                <div class="payment-kpi">
+                  <strong>Payment mode</strong>
+                  <span id="paymentModeLabel">Stripe card</span>
+                </div>
+              </div>
+              <div class="muted-note" id="stripeModeNote">Live Stripe card charging needs a backend checkout endpoint or Firebase Cloud Function. This version is Stripe-ready and includes a safe demo fallback.</div>
+            </div>
+            <div class="auto-status-note">Auto trip status uses live driver GPS: nearby pickup → Arrived, leaving pickup → In Progress, nearby destination → Completed.</div>
           </div>
 
           <div class="list-card">
@@ -1121,6 +1215,8 @@
                 <option value="All">All Statuses</option>
                 <option value="Pending">Pending</option>
                 <option value="Assigned">Assigned</option>
+                <option value="Driver En Route">Driver En Route</option>
+                <option value="Arrived">Arrived</option>
                 <option value="In Progress">In Progress</option>
               </select>
               <select id="driverFilter" onchange="renderAdminBookings()">
@@ -1224,6 +1320,7 @@
     </div>
   </div>
 
+  <script src="https://js.stripe.com/v3/"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -1263,6 +1360,12 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
+    const STRIPE_PUBLISHABLE_KEY = "pk_test_replace_me";
+    const STRIPE_CHECKOUT_ENDPOINT = "";
+    const stripeClient = window.Stripe && STRIPE_PUBLISHABLE_KEY !== "pk_test_replace_me"
+      ? window.Stripe(STRIPE_PUBLISHABLE_KEY)
+      : null;
+
     let liveBookings = [];
     let driverUsers = [];
     let allUsers = [];
@@ -1296,8 +1399,8 @@
     }
 
     function getStatusClass(status) {
-      if (status === "Assigned") return "assigned";
-      if (status === "In Progress") return "progress";
+      if (status === "Assigned" || status === "Driver En Route") return "assigned";
+      if (status === "Arrived" || status === "In Progress") return "progress";
       if (status === "Completed") return "completed";
       return "pending";
     }
@@ -1331,7 +1434,7 @@
 
     function getDriverTrackingBooking() {
       if (!currentDriver) return null;
-      return liveBookings.find(trip => trip.driver === currentDriver && ["Assigned", "In Progress"].includes(trip.status)) || null;
+      return liveBookings.find(trip => trip.driver === currentDriver && ["Assigned", "Driver En Route", "Arrived", "In Progress"].includes(trip.status)) || null;
     }
 
     function distanceMeters(a, b) {
@@ -1374,6 +1477,8 @@
         driverSpeedKmh: speedKmh,
         driverTracking: true
       });
+
+      await maybeAutoAdvanceTripStatus(booking, coords, speedKmh);
 
       updateGpsUI(
         "tracking",
@@ -1466,14 +1571,14 @@
     function updateAdminStats() {
       const total = liveBookings.length;
       const pending = liveBookings.filter(b => b.status === "Pending").length;
-      const assigned = liveBookings.filter(b => b.status === "Assigned").length;
+      const assigned = liveBookings.filter(b => ["Assigned", "Driver En Route", "Arrived"].includes(b.status)).length;
       const progress = liveBookings.filter(b => b.status === "In Progress").length;
       const completed = liveBookings.filter(b => b.status === "Completed").length;
 
       const today = todayString();
       const todayTrips = liveBookings.filter(b => b.tripDate === today).length;
       const todayPending = liveBookings.filter(b => b.tripDate === today && b.status === "Pending").length;
-      const todayAssigned = liveBookings.filter(b => b.tripDate === today && b.status === "Assigned").length;
+      const todayAssigned = liveBookings.filter(b => b.tripDate === today && ["Assigned", "Driver En Route", "Arrived"].includes(b.status)).length;
       const todayCompleted = liveBookings.filter(b => b.tripDate === today && b.status === "Completed").length;
 
       document.getElementById("totalBookings").textContent = total;
@@ -1679,6 +1784,128 @@
       return (distanceKm / avgSpeedKmh) * 60;
     }
 
+    function calculateEstimatedFare(distanceKm, tripType = "Normal") {
+      if (tripType === "NDIS") return 0;
+      const safeKm = Math.max(1, Number(distanceKm) || 0);
+      const fare = 8 + (safeKm * 2.4);
+      return Math.round(fare * 100) / 100;
+    }
+
+    async function estimateTripDistanceKm(pickup, destination) {
+      if (!pickup || !destination) return null;
+      const pickupQuery = pickup.toLowerCase().includes("sydney") ? pickup : `${pickup}, Sydney, NSW, Australia`;
+      const destinationQuery = destination.toLowerCase().includes("sydney") ? destination : `${destination}, Sydney, NSW, Australia`;
+      const [pickupPoint, destinationPoint] = await Promise.all([
+        geocodeLocation(pickupQuery),
+        geocodeLocation(destinationQuery)
+      ]);
+      if (!pickupPoint || !destinationPoint) return null;
+      const route = await fetchRoadRoute(pickupPoint, destinationPoint);
+      if (route?.distanceKm != null) return route.distanceKm;
+      return L.latLng(pickupPoint.lat, pickupPoint.lng).distanceTo(L.latLng(destinationPoint.lat, destinationPoint.lng)) / 1000;
+    }
+
+    async function refreshFareEstimatePreview() {
+      const tripType = document.getElementById("tripType")?.value || "Normal";
+      const pickup = document.getElementById("pickup")?.value.trim() || "";
+      const destination = document.getElementById("destination")?.value.trim() || "";
+      const fareEl = document.getElementById("fareEstimateValue");
+      const modeEl = document.getElementById("paymentModeLabel");
+      if (!fareEl || !modeEl) return;
+      modeEl.textContent = tripType === "NDIS" ? "Referral / invoice" : "Stripe card";
+      if (!pickup || !destination) {
+        fareEl.textContent = tripType === "NDIS" ? "AUD 0.00" : "AUD --";
+        return;
+      }
+      fareEl.textContent = "Calculating…";
+      const distanceKm = await estimateTripDistanceKm(pickup, destination);
+      const fare = calculateEstimatedFare(distanceKm, tripType);
+      fareEl.textContent = `AUD ${fare.toFixed(2)}`;
+    }
+
+    async function maybeAutoAdvanceTripStatus(booking, coords, speedKmh) {
+      if (!booking || !coords) return;
+      try {
+        const pickupPoint = booking.pickupGeo || await geocodeLocation(booking.pickup?.toLowerCase().includes("sydney") ? booking.pickup : `${booking.pickup}, Sydney, NSW, Australia`);
+        const destinationPoint = booking.destinationGeo || await geocodeLocation(booking.destination?.toLowerCase().includes("sydney") ? booking.destination : `${booking.destination}, Sydney, NSW, Australia`);
+        if (!pickupPoint || !destinationPoint) return;
+
+        const driverPoint = { lat: coords.lat, lng: coords.lng };
+        const pickupDistanceM = distanceMeters(driverPoint, pickupPoint);
+        const destinationDistanceM = distanceMeters(driverPoint, destinationPoint);
+
+        const patch = {
+          pickupDistanceMeters: Math.round(pickupDistanceM),
+          destinationDistanceMeters: Math.round(destinationDistanceM)
+        };
+
+        let nextStatus = booking.status;
+        if (["Assigned", "Driver En Route"].includes(booking.status)) {
+          nextStatus = pickupDistanceM <= 250 ? "Arrived" : "Driver En Route";
+        } else if (booking.status === "Arrived") {
+          if ((speedKmh ?? 0) >= 8 && pickupDistanceM > 220) {
+            nextStatus = "In Progress";
+          }
+        } else if (booking.status === "In Progress") {
+          if (destinationDistanceM <= 180) {
+            nextStatus = "Completed";
+            patch.driverTracking = false;
+            patch.completedAt = new Date().toISOString();
+          }
+        }
+
+        if (nextStatus !== booking.status) {
+          patch.status = nextStatus;
+          patch.statusUpdatedAt = new Date().toISOString();
+        }
+
+        await updateDoc(doc(db, "bookings", booking.id), patch);
+      } catch (error) {
+        console.error("Auto status update failed:", error);
+      }
+    }
+
+    async function startStripeCheckout(booking) {
+      if (!booking) return;
+      if (booking.tripType === "NDIS") {
+        alert("NDIS trips use referral / invoice flow in this MVP.");
+        return;
+      }
+
+      if (stripeClient && STRIPE_CHECKOUT_ENDPOINT) {
+        try {
+          const response = await fetch(STRIPE_CHECKOUT_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              bookingId: booking.id,
+              amount: Math.round((Number(booking.fareEstimate || 0) || 0) * 100),
+              currency: "aud",
+              pickup: booking.pickup,
+              destination: booking.destination,
+              passengerName: booking.passengerName
+            })
+          });
+          const data = await response.json();
+          if (data.sessionId) {
+            await stripeClient.redirectToCheckout({ sessionId: data.sessionId });
+            return;
+          }
+        } catch (error) {
+          console.error("Stripe checkout init failed:", error);
+        }
+      }
+
+      const confirmed = window.confirm(`Stripe backend is not configured yet. Mark this trip as paid in demo mode for AUD ${(Number(booking.fareEstimate || 0) || 0).toFixed(2)}?`);
+      if (!confirmed) return;
+
+      await updateDoc(doc(db, "bookings", booking.id), {
+        paymentStatus: "Paid",
+        paymentMethod: "Stripe Demo",
+        paidAt: new Date().toISOString()
+      });
+    }
+
     function setRouteStatus(mapId, text) {
       const statusMap = {
         liveMapFrame: "liveMapStatus",
@@ -1876,17 +2103,17 @@
 
     function getCurrentPassengerBooking() {
       if (!currentUser) return null;
-      return liveBookings.find(trip => trip.createdBy === currentUser.uid && ["Pending", "Assigned", "In Progress"].includes(trip.status)) || null;
+      return liveBookings.find(trip => trip.createdBy === currentUser.uid && ["Pending", "Assigned", "Driver En Route", "Arrived", "In Progress"].includes(trip.status)) || null;
     }
 
     function getCurrentDriverBooking() {
       if (!currentDriver) return null;
-      return liveBookings.find(trip => trip.driver === currentDriver && ["Assigned", "In Progress"].includes(trip.status)) || null;
+      return liveBookings.find(trip => trip.driver === currentDriver && ["Assigned", "Driver En Route", "Arrived", "In Progress"].includes(trip.status)) || null;
     }
 
     function getAdminFocusedBooking() {
       if (selectedAdminBookingId) return liveBookings.find(b => b.id === selectedAdminBookingId) || null;
-      return liveBookings.find(b => ["Pending", "Assigned", "In Progress"].includes(b.status)) || null;
+      return liveBookings.find(b => ["Pending", "Assigned", "Driver En Route", "Arrived", "In Progress"].includes(b.status)) || null;
     }
 
     async function refreshAllMaps() {
@@ -1924,14 +2151,14 @@
         driverTrips.innerHTML = '<p class="empty-text">No driver selected.</p>';
         return;
       }
-      const myTrips = liveBookings.filter(trip => trip.driver === currentDriver && ["Assigned", "In Progress"].includes(trip.status));
+      const myTrips = liveBookings.filter(trip => trip.driver === currentDriver && ["Assigned", "Driver En Route", "Arrived", "In Progress"].includes(trip.status));
       if (!myTrips.length) {
         driverTrips.innerHTML = `<p class="empty-text">No trips assigned to ${currentDriver} yet.</p>`;
         return;
       }
       driverTrips.innerHTML = myTrips.map(trip => {
         let actionButton = "";
-        if (trip.status === "Assigned") actionButton = `<button class="start-btn" onclick="driverStartTrip('${trip.id}')">Start Trip</button>`;
+        if (["Assigned", "Driver En Route", "Arrived"].includes(trip.status)) actionButton = `<button class="start-btn" onclick="driverStartTrip('${trip.id}')">Start Trip</button>`;
         if (trip.status === "In Progress") actionButton = `<button class="complete-btn" onclick="driverCompleteTrip('${trip.id}')">Complete Trip</button>`;
         return `
           <div class="driver-card">
@@ -1942,6 +2169,7 @@
             <p><strong>Destination:</strong> ${trip.destination}</p>
             <p><strong>Date:</strong> ${trip.tripDate || "Not provided"}</p>
             <p><strong>Time:</strong> ${trip.tripTime || "Not provided"}</p>
+            <p><strong>Payment:</strong> ${trip.tripType === "NDIS" ? (trip.paymentStatus || "NDIS Invoice") : (trip.paymentStatus || "Unpaid")}</p>
             <p><strong>Notes:</strong> ${trip.notes || "None"}</p>
             <div class="status-row"><span class="status ${getStatusClass(trip.status)}">${trip.status}</span></div>
             <div class="action-row">${actionButton}</div>
@@ -2149,7 +2377,7 @@
             </div>`;
         }
 
-        if (booking.status === "Assigned") startControl = `<button class="start-btn" onclick="startTrip('${booking.id}')">Start Trip</button>`;
+        if (["Assigned", "Driver En Route", "Arrived"].includes(booking.status)) startControl = `<button class="start-btn" onclick="startTrip('${booking.id}')">Start Trip</button>`;
         if (booking.status === "In Progress") completeControl = `<button class="complete-btn" onclick="completeTrip('${booking.id}')">Mark Completed</button>`;
 
         const safeBooking = encodeURIComponent(JSON.stringify(booking).replace(/'/g, "&#39;"));
@@ -2236,7 +2464,7 @@
     };
 
     window.assignDriver = async function(bookingId, driverName) {
-      await updateDoc(doc(db, "bookings", bookingId), { driver: driverName, status: "Assigned" });
+      await updateDoc(doc(db, "bookings", bookingId), { driver: driverName, status: "Assigned", statusUpdatedAt: new Date().toISOString() });
       renderAdminBookings();
       refreshAllMaps();
     };
@@ -2251,22 +2479,34 @@
     };
 
     window.startTrip = async function(bookingId) {
-      await updateDoc(doc(db, "bookings", bookingId), { status: "In Progress" });
+      const booking = liveBookings.find(b => b.id === bookingId);
+      if (!booking) return;
+      if (booking.tripType !== "NDIS" && booking.paymentStatus !== "Paid") {
+        alert("Payment is required before starting a normal trip.");
+        return;
+      }
+      await updateDoc(doc(db, "bookings", bookingId), { status: "In Progress", statusUpdatedAt: new Date().toISOString() });
       syncDriverTrackingState();
     };
 
     window.completeTrip = async function(bookingId) {
-      await updateDoc(doc(db, "bookings", bookingId), { status: "Completed", driverTracking: false });
+      await updateDoc(doc(db, "bookings", bookingId), { status: "Completed", driverTracking: false, completedAt: new Date().toISOString(), statusUpdatedAt: new Date().toISOString() });
       syncDriverTrackingState();
     };
 
     window.driverStartTrip = async function(bookingId) {
-      await updateDoc(doc(db, "bookings", bookingId), { status: "In Progress" });
+      const booking = liveBookings.find(b => b.id === bookingId);
+      if (!booking) return;
+      if (booking.tripType !== "NDIS" && booking.paymentStatus !== "Paid") {
+        alert("Payment is required before starting a normal trip.");
+        return;
+      }
+      await updateDoc(doc(db, "bookings", bookingId), { status: "In Progress", statusUpdatedAt: new Date().toISOString() });
       syncDriverTrackingState();
     };
 
     window.driverCompleteTrip = async function(bookingId) {
-      await updateDoc(doc(db, "bookings", bookingId), { status: "Completed", driverTracking: false });
+      await updateDoc(doc(db, "bookings", bookingId), { status: "Completed", driverTracking: false, completedAt: new Date().toISOString(), statusUpdatedAt: new Date().toISOString() });
       syncDriverTrackingState();
     };
 
@@ -2408,6 +2648,14 @@
       }
 
       try {
+        const pickupQuery = pickup.toLowerCase().includes("sydney") ? pickup : `${pickup}, Sydney, NSW, Australia`;
+        const destinationQuery = destination.toLowerCase().includes("sydney") ? destination : `${destination}, Sydney, NSW, Australia`;
+        const [pickupGeo, destinationGeo, estimatedDistanceKm] = await Promise.all([
+          geocodeLocation(pickupQuery),
+          geocodeLocation(destinationQuery),
+          estimateTripDistanceKm(pickup, destination)
+        ]);
+        const fareEstimate = calculateEstimatedFare(estimatedDistanceKm, tripType);
         await addDoc(collection(db, "bookings"), {
           passengerName,
           tripType,
@@ -2418,8 +2666,15 @@
           notes,
           driver: "Unassigned",
           status: "Pending",
+          fareEstimate,
+          estimatedDistanceKm,
+          paymentStatus: tripType === "NDIS" ? "NDIS Invoice" : "Unpaid",
+          paymentMethod: tripType === "NDIS" ? "Invoice / Referral" : "",
+          pickupGeo,
+          destinationGeo,
           createdBy: currentUser.uid,
-          createdAt: serverTimestamp()
+          createdAt: serverTimestamp(),
+          statusUpdatedAt: new Date().toISOString()
         });
 
         document.getElementById("passengerName").value = "";
@@ -2433,11 +2688,23 @@
         const box = document.getElementById("successBox");
         box.style.display = "block";
         setTimeout(() => { box.style.display = "none"; }, 2500);
-        setTimeout(() => { refreshAllMaps(); }, 500);
+        setTimeout(() => { refreshAllMaps(); refreshFareEstimatePreview(); }, 500);
       } catch (error) {
         console.error(error);
         alert("Failed to request ride.");
       }
+    };
+
+
+    ["tripType", "pickup", "destination"].forEach(id => {
+      document.getElementById(id)?.addEventListener("change", refreshFareEstimatePreview);
+      document.getElementById(id)?.addEventListener("blur", refreshFareEstimatePreview);
+    });
+
+    window.payForBooking = async function(bookingId) {
+      const booking = liveBookings.find(b => b.id === bookingId && b.createdBy === currentUser?.uid);
+      if (!booking) return;
+      await startStripeCheckout(booking);
     };
 
     onAuthStateChanged(auth, async (user) => {
@@ -2447,6 +2714,7 @@
         currentDriver = "";
         stopDriverLocationTracking("Driver GPS tracking is idle.");
         applyRoleUI();
+        refreshFareEstimatePreview();
         return;
       }
 
