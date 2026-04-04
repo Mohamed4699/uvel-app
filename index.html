@@ -398,6 +398,35 @@
       overflow: hidden;
     }
 
+    .route-meta {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .route-pill {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+
+    .route-pill strong {
+      display: block;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .route-pill span {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
     .section {
       display: none;
       padding: 22px;
@@ -912,6 +941,7 @@
               <h3>Live Trip Map</h3>
               <p>Interactive map with pickup, destination, and driver simulation.</p>
               <div id="liveMapFrame" class="real-map-frame"></div>
+              <div id="liveMapMeta" class="route-meta"></div>
               <div class="map-legend">
                 <span><span class="dot" style="background:#22c55e"></span>Pickup</span>
                 <span><span class="dot" style="background:#ef4444"></span>Destination</span>
@@ -995,6 +1025,7 @@
               <h3 style="font-size:18px;">Passenger Live Map</h3>
               <p>Track pickup, destination, and driver location for the current trip.</p>
               <div id="passengerMapFrame" class="real-map-frame"></div>
+              <div id="passengerMapMeta" class="route-meta"></div>
             </div>
             <p>See current and past trip activity with driver and status updates.</p>
             <div id="riderTrips">
@@ -1038,6 +1069,7 @@
               </div>
               <p id="gpsStatusText" class="muted-note">Driver GPS tracking is idle.</p>
               <div id="driverMapFrame" class="real-map-frame"></div>
+              <div id="driverMapMeta" class="route-meta"></div>
             </div>
             <div id="driverTrips">
               <p class="empty-text">No assigned trips yet.</p>
@@ -1554,6 +1586,7 @@
     const destinationIcon = createEmojiIcon("🏁", "#dc2626");
     const driverIcon = createEmojiIcon("🚗", "#2563eb");
     const geocodeCache = new Map();
+    const routeCache = new Map();
 
     async function geocodeLocation(place) {
       if (!place) return null;
@@ -1573,6 +1606,71 @@
       }
     }
 
+    async function fetchRoadRoute(startPoint, endPoint) {
+      if (!startPoint || !endPoint) return null;
+      const cacheKey = `${startPoint.lat.toFixed(5)},${startPoint.lng.toFixed(5)}->${endPoint.lat.toFixed(5)},${endPoint.lng.toFixed(5)}`;
+      if (routeCache.has(cacheKey)) return routeCache.get(cacheKey);
+
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${startPoint.lng},${startPoint.lat};${endPoint.lng},${endPoint.lat}?overview=full&geometries=geojson&steps=false`;
+        const response = await fetch(url, { headers: { Accept: "application/json" } });
+        const data = await response.json();
+        if (!data || !data.routes || !data.routes.length) return null;
+
+        const best = data.routes[0];
+        const route = {
+          coordinates: (best.geometry?.coordinates || []).map(([lng, lat]) => [lat, lng]),
+          distanceKm: Number(best.distance || 0) / 1000,
+          durationMin: Number(best.duration || 0) / 60
+        };
+        routeCache.set(cacheKey, route);
+        return route;
+      } catch (error) {
+        console.error("Road routing failed:", error);
+        return null;
+      }
+    }
+
+    function formatDistance(km) {
+      if (km == null || Number.isNaN(km)) return "--";
+      return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+    }
+
+    function formatDuration(mins) {
+      if (mins == null || Number.isNaN(mins)) return "--";
+      if (mins < 1) return "< 1 min";
+      const rounded = Math.round(mins);
+      if (rounded < 60) return `${rounded} min`;
+      const hours = Math.floor(rounded / 60);
+      const minutes = rounded % 60;
+      return minutes ? `${hours}h ${minutes}m` : `${hours}h`;
+    }
+
+    function setRouteMeta(mapId, { tripDistanceKm = null, etaMin = null, driverToPickupMin = null } = {}) {
+      const metaMap = {
+        liveMapFrame: "liveMapMeta",
+        passengerMapFrame: "passengerMapMeta",
+        driverMapFrame: "driverMapMeta"
+      };
+      const el = document.getElementById(metaMap[mapId]);
+      if (!el) return;
+
+      el.innerHTML = `
+        <div class="route-pill">
+          <strong>Route</strong>
+          <span>${formatDistance(tripDistanceKm)}</span>
+        </div>
+        <div class="route-pill">
+          <strong>ETA</strong>
+          <span>${formatDuration(etaMin)}</span>
+        </div>
+        <div class="route-pill">
+          <strong>Driver to Pickup</strong>
+          <span>${formatDuration(driverToPickupMin)}</span>
+        </div>
+      `;
+    }
+
     function ensureMap(mapId) {
       if (mapStore[mapId]?.map) return mapStore[mapId];
       const map = L.map(mapId, { zoomControl: true }).setView([-33.8688, 151.2093], 11);
@@ -1586,6 +1684,7 @@
         destinationMarker: null,
         driverMarker: null,
         routeLine: null,
+        driverApproachLine: null,
         animationTimer: null
       };
       setTimeout(() => map.invalidateSize(), 250);
@@ -1593,7 +1692,7 @@
     }
 
     function clearMapObjects(store) {
-      ["pickupMarker", "destinationMarker", "driverMarker", "routeLine"].forEach(key => {
+      ["pickupMarker", "destinationMarker", "driverMarker", "routeLine", "driverApproachLine"].forEach(key => {
         if (store[key]) {
           store.map.removeLayer(store[key]);
           store[key] = null;
@@ -1635,6 +1734,7 @@
 
       if (!booking || !booking.pickup || !booking.destination) {
         store.map.setView([-33.8688, 151.2093], 11);
+        setRouteMeta(mapId, {});
         return;
       }
 
@@ -1643,6 +1743,7 @@
 
       if (!pickupPoint || !destinationPoint) {
         store.map.setView([-33.8688, 151.2093], 11);
+        setRouteMeta(mapId, {});
         return;
       }
 
@@ -1651,16 +1752,6 @@
 
       store.destinationMarker = L.marker([destinationPoint.lat, destinationPoint.lng], { icon: destinationIcon }).addTo(store.map)
         .bindPopup(`<strong>Destination</strong><br>${booking.destination}`);
-
-      store.routeLine = L.polyline([
-        [pickupPoint.lat, pickupPoint.lng],
-        [destinationPoint.lat, destinationPoint.lng]
-      ], {
-        color: "#3b82f6",
-        weight: 5,
-        opacity: 0.85,
-        dashArray: "10, 8"
-      }).addTo(store.map);
 
       const hasLiveDriver = typeof booking.driverLat === "number" && typeof booking.driverLng === "number";
       const startDriverPoint = hasLiveDriver ? {
@@ -1671,15 +1762,51 @@
         lng: pickupPoint.lng - 0.01
       };
 
+      const [tripRoute, driverApproachRoute] = await Promise.all([
+        fetchRoadRoute(pickupPoint, destinationPoint),
+        fetchRoadRoute(startDriverPoint, pickupPoint)
+      ]);
+
+      const routeCoords = tripRoute?.coordinates?.length
+        ? tripRoute.coordinates
+        : [[pickupPoint.lat, pickupPoint.lng], [destinationPoint.lat, destinationPoint.lng]];
+
+      store.routeLine = L.polyline(routeCoords, {
+        color: "#3b82f6",
+        weight: 5,
+        opacity: 0.9
+      }).addTo(store.map);
+
+      if (driverApproachRoute?.coordinates?.length) {
+        store.driverApproachLine = L.polyline(driverApproachRoute.coordinates, {
+          color: "#f59e0b",
+          weight: 4,
+          opacity: 0.9,
+          dashArray: "8, 8"
+        }).addTo(store.map);
+      }
+
       const driverPopupBits = [`<strong>Driver</strong>`, booking.driver || "Assigned driver"];
       if (booking.driverLocationUpdatedAt) driverPopupBits.push(`Updated: ${booking.driverLocationUpdatedAt}`);
       if (booking.driverSpeedKmh != null) driverPopupBits.push(`Speed: ${Number(booking.driverSpeedKmh).toFixed(1)} km/h`);
+      if (driverApproachRoute?.durationMin != null) driverPopupBits.push(`Pickup ETA: ${formatDuration(driverApproachRoute.durationMin)}`);
 
       store.driverMarker = L.marker([startDriverPoint.lat, startDriverPoint.lng], { icon: driverIcon }).addTo(store.map)
         .bindPopup(driverPopupBits.join("<br>"));
 
-      fitMapToPoints(store, [pickupPoint, destinationPoint, startDriverPoint]);
-      if (animate && !hasLiveDriver) animateDriver(store, startDriverPoint, pickupPoint);
+      const fitPoints = routeCoords.map(([lat, lng]) => ({ lat, lng }));
+      fitPoints.push(startDriverPoint);
+      fitMapToPoints(store, fitPoints);
+
+      setRouteMeta(mapId, {
+        tripDistanceKm: tripRoute?.distanceKm ?? null,
+        etaMin: tripRoute?.durationMin ?? null,
+        driverToPickupMin: driverApproachRoute?.durationMin ?? null
+      });
+
+      if (animate && !hasLiveDriver && !driverApproachRoute?.coordinates?.length) {
+        animateDriver(store, startDriverPoint, pickupPoint);
+      }
     }
 
     function getCurrentPassengerBooking() {
