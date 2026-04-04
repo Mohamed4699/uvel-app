@@ -942,6 +942,7 @@
               <p>Interactive map with pickup, destination, and driver simulation.</p>
               <div id="liveMapFrame" class="real-map-frame"></div>
               <div id="liveMapMeta" class="route-meta"></div>
+              <div id="liveMapStatus" class="muted-note">Waiting for route…</div>
               <div class="map-legend">
                 <span><span class="dot" style="background:#22c55e"></span>Pickup</span>
                 <span><span class="dot" style="background:#ef4444"></span>Destination</span>
@@ -1026,6 +1027,7 @@
               <p>Track pickup, destination, and driver location for the current trip.</p>
               <div id="passengerMapFrame" class="real-map-frame"></div>
               <div id="passengerMapMeta" class="route-meta"></div>
+              <div id="passengerMapStatus" class="muted-note">Waiting for route…</div>
             </div>
             <p>See current and past trip activity with driver and status updates.</p>
             <div id="riderTrips">
@@ -1070,6 +1072,7 @@
               <p id="gpsStatusText" class="muted-note">Driver GPS tracking is idle.</p>
               <div id="driverMapFrame" class="real-map-frame"></div>
               <div id="driverMapMeta" class="route-meta"></div>
+              <div id="driverMapStatus" class="muted-note">Waiting for route…</div>
             </div>
             <div id="driverTrips">
               <p class="empty-text">No assigned trips yet.</p>
@@ -1670,6 +1673,22 @@
       return minutes ? `${hours}h ${minutes}m` : `${hours}h`;
     }
 
+    function estimateDurationFromDistanceKm(distanceKm, avgSpeedKmh = 35) {
+      if (distanceKm == null || Number.isNaN(distanceKm)) return null;
+      if (!avgSpeedKmh) return null;
+      return (distanceKm / avgSpeedKmh) * 60;
+    }
+
+    function setRouteStatus(mapId, text) {
+      const statusMap = {
+        liveMapFrame: "liveMapStatus",
+        passengerMapFrame: "passengerMapStatus",
+        driverMapFrame: "driverMapStatus"
+      };
+      const el = document.getElementById(statusMap[mapId]);
+      if (el) el.textContent = text || "";
+    }
+
     function setRouteMeta(mapId, { tripDistanceKm = null, etaMin = null, driverToPickupMin = null } = {}) {
       const metaMap = {
         liveMapFrame: "liveMapMeta",
@@ -1759,6 +1778,7 @@
       if (!booking || !booking.pickup || !booking.destination) {
         store.map.setView([-33.8688, 151.2093], 11);
         setRouteMeta(mapId, {});
+        setRouteStatus(mapId, "Add pickup and destination to load the route.");
         return;
       }
 
@@ -1771,6 +1791,7 @@
       if (!pickupPoint || !destinationPoint) {
         store.map.setView([-33.8688, 151.2093], 11);
         setRouteMeta(mapId, {});
+        setRouteStatus(mapId, "Could not match one of the addresses. Try a more specific Sydney address.");
         return;
       }
 
@@ -1794,23 +1815,40 @@
         fetchRoadRoute(startDriverPoint, pickupPoint)
       ]);
 
-      const routeCoords = tripRoute?.coordinates?.length
+      const directTripDistanceKm = L.latLng(pickupPoint.lat, pickupPoint.lng).distanceTo(L.latLng(destinationPoint.lat, destinationPoint.lng)) / 1000;
+      const directDriverDistanceKm = L.latLng(startDriverPoint.lat, startDriverPoint.lng).distanceTo(L.latLng(pickupPoint.lat, pickupPoint.lng)) / 1000;
+
+      const tripRouteIsReal = Boolean(tripRoute?.coordinates?.length);
+      const driverApproachIsReal = Boolean(driverApproachRoute?.coordinates?.length);
+
+      const routeCoords = tripRouteIsReal
         ? tripRoute.coordinates
         : [[pickupPoint.lat, pickupPoint.lng], [destinationPoint.lat, destinationPoint.lng]];
 
       store.routeLine = L.polyline(routeCoords, {
-        color: "#3b82f6",
+        color: tripRouteIsReal ? "#3b82f6" : "#60a5fa",
         weight: 5,
-        opacity: 0.9
+        opacity: 0.9,
+        dashArray: tripRouteIsReal ? null : "10, 8"
       }).addTo(store.map);
 
-      if (driverApproachRoute?.coordinates?.length) {
-        store.driverApproachLine = L.polyline(driverApproachRoute.coordinates, {
-          color: "#f59e0b",
-          weight: 4,
-          opacity: 0.9,
-          dashArray: "8, 8"
-        }).addTo(store.map);
+      const driverApproachCoords = driverApproachIsReal
+        ? driverApproachRoute.coordinates
+        : [[startDriverPoint.lat, startDriverPoint.lng], [pickupPoint.lat, pickupPoint.lng]];
+
+      store.driverApproachLine = L.polyline(driverApproachCoords, {
+        color: "#f59e0b",
+        weight: 4,
+        opacity: 0.9,
+        dashArray: "8, 8"
+      }).addTo(store.map);
+
+      if (tripRouteIsReal && driverApproachIsReal) {
+        setRouteStatus(mapId, "Road routing loaded.");
+      } else if (tripRouteIsReal || driverApproachIsReal) {
+        setRouteStatus(mapId, "Partial road routing loaded. Some parts are using fallback.");
+      } else {
+        setRouteStatus(mapId, "Routing service unavailable. Showing fallback direct path.");
       }
 
       const driverPopupBits = [`<strong>Driver</strong>`, booking.driver || "Assigned driver"];
@@ -1826,9 +1864,9 @@
       fitMapToPoints(store, fitPoints);
 
       setRouteMeta(mapId, {
-        tripDistanceKm: tripRoute?.distanceKm ?? (L.latLng(pickupPoint.lat, pickupPoint.lng).distanceTo(L.latLng(destinationPoint.lat, destinationPoint.lng)) / 1000),
-        etaMin: tripRoute?.durationMin ?? null,
-        driverToPickupMin: driverApproachRoute?.durationMin ?? null
+        tripDistanceKm: tripRoute?.distanceKm ?? directTripDistanceKm,
+        etaMin: tripRoute?.durationMin ?? estimateDurationFromDistanceKm(directTripDistanceKm, 35),
+        driverToPickupMin: driverApproachRoute?.durationMin ?? estimateDurationFromDistanceKm(directDriverDistanceKm, 30)
       });
 
       if (animate && !hasLiveDriver && !driverApproachRoute?.coordinates?.length) {
