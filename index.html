@@ -1,9 +1,10 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>UVEL Platform</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UVEL Platform — Full Updated Version</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <style>
     :root {
       --bg: #07111f;
@@ -177,9 +178,7 @@
       font-weight: 800;
     }
 
-    .main {
-      min-width: 0;
-    }
+    .main { min-width: 0; }
 
     .hero {
       position: relative;
@@ -252,7 +251,6 @@
 
     .workflow-card,
     .chart-card,
-    .panel,
     .login-box,
     .stat-card,
     .booking-card,
@@ -262,10 +260,12 @@
     .mini-panel,
     .form-card,
     .list-card,
-    .panel-box {
+    .panel-box,
+    .section {
       background: var(--panel);
       border: 1px solid var(--panel-border);
       box-shadow: var(--shadow);
+      border-radius: var(--radius-lg);
     }
 
     .workflow-card,
@@ -273,19 +273,7 @@
     .form-card,
     .list-card,
     .mini-panel,
-    .panel-box,
-    .stat-card,
-    .booking-card,
-    .driver-card,
-    .history-card,
-    .rider-card,
-    .login-box,
-    .section {
-      border-radius: var(--radius-lg);
-    }
-
-    .workflow-card,
-    .chart-card {
+    .panel-box {
       padding: 18px;
     }
 
@@ -346,6 +334,41 @@
       overflow: hidden;
     }
 
+    .chart-grid {
+      position: absolute;
+      inset: 14px;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 100% 34px, 44px 100%;
+      border-radius: 14px;
+    }
+
+    .chart-svg {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .chart-legend,
+    .map-legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+
     .map-panel {
       margin-top: 18px;
       background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.03));
@@ -372,55 +395,7 @@
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 18px;
       background: #0b1326;
-    }
-
-    .map-legend {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    @keyframes carMove {
-      0% { transform: translateX(-22px); }
-      100% { transform: translateX(115px); }
-    }
-
-    .chart-grid {
-      position: absolute;
-      inset: 14px;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-      background-size: 100% 34px, 44px 100%;
-      border-radius: 14px;
-    }
-
-    .chart-svg {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
-
-    .chart-legend {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-right: 6px;
+      overflow: hidden;
     }
 
     .section {
@@ -428,7 +403,6 @@
       padding: 22px;
       margin-bottom: 20px;
       background: rgba(13,27,47,0.7);
-      border: 1px solid var(--panel-border);
     }
 
     .active { display: block; }
@@ -495,14 +469,6 @@
       align-items: start;
     }
 
-    .form-card,
-    .list-card,
-    .mini-panel,
-    .panel-box {
-      background: rgba(255,255,255,0.04);
-      padding: 18px;
-    }
-
     .full-width { grid-column: 1 / -1; }
 
     input, select, textarea {
@@ -532,28 +498,16 @@
       padding-right: 38px;
     }
 
-    select option {
-      background: #0f172a;
-      color: #ffffff;
-    }
+    select option { background: #0f172a; color: #ffffff; }
+    input::placeholder, textarea::placeholder { color: #9fb0c8; }
 
-    input::placeholder,
-    textarea::placeholder { color: #9fb0c8; }
-
-    select:invalid {
-      color: #cbd5e1;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
+    input:focus, select:focus, textarea:focus {
       border-color: rgba(20,184,166,0.55);
       box-shadow: 0 0 0 3px rgba(20,184,166,0.14);
     }
 
     textarea { min-height: 96px; resize: vertical; }
 
-    .primary,
     .ride,
     .driver,
     .admin,
@@ -563,7 +517,9 @@
     .start-btn,
     .complete-btn,
     .delete-btn,
-    .request-btn {
+    .request-btn,
+    .modal-save,
+    .modal-cancel {
       border: none;
       cursor: pointer;
       font-weight: 800;
@@ -580,10 +536,14 @@
     .complete-btn:hover,
     .delete-btn:hover,
     .request-btn:hover,
-    .hero-button:hover { transform: translateY(-1px); opacity: 0.97; }
+    .hero-button:hover,
+    .modal-save:hover,
+    .modal-cancel:hover {
+      transform: translateY(-1px);
+      opacity: 0.97;
+    }
 
-    .ride,
-    .request-btn { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 13px 18px; border-radius: 14px; }
+    .ride, .request-btn { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 13px 18px; border-radius: 14px; }
     .driver { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 13px 18px; border-radius: 14px; }
     .admin { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 13px 18px; border-radius: 14px; }
     .export-btn { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; padding: 12px 16px; border-radius: 12px; }
@@ -593,10 +553,7 @@
     .complete-btn { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 9px 12px; border-radius: 10px; }
     .delete-btn { background: rgba(239,68,68,0.18); color: white; padding: 9px 12px; border-radius: 10px; border: 1px solid rgba(239,68,68,0.2); }
 
-    .ride-submit {
-      margin-top: 14px;
-      width: 100%;
-    }
+    .ride-submit { margin-top: 14px; width: 100%; }
 
     .success-box,
     .auth-message,
@@ -676,33 +633,13 @@
     }
 
     .admin-filters {
-      display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr auto;
-      gap: 12px;
       margin-top: 15px;
       margin-bottom: 10px;
       align-items: center;
     }
 
-    .assign-select {
-      width: 100%;
-      max-width: 240px;
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(15, 23, 42, 0.95);
-      color: #ffffff;
-      font-weight: 600;
-      margin-top: 10px;
-      appearance: none;
-    }
-
-    .assign-select option {
-      background: #0f172a;
-      color: #ffffff;
-    }
-
-    .driver-combobox { position: relative; max-width: 260px; margin-top:10px; }
+    .driver-combobox { position: relative; max-width: 260px; margin-top: 10px; }
     .driver-input {
       width: 100%; padding: 12px; border-radius: 14px;
       border: 1px solid rgba(255,255,255,0.15);
@@ -717,39 +654,6 @@
       padding:10px 12px; cursor:pointer; color:#fff; font-size:14px;
     }
     .driver-item:hover { background:#1e293b; }
-
-    .admin-filters select {
-      padding: 10px 14px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.15);
-      color: #ffffff;
-      font-weight: 600;
-    }
-
-    .admin-filters select option {
-      background: #0f172a;
-      color: #ffffff;
-    }
-
-    .admin-filters input {
-      padding: 10px 14px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.15);
-      color: #ffffff;
-    }
-
-    .admin-filters input::placeholder {
-      color: rgba(255,255,255,0.6);
-    }
-
-    .admin-filters select:focus,
-    .admin-filters input:focus {
-      border-color: #38bdf8;
-      box-shadow: 0 0 0 2px rgba(56,189,248,0.2);
-      outline: none;
-    }
 
     .export-bar {
       display: flex;
@@ -815,7 +719,10 @@
     #bookingList,
     #driverTrips,
     #tripHistoryList,
-    #riderTrips { margin-top: 16px; text-align: left; }
+    #riderTrips,
+    #adminDriversList,
+    #adminPassengersList,
+    #adminRecentActivityList { margin-top: 16px; text-align: left; }
 
     .empty-text {
       color: var(--muted);
@@ -858,21 +765,9 @@
       gap: 12px;
     }
 
-    .modal-field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .modal-field.full {
-      grid-column: 1 / -1;
-    }
-
-    .modal-field label {
-      font-size: 13px;
-      font-weight: 700;
-      color: #334155;
-    }
+    .modal-field { display: flex; flex-direction: column; gap: 6px; }
+    .modal-field.full { grid-column: 1 / -1; }
+    .modal-field label { font-size: 13px; font-weight: 700; color: #334155; }
 
     .modal-content input,
     .modal-content select,
@@ -887,19 +782,6 @@
       box-shadow: none;
     }
 
-    .modal-content input::placeholder,
-    .modal-content textarea::placeholder {
-      color: #64748b;
-    }
-
-    .modal-content input:focus,
-    .modal-content select:focus,
-    .modal-content textarea:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-      outline: none;
-    }
-
     .modal-actions {
       display: flex;
       justify-content: flex-end;
@@ -908,31 +790,8 @@
       flex-wrap: wrap;
     }
 
-    .modal-save {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: white;
-      border: none;
-      padding: 11px 16px;
-      border-radius: 12px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .modal-cancel {
-      background: #e2e8f0;
-      color: #0f172a;
-      border: none;
-      padding: 11px 16px;
-      border-radius: 12px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    @media (max-width: 640px) {
-      .modal-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+    .modal-save { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 11px 16px; border-radius: 12px; }
+    .modal-cancel { background: #e2e8f0; color: #0f172a; padding: 11px 16px; border-radius: 12px; }
 
     @media (max-width: 1180px) {
       .app-shell { grid-template-columns: 1fr; }
@@ -949,7 +808,8 @@
       .login-grid,
       .form-grid,
       .admin-filters,
-      .hero-steps { grid-template-columns: 1fr; }
+      .hero-steps,
+      .modal-grid { grid-template-columns: 1fr; }
       .admin-stats,
       .today-stats { grid-template-columns: 1fr 1fr; }
     }
@@ -966,7 +826,7 @@
       .hero-copy h2 { font-size: 24px; }
     }
   </style>
-  </head>
+</head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
@@ -1002,8 +862,8 @@
       </div>
 
       <div class="side-card">
-        <h3>Why it looks better now</h3>
-        <p>Sidebar navigation, dashboard layout, and analytics cards make the MVP feel much closer to a real startup product.</p>
+        <h3>Startup Upgrade</h3>
+        <p>This version replaces empty map iframes with real Leaflet maps, route lines, markers, and animated driver simulation.</p>
       </div>
     </aside>
 
@@ -1012,7 +872,7 @@
         <div class="hero-top">
           <div class="hero-copy">
             <h2>Modern transport operations for community and NDIS-ready services.</h2>
-            <p>UVEL now has a more realistic product dashboard with sidebar navigation, analytics visuals, cleaner hierarchy, and stronger SaaS-style presentation.</p>
+            <p>UVEL now includes real interactive maps for admin, passenger, and driver views in a single-file MVP.</p>
           </div>
 
           <div class="hero-actions">
@@ -1035,7 +895,7 @@
 
           <div class="chart-card">
             <h3>Trips Overview</h3>
-            <p>Simple dashboard visual to make the MVP feel like a live product.</p>
+            <p>Dashboard visual plus real map preview.</p>
             <div class="mini-chart">
               <div class="chart-grid"></div>
               <svg class="chart-svg" viewBox="0 0 320 150" preserveAspectRatio="none">
@@ -1050,8 +910,8 @@
 
             <div class="map-panel">
               <h3>Live Trip Map</h3>
-              <p>Interactive map using Leaflet with live markers for pickup, destination, and driver location.</p>
-              <iframe id="liveMapFrame" class="real-map-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              <p>Interactive map with pickup, destination, and driver simulation.</p>
+              <div id="liveMapFrame" class="real-map-frame"></div>
               <div class="map-legend">
                 <span><span class="dot" style="background:#22c55e"></span>Pickup</span>
                 <span><span class="dot" style="background:#ef4444"></span>Destination</span>
@@ -1101,7 +961,7 @@
         <div class="section-head">
           <div>
             <h2>Ride App</h2>
-            <p>Create a trip request with transport type, time, and support notes. Passengers can also track all trips in one place.</p>
+            <p>Create a trip request with transport type, time, and support notes. Passengers can also track trips on a live map.</p>
           </div>
           <div class="section-badge">Passenger View</div>
         </div>
@@ -1134,7 +994,7 @@
             <div class="map-panel" style="margin-top:14px;">
               <h3 style="font-size:18px;">Passenger Live Map</h3>
               <p>Track pickup, destination, and driver location for the current trip.</p>
-              <iframe id="passengerMapFrame" class="real-map-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              <div id="passengerMapFrame" class="real-map-frame"></div>
             </div>
             <p>See current and past trip activity with driver and status updates.</p>
             <div id="riderTrips">
@@ -1171,7 +1031,7 @@
             <div class="map-panel" style="margin-top:14px;">
               <h3 style="font-size:18px;">Driver Route Map</h3>
               <p>View the live route from pickup to destination.</p>
-              <iframe id="driverMapFrame" class="real-map-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              <div id="driverMapFrame" class="real-map-frame"></div>
             </div>
             <div id="driverTrips">
               <p class="empty-text">No assigned trips yet.</p>
@@ -1276,10 +1136,54 @@
         </div>
       </div>
 
-      <div class="footer-note">UVEL upgraded again — now with startup-style sidebar navigation and dashboard analytics visuals.</div>
+      <div class="footer-note">UVEL full updated single-file version with real maps.</div>
     </main>
   </div>
 
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <h3>Edit Booking</h3>
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label>Passenger Name</label>
+          <input id="editPassengerName" type="text" />
+        </div>
+        <div class="modal-field">
+          <label>Trip Type</label>
+          <select id="editTripType">
+            <option value="Normal">Normal</option>
+            <option value="NDIS">NDIS</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Pickup</label>
+          <input id="editPickup" type="text" />
+        </div>
+        <div class="modal-field">
+          <label>Destination</label>
+          <input id="editDestination" type="text" />
+        </div>
+        <div class="modal-field">
+          <label>Date</label>
+          <input id="editTripDate" type="date" />
+        </div>
+        <div class="modal-field">
+          <label>Time</label>
+          <input id="editTripTime" type="time" />
+        </div>
+        <div class="modal-field full">
+          <label>Notes</label>
+          <textarea id="editTripNotes"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeEdit()">Cancel</button>
+        <button class="modal-save" onclick="saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
@@ -1294,7 +1198,8 @@
       onSnapshot,
       setDoc,
       getDoc,
-      getDocs
+      getDocs,
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import {
       getAuth,
@@ -1321,10 +1226,12 @@
     let driverUsers = [];
     let allUsers = [];
     let currentRole = "";
-    window.selectedAdminBookingIdForMaps = "";
     let selectedAdminBookingId = "";
     let currentDriver = "";
     let currentUser = null;
+    let editingBookingId = "";
+
+    const mapStore = {};
 
     function showMessage(text) {
       const box = document.getElementById("authMessage");
@@ -1356,13 +1263,10 @@
     }
 
     function setActiveNav(section) {
-      const ids = ["rideNavBtn", "driverNavBtn", "adminNavBtn"];
-      ids.forEach(id => document.getElementById(id)?.classList.remove("active-link"));
-      const match = {
-        ride: "rideNavBtn",
-        driver: "driverNavBtn",
-        admin: "adminNavBtn"
-      }[section];
+      ["rideNavBtn", "driverNavBtn", "adminNavBtn"].forEach(id => {
+        document.getElementById(id)?.classList.remove("active-link");
+      });
+      const match = { ride: "rideNavBtn", driver: "driverNavBtn", admin: "adminNavBtn" }[section];
       if (match) document.getElementById(match)?.classList.add("active-link");
     }
 
@@ -1377,9 +1281,6 @@
     function updateQuickActions() {
       const passengerBtn = document.getElementById("heroPassengerBtn");
       const adminBtn = document.getElementById("heroAdminBtn");
-
-      if (!passengerBtn || !adminBtn) return;
-
       passengerBtn.style.display = currentRole === "Passenger" ? "inline-block" : "none";
       adminBtn.style.display = currentRole === "Admin" ? "inline-block" : "none";
     }
@@ -1409,27 +1310,17 @@
     }
 
     function updateDriverHeader() {
-      const text = document.getElementById("driverSelectedText");
-      text.textContent = currentDriver ? "Logged in as: " + currentDriver : "No driver selected.";
+      document.getElementById("driverSelectedText").textContent = currentDriver ? `Logged in as: ${currentDriver}` : "No driver selected.";
     }
 
     function populateDriverFilter() {
       const driverFilter = document.getElementById("driverFilter");
-      if (!driverFilter) return;
-
       const currentValue = driverFilter.value || "All";
       const options = ['<option value="All">All Drivers</option>', '<option value="Unassigned">Unassigned</option>'];
-
-      driverUsers.forEach(driver => {
-        options.push(`<option value="${driver}">${driver}</option>`);
-      });
-
+      driverUsers.forEach(driver => options.push(`<option value="${driver}">${driver}</option>`));
       driverFilter.innerHTML = options.join("");
-      const allowedValues = ["All", "Unassigned", ...driverUsers];
-      driverFilter.value = allowedValues.includes(currentValue) ? currentValue : "All";
+      driverFilter.value = ["All", "Unassigned", ...driverUsers].includes(currentValue) ? currentValue : "All";
     }
-
-    window.getFilteredActiveBookingsForMaps = function() { return getFilteredActiveBookings(); };
 
     function getFilteredActiveBookings() {
       const searchValue = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
@@ -1441,21 +1332,13 @@
         .filter(b => b.status !== "Completed")
         .filter(b => {
           if (statusValue !== "All" && b.status !== statusValue) return false;
-          if (driverValue !== "All" && b.driver !== driverValue) return false;
+          if (driverValue === "Unassigned" && (b.driver || "") !== "Unassigned") return false;
+          if (driverValue !== "All" && driverValue !== "Unassigned" && b.driver !== driverValue) return false;
           if (dateValue && b.tripDate !== dateValue) return false;
 
           if (!searchValue) return true;
 
-          const text = `
-            ${b.id || ""}
-            ${b.passengerName || ""}
-            ${b.pickup || ""}
-            ${b.destination || ""}
-            ${b.driver || ""}
-            ${b.tripType || ""}
-            ${b.notes || ""}
-          `.toLowerCase();
-
+          const text = `${b.id || ""} ${b.passengerName || ""} ${b.pickup || ""} ${b.destination || ""} ${b.driver || ""} ${b.tripType || ""} ${b.notes || ""}`.toLowerCase();
           return text.includes(searchValue);
         });
     }
@@ -1469,12 +1352,7 @@
         alert("No data to export.");
         return;
       }
-
-      const escapeCell = (value) => {
-        const stringValue = String(value ?? "");
-        return `"${stringValue.replace(/"/g, '""')}"`;
-      };
-
+      const escapeCell = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
       const csvContent = rows.map(row => row.map(escapeCell).join(",")).join("\n");
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
@@ -1492,219 +1370,9 @@
         .filter(u => u.role === "Driver" && u.driverName)
         .map(u => u.driverName)
         .sort((a, b) => a.localeCompare(b));
-      window.driverUsersForEdit = [...driverUsers];
       populateDriverFilter();
       renderAdminDrivers();
       renderAdminPassengers();
-    }
-
-    window.exportActiveBookingsCSV = function() {
-      if (currentRole !== "Admin") return;
-      const activeBookings = getFilteredActiveBookings();
-      const rows = [
-        ["Booking ID", "Passenger", "Type", "Pickup", "Destination", "Date", "Time", "Driver", "Status", "Notes"],
-        ...activeBookings.map(b => [b.id || "", b.passengerName || "", b.tripType || "", b.pickup || "", b.destination || "", b.tripDate || "", b.tripTime || "", b.driver || "", b.status || "", b.notes || ""])
-      ];
-      downloadCSV("uvel-active-bookings.csv", rows);
-    };
-
-    window.exportCompletedTripsCSV = function() {
-      if (currentRole !== "Admin") return;
-      const completedTrips = getCompletedTrips();
-      const rows = [
-        ["Booking ID", "Passenger", "Type", "Pickup", "Destination", "Date", "Time", "Driver", "Status", "Notes"],
-        ...completedTrips.map(b => [b.id || "", b.passengerName || "", b.tripType || "", b.pickup || "", b.destination || "", b.tripDate || "", b.tripTime || "", b.driver || "", b.status || "", b.notes || ""])
-      ];
-      downloadCSV("uvel-completed-trips.csv", rows);
-    };
-
-    window.focusBookingOnMap = function(bookingId) {
-      selectedAdminBookingId = bookingId;
-      initLiveMap();
-    };
-
-    window.printAdminReport = function() {
-      if (currentRole !== "Admin") return;
-      show("admin");
-      setTimeout(() => window.print(), 200);
-    };
-
-    window.renderAdminBookings = function() {
-      const bookingList = document.getElementById("bookingList");
-      const recommendedDriver = getRecommendedDriver();
-      const recommendedDriverPill = document.getElementById("recommendedDriverPill");
-      if (recommendedDriverPill) {
-        recommendedDriverPill.textContent = recommendedDriver ? `Recommended: ${recommendedDriver}` : "Recommended: --";
-      }
-      const activeBookings = getFilteredActiveBookings();
-      updateAdminStats();
-
-      if (activeBookings.length === 0) {
-        bookingList.innerHTML = '<p class="empty-text">No matching active bookings found.</p>';
-        return;
-      }
-
-      let html = "";
-
-      activeBookings.forEach((booking) => {
-        let assignControl = "";
-        let startControl = "";
-        let completeControl = "";
-
-        if (booking.status === "Pending") {
-          assignControl = `
-            <div class="driver-combobox">
-              <input class="driver-input" placeholder="Search driver..." oninput="filterDriverOptions(this, '${booking.id}')" onclick="toggleDriverList('${booking.id}', true)" />
-              <div class="driver-list" id="driverList-${booking.id}"></div>
-            </div>`;
-        }
-
-        if (booking.status === "Assigned") {
-          startControl = `<button class="start-btn" onclick="startTrip('${booking.id}')">Start Trip</button>`;
-        }
-
-        if (booking.status === "In Progress") {
-          completeControl = `<button class="complete-btn" onclick="completeTrip('${booking.id}')">Mark Completed</button>`;
-        }
-
-        const safeBooking = encodeURIComponent(JSON.stringify(booking).replace(/'/g, "&#39;"));
-
-        html += `
-          <div class="booking-card">
-            <p><strong>Booking ID:</strong> ${booking.id}</p>
-            <p><strong>Passenger:</strong> ${booking.passengerName || "Not provided"}</p>
-            <p><strong>Trip Type:</strong> ${booking.tripType || "Normal"}</p>
-            <p><strong>Pickup:</strong> ${booking.pickup}</p>
-            <p><strong>Destination:</strong> ${booking.destination}</p>
-            <p><strong>Date:</strong> ${booking.tripDate || "Not provided"}</p>
-            <p><strong>Time:</strong> ${booking.tripTime || "Not provided"}</p>
-            <p><strong>Driver:</strong> ${booking.driver}</p>
-            <p><strong>Notes:</strong> ${booking.notes || "None"}</p>
-            <div class="status-row">
-              <span class="status ${getStatusClass(booking.status)}">${booking.status}</span>
-              ${assignControl}
-            </div>
-            <div class="action-row">
-              <button class="driver" onclick='openEdit(JSON.parse(decodeURIComponent("${safeBooking}")))'>Edit</button>
-              <button class="hero-button" style="padding:9px 12px;" onclick="focusBookingOnMap('${booking.id}')">Show on Map</button>
-              ${booking.status === "Pending" ? `<button class="start-btn" onclick="autoAssignDriver('${booking.id}')">⭐ Auto Assign</button>` : ``}
-              ${startControl}
-              ${completeControl}
-              <button class="delete-btn" onclick="deleteBooking('${booking.id}')">Delete</button>
-            </div>
-          </div>
-        `;
-      });
-
-      bookingList.innerHTML = html;
-      initDriverLists(activeBookings);
-    };
-
-    function renderTripHistory() {
-      const tripHistoryList = document.getElementById("tripHistoryList");
-      const completedTrips = getCompletedTrips();
-
-      if (completedTrips.length === 0) {
-        tripHistoryList.innerHTML = '<p class="empty-text">No completed trips yet.</p>';
-        return;
-      }
-
-      let html = "";
-      completedTrips.forEach((trip) => {
-        html += `
-          <div class="history-card">
-            <p><strong>Booking ID:</strong> ${trip.id}</p>
-            <p><strong>Passenger:</strong> ${trip.passengerName || "Not provided"}</p>
-            <p><strong>Trip Type:</strong> ${trip.tripType || "Normal"}</p>
-            <p><strong>Pickup:</strong> ${trip.pickup}</p>
-            <p><strong>Destination:</strong> ${trip.destination}</p>
-            <p><strong>Date:</strong> ${trip.tripDate || "Not provided"}</p>
-            <p><strong>Time:</strong> ${trip.tripTime || "Not provided"}</p>
-            <p><strong>Driver:</strong> ${trip.driver}</p>
-            <p><strong>Notes:</strong> ${trip.notes || "None"}</p>
-            <div class="status-row"><span class="status completed">${trip.status}</span></div>
-          </div>
-        `;
-      });
-      tripHistoryList.innerHTML = html;
-    }
-
-    function renderDriverTrips() {
-      const driverTrips = document.getElementById("driverTrips");
-
-      if (!currentDriver) {
-        driverTrips.innerHTML = '<p class="empty-text">No driver selected.</p>';
-        return;
-      }
-
-      const myTrips = liveBookings.filter(
-        (trip) => trip.driver === currentDriver && (trip.status === "Assigned" || trip.status === "In Progress")
-      );
-
-      if (myTrips.length === 0) {
-        driverTrips.innerHTML = `<p class="empty-text">No trips assigned to ${currentDriver} yet.</p>`;
-        return;
-      }
-
-      let html = "";
-      myTrips.forEach((trip) => {
-        let actionButton = "";
-        if (trip.status === "Assigned") {
-          actionButton = `<button class="start-btn" onclick="driverStartTrip('${trip.id}')">Start Trip</button>`;
-        }
-        if (trip.status === "In Progress") {
-          actionButton = `<button class="complete-btn" onclick="driverCompleteTrip('${trip.id}')">Complete Trip</button>`;
-        }
-
-        html += `
-          <div class="driver-card">
-            <p><strong>Booking ID:</strong> ${trip.id}</p>
-            <p><strong>Passenger:</strong> ${trip.passengerName || "Not provided"}</p>
-            <p><strong>Trip Type:</strong> ${trip.tripType || "Normal"}</p>
-            <p><strong>Pickup:</strong> ${trip.pickup}</p>
-            <p><strong>Destination:</strong> ${trip.destination}</p>
-            <p><strong>Date:</strong> ${trip.tripDate || "Not provided"}</p>
-            <p><strong>Time:</strong> ${trip.tripTime || "Not provided"}</p>
-            <p><strong>Notes:</strong> ${trip.notes || "None"}</p>
-            <div class="status-row"><span class="status ${getStatusClass(trip.status)}">${trip.status}</span></div>
-            <div class="action-row">${actionButton}</div>
-          </div>
-        `;
-      });
-
-      driverTrips.innerHTML = html;
-    }
-
-    function renderRiderTrips() {
-      const riderTrips = document.getElementById("riderTrips");
-      if (!currentUser || currentRole !== "Passenger") {
-        riderTrips.innerHTML = '<p class="empty-text">No trips yet.</p>';
-        return;
-      }
-
-      const myTrips = liveBookings.filter(trip => trip.createdBy === currentUser.uid);
-      if (myTrips.length === 0) {
-        riderTrips.innerHTML = '<p class="empty-text">No trips yet.</p>';
-        return;
-      }
-
-      let html = "";
-      myTrips.forEach((trip) => {
-        html += `
-          <div class="rider-card">
-            <p><strong>Booking ID:</strong> ${trip.id}</p>
-            <p><strong>Trip Type:</strong> ${trip.tripType || "Normal"}</p>
-            <p><strong>Pickup:</strong> ${trip.pickup}</p>
-            <p><strong>Destination:</strong> ${trip.destination}</p>
-            <p><strong>Date:</strong> ${trip.tripDate || "Not provided"}</p>
-            <p><strong>Time:</strong> ${trip.tripTime || "Not provided"}</p>
-            <p><strong>Driver:</strong> ${trip.driver || "Unassigned"}</p>
-            <p><strong>Notes:</strong> ${trip.notes || "None"}</p>
-            <div class="status-row"><span class="status ${getStatusClass(trip.status)}">${trip.status}</span></div>
-          </div>
-        `;
-      });
-      riderTrips.innerHTML = html;
     }
 
     function getDriverLoad(driverName) {
@@ -1730,26 +1398,256 @@
       return ranked[0]?.name || "";
     }
 
-    function renderAdminDrivers() {
-      const list = document.getElementById("adminDriversList");
-      if (!list) return;
+    function createEmojiIcon(emoji, bgColor = "#0f172a") {
+      return L.divIcon({
+        className: "",
+        html: `<div style="width:34px;height:34px;border-radius:50%;background:${bgColor};border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 6px 16px rgba(0,0,0,0.28);">${emoji}</div>`,
+        iconSize: [34, 34],
+        iconAnchor: [17, 17]
+      });
+    }
 
-      const drivers = allUsers.filter(user => user.role === "Driver");
-      if (drivers.length === 0) {
-        list.innerHTML = '<p class="empty-text">No drivers found.</p>';
+    const pickupIcon = createEmojiIcon("📍", "#16a34a");
+    const destinationIcon = createEmojiIcon("🏁", "#dc2626");
+    const driverIcon = createEmojiIcon("🚗", "#2563eb");
+    const geocodeCache = new Map();
+
+    async function geocodeLocation(place) {
+      if (!place) return null;
+      if (geocodeCache.has(place)) return geocodeCache.get(place);
+
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`;
+        const response = await fetch(url, { headers: { Accept: "application/json" } });
+        const data = await response.json();
+        if (!data || !data.length) return null;
+        const result = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), label: place };
+        geocodeCache.set(place, result);
+        return result;
+      } catch (error) {
+        console.error("Geocoding failed:", error);
+        return null;
+      }
+    }
+
+    function ensureMap(mapId) {
+      if (mapStore[mapId]?.map) return mapStore[mapId];
+      const map = L.map(mapId, { zoomControl: true }).setView([-33.8688, 151.2093], 11);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 19
+      }).addTo(map);
+      mapStore[mapId] = {
+        map,
+        pickupMarker: null,
+        destinationMarker: null,
+        driverMarker: null,
+        routeLine: null,
+        animationTimer: null
+      };
+      setTimeout(() => map.invalidateSize(), 250);
+      return mapStore[mapId];
+    }
+
+    function clearMapObjects(store) {
+      ["pickupMarker", "destinationMarker", "driverMarker", "routeLine"].forEach(key => {
+        if (store[key]) {
+          store.map.removeLayer(store[key]);
+          store[key] = null;
+        }
+      });
+      if (store.animationTimer) {
+        clearInterval(store.animationTimer);
+        store.animationTimer = null;
+      }
+    }
+
+    function fitMapToPoints(store, points) {
+      const validPoints = points.filter(Boolean).map(p => [p.lat, p.lng]);
+      if (!validPoints.length) return;
+      if (validPoints.length === 1) {
+        store.map.setView(validPoints[0], 14);
+        return;
+      }
+      const bounds = L.latLngBounds(validPoints);
+      store.map.fitBounds(bounds, { padding: [40, 40] });
+    }
+
+    function animateDriver(store, startPoint, endPoint) {
+      if (!startPoint || !endPoint || !store.driverMarker) return;
+      let step = 0;
+      const steps = 120;
+      store.animationTimer = setInterval(() => {
+        step = (step + 1) % steps;
+        const progress = step / steps;
+        const lat = startPoint.lat + (endPoint.lat - startPoint.lat) * progress;
+        const lng = startPoint.lng + (endPoint.lng - startPoint.lng) * progress;
+        store.driverMarker.setLatLng([lat, lng]);
+      }, 120);
+    }
+
+    async function renderBookingMap(mapId, booking, animate = false) {
+      const store = ensureMap(mapId);
+      clearMapObjects(store);
+
+      if (!booking || !booking.pickup || !booking.destination) {
+        store.map.setView([-33.8688, 151.2093], 11);
         return;
       }
 
-      let html = "";
-      drivers.forEach(driver => {
+      const pickupPoint = await geocodeLocation(booking.pickup);
+      const destinationPoint = await geocodeLocation(booking.destination);
+
+      if (!pickupPoint || !destinationPoint) {
+        store.map.setView([-33.8688, 151.2093], 11);
+        return;
+      }
+
+      store.pickupMarker = L.marker([pickupPoint.lat, pickupPoint.lng], { icon: pickupIcon }).addTo(store.map)
+        .bindPopup(`<strong>Pickup</strong><br>${booking.pickup}`);
+
+      store.destinationMarker = L.marker([destinationPoint.lat, destinationPoint.lng], { icon: destinationIcon }).addTo(store.map)
+        .bindPopup(`<strong>Destination</strong><br>${booking.destination}`);
+
+      store.routeLine = L.polyline([
+        [pickupPoint.lat, pickupPoint.lng],
+        [destinationPoint.lat, destinationPoint.lng]
+      ], {
+        color: "#3b82f6",
+        weight: 5,
+        opacity: 0.85,
+        dashArray: "10, 8"
+      }).addTo(store.map);
+
+      const startDriverPoint = {
+        lat: pickupPoint.lat - 0.01,
+        lng: pickupPoint.lng - 0.01
+      };
+
+      store.driverMarker = L.marker([startDriverPoint.lat, startDriverPoint.lng], { icon: driverIcon }).addTo(store.map)
+        .bindPopup(`<strong>Driver</strong><br>${booking.driver || "Assigned driver"}`);
+
+      fitMapToPoints(store, [pickupPoint, destinationPoint, startDriverPoint]);
+      if (animate) animateDriver(store, startDriverPoint, pickupPoint);
+    }
+
+    function getCurrentPassengerBooking() {
+      if (!currentUser) return null;
+      return liveBookings.find(trip => trip.createdBy === currentUser.uid && ["Pending", "Assigned", "In Progress"].includes(trip.status)) || null;
+    }
+
+    function getCurrentDriverBooking() {
+      if (!currentDriver) return null;
+      return liveBookings.find(trip => trip.driver === currentDriver && ["Assigned", "In Progress"].includes(trip.status)) || null;
+    }
+
+    function getAdminFocusedBooking() {
+      if (selectedAdminBookingId) return liveBookings.find(b => b.id === selectedAdminBookingId) || null;
+      return liveBookings.find(b => ["Pending", "Assigned", "In Progress"].includes(b.status)) || null;
+    }
+
+    async function refreshAllMaps() {
+      await renderBookingMap("liveMapFrame", getAdminFocusedBooking(), true);
+      await renderBookingMap("passengerMapFrame", getCurrentPassengerBooking(), true);
+      await renderBookingMap("driverMapFrame", getCurrentDriverBooking(), true);
+    }
+
+    function renderTripHistory() {
+      const tripHistoryList = document.getElementById("tripHistoryList");
+      const completedTrips = getCompletedTrips();
+      if (!completedTrips.length) {
+        tripHistoryList.innerHTML = '<p class="empty-text">No completed trips yet.</p>';
+        return;
+      }
+      tripHistoryList.innerHTML = completedTrips.map(trip => `
+        <div class="history-card">
+          <p><strong>Booking ID:</strong> ${trip.id}</p>
+          <p><strong>Passenger:</strong> ${trip.passengerName || "Not provided"}</p>
+          <p><strong>Trip Type:</strong> ${trip.tripType || "Normal"}</p>
+          <p><strong>Pickup:</strong> ${trip.pickup}</p>
+          <p><strong>Destination:</strong> ${trip.destination}</p>
+          <p><strong>Date:</strong> ${trip.tripDate || "Not provided"}</p>
+          <p><strong>Time:</strong> ${trip.tripTime || "Not provided"}</p>
+          <p><strong>Driver:</strong> ${trip.driver}</p>
+          <p><strong>Notes:</strong> ${trip.notes || "None"}</p>
+          <div class="status-row"><span class="status completed">${trip.status}</span></div>
+        </div>
+      `).join("");
+    }
+
+    function renderDriverTrips() {
+      const driverTrips = document.getElementById("driverTrips");
+      if (!currentDriver) {
+        driverTrips.innerHTML = '<p class="empty-text">No driver selected.</p>';
+        return;
+      }
+      const myTrips = liveBookings.filter(trip => trip.driver === currentDriver && ["Assigned", "In Progress"].includes(trip.status));
+      if (!myTrips.length) {
+        driverTrips.innerHTML = `<p class="empty-text">No trips assigned to ${currentDriver} yet.</p>`;
+        return;
+      }
+      driverTrips.innerHTML = myTrips.map(trip => {
+        let actionButton = "";
+        if (trip.status === "Assigned") actionButton = `<button class="start-btn" onclick="driverStartTrip('${trip.id}')">Start Trip</button>`;
+        if (trip.status === "In Progress") actionButton = `<button class="complete-btn" onclick="driverCompleteTrip('${trip.id}')">Complete Trip</button>`;
+        return `
+          <div class="driver-card">
+            <p><strong>Booking ID:</strong> ${trip.id}</p>
+            <p><strong>Passenger:</strong> ${trip.passengerName || "Not provided"}</p>
+            <p><strong>Trip Type:</strong> ${trip.tripType || "Normal"}</p>
+            <p><strong>Pickup:</strong> ${trip.pickup}</p>
+            <p><strong>Destination:</strong> ${trip.destination}</p>
+            <p><strong>Date:</strong> ${trip.tripDate || "Not provided"}</p>
+            <p><strong>Time:</strong> ${trip.tripTime || "Not provided"}</p>
+            <p><strong>Notes:</strong> ${trip.notes || "None"}</p>
+            <div class="status-row"><span class="status ${getStatusClass(trip.status)}">${trip.status}</span></div>
+            <div class="action-row">${actionButton}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderRiderTrips() {
+      const riderTrips = document.getElementById("riderTrips");
+      if (!currentUser || currentRole !== "Passenger") {
+        riderTrips.innerHTML = '<p class="empty-text">No trips yet.</p>';
+        return;
+      }
+      const myTrips = liveBookings.filter(trip => trip.createdBy === currentUser.uid);
+      if (!myTrips.length) {
+        riderTrips.innerHTML = '<p class="empty-text">No trips yet.</p>';
+        return;
+      }
+      riderTrips.innerHTML = myTrips.map(trip => `
+        <div class="rider-card">
+          <p><strong>Booking ID:</strong> ${trip.id}</p>
+          <p><strong>Trip Type:</strong> ${trip.tripType || "Normal"}</p>
+          <p><strong>Pickup:</strong> ${trip.pickup}</p>
+          <p><strong>Destination:</strong> ${trip.destination}</p>
+          <p><strong>Date:</strong> ${trip.tripDate || "Not provided"}</p>
+          <p><strong>Time:</strong> ${trip.tripTime || "Not provided"}</p>
+          <p><strong>Driver:</strong> ${trip.driver || "Unassigned"}</p>
+          <p><strong>Notes:</strong> ${trip.notes || "None"}</p>
+          <div class="status-row"><span class="status ${getStatusClass(trip.status)}">${trip.status}</span></div>
+        </div>
+      `).join("");
+    }
+
+    function renderAdminDrivers() {
+      const list = document.getElementById("adminDriversList");
+      const drivers = allUsers.filter(user => user.role === "Driver");
+      if (!drivers.length) {
+        list.innerHTML = '<p class="empty-text">No drivers found.</p>';
+        return;
+      }
+      list.innerHTML = drivers.map(driver => {
         const name = driver.driverName || driver.email || "Driver";
         const assignedTrips = liveBookings.filter(b => b.driver === name && b.status === "Assigned").length;
         const progressTrips = liveBookings.filter(b => b.driver === name && b.status === "In Progress").length;
         const completedTrips = liveBookings.filter(b => b.driver === name && b.status === "Completed").length;
         const statusLabel = progressTrips > 0 ? "On Trip" : assignedTrips > 0 ? "Assigned" : "Available";
         const statusClass = progressTrips > 0 ? "progress" : assignedTrips > 0 ? "assigned" : "completed";
-
-        html += `
+        return `
           <div class="driver-card">
             <p><strong>Driver:</strong> ${name}</p>
             <p><strong>Email:</strong> ${driver.email || "Not provided"}</p>
@@ -1757,88 +1655,56 @@
             <p><strong>In Progress:</strong> ${progressTrips}</p>
             <p><strong>Completed Trips:</strong> ${completedTrips}</p>
             <p><strong>Active Load:</strong> ${assignedTrips + progressTrips}</p>
-            <div class="status-row">
-              <span class="status ${statusClass}">${statusLabel}</span>
-            </div>
+            <div class="status-row"><span class="status ${statusClass}">${statusLabel}</span></div>
           </div>
         `;
-      });
-
-      list.innerHTML = html;
+      }).join("");
     }
 
     function renderAdminPassengers() {
       const list = document.getElementById("adminPassengersList");
-      if (!list) return;
-
       const passengers = allUsers.filter(user => user.role === "Passenger");
-      if (passengers.length === 0) {
+      if (!passengers.length) {
         list.innerHTML = '<p class="empty-text">No passengers found.</p>';
         return;
       }
-
-      let html = "";
-      passengers.forEach(passenger => {
+      list.innerHTML = passengers.map(passenger => {
         const bookingCount = liveBookings.filter(b => b.createdBy === passenger.id).length;
         const pendingCount = liveBookings.filter(b => b.createdBy === passenger.id && b.status !== "Completed").length;
-
-        html += `
+        return `
           <div class="rider-card">
             <p><strong>Passenger Email:</strong> ${passenger.email || "Not provided"}</p>
             <p><strong>Total Bookings:</strong> ${bookingCount}</p>
             <p><strong>Active Bookings:</strong> ${pendingCount}</p>
-            <div class="status-row">
-              <span class="status ${bookingCount > 0 ? 'assigned' : 'pending'}">${bookingCount > 0 ? 'Active User' : 'No Trips Yet'}</span>
-            </div>
+            <div class="status-row"><span class="status ${bookingCount > 0 ? 'assigned' : 'pending'}">${bookingCount > 0 ? 'Active User' : 'No Trips Yet'}</span></div>
           </div>
         `;
-      });
-
-      list.innerHTML = html;
+      }).join("");
     }
 
     function renderAdminRecentActivity() {
       const list = document.getElementById("adminRecentActivityList");
-      if (!list) return;
-
       const recent = liveBookings.slice(0, 8);
-      if (recent.length === 0) {
+      if (!recent.length) {
         list.innerHTML = '<p class="empty-text">No activity yet.</p>';
         return;
       }
-
-      let html = "";
-      recent.forEach(item => {
-        html += `
-          <div class="booking-card">
-            <p><strong>Passenger:</strong> ${item.passengerName || "Not provided"}</p>
-            <p><strong>Trip:</strong> ${item.pickup || "-"} → ${item.destination || "-"}</p>
-            <p><strong>Date:</strong> ${item.tripDate || "Not provided"} ${item.tripTime ? 'at ' + item.tripTime : ''}</p>
-            <p><strong>Driver:</strong> ${item.driver || "Unassigned"}</p>
-            <div class="status-row">
-              <span class="status ${getStatusClass(item.status)}">${item.status}</span>
-            </div>
-          </div>
-        `;
-      });
-
-      list.innerHTML = html;
+      list.innerHTML = recent.map(item => `
+        <div class="booking-card">
+          <p><strong>Passenger:</strong> ${item.passengerName || "Not provided"}</p>
+          <p><strong>Trip:</strong> ${item.pickup || "-"} → ${item.destination || "-"}</p>
+          <p><strong>Date:</strong> ${item.tripDate || "Not provided"} ${item.tripTime ? 'at ' + item.tripTime : ''}</p>
+          <p><strong>Driver:</strong> ${item.driver || "Unassigned"}</p>
+          <div class="status-row"><span class="status ${getStatusClass(item.status)}">${item.status}</span></div>
+        </div>
+      `).join("");
     }
 
-    function startRealtimeListener() {
-      const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"));
-      onSnapshot(q, (snapshot) => {
-        liveBookings = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-        window.liveBookingsForMaps = liveBookings;
-        renderAdminBookings();
-        renderTripHistory();
-        renderDriverTrips();
-        renderRiderTrips();
-        renderAdminDrivers();
-        renderAdminPassengers();
-        renderAdminRecentActivity();
-      }, (error) => {
-        console.error("Realtime listener error:", error);
+    function initDriverLists(activeBookings) {
+      activeBookings.forEach(booking => {
+        const list = document.getElementById(`driverList-${booking.id}`);
+        if (!list) return;
+        list.innerHTML = driverUsers.map(name => `<div class="driver-item" onclick="assignDriver('${booking.id}', '${name.replace(/'/g, "\\'")}')">${name}</div>`).join("");
       });
     }
 
@@ -1847,6 +1713,9 @@
       const navButtons = document.getElementById("navButtons");
       const loginSection = document.getElementById("loginSection");
       const roleBadge = document.getElementById("roleBadge");
+      const rideSection = document.getElementById("ride");
+      const driverSection = document.getElementById("driver");
+      const adminSection = document.getElementById("admin");
       const rideNavBtn = document.getElementById("rideNavBtn");
       const driverNavBtn = document.getElementById("driverNavBtn");
       const adminNavBtn = document.getElementById("adminNavBtn");
@@ -1855,9 +1724,9 @@
         sessionBar.style.display = "none";
         navButtons.style.display = "none";
         loginSection.style.display = "block";
-        document.getElementById("ride").style.display = "none";
-        document.getElementById("driver").style.display = "none";
-        document.getElementById("admin").style.display = "none";
+        rideSection.style.display = "none";
+        driverSection.style.display = "none";
+        adminSection.style.display = "none";
         updateQuickActions();
         return;
       }
@@ -1865,69 +1734,124 @@
       sessionBar.style.display = "block";
       navButtons.style.display = "grid";
       loginSection.style.display = "none";
-      roleBadge.textContent = "Role: " + currentRole + (currentRole === "Driver" && currentDriver ? " (" + currentDriver + ")" : "");
+      roleBadge.textContent = `Role: ${currentRole}${currentRole === 'Driver' && currentDriver ? ' (' + currentDriver + ')' : ''}`;
 
       rideNavBtn.style.display = currentRole === "Passenger" ? "flex" : "none";
       driverNavBtn.style.display = currentRole === "Driver" ? "flex" : "none";
       adminNavBtn.style.display = currentRole === "Admin" ? "flex" : "none";
 
-      updateQuickActions();
+      rideSection.style.display = currentRole === "Passenger" ? "block" : "none";
+      driverSection.style.display = currentRole === "Driver" ? "block" : "none";
+      adminSection.style.display = currentRole === "Admin" ? "block" : "none";
 
       if (currentRole === "Passenger") show("ride");
       if (currentRole === "Driver") show("driver");
       if (currentRole === "Admin") show("admin");
+
+      updateQuickActions();
     }
 
-    window.registerUser = async function() {
-      const email = document.getElementById("authEmail").value.trim();
-      const password = document.getElementById("authPassword").value;
-      const role = document.getElementById("authRole").value;
-      const driverName = document.getElementById("authDriverName").value.trim();
+    function startRealtimeListener() {
+      const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"));
+      onSnapshot(q, (snapshot) => {
+        liveBookings = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+        renderAdminBookings();
+        renderTripHistory();
+        renderDriverTrips();
+        renderRiderTrips();
+        renderAdminDrivers();
+        renderAdminPassengers();
+        renderAdminRecentActivity();
+        refreshAllMaps();
+      }, (error) => {
+        console.error("Realtime listener error:", error);
+      });
+    }
 
-      if (!email || !password || !role) {
-        showError("Please fill email, password, and role.");
+    window.renderAdminBookings = function() {
+      const bookingList = document.getElementById("bookingList");
+      const recommendedDriver = getRecommendedDriver();
+      document.getElementById("recommendedDriverPill").textContent = recommendedDriver ? `Recommended: ${recommendedDriver}` : "Recommended: --";
+      const activeBookings = getFilteredActiveBookings();
+      updateAdminStats();
+
+      if (!activeBookings.length) {
+        bookingList.innerHTML = '<p class="empty-text">No matching active bookings found.</p>';
         return;
       }
 
-      if (role === "Driver" && !driverName) {
-        showError("Please enter a driver name for Driver role.");
-        return;
-      }
+      bookingList.innerHTML = activeBookings.map(booking => {
+        let assignControl = "";
+        let startControl = "";
+        let completeControl = "";
 
-      try {
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        await setDoc(doc(db, "users", cred.user.uid), {
-          email,
-          role,
-          driverName: role === "Driver" ? driverName : "",
-          createdAt: Date.now()
-        });
-        await loadDrivers();
-        showMessage("Registration successful. You are now logged in.");
-      } catch (error) {
-        showError(error.message);
-      }
+        if (booking.status === "Pending") {
+          assignControl = `
+            <div class="driver-combobox">
+              <input class="driver-input" placeholder="Search driver..." oninput="filterDriverOptions(this, '${booking.id}')" onclick="toggleDriverList('${booking.id}', true)" />
+              <div class="driver-list" id="driverList-${booking.id}"></div>
+            </div>`;
+        }
+
+        if (booking.status === "Assigned") startControl = `<button class="start-btn" onclick="startTrip('${booking.id}')">Start Trip</button>`;
+        if (booking.status === "In Progress") completeControl = `<button class="complete-btn" onclick="completeTrip('${booking.id}')">Mark Completed</button>`;
+
+        const safeBooking = encodeURIComponent(JSON.stringify(booking).replace(/'/g, "&#39;"));
+
+        return `
+          <div class="booking-card">
+            <p><strong>Booking ID:</strong> ${booking.id}</p>
+            <p><strong>Passenger:</strong> ${booking.passengerName || "Not provided"}</p>
+            <p><strong>Trip Type:</strong> ${booking.tripType || "Normal"}</p>
+            <p><strong>Pickup:</strong> ${booking.pickup}</p>
+            <p><strong>Destination:</strong> ${booking.destination}</p>
+            <p><strong>Date:</strong> ${booking.tripDate || "Not provided"}</p>
+            <p><strong>Time:</strong> ${booking.tripTime || "Not provided"}</p>
+            <p><strong>Driver:</strong> ${booking.driver || "Unassigned"}</p>
+            <p><strong>Notes:</strong> ${booking.notes || "None"}</p>
+            <div class="status-row">
+              <span class="status ${getStatusClass(booking.status)}">${booking.status}</span>
+              ${assignControl}
+            </div>
+            <div class="action-row">
+              <button class="driver" onclick='openEdit(JSON.parse(decodeURIComponent("${safeBooking}")))'>Edit</button>
+              <button class="hero-button" style="padding:9px 12px;" onclick="focusBookingOnMap('${booking.id}')">Show on Map</button>
+              ${booking.status === "Pending" ? `<button class="start-btn" onclick="autoAssignDriver('${booking.id}')">⭐ Auto Assign</button>` : ``}
+              ${startControl}
+              ${completeControl}
+              <button class="delete-btn" onclick="deleteBooking('${booking.id}')">Delete</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      initDriverLists(activeBookings);
     };
 
-    window.loginUser = async function() {
-      const email = document.getElementById("authEmail").value.trim();
-      const password = document.getElementById("authPassword").value;
-
-      if (!email || !password) {
-        showError("Please enter email and password.");
-        return;
-      }
-
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        showMessage("Login successful.");
-      } catch (error) {
-        showError(error.message);
-      }
+    window.exportActiveBookingsCSV = function() {
+      if (currentRole !== "Admin") return;
+      const activeBookings = getFilteredActiveBookings();
+      const rows = [["Booking ID", "Passenger", "Type", "Pickup", "Destination", "Date", "Time", "Driver", "Status", "Notes"], ...activeBookings.map(b => [b.id || "", b.passengerName || "", b.tripType || "", b.pickup || "", b.destination || "", b.tripDate || "", b.tripTime || "", b.driver || "", b.status || "", b.notes || ""])];
+      downloadCSV("uvel-active-bookings.csv", rows);
     };
 
-    window.logoutUser = async function() {
-      await signOut(auth);
+    window.exportCompletedTripsCSV = function() {
+      if (currentRole !== "Admin") return;
+      const completedTrips = getCompletedTrips();
+      const rows = [["Booking ID", "Passenger", "Type", "Pickup", "Destination", "Date", "Time", "Driver", "Status", "Notes"], ...completedTrips.map(b => [b.id || "", b.passengerName || "", b.tripType || "", b.pickup || "", b.destination || "", b.tripDate || "", b.tripTime || "", b.driver || "", b.status || "", b.notes || ""])];
+      downloadCSV("uvel-completed-trips.csv", rows);
+    };
+
+    window.printAdminReport = function() {
+      if (currentRole !== "Admin") return;
+      show("admin");
+      setTimeout(() => window.print(), 200);
+    };
+
+    window.focusBookingOnMap = async function(bookingId) {
+      selectedAdminBookingId = bookingId;
+      const booking = liveBookings.find(b => b.id === bookingId);
+      await renderBookingMap("liveMapFrame", booking, true);
     };
 
     window.clearAdminFilters = function() {
@@ -1938,43 +1862,158 @@
       renderAdminBookings();
     };
 
+    window.toggleDriverList = function(bookingId, visible) {
+      const list = document.getElementById(`driverList-${bookingId}`);
+      if (!list) return;
+      list.style.display = visible ? "block" : "none";
+    };
+
+    window.filterDriverOptions = function(input, bookingId) {
+      const value = input.value.toLowerCase().trim();
+      const list = document.getElementById(`driverList-${bookingId}`);
+      if (!list) return;
+      list.style.display = "block";
+      list.innerHTML = driverUsers
+        .filter(name => name.toLowerCase().includes(value))
+        .map(name => `<div class="driver-item" onclick="assignDriver('${bookingId}', '${name.replace(/'/g, "\\'")}')">${name}</div>`)
+        .join("") || '<div class="driver-item">No matching drivers</div>';
+    };
+
+    window.assignDriver = async function(bookingId, driverName) {
+      await updateDoc(doc(db, "bookings", bookingId), { driver: driverName, status: "Assigned" });
+      renderAdminBookings();
+      refreshAllMaps();
+    };
+
+    window.autoAssignDriver = async function(bookingId) {
+      const recommended = getRecommendedDriver();
+      if (!recommended) {
+        alert("No drivers available.");
+        return;
+      }
+      await assignDriver(bookingId, recommended);
+    };
+
+    window.startTrip = async function(bookingId) {
+      await updateDoc(doc(db, "bookings", bookingId), { status: "In Progress" });
+    };
+
+    window.completeTrip = async function(bookingId) {
+      await updateDoc(doc(db, "bookings", bookingId), { status: "Completed" });
+    };
+
+    window.driverStartTrip = async function(bookingId) {
+      await updateDoc(doc(db, "bookings", bookingId), { status: "In Progress" });
+    };
+
+    window.driverCompleteTrip = async function(bookingId) {
+      await updateDoc(doc(db, "bookings", bookingId), { status: "Completed" });
+    };
+
+    window.deleteBooking = async function(bookingId) {
+      if (!confirm("Delete this booking?")) return;
+      await deleteDoc(doc(db, "bookings", bookingId));
+      if (selectedAdminBookingId === bookingId) selectedAdminBookingId = "";
+    };
+
+    window.openEdit = function(booking) {
+      editingBookingId = booking.id;
+      document.getElementById("editPassengerName").value = booking.passengerName || "";
+      document.getElementById("editTripType").value = booking.tripType || "Normal";
+      document.getElementById("editPickup").value = booking.pickup || "";
+      document.getElementById("editDestination").value = booking.destination || "";
+      document.getElementById("editTripDate").value = booking.tripDate || "";
+      document.getElementById("editTripTime").value = booking.tripTime || "";
+      document.getElementById("editTripNotes").value = booking.notes || "";
+      document.getElementById("editModal").style.display = "flex";
+    };
+
+    window.closeEdit = function() {
+      document.getElementById("editModal").style.display = "none";
+      editingBookingId = "";
+    };
+
+    window.saveEdit = async function() {
+      if (!editingBookingId) return;
+      await updateDoc(doc(db, "bookings", editingBookingId), {
+        passengerName: document.getElementById("editPassengerName").value.trim(),
+        tripType: document.getElementById("editTripType").value,
+        pickup: document.getElementById("editPickup").value.trim(),
+        destination: document.getElementById("editDestination").value.trim(),
+        tripDate: document.getElementById("editTripDate").value,
+        tripTime: document.getElementById("editTripTime").value,
+        notes: document.getElementById("editTripNotes").value.trim()
+      });
+      closeEdit();
+    };
+
     window.show = function(section) {
-      if (!canAccessSection(section)) {
+      if (!canAccessSection(section)) return;
+      ["ride", "driver", "admin"].forEach(id => document.getElementById(id)?.classList.remove("active"));
+      document.getElementById(section)?.classList.add("active");
+      setActiveNav(section);
+      setTimeout(() => {
+        Object.values(mapStore).forEach(entry => entry.map?.invalidateSize());
+        refreshAllMaps();
+      }, 250);
+    };
+
+    window.registerUser = async function() {
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value.trim();
+      const role = document.getElementById("authRole").value;
+      const driverName = document.getElementById("authDriverName").value.trim();
+
+      if (!email || !password || !role) {
+        showError("Please complete all required fields.");
         return;
       }
 
-      ["ride", "driver", "admin"].forEach(id => {
-        document.getElementById(id).classList.remove("active");
-        document.getElementById(id).style.display = "none";
-      });
-
-      document.getElementById(section).style.display = "block";
-      document.getElementById(section).classList.add("active");
-      setActiveNav(section);
-
-      if (section === "driver") {
-        updateDriverHeader();
-        renderDriverTrips();
-        setTimeout(() => refreshAllMaps(), 120);
+      if (role === "Driver" && !driverName) {
+        showError("Driver name is required for Driver role.");
+        return;
       }
-      if (section === "ride") {
-        renderRiderTrips();
-        setTimeout(() => refreshAllMaps(), 120);
-      }
-      if (section === "admin") {
-        updateAdminStats();
-        renderTripHistory();
-        renderAdminBookings();
-        renderAdminDrivers();
-        renderAdminPassengers();
-        renderAdminRecentActivity();
-        setTimeout(() => refreshAllMaps(), 120);
+
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, "users", cred.user.uid), {
+          email,
+          role,
+          driverName: role === "Driver" ? driverName : "",
+          createdAt: new Date().toISOString()
+        });
+        showMessage("Registration successful.");
+        await loadDrivers();
+      } catch (error) {
+        console.error(error);
+        showError(error.message || "Registration failed.");
       }
     };
 
+    window.loginUser = async function() {
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value.trim();
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        showMessage("Login successful.");
+      } catch (error) {
+        console.error(error);
+        showError(error.message || "Login failed.");
+      }
+    };
+
+    window.logoutUser = async function() {
+      await signOut(auth);
+      currentRole = "";
+      currentDriver = "";
+      currentUser = null;
+      selectedAdminBookingId = "";
+      applyRoleUI();
+    };
+
     window.requestRide = async function() {
-      if (currentRole !== "Passenger") {
-        alert("Only Passenger can create bookings.");
+      if (!currentUser || currentRole !== "Passenger") {
+        showError("Please log in as a passenger first.");
         return;
       }
 
@@ -1987,429 +2026,87 @@
       const notes = document.getElementById("tripNotes").value.trim();
 
       if (!passengerName || !pickup || !destination || !tripDate || !tripTime) {
-        alert("Please fill all booking fields.");
-        return;
-      }
-
-      await addDoc(collection(db, "bookings"), {
-        passengerName,
-        tripType,
-        pickup,
-        destination,
-        tripDate,
-        tripTime,
-        notes,
-        status: "Pending",
-        driver: "Unassigned",
-        createdAt: Date.now(),
-        createdBy: currentUser ? currentUser.uid : ""
-      });
-
-      document.getElementById("passengerName").value = "";
-      document.getElementById("tripType").value = "Normal";
-      document.getElementById("pickup").value = "";
-      document.getElementById("destination").value = "";
-      document.getElementById("tripDate").value = "";
-      document.getElementById("tripTime").value = "";
-      document.getElementById("tripNotes").value = "";
-
-      const successBox = document.getElementById("successBox");
-      successBox.style.display = "block";
-      setTimeout(() => { successBox.style.display = "none"; }, 2000);
-    };
-
-    window.assignDriver = async function(bookingId, driverName) {
-      if (currentRole !== "Admin" || !driverName) return;
-      await updateDoc(doc(db, "bookings", bookingId), {
-        driver: driverName,
-        status: "Assigned"
-      });
-    };
-
-    window.autoAssignDriver = async function(bookingId) {
-      if (currentRole !== "Admin") return;
-      const driver = getRecommendedDriver();
-      if (!driver) {
-        alert("No available drivers");
-        return;
-      }
-      await updateDoc(doc(db, "bookings", bookingId), {
-        driver,
-        status: "Assigned"
-      });
-    };
-
-    window.startTrip = async function(bookingId) {
-      if (currentRole !== "Admin") return;
-      await updateDoc(doc(db, "bookings", bookingId), {
-        status: "In Progress"
-      });
-    };
-
-    window.completeTrip = async function(bookingId) {
-      if (currentRole !== "Admin") return;
-      await updateDoc(doc(db, "bookings", bookingId), {
-        status: "Completed"
-      });
-    };
-
-    window.driverStartTrip = async function(bookingId) {
-      const booking = liveBookings.find(b => b.id === bookingId);
-      if (currentRole !== "Driver" || !booking || booking.driver !== currentDriver) return;
-      await updateDoc(doc(db, "bookings", bookingId), {
-        status: "In Progress"
-      });
-    };
-
-    window.driverCompleteTrip = async function(bookingId) {
-      const booking = liveBookings.find(b => b.id === bookingId);
-      if (currentRole !== "Driver" || !booking || booking.driver !== currentDriver) return;
-      await updateDoc(doc(db, "bookings", bookingId), {
-        status: "Completed"
-      });
-    };
-
-    window.saveEditBooking = async function() {
-      if (currentRole !== "Admin") return;
-
-      const id = document.getElementById('editId').value;
-      const pickup = document.getElementById('editPickup').value.trim();
-      const destination = document.getElementById('editDestination').value.trim();
-      const tripDate = document.getElementById('editDate').value;
-      const tripTime = document.getElementById('editTime').value;
-      const tripType = document.getElementById('editType').value;
-      const notes = document.getElementById('editNotes').value.trim();
-      const driver = document.getElementById('editDriver').value || 'Unassigned';
-
-      if (!id || !pickup || !destination || !tripDate || !tripTime) {
-        throw new Error('Please fill pickup, destination, date, and time.');
-      }
-
-      const updatedStatus = driver === 'Unassigned' ? 'Pending' : 'Assigned';
-
-      await updateDoc(doc(db, 'bookings', id), {
-        pickup,
-        destination,
-        tripDate,
-        tripTime,
-        tripType,
-        notes,
-        driver,
-        status: updatedStatus
-      });
-    };
-
-    function initDriverLists(bookings) {
-      bookings.forEach(b => {
-        const list = document.getElementById(`driverList-${b.id}`);
-        if (!list) return;
-        list.innerHTML = '';
-        const recommended = getRecommendedDriver();
-        driverUsers.forEach(d => {
-          const item = document.createElement('div');
-          item.className = 'driver-item';
-          const load = getDriverLoad(d);
-          item.textContent = d + (d === recommended ? ' ★ Recommended' : '') + ` (${load.totalActive} active)`;
-          item.onclick = () => {
-            assignDriver(b.id, d);
-            list.style.display = 'none';
-          };
-          list.appendChild(item);
-        });
-      });
-    }
-
-    function filterDriverOptions(input, bookingId) {
-      const list = document.getElementById(`driverList-${bookingId}`);
-      const val = input.value.toLowerCase();
-      list.style.display = 'block';
-      list.innerHTML = '';
-      const recommended = getRecommendedDriver();
-      driverUsers
-        .filter(d => d.toLowerCase().includes(val))
-        .forEach(d => {
-          const item = document.createElement('div');
-          item.className = 'driver-item';
-          const load = getDriverLoad(d);
-          item.textContent = d + (d === recommended ? ' ★ Recommended' : '') + ` (${load.totalActive} active)`;
-          item.onclick = () => {
-            assignDriver(bookingId, d);
-            list.style.display = 'none';
-          };
-          list.appendChild(item);
-        });
-    }
-
-    function toggleDriverList(id, show) {
-      const list = document.getElementById(`driverList-${id}`);
-      if (list) list.style.display = show ? 'block' : 'none';
-    }
-
-    window.deleteBooking = async function(bookingId) {
-      if (currentRole !== "Admin") return;
-      const confirmDelete = confirm("Are you sure you want to delete this booking?");
-      if (!confirmDelete) return;
-      await deleteDoc(doc(db, "bookings", bookingId));
-    };
-
-    onAuthStateChanged(auth, async (user) => {
-      currentUser = user;
-      window.currentUserForMaps = user;
-
-      if (!user) {
-        currentRole = "";
-        currentDriver = "";
-        window.currentRoleForMaps = "";
-        window.currentDriverForMaps = "";
-        applyRoleUI();
-        updateDriverHeader();
+        alert("Please complete all required ride fields.");
         return;
       }
 
       try {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (!userDoc.exists()) {
-          currentRole = "";
-          currentDriver = "";
-          showError("No user profile found.");
-          applyRoleUI();
+        await addDoc(collection(db, "bookings"), {
+          passengerName,
+          tripType,
+          pickup,
+          destination,
+          tripDate,
+          tripTime,
+          notes,
+          driver: "Unassigned",
+          status: "Pending",
+          createdBy: currentUser.uid,
+          createdAt: serverTimestamp()
+        });
+
+        document.getElementById("passengerName").value = "";
+        document.getElementById("tripType").value = "Normal";
+        document.getElementById("pickup").value = "";
+        document.getElementById("destination").value = "";
+        document.getElementById("tripDate").value = "";
+        document.getElementById("tripTime").value = "";
+        document.getElementById("tripNotes").value = "";
+
+        const box = document.getElementById("successBox");
+        box.style.display = "block";
+        setTimeout(() => { box.style.display = "none"; }, 2500);
+        setTimeout(() => { refreshAllMaps(); }, 500);
+      } catch (error) {
+        console.error(error);
+        alert("Failed to request ride.");
+      }
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      if (!user) {
+        currentRole = "";
+        currentDriver = "";
+        applyRoleUI();
+        return;
+      }
+
+      try {
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        if (!userSnap.exists()) {
+          showError("User profile not found.");
           return;
         }
 
-        const profile = userDoc.data();
+        const profile = userSnap.data();
         currentRole = profile.role || "";
         currentDriver = profile.driverName || "";
-        window.currentRoleForMaps = currentRole;
-        window.currentDriverForMaps = currentDriver;
-
-        await loadDrivers();
-        applyRoleUI();
         updateDriverHeader();
-        renderRiderTrips();
-        renderDriverTrips();
+        applyRoleUI();
+        await loadDrivers();
+        refreshAllMaps();
       } catch (error) {
-        showError(error.message);
+        console.error(error);
+        showError("Failed to load user profile.");
       }
     });
 
-    window.onload = function() {
-      startRealtimeListener();
-      document.addEventListener("input", function(event) {
-        if (event.target && event.target.id === "searchInput") {
-          renderAdminBookings();
+    document.getElementById("searchInput")?.addEventListener("input", renderAdminBookings);
+
+    await loadDrivers();
+    startRealtimeListener();
+    updateDriverHeader();
+    applyRoleUI();
+
+    document.addEventListener("click", (event) => {
+      document.querySelectorAll(".driver-list").forEach(list => {
+        const wrapper = list.parentElement;
+        if (wrapper && !wrapper.contains(event.target)) {
+          list.style.display = "none";
         }
       });
-
-      // Try to initialize visible maps after page load
-      setTimeout(() => {
-        try {
-          refreshAllMaps();
-        } catch (e) {
-          console.error('Map init error:', e);
-        }
-      }, 800);
-    };
-  </script>
-  <!-- Edit Booking Modal -->
-  <div id="editModal" class="modal">
-    <div class="modal-content">
-      <h3>Edit Booking</h3>
-      <input type="hidden" id="editId" />
-
-      <div class="modal-grid">
-        <div class="modal-field">
-          <label for="editPickup">Pickup</label>
-          <input id="editPickup" placeholder="Enter pickup location" />
-        </div>
-
-        <div class="modal-field">
-          <label for="editDestination">Destination</label>
-          <input id="editDestination" placeholder="Enter destination" />
-        </div>
-
-        <div class="modal-field">
-          <label for="editDate">Date</label>
-          <input id="editDate" type="date" />
-        </div>
-
-        <div class="modal-field">
-          <label for="editTime">Time</label>
-          <input id="editTime" type="time" />
-        </div>
-
-        <div class="modal-field">
-          <label for="editType">Trip Type</label>
-          <select id="editType">
-            <option>Normal</option>
-            <option>NDIS</option>
-          </select>
-        </div>
-
-        <div class="modal-field">
-          <label for="editDriver">Driver</label>
-          <select id="editDriver"></select>
-        </div>
-
-        <div class="modal-field full">
-          <label for="editNotes">Notes</label>
-          <textarea id="editNotes" placeholder="Wheelchair, assistance, escort, or other trip notes"></textarea>
-        </div>
-      </div>
-
-      <div class="modal-actions">
-        <button class="modal-cancel" onclick="closeEdit()">Cancel</button>
-        <button class="modal-save" onclick="saveEdit()">Save Changes</button>
-      </div>
-    </div>
-  </div>
-
-<script>
-  window.openEdit = function(trip) {
-    if (!trip) return;
-    const modal = document.getElementById('editModal');
-    if (!modal) return;
-
-    document.getElementById('editId').value = trip.id || '';
-    document.getElementById('editPickup').value = trip.pickup || '';
-    document.getElementById('editDestination').value = trip.destination || '';
-    document.getElementById('editDate').value = trip.tripDate || '';
-    document.getElementById('editTime').value = trip.tripTime || '';
-    document.getElementById('editType').value = trip.tripType || 'Normal';
-    document.getElementById('editNotes').value = trip.notes || '';
-
-    const driverSelect = document.getElementById('editDriver');
-    driverSelect.innerHTML = '<option value="">Unassigned</option>';
-
-    const drivers = window.driverUsersForEdit || [];
-    drivers.forEach(d => {
-      const opt = document.createElement('option');
-      opt.value = d;
-      opt.textContent = d;
-      if (trip.driver === d) opt.selected = true;
-      driverSelect.appendChild(opt);
     });
-
-    if (!trip.driver || trip.driver === 'Unassigned') {
-      driverSelect.value = '';
-    }
-
-    modal.style.display = 'flex';
-  };
-
-  window.closeEdit = function() {
-    const modal = document.getElementById('editModal');
-    if (modal) modal.style.display = 'none';
-  };
-
-  window.saveEdit = async function() {
-    try {
-      if (!window.saveEditBooking) {
-        alert('Edit function not ready. Please refresh the page.');
-        return;
-      }
-      await window.saveEditBooking();
-      window.closeEdit();
-    } catch (error) {
-      alert('Failed to save booking: ' + error.message);
-      console.error(error);
-    }
-  };
-
-  window.addEventListener('click', function(event) {
-    const modal = document.getElementById('editModal');
-    if (event.target === modal) {
-      window.closeEdit();
-    }
-  });
-</script>
-<script>
-  function hashStringToNumber(str) {
-    let hash = 0;
-    const text = String(str || 'uvel');
-    for (let i = 0; i < text.length; i++) {
-      hash = ((hash << 5) - hash) + text.charCodeAt(i);
-      hash |= 0;
-    }
-    return Math.abs(hash);
-  }
-
-  function getTripMapData(trip) {
-    const baseLat = -33.8688;
-    const baseLng = 151.2093;
-    const seed = hashStringToNumber((trip && (trip.id || trip.pickup || trip.destination)) || 'uvel');
-    const offsetA = ((seed % 700) / 10000) + 0.01;
-    const offsetB = (((Math.floor(seed / 7)) % 700) / 10000) + 0.01;
-    const offsetC = (((Math.floor(seed / 13)) % 500) / 10000) + 0.006;
-    const offsetD = (((Math.floor(seed / 17)) % 500) / 10000) + 0.006;
-
-    const pickup = [baseLat + offsetA, baseLng + offsetC];
-    const dropoff = [baseLat - offsetB, baseLng - offsetD];
-    return { pickup, dropoff };
-  }
-
-  function getPassengerSelectedTrip() {
-    if (!window.currentUserForMaps || window.currentRoleForMaps !== 'Passenger') return null;
-    const myTrips = (window.liveBookingsForMaps || []).filter(trip => trip.createdBy === window.currentUserForMaps.uid);
-    return myTrips[0] || null;
-  }
-
-  function getDriverSelectedTrip() {
-    if (!window.currentDriverForMaps || window.currentRoleForMaps !== 'Driver') return null;
-    const myTrips = (window.liveBookingsForMaps || []).filter(trip => trip.driver === window.currentDriverForMaps && (trip.status === 'Assigned' || trip.status === 'In Progress' || trip.status === 'Completed'));
-    return myTrips[0] || null;
-  }
-
-  function getAdminSelectedTrip() {
-    const active = (window.getFilteredActiveBookingsForMaps ? window.getFilteredActiveBookingsForMaps() : []).filter(Boolean);
-    if (!active.length) return null;
-    if (window.selectedAdminBookingIdForMaps) {
-      const found = active.find(t => t.id === window.selectedAdminBookingIdForMaps);
-      if (found) return found;
-    }
-    return active[0] || null;
-  }
-
-  function buildMapEmbedUrl(trip) {
-    if (!trip) return '';
-    const mapData = getTripMapData(trip);
-    const p1 = mapData.pickup;
-    const p2 = mapData.dropoff;
-    const minLat = Math.min(p1[0], p2[0]) - 0.02;
-    const maxLat = Math.max(p1[0], p2[0]) + 0.02;
-    const minLng = Math.min(p1[1], p2[1]) - 0.02;
-    const maxLng = Math.max(p1[1], p2[1]) + 0.02;
-    const marker1 = `${p1[0]},${p1[1]}`;
-    const marker2 = `${p2[0]},${p2[1]}`;
-    return `https://www.openstreetmap.org/export/embed.html?bbox=${minLng}%2C${minLat}%2C${maxLng}%2C${maxLat}&layer=mapnik&marker=${marker1}&marker=${marker2}`;
-  }
-
-  function setFrameSrc(frameId, trip) {
-    const frame = document.getElementById(frameId);
-    if (!frame) return;
-    if (!trip) {
-      frame.removeAttribute('src');
-      return;
-    }
-    frame.src = buildMapEmbedUrl(trip);
-  }
-
-  function refreshAllMaps() {
-    setFrameSrc('liveMapFrame', getAdminSelectedTrip());
-    setFrameSrc('passengerMapFrame', getPassengerSelectedTrip());
-    setFrameSrc('driverMapFrame', getDriverSelectedTrip());
-  }
-
-  window.focusBookingOnMap = function(bookingId) {
-    window.selectedAdminBookingIdForMaps = bookingId;
-    refreshAllMaps();
-  };
-</script>
+  </script>
 </body>
 </html>
-
-
-
-
-
-
-
