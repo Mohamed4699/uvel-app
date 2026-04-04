@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -215,6 +214,71 @@
     .empty-text{color:var(--muted);font-size:15px;text-align:center;padding:26px 10px}
     .gps-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
     .gps-status{margin-top:8px;color:#9fdcff;font-size:14px}
+
+    .driver-combobox{position:relative;max-width:260px;min-width:220px}
+    .driver-input{
+      width:100%;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.15);
+      background:rgba(15,23,42,.95);
+      color:#fff;
+      font-weight:600;
+    }
+    .driver-list{
+      position:absolute;
+      top:100%;
+      left:0;
+      right:0;
+      background:#0f172a;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:12px;
+      margin-top:6px;
+      max-height:180px;
+      overflow:auto;
+      display:none;
+      z-index:50;
+      box-shadow:var(--shadow);
+    }
+    .driver-item{
+      padding:10px 12px;
+      cursor:pointer;
+      color:#fff;
+      font-size:14px;
+    }
+    .driver-item:hover{background:#1e293b}
+
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(2,6,23,.72);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      padding:20px;
+    }
+    .modal-content{
+      width:min(560px,96%);
+      background:linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      color:#0f172a;
+      border-radius:20px;
+      padding:22px;
+      box-shadow:0 25px 60px rgba(0,0,0,.35);
+      border:1px solid rgba(15,23,42,.08);
+    }
+    .modal-content h3{margin:0 0 14px;color:#0f172a;font-size:24px;letter-spacing:-.02em}
+    .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .modal-field{display:flex;flex-direction:column;gap:6px}
+    .modal-field.full{grid-column:1 / -1}
+    .modal-field label{font-size:13px;font-weight:700;color:#334155}
+    .modal-content input,.modal-content select,.modal-content textarea{
+      width:100%;padding:12px 13px;border-radius:12px;border:1px solid #cbd5e1;background:#fff;color:#0f172a;font-size:14px;
+    }
+    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;flex-wrap:wrap}
+    .modal-save{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;padding:11px 16px;border-radius:12px;font-weight:800;cursor:pointer}
+    .modal-cancel{background:#e2e8f0;color:#0f172a;border:none;padding:11px 16px;border-radius:12px;font-weight:800;cursor:pointer}
+
     @media (max-width:1180px){
       .app-shell{grid-template-columns:1fr}
       .sidebar{position:static}
@@ -223,7 +287,7 @@
       .today-stats{grid-template-columns:repeat(2,1fr)}
     }
     @media (max-width:860px){
-      .login-grid,.form-grid,.admin-filters,.hero-steps,.payments-grid,.route-stats{grid-template-columns:1fr}
+      .login-grid,.form-grid,.admin-filters,.hero-steps,.payments-grid,.route-stats,.modal-grid{grid-template-columns:1fr}
       .admin-stats,.today-stats{grid-template-columns:1fr 1fr}
     }
     @media (max-width:620px){
@@ -232,7 +296,6 @@
       .section-head h2,.hero-copy h2{font-size:24px}
     }
   </style>
-
 </head>
 <body>
   <div class="app-shell">
@@ -245,351 +308,391 @@
         </div>
       </div>
 
-```
-  <div class="nav-title">Workspace</div>
-  <div class="side-nav" id="navButtons" style="display:none;">
-    <button class="side-link" id="rideNavBtn" onclick="showSection('ride')">
-      <span>Ride App</span><small>Passenger</small>
-    </button>
-    <button class="side-link" id="driverNavBtn" onclick="showSection('driver')">
-      <span>Driver App</span><small>Trips</small>
-    </button>
-    <button class="side-link" id="adminNavBtn" onclick="showSection('admin')">
-      <span>Admin Panel</span><small>Dispatch</small>
-    </button>
-  </div>
-
-  <div id="sessionBar" style="display:none;">
-    <div class="pill" id="roleBadge">Role: Guest</div>
-    <button class="logout-btn" onclick="logoutUser()">Logout</button>
-  </div>
-
-  <div class="side-card">
-    <h3>Operations Flow</h3>
-    <p>Book trips, assign drivers, start rides, complete trips, track payments, and keep transport records in one dashboard.</p>
-  </div>
-
-  <div class="side-card">
-    <h3>Startup Upgrade</h3>
-    <p>This version includes localStorage sync, pending requests, admin driver assignment, role-based views, live maps, GPS tracking, and auto trip status.</p>
-  </div>
-</aside>
-
-<main class="main">
-  <div id="heroSection">
-    <div class="hero-top">
-      <div class="hero-copy">
-        <h2>Modern transport operations for community and NDIS-ready services.</h2>
-        <p>Passenger requests are saved locally and can be seen by Admin in another tab of the same browser.</p>
-      </div>
-    </div>
-
-    <div class="hero-grid">
-      <div class="workflow-card">
-        <h3>Operational Workflow</h3>
-        <p>Clear booking lifecycle from request to trip completion and payment tracking.</p>
-        <div class="hero-steps">
-          <div class="step-chip"><strong>Book</strong>Passenger submits request</div>
-          <div class="step-chip"><strong>Pending</strong>Admin receives request</div>
-          <div class="step-chip"><strong>Assign</strong>Admin selects driver</div>
-          <div class="step-chip"><strong>Complete</strong>Trip finalised</div>
-        </div>
+      <div class="nav-title">Workspace</div>
+      <div class="side-nav" id="navButtons" style="display:none;">
+        <button class="side-link" id="rideNavBtn" onclick="showSection('ride')">
+          <span>Ride App</span><small>Passenger</small>
+        </button>
+        <button class="side-link" id="driverNavBtn" onclick="showSection('driver')">
+          <span>Driver App</span><small>Trips</small>
+        </button>
+        <button class="side-link" id="adminNavBtn" onclick="showSection('admin')">
+          <span>Admin Panel</span><small>Dispatch</small>
+        </button>
       </div>
 
-      <div class="chart-card">
-        <h3>Admin Live Trip Map</h3>
-        <p>Admin-only map for active bookings and driver locations.</p>
-        <div id="liveMapFrame" class="real-map-frame"></div>
-        <div class="route-stats">
-          <div class="route-stat">
-            <h4>Route</h4>
-            <p id="liveRouteDistance">--</p>
-          </div>
-          <div class="route-stat">
-            <h4>ETA</h4>
-            <p id="liveRouteEta">--</p>
-          </div>
-          <div class="route-stat">
-            <h4>Driver to Pickup</h4>
-            <p id="liveDriverPickupEta">--</p>
+      <div id="sessionBar" style="display:none;">
+        <div class="pill" id="roleBadge">Role: Guest</div>
+        <button class="logout-btn" onclick="logoutUser()">Logout</button>
+      </div>
+
+      <div class="side-card">
+        <h3>Operations Flow</h3>
+        <p>Book trips, assign drivers, start rides, complete trips, track payments, and keep transport records in one dashboard.</p>
+      </div>
+
+      <div class="side-card">
+        <h3>Startup Upgrade</h3>
+        <p>This version includes Edit, Auto Assign, searchable driver selector, localStorage sync, live maps, and GPS auto status.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div id="heroSection">
+        <div class="hero-top">
+          <div class="hero-copy">
+            <h2>Modern transport operations for community and NDIS-ready services.</h2>
+            <p>Passenger requests are saved locally and can be seen by Admin in another tab of the same browser.</p>
           </div>
         </div>
-        <div class="route-message" id="liveRouteMessage">Waiting for active booking.</div>
-      </div>
-    </div>
-  </div>
 
-  <div id="loginSection" class="login-box">
-    <div class="section-head" style="margin-bottom:14px;">
-      <div>
-        <h2>Login / Role Switch</h2>
-        <p>This single-file version uses role simulation plus localStorage. Use the same browser for Passenger and Admin.</p>
-      </div>
-      <div class="section-badge">LocalStorage Mode</div>
-    </div>
-
-    <div class="login-grid">
-      <input id="authName" type="text" placeholder="Your name">
-      <input id="authEmail" type="email" placeholder="Email address">
-      <select id="authRole">
-        <option value="">Select role</option>
-        <option value="Passenger">Passenger</option>
-        <option value="Driver">Driver</option>
-        <option value="Admin">Admin</option>
-      </select>
-      <input id="authDriverName" type="text" placeholder="Driver name (for Driver role)">
-    </div>
-
-    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:18px;">
-      <button class="ride" onclick="loginUser()">Enter App</button>
-      <button class="delete-btn" onclick="clearAllBookings()">Clear Saved Bookings</button>
-    </div>
-
-    <div id="authMessage" class="auth-message">Success</div>
-    <div id="authError" class="error-box">Error</div>
-
-    <div class="helper-text">
-      Test method:<br>
-      Passenger creates request → open another tab in same browser → login as Admin → Admin sees pending request.
-    </div>
-  </div>
-
-  <div id="ride" class="section">
-    <div class="section-head">
-      <div>
-        <h2>Ride App</h2>
-        <p>Create a trip request, view payment mode, and track your current trip.</p>
-      </div>
-      <div class="section-badge">Passenger View</div>
-    </div>
-
-    <div class="ride-layout">
-      <div>
-        <div class="form-card">
-          <h3>Book a Ride</h3>
-          <p>Enter trip details below to create a new booking.</p>
-
-          <div class="form-grid">
-            <input id="passengerName" type="text" placeholder="Passenger name">
-            <select id="tripType">
-              <option value="Normal">Normal</option>
-              <option value="NDIS">NDIS</option>
-            </select>
-            <input id="pickup" type="text" placeholder="Pickup location">
-            <input id="destination" type="text" placeholder="Destination">
-            <input id="tripDate" type="date">
-            <input id="tripTime" type="time">
-            <textarea id="tripNotes" class="full-width" placeholder="Notes (wheelchair, assistance, escort, special instructions)"></textarea>
-          </div>
-
-          <button class="request-btn ride-submit" onclick="requestRide()">Request Ride</button>
-          <div id="successBox" class="success-box">Ride requested successfully ✅</div>
-          <div class="muted-note">Requests now go to Admin as Pending first and are saved in localStorage.</div>
-        </div>
-
-        <div class="payments-panel">
-          <div class="payments-top">
-            <h3 style="margin:0;">Payments</h3>
-            <div class="pill" style="background:rgba(124,58,237,.18);border-color:rgba(124,58,237,.25);">Stripe-ready</div>
-          </div>
-          <p style="margin-top:10px;">Normal trips can be paid by card. NDIS trips are marked as referral / invoice and do not require card payment in this MVP.</p>
-          <div class="payments-grid">
-            <div class="payment-box">
-              <h4>Estimated fare</h4>
-              <p id="previewFare">AUD 0.00</p>
-            </div>
-            <div class="payment-box">
-              <h4>Payment mode</h4>
-              <p id="previewPaymentMode">Stripe card</p>
+        <div class="hero-grid">
+          <div class="workflow-card">
+            <h3>Operational Workflow</h3>
+            <p>Clear booking lifecycle from request to trip completion and payment tracking.</p>
+            <div class="hero-steps">
+              <div class="step-chip"><strong>Book</strong>Passenger submits request</div>
+              <div class="step-chip"><strong>Pending</strong>Admin receives request</div>
+              <div class="step-chip"><strong>Assign</strong>Admin selects driver</div>
+              <div class="step-chip"><strong>Complete</strong>Trip finalised</div>
             </div>
           </div>
-          <p class="muted-note" style="margin-top:12px;">NDIS still shows the real fare, but payment mode stays invoice / referral.</p>
-        </div>
-      </div>
 
-      <div class="list-card">
-        <h3>My Trips</h3>
-        <div class="map-panel" style="margin-top:14px;">
-          <h3 style="font-size:18px;">Passenger Live Map</h3>
-          <p>Track pickup, destination, and driver location for your current trip.</p>
-          <div id="passengerMapFrame" class="real-map-frame"></div>
-          <div class="route-stats">
-            <div class="route-stat">
-              <h4>Route</h4>
-              <p id="passengerRouteDistance">--</p>
+          <div class="chart-card">
+            <h3>Admin Live Trip Map</h3>
+            <p>Admin-only map for active bookings and driver locations.</p>
+            <div id="liveMapFrame" class="real-map-frame"></div>
+            <div class="route-stats">
+              <div class="route-stat">
+                <h4>Route</h4>
+                <p id="liveRouteDistance">--</p>
+              </div>
+              <div class="route-stat">
+                <h4>ETA</h4>
+                <p id="liveRouteEta">--</p>
+              </div>
+              <div class="route-stat">
+                <h4>Driver to Pickup</h4>
+                <p id="liveDriverPickupEta">--</p>
+              </div>
             </div>
-            <div class="route-stat">
-              <h4>ETA</h4>
-              <p id="passengerRouteEta">--</p>
-            </div>
-            <div class="route-stat">
-              <h4>Driver to Pickup</h4>
-              <p id="passengerDriverPickupEta">--</p>
-            </div>
+            <div class="route-message" id="liveRouteMessage">Waiting for active booking.</div>
           </div>
-          <div class="route-message" id="passengerRouteMessage">Waiting for your trip.</div>
-        </div>
-        <p>See current and past trip activity with driver, fare, and payment status.</p>
-        <div id="riderTrips">
-          <p class="empty-text">No trips yet.</p>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div id="driver" class="section">
-    <div class="section-head">
-      <div>
-        <h2>Driver App</h2>
-        <p>Drivers only receive trips after Admin assigns them.</p>
-        <div id="driverSelectedText" class="driver-selected">No driver selected.</div>
-      </div>
-      <div class="section-badge">Driver View</div>
-    </div>
-
-    <div class="driver-layout">
-      <div class="mini-panel">
-        <h3>Driver Workflow</h3>
-        <p>Receive assigned trip, track location, and let trip status update from GPS.</p>
-        <div class="hero-steps" style="margin-top:14px; grid-template-columns:repeat(4,1fr);">
-          <div class="step-chip"><strong>Assigned</strong>Ready to begin</div>
-          <div class="step-chip"><strong>En Route</strong>Heading to pickup</div>
-          <div class="step-chip"><strong>Arrived</strong>At pickup point</div>
-          <div class="step-chip"><strong>Complete</strong>Trip closed</div>
-        </div>
-
-        <div class="gps-row">
-          <button class="driver" onclick="startGPS()">Start Live GPS</button>
-          <button class="delete-btn" onclick="stopGPS()">Stop GPS</button>
-          <div class="pill" style="background:rgba(20,184,166,.14);border-color:rgba(20,184,166,.18);">GPS LIVE</div>
-        </div>
-        <div class="gps-status" id="gpsStatusText">GPS stopped.</div>
-      </div>
-
-      <div class="list-card">
-        <h3>My Trips</h3>
-        <p>Only trips assigned by Admin are shown below.</p>
-        <div class="map-panel" style="margin-top:14px;">
-          <h3 style="font-size:18px;">Driver Route Map</h3>
-          <p>View the live route from pickup to destination.</p>
-          <div id="driverMapFrame" class="real-map-frame"></div>
-          <div class="route-stats">
-            <div class="route-stat">
-              <h4>Route</h4>
-              <p id="driverRouteDistance">--</p>
-            </div>
-            <div class="route-stat">
-              <h4>ETA</h4>
-              <p id="driverRouteEta">--</p>
-            </div>
-            <div class="route-stat">
-              <h4>Driver to Pickup</h4>
-              <p id="driverDriverPickupEta">--</p>
-            </div>
+      <div id="loginSection" class="login-box">
+        <div class="section-head" style="margin-bottom:14px;">
+          <div>
+            <h2>Login / Role Switch</h2>
+            <p>This single-file version uses role simulation plus localStorage. Use the same browser for Passenger and Admin.</p>
           </div>
-          <div class="route-message" id="driverRouteMessage">Waiting for assigned trip.</div>
-        </div>
-        <div id="driverTrips">
-          <p class="empty-text">No assigned trips yet.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="admin" class="section">
-    <div class="section-head">
-      <div>
-        <h2>Admin Panel</h2>
-        <p>Receive pending bookings, assign drivers, monitor statuses, and review payment state.</p>
-      </div>
-      <div class="section-badge">Operations View</div>
-    </div>
-
-    <div class="admin-stats">
-      <div class="stat-card"><h4>Total Bookings</h4><p id="totalBookings">0</p></div>
-      <div class="stat-card"><h4>Pending</h4><p id="pendingBookings">0</p></div>
-      <div class="stat-card"><h4>Assigned</h4><p id="assignedBookings">0</p></div>
-      <div class="stat-card"><h4>In Progress</h4><p id="progressBookings">0</p></div>
-      <div class="stat-card"><h4>Completed</h4><p id="completedBookings">0</p></div>
-    </div>
-
-    <div class="today-stats">
-      <div class="stat-card"><h4>Today's Trips</h4><p id="todayTrips">0</p></div>
-      <div class="stat-card"><h4>Today's Pending</h4><p id="todayPending">0</p></div>
-      <div class="stat-card"><h4>Today's Assigned</h4><p id="todayAssigned">0</p></div>
-      <div class="stat-card"><h4>Today's Completed</h4><p id="todayCompleted">0</p></div>
-    </div>
-
-    <div class="admin-grid">
-      <div class="panel-box">
-        <h3>Active Booking Requests</h3>
-
-        <div class="side-card" style="margin-top:0; margin-bottom:14px; background:rgba(20,184,166,0.08); border-color:rgba(20,184,166,0.14);">
-          <h3 style="font-size:16px; margin-bottom:6px;">Smart Driver Assignment</h3>
-          <p style="margin-bottom:10px;">UVEL recommends the least busy driver based on current active trips.</p>
-          <div class="pill" id="recommendedDriverPill">Recommended: --</div>
+          <div class="section-badge">LocalStorage Mode</div>
         </div>
 
-        <div class="admin-filters">
-          <input id="searchInput" type="text" placeholder="Search passenger, pickup, destination, booking ID" oninput="renderAdminBookings()">
-          <select id="statusFilter" onchange="renderAdminBookings()">
-            <option value="All">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="Assigned">Assigned</option>
-            <option value="Driver En Route">Driver En Route</option>
-            <option value="Arrived">Arrived</option>
-            <option value="In Progress">In Progress</option>
+        <div class="login-grid">
+          <input id="authName" type="text" placeholder="Your name">
+          <input id="authEmail" type="email" placeholder="Email address">
+          <select id="authRole">
+            <option value="">Select role</option>
+            <option value="Passenger">Passenger</option>
+            <option value="Driver">Driver</option>
+            <option value="Admin">Admin</option>
           </select>
-          <select id="driverFilter" onchange="renderAdminBookings()">
-            <option value="All">All Drivers</option>
-            <option value="Unassigned">Unassigned</option>
-          </select>
-          <input id="dateFilter" type="date" onchange="renderAdminBookings()">
-          <button class="filter-btn" onclick="clearAdminFilters()">Clear</button>
+          <input id="authDriverName" type="text" placeholder="Driver name (for Driver role)">
         </div>
 
-        <div class="export-bar">
-          <button class="export-btn" onclick="exportActiveBookingsCSV()">Export Active CSV</button>
-          <button class="export-btn" onclick="exportCompletedTripsCSV()">Export Completed CSV</button>
-          <button class="pdf-btn" onclick="printAdminReport()">Export PDF</button>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:18px;">
+          <button class="ride" onclick="loginUser()">Enter App</button>
+          <button class="delete-btn" onclick="clearAllBookings()">Clear Saved Bookings</button>
         </div>
 
-        <div id="bookingList">
-          <p class="empty-text">No bookings yet.</p>
+        <div id="authMessage" class="auth-message">Success</div>
+        <div id="authError" class="error-box">Error</div>
+
+        <div class="helper-text">
+          Test method:<br>
+          Passenger creates request → open another tab in same browser → login as Admin → Admin sees pending request.
         </div>
       </div>
 
-      <div class="panel-box">
-        <h3>Completed Trip History</h3>
-        <div id="tripHistoryList">
-          <p class="empty-text">No completed trips yet.</p>
+      <div id="ride" class="section">
+        <div class="section-head">
+          <div>
+            <h2>Ride App</h2>
+            <p>Create a trip request, view payment mode, and track your current trip.</p>
+          </div>
+          <div class="section-badge">Passenger View</div>
         </div>
-      </div>
-    </div>
 
-    <div class="admin-grid" style="margin-top:20px;">
-      <div class="panel-box">
-        <h3>Driver Management</h3>
-        <p style="margin-bottom:12px;">See all drivers and their current trip load.</p>
-        <div id="adminDriversList">
-          <p class="empty-text">No drivers found.</p>
+        <div class="ride-layout">
+          <div>
+            <div class="form-card">
+              <h3>Book a Ride</h3>
+              <p>Enter trip details below to create a new booking.</p>
+
+              <div class="form-grid">
+                <input id="passengerName" type="text" placeholder="Passenger name">
+                <select id="tripType">
+                  <option value="Normal">Normal</option>
+                  <option value="NDIS">NDIS</option>
+                </select>
+                <input id="pickup" type="text" placeholder="Pickup location">
+                <input id="destination" type="text" placeholder="Destination">
+                <input id="tripDate" type="date">
+                <input id="tripTime" type="time">
+                <textarea id="tripNotes" class="full-width" placeholder="Notes (wheelchair, assistance, escort, special instructions)"></textarea>
+              </div>
+
+              <button class="request-btn ride-submit" onclick="requestRide()">Request Ride</button>
+              <div id="successBox" class="success-box">Ride requested successfully ✅</div>
+              <div class="muted-note">Requests now go to Admin as Pending first and are saved in localStorage.</div>
+            </div>
+
+            <div class="payments-panel">
+              <div class="payments-top">
+                <h3 style="margin:0;">Payments</h3>
+                <div class="pill" style="background:rgba(124,58,237,.18);border-color:rgba(124,58,237,.25);">Stripe-ready</div>
+              </div>
+              <p style="margin-top:10px;">Normal trips can be paid by card. NDIS trips are marked as referral / invoice and do not require card payment in this MVP.</p>
+              <div class="payments-grid">
+                <div class="payment-box">
+                  <h4>Estimated fare</h4>
+                  <p id="previewFare">AUD 0.00</p>
+                </div>
+                <div class="payment-box">
+                  <h4>Payment mode</h4>
+                  <p id="previewPaymentMode">Stripe card</p>
+                </div>
+              </div>
+              <p class="muted-note" style="margin-top:12px;">NDIS still shows the real fare, but payment mode stays invoice / referral.</p>
+            </div>
+          </div>
+
+          <div class="list-card">
+            <h3>My Trips</h3>
+            <div class="map-panel" style="margin-top:14px;">
+              <h3 style="font-size:18px;">Passenger Live Map</h3>
+              <p>Track pickup, destination, and driver location for your current trip.</p>
+              <div id="passengerMapFrame" class="real-map-frame"></div>
+              <div class="route-stats">
+                <div class="route-stat">
+                  <h4>Route</h4>
+                  <p id="passengerRouteDistance">--</p>
+                </div>
+                <div class="route-stat">
+                  <h4>ETA</h4>
+                  <p id="passengerRouteEta">--</p>
+                </div>
+                <div class="route-stat">
+                  <h4>Driver to Pickup</h4>
+                  <p id="passengerDriverPickupEta">--</p>
+                </div>
+              </div>
+              <div class="route-message" id="passengerRouteMessage">Waiting for your trip.</div>
+            </div>
+            <p>See current and past trip activity with driver, fare, and payment status.</p>
+            <div id="riderTrips">
+              <p class="empty-text">No trips yet.</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="panel-box">
-        <h3>Passenger Management</h3>
-        <p style="margin-bottom:12px;">See all passengers and how many bookings they created.</p>
-        <div id="adminPassengersList">
-          <p class="empty-text">No passengers found.</p>
+      <div id="driver" class="section">
+        <div class="section-head">
+          <div>
+            <h2>Driver App</h2>
+            <p>Drivers only receive trips after Admin assigns them.</p>
+            <div id="driverSelectedText" class="driver-selected">No driver selected.</div>
+          </div>
+          <div class="section-badge">Driver View</div>
+        </div>
+
+        <div class="driver-layout">
+          <div class="mini-panel">
+            <h3>Driver Workflow</h3>
+            <p>Receive assigned trip, track location, and let trip status update from GPS.</p>
+            <div class="hero-steps" style="margin-top:14px; grid-template-columns:repeat(4,1fr);">
+              <div class="step-chip"><strong>Assigned</strong>Ready to begin</div>
+              <div class="step-chip"><strong>En Route</strong>Heading to pickup</div>
+              <div class="step-chip"><strong>Arrived</strong>At pickup point</div>
+              <div class="step-chip"><strong>Complete</strong>Trip closed</div>
+            </div>
+
+            <div class="gps-row">
+              <button class="driver" onclick="startGPS()">Start Live GPS</button>
+              <button class="delete-btn" onclick="stopGPS()">Stop GPS</button>
+              <div class="pill" style="background:rgba(20,184,166,.14);border-color:rgba(20,184,166,.18);">GPS LIVE</div>
+            </div>
+            <div class="gps-status" id="gpsStatusText">GPS stopped.</div>
+          </div>
+
+          <div class="list-card">
+            <h3>My Trips</h3>
+            <p>Only trips assigned by Admin are shown below.</p>
+            <div class="map-panel" style="margin-top:14px;">
+              <h3 style="font-size:18px;">Driver Route Map</h3>
+              <p>View the live route from pickup to destination.</p>
+              <div id="driverMapFrame" class="real-map-frame"></div>
+              <div class="route-stats">
+                <div class="route-stat">
+                  <h4>Route</h4>
+                  <p id="driverRouteDistance">--</p>
+                </div>
+                <div class="route-stat">
+                  <h4>ETA</h4>
+                  <p id="driverRouteEta">--</p>
+                </div>
+                <div class="route-stat">
+                  <h4>Driver to Pickup</h4>
+                  <p id="driverDriverPickupEta">--</p>
+                </div>
+              </div>
+              <div class="route-message" id="driverRouteMessage">Waiting for assigned trip.</div>
+            </div>
+            <div id="driverTrips">
+              <p class="empty-text">No assigned trips yet.</p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+
+      <div id="admin" class="section">
+        <div class="section-head">
+          <div>
+            <h2>Admin Panel</h2>
+            <p>Receive pending bookings, assign drivers, edit bookings, monitor statuses, and review payment state.</p>
+          </div>
+          <div class="section-badge">Operations View</div>
+        </div>
+
+        <div class="admin-stats">
+          <div class="stat-card"><h4>Total Bookings</h4><p id="totalBookings">0</p></div>
+          <div class="stat-card"><h4>Pending</h4><p id="pendingBookings">0</p></div>
+          <div class="stat-card"><h4>Assigned</h4><p id="assignedBookings">0</p></div>
+          <div class="stat-card"><h4>In Progress</h4><p id="progressBookings">0</p></div>
+          <div class="stat-card"><h4>Completed</h4><p id="completedBookings">0</p></div>
+        </div>
+
+        <div class="today-stats">
+          <div class="stat-card"><h4>Today's Trips</h4><p id="todayTrips">0</p></div>
+          <div class="stat-card"><h4>Today's Pending</h4><p id="todayPending">0</p></div>
+          <div class="stat-card"><h4>Today's Assigned</h4><p id="todayAssigned">0</p></div>
+          <div class="stat-card"><h4>Today's Completed</h4><p id="todayCompleted">0</p></div>
+        </div>
+
+        <div class="admin-grid">
+          <div class="panel-box">
+            <h3>Active Booking Requests</h3>
+
+            <div class="side-card" style="margin-top:0; margin-bottom:14px; background:rgba(20,184,166,0.08); border-color:rgba(20,184,166,0.14);">
+              <h3 style="font-size:16px; margin-bottom:6px;">Smart Driver Assignment</h3>
+              <p style="margin-bottom:10px;">UVEL recommends the least busy driver based on current active trips.</p>
+              <div class="pill" id="recommendedDriverPill">Recommended: --</div>
+            </div>
+
+            <div class="admin-filters">
+              <input id="searchInput" type="text" placeholder="Search passenger, pickup, destination, booking ID" oninput="renderAdminBookings()">
+              <select id="statusFilter" onchange="renderAdminBookings()">
+                <option value="All">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Assigned">Assigned</option>
+                <option value="Driver En Route">Driver En Route</option>
+                <option value="Arrived">Arrived</option>
+                <option value="In Progress">In Progress</option>
+              </select>
+              <select id="driverFilter" onchange="renderAdminBookings()">
+                <option value="All">All Drivers</option>
+                <option value="Unassigned">Unassigned</option>
+              </select>
+              <input id="dateFilter" type="date" onchange="renderAdminBookings()">
+              <button class="filter-btn" onclick="clearAdminFilters()">Clear</button>
+            </div>
+
+            <div class="export-bar">
+              <button class="export-btn" onclick="exportActiveBookingsCSV()">Export Active CSV</button>
+              <button class="export-btn" onclick="exportCompletedTripsCSV()">Export Completed CSV</button>
+              <button class="pdf-btn" onclick="printAdminReport()">Export PDF</button>
+            </div>
+
+            <div id="bookingList">
+              <p class="empty-text">No bookings yet.</p>
+            </div>
+          </div>
+
+          <div class="panel-box">
+            <h3>Completed Trip History</h3>
+            <div id="tripHistoryList">
+              <p class="empty-text">No completed trips yet.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-grid" style="margin-top:20px;">
+          <div class="panel-box">
+            <h3>Driver Management</h3>
+            <p style="margin-bottom:12px;">See all drivers and their current trip load.</p>
+            <div id="adminDriversList">
+              <p class="empty-text">No drivers found.</p>
+            </div>
+          </div>
+
+          <div class="panel-box">
+            <h3>Passenger Management</h3>
+            <p style="margin-bottom:12px;">See all passengers and how many bookings they created.</p>
+            <div id="adminPassengersList">
+              <p class="empty-text">No passengers found.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">UVEL full localStorage single-file version with Edit, Auto Assign, searchable driver selector, GPS auto status, and NDIS invoice pricing.</div>
+    </main>
   </div>
 
-  <div class="footer-note">UVEL full localStorage single-file version with pending requests, admin assignment, GPS auto status, and NDIS invoice pricing.</div>
-</main>
-```
-
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <h3>Edit Booking</h3>
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label>Passenger Name</label>
+          <input id="editPassengerName" type="text">
+        </div>
+        <div class="modal-field">
+          <label>Trip Type</label>
+          <select id="editTripType">
+            <option value="Normal">Normal</option>
+            <option value="NDIS">NDIS</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Pickup</label>
+          <input id="editPickup" type="text">
+        </div>
+        <div class="modal-field">
+          <label>Destination</label>
+          <input id="editDestination" type="text">
+        </div>
+        <div class="modal-field">
+          <label>Date</label>
+          <input id="editTripDate" type="date">
+        </div>
+        <div class="modal-field">
+          <label>Time</label>
+          <input id="editTripTime" type="time">
+        </div>
+        <div class="modal-field full">
+          <label>Notes</label>
+          <textarea id="editTripNotes"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeEditModal()">Cancel</button>
+        <button class="modal-save" onclick="saveBookingEdit()">Save Changes</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -599,8 +702,9 @@
     let currentDriver = "";
     let selectedAdminBookingId = "";
     let gpsWatchId = null;
+    let editingBookingId = "";
 
-    const UVEL_BOOKINGS_KEY = "uvel_bookings_v1";
+    const UVEL_BOOKINGS_KEY = "uvel_bookings_v2";
 
     function loadBookingsFromStorage() {
       try {
@@ -899,12 +1003,10 @@
     function updateHeroVisibility() {
       const hero = document.getElementById("heroSection");
       if (!hero) return;
-
       if (!currentUser || !currentRole) {
         hero.style.display = "block";
         return;
       }
-
       hero.style.display = currentRole === "Admin" ? "block" : "none";
     }
 
@@ -1226,6 +1328,35 @@
       refreshAllMaps();
     }
 
+    function populateDriverSearchList(bookingId, filterText = "") {
+      const list = document.getElementById(`driverList-${bookingId}`);
+      if (!list) return;
+
+      const filtered = driverUsers.filter(driver =>
+        driver.toLowerCase().includes(filterText.toLowerCase())
+      );
+
+      if (!filtered.length) {
+        list.innerHTML = `<div class="driver-item">No matching driver</div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(driver => `
+        <div class="driver-item" onclick="assignSelectedDriver('${bookingId}', '${driver.replace(/'/g, "\\'")}')">${driver}</div>
+      `).join("");
+    }
+
+    function toggleDriverList(bookingId, show) {
+      const list = document.getElementById(`driverList-${bookingId}`);
+      if (!list) return;
+      list.style.display = show ? "block" : "none";
+    }
+
+    function filterDriverOptions(inputEl, bookingId) {
+      populateDriverSearchList(bookingId, inputEl.value || "");
+      toggleDriverList(bookingId, true);
+    }
+
     function renderAdminBookings() {
       updateAdminStats();
       const bookingList = document.getElementById("bookingList");
@@ -1254,11 +1385,25 @@
             <span class="status ${getStatusClass(booking.status)}">${booking.status}</span>
           </div>
 
+          ${booking.status === "Pending" ? `
+            <div class="action-row">
+              <div class="driver-combobox">
+                <input
+                  class="driver-input"
+                  placeholder="Search driver..."
+                  oninput="filterDriverOptions(this, '${booking.id}')"
+                  onclick="filterDriverOptions(this, '${booking.id}')"
+                  onfocus="filterDriverOptions(this, '${booking.id}')"
+                  onblur="setTimeout(() => toggleDriverList('${booking.id}', false), 200)"
+                />
+                <div class="driver-list" id="driverList-${booking.id}"></div>
+              </div>
+              <button class="driver" onclick="assignRecommendedDriver('${booking.id}')">Auto Assign</button>
+            </div>
+          ` : ""}
+
           <div class="action-row">
-            ${booking.status === "Pending"
-              ? `<button class="driver" onclick="assignRecommendedDriver('${booking.id}')">Assign Driver</button>`
-              : ""
-            }
+            <button class="admin" onclick="openEditBooking('${booking.id}')">Edit</button>
             <button class="secondary" onclick="focusBookingOnMap('${booking.id}')">Show on Map</button>
             <button class="start-btn" onclick="moveBookingStatus('${booking.id}', 'In Progress')">Mark In Progress</button>
             <button class="complete-btn" onclick="moveBookingStatus('${booking.id}', 'Completed')">Mark Completed</button>
@@ -1266,6 +1411,72 @@
           </div>
         </div>
       `).join("");
+
+      bookings.forEach(booking => {
+        if (booking.status === "Pending") {
+          populateDriverSearchList(booking.id, "");
+        }
+      });
+    }
+
+    function assignSelectedDriver(bookingId, driverName) {
+      if (!driverName) return;
+      const booking = liveBookings.find(b => b.id === bookingId);
+      if (!booking) return;
+
+      booking.driver = driverName;
+      booking.status = "Assigned";
+      booking.updatedAt = new Date().toISOString();
+
+      syncAndRenderBookings();
+    }
+
+    function openEditBooking(bookingId) {
+      const booking = liveBookings.find(b => b.id === bookingId);
+      if (!booking) return;
+
+      editingBookingId = bookingId;
+      document.getElementById("editPassengerName").value = booking.passengerName || "";
+      document.getElementById("editTripType").value = booking.tripType || "Normal";
+      document.getElementById("editPickup").value = booking.pickup || "";
+      document.getElementById("editDestination").value = booking.destination || "";
+      document.getElementById("editTripDate").value = booking.tripDate || "";
+      document.getElementById("editTripTime").value = booking.tripTime || "";
+      document.getElementById("editTripNotes").value = booking.notes || "";
+      document.getElementById("editModal").style.display = "flex";
+    }
+
+    function closeEditModal() {
+      editingBookingId = "";
+      document.getElementById("editModal").style.display = "none";
+    }
+
+    async function saveBookingEdit() {
+      const booking = liveBookings.find(b => b.id === editingBookingId);
+      if (!booking) return;
+
+      booking.passengerName = document.getElementById("editPassengerName").value.trim() || booking.passengerName;
+      booking.tripType = document.getElementById("editTripType").value;
+      booking.pickup = document.getElementById("editPickup").value.trim() || booking.pickup;
+      booking.destination = document.getElementById("editDestination").value.trim() || booking.destination;
+      booking.tripDate = document.getElementById("editTripDate").value || booking.tripDate;
+      booking.tripTime = document.getElementById("editTripTime").value || booking.tripTime;
+      booking.notes = document.getElementById("editTripNotes").value.trim();
+
+      booking.pickupCoords = await geocodeLocation(booking.pickup);
+      booking.destinationCoords = await geocodeLocation(booking.destination);
+
+      const estimatedKm = booking.pickupCoords && booking.destinationCoords
+        ? haversineKm(booking.pickupCoords.lat, booking.pickupCoords.lng, booking.destinationCoords.lat, booking.destinationCoords.lng).toFixed(1)
+        : 8;
+
+      booking.estimatedKm = Number(estimatedKm);
+      booking.fareAUD = calculateFare(estimatedKm, booking.notes);
+      booking.paymentStatus = booking.tripType === "NDIS" ? "NDIS / Invoice" : (booking.paymentStatus === "NDIS / Invoice" ? "Unpaid" : booking.paymentStatus);
+      booking.updatedAt = new Date().toISOString();
+
+      closeEditModal();
+      syncAndRenderBookings();
     }
 
     function renderTripHistory() {
@@ -1645,6 +1856,5 @@
       });
     });
   </script>
-
 </body>
 </html>
