@@ -398,10 +398,6 @@
       overflow: hidden;
     }
 
-    #heroMapPanel {
-      display: none;
-    }
-
     .route-meta {
       margin-top: 12px;
       display: grid;
@@ -901,7 +897,7 @@
     </aside>
 
     <main class="main">
-      <div class="hero">
+      <div class="hero" id="heroSection">
         <div class="hero-top">
           <div class="hero-copy">
             <h2>Modern transport operations for community and NDIS-ready services.</h2>
@@ -2055,10 +2051,14 @@
       });
     }
 
-    function updateHeroMapVisibility() {
-      const heroMapPanel = document.getElementById("heroMapPanel");
-      if (!heroMapPanel) return;
-      heroMapPanel.style.display = currentRole === "Admin" ? "block" : "none";
+    function updateHeroVisibility() {
+      const hero = document.getElementById("heroSection");
+      if (!hero) return;
+      if (!currentUser || !currentRole) {
+        hero.style.display = "block";
+        return;
+      }
+      hero.style.display = currentRole === "Admin" ? "block" : "none";
     }
 
     function applyRoleUI() {
@@ -2081,7 +2081,7 @@
         driverSection.style.display = "none";
         adminSection.style.display = "none";
         updateQuickActions();
-        updateHeroMapVisibility();
+        updateHeroVisibility();
         return;
       }
 
@@ -2089,7 +2089,7 @@
       navButtons.style.display = "grid";
       loginSection.style.display = "none";
       roleBadge.textContent = `Role: ${currentRole}${currentRole === 'Driver' && currentDriver ? ' (' + currentDriver + ')' : ''}`;
-      updateHeroMapVisibility();
+      updateHeroVisibility();
 
       rideNavBtn.style.display = currentRole === "Passenger" ? "flex" : "none";
       driverNavBtn.style.display = currentRole === "Driver" ? "flex" : "none";
