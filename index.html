@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -12,117 +11,52 @@
 
   <style>
     :root{
-      --bg:#07111f;
-      --panel:rgba(13,27,47,0.95);
-      --line:rgba(255,255,255,0.08);
-      --text:#f8fafc;
-      --muted:#9eb0ca;
-      --green:#22c55e;
-      --blue:#3b82f6;
-      --purple:#8b5cf6;
-      --red:#ef4444;
-      --shadow:0 24px 50px rgba(0,0,0,.28);
+      --bg:#07111f; --panel:rgba(13,27,47,0.95); --line:rgba(255,255,255,0.08);
+      --text:#f8fafc; --muted:#9eb0ca; --green:#22c55e; --blue:#3b82f6;
+      --purple:#8b5cf6; --red:#ef4444; --shadow:0 24px 50px rgba(0,0,0,.28);
     }
     *{box-sizing:border-box}
     body{
-      margin:0;
-      font-family:Inter, Arial, sans-serif;
-      color:var(--text);
+      margin:0; font-family:Inter, Arial, sans-serif; color:var(--text);
       background:
         radial-gradient(circle at top left, rgba(20,184,166,.14), transparent 28%),
         radial-gradient(circle at top right, rgba(59,130,246,.18), transparent 28%),
         linear-gradient(180deg,#06101d 0%,#08162a 45%,#0a1630 100%);
       min-height:100vh;
     }
-    .app-shell{
-      width:min(1380px,96%);
-      margin:0 auto;
-      padding:22px 0 30px;
-      display:grid;
-      grid-template-columns:280px 1fr;
-      gap:22px;
-      min-height:100vh;
-    }
-    .sidebar{
-      position:sticky;
-      top:20px;
-      align-self:start;
-      background:linear-gradient(180deg, rgba(13,27,47,.98), rgba(11,23,48,.94));
-      border:1px solid var(--line);
-      border-radius:30px;
-      box-shadow:var(--shadow);
-      padding:22px;
-    }
+    .app-shell{width:min(1380px,96%);margin:0 auto;padding:22px 0 30px;display:grid;grid-template-columns:280px 1fr;gap:22px;min-height:100vh}
+    .sidebar{position:sticky;top:20px;align-self:start;background:linear-gradient(180deg, rgba(13,27,47,.98), rgba(11,23,48,.94));border:1px solid var(--line);border-radius:30px;box-shadow:var(--shadow);padding:22px}
     .logo-wrap{display:flex;align-items:center;gap:14px;margin-bottom:24px}
-    .logo-box{
-      width:56px;height:56px;border-radius:18px;display:grid;place-items:center;
-      font-size:28px;background:linear-gradient(135deg, rgba(20,184,166,.2), rgba(59,130,246,.22));
-      border:1px solid rgba(255,255,255,.08);
-    }
+    .logo-box{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;font-size:28px;background:linear-gradient(135deg, rgba(20,184,166,.2), rgba(59,130,246,.22));border:1px solid rgba(255,255,255,.08)}
     .logo-wrap h1{margin:0;font-size:26px;letter-spacing:-.03em}
     .logo-wrap p{margin:4px 0 0;color:var(--muted);font-size:13px}
     .nav-title{margin:0 0 12px;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
     .side-nav{display:grid;gap:10px;margin-bottom:20px}
-    .side-link{
-      width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding:14px 16px;border:1px solid transparent;background:rgba(255,255,255,.04);
-      color:var(--text);border-radius:16px;cursor:pointer;font-weight:700;font-size:14px;text-align:left;transition:.18s ease;
-    }
-    .side-link:hover,.side-link.active-link{
-      background:rgba(255,255,255,.08);
-      border-color:rgba(20,184,166,.18);
-      transform:translateY(-1px);
-    }
+    .side-link{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border:1px solid transparent;background:rgba(255,255,255,.04);color:var(--text);border-radius:16px;cursor:pointer;font-weight:700;font-size:14px;text-align:left;transition:.18s ease}
+    .side-link:hover,.side-link.active-link{background:rgba(255,255,255,.08);border-color:rgba(20,184,166,.18);transform:translateY(-1px)}
     .side-link small{color:var(--muted);font-weight:600}
-    .side-card{
-      margin-top:18px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:20px;padding:16px;
-    }
+    .side-card{margin-top:18px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:20px;padding:16px}
     .side-card h3{margin:0 0 8px;font-size:16px}
     .side-card p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}
-    .pill{
-      display:inline-flex;align-items:center;padding:10px 14px;border-radius:999px;
-      background:rgba(255,255,255,.06);border:1px solid var(--line);font-size:13px;font-weight:700;
-    }
-    .logout-btn{
-      width:100%;margin-top:14px;background:rgba(239,68,68,.16);color:white;padding:12px 16px;
-      border:1px solid rgba(239,68,68,.22);border-radius:14px;cursor:pointer;font-weight:800;
-    }
+    .pill{display:inline-flex;align-items:center;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-size:13px;font-weight:700}
+    .logout-btn{width:100%;margin-top:14px;background:rgba(239,68,68,.16);color:white;padding:12px 16px;border:1px solid rgba(239,68,68,.22);border-radius:14px;cursor:pointer;font-weight:800}
     .main{min-width:0}
-    #heroSection{
-      background:linear-gradient(135deg, rgba(13,27,47,.96), rgba(11,23,48,.94));
-      border:1px solid var(--line);
-      border-radius:30px;
-      box-shadow:var(--shadow);
-      padding:26px;
-      margin-bottom:20px;
-      display:block;
-    }
+    #heroSection{background:linear-gradient(135deg, rgba(13,27,47,.96), rgba(11,23,48,.94));border:1px solid var(--line);border-radius:30px;box-shadow:var(--shadow);padding:26px;margin-bottom:20px;display:block}
     .hero-top{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}
     .hero-copy h2{margin:0;font-size:clamp(28px,3vw,40px);letter-spacing:-.03em;line-height:1.1}
     .hero-copy p{margin:10px 0 0;color:var(--muted);line-height:1.7;max-width:760px}
     .hero-grid{margin-top:20px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
-    .workflow-card,.chart-card,.panel-box,.form-card,.list-card,.mini-panel,.login-box,.stat-card,.booking-card,.driver-card,.history-card,.rider-card{
-      background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:22px;
-    }
+    .workflow-card,.chart-card,.panel-box,.form-card,.list-card,.mini-panel,.login-box,.stat-card,.booking-card,.driver-card,.history-card,.rider-card{background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:22px}
     .workflow-card,.chart-card,.form-card,.list-card,.mini-panel,.panel-box,.login-box,.section{padding:18px}
     .workflow-card h3,.chart-card h3,.form-card h3,.list-card h3,.mini-panel h3,.panel-box h3{margin:0 0 8px;font-size:20px;letter-spacing:-.02em}
     .workflow-card p,.chart-card p,.form-card p,.list-card p,.mini-panel p,.panel-box p{margin:0;color:var(--muted);line-height:1.6}
     .hero-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
-    .step-chip{
-      background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:18px;padding:16px 14px;
-      text-align:center;font-size:13px;color:var(--muted);
-    }
+    .step-chip{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:18px;padding:16px 14px;text-align:center;font-size:13px;color:var(--muted)}
     .step-chip strong{display:block;margin-bottom:6px;color:var(--text);font-size:15px}
-    .map-panel{
-      margin-top:18px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.03));
-      border:1px solid var(--line);border-radius:20px;padding:16px;
-    }
+    .map-panel{margin-top:18px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.03));border:1px solid var(--line);border-radius:20px;padding:16px}
     .map-panel h3{margin:0 0 8px;font-size:19px}
     .map-panel p{margin:0;color:var(--muted);line-height:1.6}
-    .real-map-frame{
-      margin-top:14px;width:100%;height:320px;border:1px solid rgba(255,255,255,.08);
-      border-radius:18px;background:#0b1326;overflow:hidden;
-    }
+    .real-map-frame{margin-top:14px;width:100%;height:320px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:#0b1326;overflow:hidden}
     .route-stats{margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
     .route-stat{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
     .route-stat h4{margin:0 0 6px;color:#9ec5ff;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
@@ -133,35 +67,19 @@
     .section-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px}
     .section-head h2{margin:0;font-size:28px;letter-spacing:-.02em}
     .section-head p{margin:6px 0 0;color:var(--muted);line-height:1.6;max-width:760px}
-    .section-badge{
-      padding:10px 14px;border-radius:14px;background:rgba(20,184,166,.12);
-      border:1px solid rgba(20,184,166,.18);color:#d5fffb;font-size:13px;font-weight:800;
-    }
+    .section-badge{padding:10px 14px;border-radius:14px;background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.18);color:#d5fffb;font-size:13px;font-weight:800}
     .login-box{max-width:760px;margin:0 auto 20px;text-align:center}
     .login-grid,.form-grid,.admin-filters,.today-stats,.admin-stats{display:grid;gap:14px}
     .login-grid,.form-grid{grid-template-columns:1fr 1fr;margin-top:18px}
     .ride-layout,.driver-layout{display:grid;grid-template-columns:.95fr 1.05fr;gap:20px;align-items:start}
     .full-width{grid-column:1 / -1}
-    input,select,textarea{
-      width:100%;padding:14px 15px;border-radius:14px;border:1px solid var(--line);
-      background:rgba(255,255,255,.06);color:var(--text);font-size:15px;outline:none;font-family:inherit;
-    }
-    select{
-      background:rgba(15,23,42,.95);color:#fff;border:1px solid rgba(255,255,255,.16);font-weight:600;
-      appearance:none;-webkit-appearance:none;-moz-appearance:none;
-      background-image:linear-gradient(45deg, transparent 50%, #cbd5e1 50%),linear-gradient(135deg, #cbd5e1 50%, transparent 50%);
-      background-position:calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px);
-      background-size:6px 6px,6px 6px;background-repeat:no-repeat;padding-right:38px;
-    }
+    input,select,textarea{width:100%;padding:14px 15px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);font-size:15px;outline:none;font-family:inherit}
+    select{background:rgba(15,23,42,.95);color:#fff;border:1px solid rgba(255,255,255,.16);font-weight:600;appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:linear-gradient(45deg, transparent 50%, #cbd5e1 50%),linear-gradient(135deg, #cbd5e1 50%, transparent 50%);background-position:calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px);background-size:6px 6px,6px 6px;background-repeat:no-repeat;padding-right:38px}
     select option{background:#0f172a;color:#fff}
     input::placeholder, textarea::placeholder{color:#9fb0c8}
-    input:focus,select:focus,textarea:focus{
-      border-color:rgba(20,184,166,.55);box-shadow:0 0 0 3px rgba(20,184,166,.14);
-    }
+    input:focus,select:focus,textarea:focus{border-color:rgba(20,184,166,.55);box-shadow:0 0 0 3px rgba(20,184,166,.14)}
     textarea{min-height:96px;resize:vertical}
-    .ride,.driver,.admin,.export-btn,.pdf-btn,.filter-btn,.start-btn,.complete-btn,.delete-btn,.request-btn,.secondary{
-      border:none;cursor:pointer;font-weight:800;transition:transform .18s ease, opacity .18s ease;
-    }
+    .ride,.driver,.admin,.export-btn,.pdf-btn,.filter-btn,.start-btn,.complete-btn,.delete-btn,.request-btn,.secondary{border:none;cursor:pointer;font-weight:800;transition:transform .18s ease, opacity .18s ease}
     .ride:hover,.driver:hover,.admin:hover,.export-btn:hover,.pdf-btn:hover,.filter-btn:hover,.start-btn:hover,.complete-btn:hover,.delete-btn:hover,.request-btn:hover,.secondary:hover{transform:translateY(-1px);opacity:.97}
     .ride,.request-btn{background:linear-gradient(135deg,#22c55e,#16a34a);color:white;padding:13px 18px;border-radius:14px}
     .driver{background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;padding:13px 18px;border-radius:14px}
@@ -181,9 +99,7 @@
     .helper-text{font-size:14px;margin-top:12px}
     .muted-note{font-size:13px;margin-top:8px}
     .driver-selected{margin-top:8px;font-size:15px}
-    .payments-panel{
-      margin-top:18px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:20px;padding:18px;
-    }
+    .payments-panel{margin-top:18px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:20px;padding:18px}
     .payments-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
     .payments-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
     .payment-box{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:16px;padding:16px}
@@ -199,14 +115,10 @@
     .admin-filters{grid-template-columns:2fr 1fr 1fr 1fr auto;gap:12px;margin-top:15px;margin-bottom:10px;align-items:center}
     .export-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
     .booking-card,.driver-card,.history-card,.rider-card{position:relative;overflow:hidden;padding:18px;margin-top:14px}
-    .booking-card::before,.driver-card::before,.history-card::before,.rider-card::before{
-      content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg, rgba(20,184,166,.85), rgba(59,130,246,.85));
-    }
+    .booking-card::before,.driver-card::before,.history-card::before,.rider-card::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg, rgba(20,184,166,.85), rgba(59,130,246,.85))}
     .booking-card p,.driver-card p,.history-card p,.rider-card p{margin:7px 0;color:#e8edf6;font-size:14px}
     .status-row,.action-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .status{
-      display:inline-block;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;
-    }
+    .status{display:inline-block;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.02em;text-transform:uppercase}
     .pending{background:rgba(245,158,11,.18);color:#ffe4ae;border:1px solid rgba(245,158,11,.28)}
     .assigned{background:rgba(59,130,246,.18);color:#d9e9ff;border:1px solid rgba(59,130,246,.25)}
     .progress{background:rgba(139,92,246,.18);color:#eadfff;border:1px solid rgba(139,92,246,.25)}
@@ -217,510 +129,247 @@
     .gps-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
     .gps-status{margin-top:8px;color:#9fdcff;font-size:14px}
     .driver-combobox{position:relative;max-width:260px;min-width:220px}
-    .driver-input{
-      width:100%;
-      padding:12px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.15);
-      background:rgba(15,23,42,.95);
-      color:#fff;
-      font-weight:600;
-    }
-    .driver-list{
-      position:absolute;
-      top:100%;
-      left:0;
-      right:0;
-      background:#0f172a;
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:12px;
-      margin-top:6px;
-      max-height:180px;
-      overflow:auto;
-      display:none;
-      z-index:50;
-      box-shadow:var(--shadow);
-    }
-    .driver-item{
-      padding:10px 12px;
-      cursor:pointer;
-      color:#fff;
-      font-size:14px;
-    }
+    .driver-input{width:100%;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:rgba(15,23,42,.95);color:#fff;font-weight:600}
+    .driver-list{position:absolute;top:100%;left:0;right:0;background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:12px;margin-top:6px;max-height:180px;overflow:auto;display:none;z-index:50;box-shadow:var(--shadow)}
+    .driver-item{padding:10px 12px;cursor:pointer;color:#fff;font-size:14px}
     .driver-item:hover{background:#1e293b}
-    .modal{
-      position:fixed;
-      inset:0;
-      background:rgba(2,6,23,.72);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:9999;
-      padding:20px;
-    }
-    .modal-content{
-      width:min(560px,96%);
-      background:linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-      color:#0f172a;
-      border-radius:20px;
-      padding:22px;
-      box-shadow:0 25px 60px rgba(0,0,0,.35);
-      border:1px solid rgba(15,23,42,.08);
-    }
+    .modal{position:fixed;inset:0;background:rgba(2,6,23,.72);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
+    .modal-content{width:min(560px,96%);background:linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);color:#0f172a;border-radius:20px;padding:22px;box-shadow:0 25px 60px rgba(0,0,0,.35);border:1px solid rgba(15,23,42,.08)}
     .modal-content h3{margin:0 0 14px;color:#0f172a;font-size:24px;letter-spacing:-.02em}
     .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .modal-field{display:flex;flex-direction:column;gap:6px}
     .modal-field.full{grid-column:1 / -1}
     .modal-field label{font-size:13px;font-weight:700;color:#334155}
-    .modal-content input,.modal-content select,.modal-content textarea{
-      width:100%;padding:12px 13px;border-radius:12px;border:1px solid #cbd5e1;background:#fff;color:#0f172a;font-size:14px;
-    }
+    .modal-content input,.modal-content select,.modal-content textarea{width:100%;padding:12px 13px;border-radius:12px;border:1px solid #cbd5e1;background:#fff;color:#0f172a;font-size:14px}
     .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;flex-wrap:wrap}
     .modal-save{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;padding:11px 16px;border-radius:12px;font-weight:800;cursor:pointer}
     .modal-cancel{background:#e2e8f0;color:#0f172a;border:none;padding:11px 16px;border-radius:12px;font-weight:800;cursor:pointer}
-    #toastContainer{
-      position:fixed;
-      top:20px;
-      right:20px;
-      z-index:99999;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      pointer-events:none;
-    }
-    .toast{
-      min-width:280px;
-      max-width:360px;
-      background:linear-gradient(135deg, #0f172a, #1e293b);
-      color:white;
-      border:1px solid rgba(255,255,255,.12);
-      border-left:4px solid #22c55e;
-      border-radius:14px;
-      padding:14px 16px;
-      box-shadow:0 18px 40px rgba(0,0,0,.35);
-      animation:toastIn .25s ease;
-      font-size:14px;
-      line-height:1.5;
-      pointer-events:auto;
-    }
-    .toast-title{font-weight:800;margin-bottom:4px}
-    .toast-sub{color:#cbd5e1;font-size:13px}
-    @keyframes toastIn{
-      from{opacity:0;transform:translateY(-10px) translateX(10px)}
-      to{opacity:1;transform:translateY(0) translateX(0)}
-    }
-    @media (max-width:1180px){
-      .app-shell{grid-template-columns:1fr}
-      .sidebar{position:static}
-      .hero-grid,.ride-layout,.driver-layout,.admin-grid{grid-template-columns:1fr}
-      .admin-stats{grid-template-columns:repeat(3,1fr)}
-      .today-stats{grid-template-columns:repeat(2,1fr)}
-    }
-    @media (max-width:860px){
-      .login-grid,.form-grid,.admin-filters,.hero-steps,.payments-grid,.route-stats,.modal-grid{grid-template-columns:1fr}
-      .admin-stats,.today-stats{grid-template-columns:1fr 1fr}
-    }
-    @media (max-width:620px){
-      .sidebar,#heroSection,.login-box,.section{padding:18px;border-radius:22px}
-      .admin-stats,.today-stats{grid-template-columns:1fr}
-      .section-head h2,.hero-copy h2{font-size:24px}
-    }
+    #toastContainer{position:fixed;top:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+    .toast{min-width:280px;max-width:360px;background:linear-gradient(135deg, #0f172a, #1e293b);color:white;border:1px solid rgba(255,255,255,.12);border-left:4px solid #22c55e;border-radius:14px;padding:14px 16px;box-shadow:0 18px 40px rgba(0,0,0,.35);animation:toastIn .25s ease;font-size:14px;line-height:1.5;pointer-events:auto}
+    .toast-title{font-weight:800;margin-bottom:4px}.toast-sub{color:#cbd5e1;font-size:13px}
+    @keyframes toastIn{from{opacity:0;transform:translateY(-10px) translateX(10px)}to{opacity:1;transform:translateY(0) translateX(0)}}
+    @media (max-width:1180px){.app-shell{grid-template-columns:1fr}.sidebar{position:static}.hero-grid,.ride-layout,.driver-layout,.admin-grid{grid-template-columns:1fr}.admin-stats{grid-template-columns:repeat(3,1fr)}.today-stats{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:860px){.login-grid,.form-grid,.admin-filters,.hero-steps,.payments-grid,.route-stats,.modal-grid{grid-template-columns:1fr}.admin-stats,.today-stats{grid-template-columns:1fr 1fr}}
+    @media (max-width:620px){.sidebar,#heroSection,.login-box,.section{padding:18px;border-radius:22px}.admin-stats,.today-stats{grid-template-columns:1fr}.section-head h2,.hero-copy h2{font-size:24px}}
   </style>
-
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="logo-wrap">
-        <div class="logo-box">🚗</div>
-        <div>
-          <h1>UVEL</h1>
-          <p>Reliable community transport</p>
-        </div>
+      <div class="logo-wrap"><div class="logo-box">🚗</div><div><h1>UVEL</h1><p>Reliable community transport</p></div></div>
+      <div class="nav-title">Workspace</div>
+      <div class="side-nav" id="navButtons" style="display:none;">
+        <button class="side-link" id="rideNavBtn" onclick="showSection('ride')"><span>Ride App</span><small>Passenger</small></button>
+        <button class="side-link" id="driverNavBtn" onclick="showSection('driver')"><span>Driver App</span><small>Trips</small></button>
+        <button class="side-link" id="adminNavBtn" onclick="showSection('admin')"><span>Admin Panel</span><small>Dispatch</small></button>
       </div>
-
-```
-  <div class="nav-title">Workspace</div>
-  <div class="side-nav" id="navButtons" style="display:none;">
-    <button class="side-link" id="rideNavBtn" onclick="showSection('ride')">
-      <span>Ride App</span><small>Passenger</small>
-    </button>
-    <button class="side-link" id="driverNavBtn" onclick="showSection('driver')">
-      <span>Driver App</span><small>Trips</small>
-    </button>
-    <button class="side-link" id="adminNavBtn" onclick="showSection('admin')">
-      <span>Admin Panel</span><small>Dispatch</small>
-    </button>
-  </div>
-
-  <div id="sessionBar" style="display:none;">
-    <div class="pill" id="roleBadge">Role: Guest</div>
-    <button class="logout-btn" onclick="logoutUser()">Logout</button>
-  </div>
-
-  <div class="side-card">
-    <h3>Operations Flow</h3>
-    <p>Book trips, assign drivers, start rides, complete trips, track payments, and keep transport records in one dashboard.</p>
-  </div>
-
-  <div class="side-card">
-    <h3>Startup Upgrade</h3>
-    <p>This version includes NDIS invoice PDF export with ABN 14688659912, local sync, notifications, and admin controls.</p>
-  </div>
-</aside>
-
-<main class="main">
-  <div id="heroSection">
-    <div class="hero-top">
-      <div class="hero-copy">
-        <h2>Modern transport operations for community and NDIS-ready services.</h2>
-        <p>Passenger requests are saved locally and can be seen by Admin in another tab of the same browser.</p>
+      <div id="sessionBar" style="display:none;">
+        <div class="pill" id="roleBadge">Role: Guest</div>
+        <button class="logout-btn" onclick="logoutUser()">Logout</button>
       </div>
-    </div>
+      <div class="side-card"><h3>Operations Flow</h3><p>Book trips, assign drivers, start rides, complete trips, track payments, and keep transport records in one dashboard.</p></div>
+      <div class="side-card"><h3>Startup Upgrade</h3><p>This version includes NDIS invoice PDF export with full provider details, local sync, notifications, and admin controls.</p></div>
+    </aside>
 
-    <div class="hero-grid">
-      <div class="workflow-card">
-        <h3>Operational Workflow</h3>
-        <p>Clear booking lifecycle from request to trip completion and payment tracking.</p>
-        <div class="hero-steps">
-          <div class="step-chip"><strong>Book</strong>Passenger submits request</div>
-          <div class="step-chip"><strong>Pending</strong>Admin receives request</div>
-          <div class="step-chip"><strong>Assign</strong>Admin selects driver</div>
-          <div class="step-chip"><strong>Complete</strong>Trip finalised</div>
-        </div>
-      </div>
-
-      <div class="chart-card">
-        <h3>Admin Live Trip Map</h3>
-        <p>Admin-only map for active bookings and driver locations.</p>
-        <div id="liveMapFrame" class="real-map-frame"></div>
-        <div class="route-stats">
-          <div class="route-stat">
-            <h4>Route</h4>
-            <p id="liveRouteDistance">--</p>
-          </div>
-          <div class="route-stat">
-            <h4>ETA</h4>
-            <p id="liveRouteEta">--</p>
-          </div>
-          <div class="route-stat">
-            <h4>Driver to Pickup</h4>
-            <p id="liveDriverPickupEta">--</p>
-          </div>
-        </div>
-        <div class="route-message" id="liveRouteMessage">Waiting for active booking.</div>
-      </div>
-    </div>
-  </div>
-
-  <div id="loginSection" class="login-box">
-    <div class="section-head" style="margin-bottom:14px;">
-      <div>
-        <h2>Login / Role Switch</h2>
-        <p>This single-file version uses role simulation plus localStorage. Use the same browser for Passenger and Admin.</p>
-      </div>
-      <div class="section-badge">LocalStorage Mode</div>
-    </div>
-
-    <div class="login-grid">
-      <input id="authName" type="text" placeholder="Your name">
-      <input id="authEmail" type="email" placeholder="Email address">
-      <select id="authRole">
-        <option value="">Select role</option>
-        <option value="Passenger">Passenger</option>
-        <option value="Driver">Driver</option>
-        <option value="Admin">Admin</option>
-      </select>
-      <input id="authDriverName" type="text" placeholder="Driver name (for Driver role)">
-    </div>
-
-    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:18px;">
-      <button class="ride" onclick="loginUser()">Enter App</button>
-      <button class="delete-btn" onclick="clearAllBookings()">Clear Saved Bookings</button>
-    </div>
-
-    <div id="authMessage" class="auth-message">Success</div>
-    <div id="authError" class="error-box">Error</div>
-
-    <div class="helper-text">
-      Test method:<br>
-      Passenger creates request → open another tab in same browser → login as Admin → Admin sees pending request.
-    </div>
-  </div>
-
-  <div id="ride" class="section">
-    <div class="section-head">
-      <div>
-        <h2>Ride App</h2>
-        <p>Create a trip request, view payment mode, and track your current trip.</p>
-      </div>
-      <div class="section-badge">Passenger View</div>
-    </div>
-
-    <div class="ride-layout">
-      <div>
-        <div class="form-card">
-          <h3>Book a Ride</h3>
-          <p>Enter trip details below to create a new booking.</p>
-
-          <div class="form-grid">
-            <input id="passengerName" type="text" placeholder="Passenger name">
-            <select id="tripType">
-              <option value="Normal">Normal</option>
-              <option value="NDIS">NDIS</option>
-            </select>
-            <input id="pickup" type="text" placeholder="Pickup location">
-            <input id="destination" type="text" placeholder="Destination">
-            <input id="tripDate" type="date">
-            <input id="tripTime" type="time">
-            <textarea id="tripNotes" class="full-width" placeholder="Notes (wheelchair, assistance, escort, special instructions)"></textarea>
-          </div>
-
-          <button class="request-btn ride-submit" onclick="requestRide()">Request Ride</button>
-          <div id="successBox" class="success-box">Ride requested successfully ✅</div>
-          <div class="muted-note">Requests now go to Admin as Pending first and are saved in localStorage.</div>
-        </div>
-
-        <div class="payments-panel">
-          <div class="payments-top">
-            <h3 style="margin:0;">Payments</h3>
-            <div class="pill" style="background:rgba(124,58,237,.18);border-color:rgba(124,58,237,.25);">Stripe-ready</div>
-          </div>
-          <p style="margin-top:10px;">Normal trips can be paid by card. NDIS trips are marked as referral / invoice and do not require card payment in this MVP.</p>
-          <div class="payments-grid">
-            <div class="payment-box">
-              <h4>Estimated fare</h4>
-              <p id="previewFare">AUD 0.00</p>
-            </div>
-            <div class="payment-box">
-              <h4>Payment mode</h4>
-              <p id="previewPaymentMode">Stripe card</p>
+    <main class="main">
+      <div id="heroSection">
+        <div class="hero-top"><div class="hero-copy"><h2>Modern transport operations for community and NDIS-ready services.</h2><p>Passenger requests are saved locally and can be seen by Admin in another tab of the same browser.</p></div></div>
+        <div class="hero-grid">
+          <div class="workflow-card">
+            <h3>Operational Workflow</h3>
+            <p>Clear booking lifecycle from request to trip completion and payment tracking.</p>
+            <div class="hero-steps">
+              <div class="step-chip"><strong>Book</strong>Passenger submits request</div>
+              <div class="step-chip"><strong>Pending</strong>Admin receives request</div>
+              <div class="step-chip"><strong>Assign</strong>Admin selects driver</div>
+              <div class="step-chip"><strong>Complete</strong>Trip finalised</div>
             </div>
           </div>
-          <p class="muted-note" style="margin-top:12px;">NDIS still shows the real fare, but payment mode stays invoice / referral.</p>
-        </div>
-      </div>
-
-      <div class="list-card">
-        <h3>My Trips</h3>
-        <div class="map-panel" style="margin-top:14px;">
-          <h3 style="font-size:18px;">Passenger Live Map</h3>
-          <p>Track pickup, destination, and driver location for your current trip.</p>
-          <div id="passengerMapFrame" class="real-map-frame"></div>
-          <div class="route-stats">
-            <div class="route-stat">
-              <h4>Route</h4>
-              <p id="passengerRouteDistance">--</p>
+          <div class="chart-card">
+            <h3>Admin Live Trip Map</h3>
+            <p>Admin-only map for active bookings and driver locations.</p>
+            <div id="liveMapFrame" class="real-map-frame"></div>
+            <div class="route-stats">
+              <div class="route-stat"><h4>Route</h4><p id="liveRouteDistance">--</p></div>
+              <div class="route-stat"><h4>ETA</h4><p id="liveRouteEta">--</p></div>
+              <div class="route-stat"><h4>Driver to Pickup</h4><p id="liveDriverPickupEta">--</p></div>
             </div>
-            <div class="route-stat">
-              <h4>ETA</h4>
-              <p id="passengerRouteEta">--</p>
-            </div>
-            <div class="route-stat">
-              <h4>Driver to Pickup</h4>
-              <p id="passengerDriverPickupEta">--</p>
-            </div>
+            <div class="route-message" id="liveRouteMessage">Waiting for active booking.</div>
           </div>
-          <div class="route-message" id="passengerRouteMessage">Waiting for your trip.</div>
-        </div>
-        <p>See current and past trip activity with driver, fare, and payment status.</p>
-        <div id="riderTrips">
-          <p class="empty-text">No trips yet.</p>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div id="driver" class="section">
-    <div class="section-head">
-      <div>
-        <h2>Driver App</h2>
-        <p>Drivers only receive trips after Admin assigns them.</p>
-        <div id="driverSelectedText" class="driver-selected">No driver selected.</div>
-      </div>
-      <div class="section-badge">Driver View</div>
-    </div>
-
-    <div class="driver-layout">
-      <div class="mini-panel">
-        <h3>Driver Workflow</h3>
-        <p>Receive assigned trip, track location, and let trip status update from GPS.</p>
-        <div class="hero-steps" style="margin-top:14px; grid-template-columns:repeat(4,1fr);">
-          <div class="step-chip"><strong>Assigned</strong>Ready to begin</div>
-          <div class="step-chip"><strong>En Route</strong>Heading to pickup</div>
-          <div class="step-chip"><strong>Arrived</strong>At pickup point</div>
-          <div class="step-chip"><strong>Complete</strong>Trip closed</div>
+      <div id="loginSection" class="login-box">
+        <div class="section-head" style="margin-bottom:14px;">
+          <div><h2>Login / Role Switch</h2><p>This single-file version uses role simulation plus localStorage. Use the same browser for Passenger and Admin.</p></div>
+          <div class="section-badge">LocalStorage Mode</div>
         </div>
-
-        <div class="gps-row">
-          <button class="driver" onclick="startGPS()">Start Live GPS</button>
-          <button class="delete-btn" onclick="stopGPS()">Stop GPS</button>
-          <div class="pill" style="background:rgba(20,184,166,.14);border-color:rgba(20,184,166,.18);">GPS LIVE</div>
-        </div>
-        <div class="gps-status" id="gpsStatusText">GPS stopped.</div>
-      </div>
-
-      <div class="list-card">
-        <h3>My Trips</h3>
-        <p>Only trips assigned by Admin are shown below.</p>
-        <div class="map-panel" style="margin-top:14px;">
-          <h3 style="font-size:18px;">Driver Route Map</h3>
-          <p>View the live route from pickup to destination.</p>
-          <div id="driverMapFrame" class="real-map-frame"></div>
-          <div class="route-stats">
-            <div class="route-stat">
-              <h4>Route</h4>
-              <p id="driverRouteDistance">--</p>
-            </div>
-            <div class="route-stat">
-              <h4>ETA</h4>
-              <p id="driverRouteEta">--</p>
-            </div>
-            <div class="route-stat">
-              <h4>Driver to Pickup</h4>
-              <p id="driverDriverPickupEta">--</p>
-            </div>
-          </div>
-          <div class="route-message" id="driverRouteMessage">Waiting for assigned trip.</div>
-        </div>
-        <div id="driverTrips">
-          <p class="empty-text">No assigned trips yet.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="admin" class="section">
-    <div class="section-head">
-      <div>
-        <h2>Admin Panel</h2>
-        <p>Receive pending bookings, assign drivers, edit bookings, monitor statuses, review payment state, and export NDIS invoices.</p>
-      </div>
-      <div class="section-badge">Operations View</div>
-    </div>
-
-    <div class="admin-stats">
-      <div class="stat-card"><h4>Total Bookings</h4><p id="totalBookings">0</p></div>
-      <div class="stat-card"><h4>Pending</h4><p id="pendingBookings">0</p></div>
-      <div class="stat-card"><h4>Assigned</h4><p id="assignedBookings">0</p></div>
-      <div class="stat-card"><h4>In Progress</h4><p id="progressBookings">0</p></div>
-      <div class="stat-card"><h4>Completed</h4><p id="completedBookings">0</p></div>
-    </div>
-
-    <div class="today-stats">
-      <div class="stat-card"><h4>Today's Trips</h4><p id="todayTrips">0</p></div>
-      <div class="stat-card"><h4>Today's Pending</h4><p id="todayPending">0</p></div>
-      <div class="stat-card"><h4>Today's Assigned</h4><p id="todayAssigned">0</p></div>
-      <div class="stat-card"><h4>Today's Completed</h4><p id="todayCompleted">0</p></div>
-    </div>
-
-    <div class="admin-grid">
-      <div class="panel-box">
-        <h3>Active Booking Requests</h3>
-
-        <div class="side-card" style="margin-top:0; margin-bottom:14px; background:rgba(20,184,166,0.08); border-color:rgba(20,184,166,0.14);">
-          <h3 style="font-size:16px; margin-bottom:6px;">Smart Driver Assignment</h3>
-          <p style="margin-bottom:10px;">UVEL recommends the least busy driver based on current active trips.</p>
-          <div class="pill" id="recommendedDriverPill">Recommended: --</div>
-        </div>
-
-        <div class="admin-filters">
-          <input id="searchInput" type="text" placeholder="Search passenger, pickup, destination, booking ID" oninput="renderAdminBookings()">
-          <select id="statusFilter" onchange="renderAdminBookings()">
-            <option value="All">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="Assigned">Assigned</option>
-            <option value="Driver En Route">Driver En Route</option>
-            <option value="Arrived">Arrived</option>
-            <option value="In Progress">In Progress</option>
+        <div class="login-grid">
+          <input id="authName" type="text" placeholder="Your name">
+          <input id="authEmail" type="email" placeholder="Email address">
+          <select id="authRole">
+            <option value="">Select role</option>
+            <option value="Passenger">Passenger</option>
+            <option value="Driver">Driver</option>
+            <option value="Admin">Admin</option>
           </select>
-          <select id="driverFilter" onchange="renderAdminBookings()">
-            <option value="All">All Drivers</option>
-            <option value="Unassigned">Unassigned</option>
-          </select>
-          <input id="dateFilter" type="date" onchange="renderAdminBookings()">
-          <button class="filter-btn" onclick="clearAdminFilters()">Clear</button>
+          <input id="authDriverName" type="text" placeholder="Driver name (for Driver role)">
         </div>
-
-        <div class="export-bar">
-          <button class="export-btn" onclick="exportActiveBookingsCSV()">Export Active CSV</button>
-          <button class="export-btn" onclick="exportCompletedTripsCSV()">Export Completed CSV</button>
-          <button class="pdf-btn" onclick="printAdminReport()">Export PDF</button>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:18px;">
+          <button class="ride" onclick="loginUser()">Enter App</button>
+          <button class="delete-btn" onclick="clearAllBookings()">Clear Saved Bookings</button>
         </div>
+        <div id="authMessage" class="auth-message">Success</div>
+        <div id="authError" class="error-box">Error</div>
+        <div class="helper-text">Test method:<br>Passenger creates request → open another tab in same browser → login as Admin → Admin sees pending request.</div>
+      </div>
 
-        <div id="bookingList">
-          <p class="empty-text">No bookings yet.</p>
+      <div id="ride" class="section">
+        <div class="section-head"><div><h2>Ride App</h2><p>Create a trip request, view payment mode, and track your current trip.</p></div><div class="section-badge">Passenger View</div></div>
+        <div class="ride-layout">
+          <div>
+            <div class="form-card">
+              <h3>Book a Ride</h3><p>Enter trip details below to create a new booking.</p>
+              <div class="form-grid">
+                <input id="passengerName" type="text" placeholder="Passenger name">
+                <select id="tripType"><option value="Normal">Normal</option><option value="NDIS">NDIS</option></select>
+                <input id="pickup" type="text" placeholder="Pickup location">
+                <input id="destination" type="text" placeholder="Destination">
+                <input id="tripDate" type="date">
+                <input id="tripTime" type="time">
+                <textarea id="tripNotes" class="full-width" placeholder="Notes (wheelchair, assistance, escort, special instructions)"></textarea>
+              </div>
+              <button class="request-btn ride-submit" onclick="requestRide()">Request Ride</button>
+              <div id="successBox" class="success-box">Ride requested successfully ✅</div>
+              <div class="muted-note">Requests now go to Admin as Pending first and are saved in localStorage.</div>
+            </div>
+            <div class="payments-panel">
+              <div class="payments-top"><h3 style="margin:0;">Payments</h3><div class="pill" style="background:rgba(124,58,237,.18);border-color:rgba(124,58,237,.25);">Stripe-ready</div></div>
+              <p style="margin-top:10px;">Normal trips can be paid by card. NDIS trips are marked as referral / invoice and do not require card payment in this MVP.</p>
+              <div class="payments-grid">
+                <div class="payment-box"><h4>Estimated fare</h4><p id="previewFare">AUD 0.00</p></div>
+                <div class="payment-box"><h4>Payment mode</h4><p id="previewPaymentMode">Stripe card</p></div>
+              </div>
+              <p class="muted-note" style="margin-top:12px;">NDIS still shows the real fare, but payment mode stays invoice / referral.</p>
+            </div>
+          </div>
+          <div class="list-card">
+            <h3>My Trips</h3>
+            <div class="map-panel" style="margin-top:14px;">
+              <h3 style="font-size:18px;">Passenger Live Map</h3>
+              <p>Track pickup, destination, and driver location for your current trip.</p>
+              <div id="passengerMapFrame" class="real-map-frame"></div>
+              <div class="route-stats">
+                <div class="route-stat"><h4>Route</h4><p id="passengerRouteDistance">--</p></div>
+                <div class="route-stat"><h4>ETA</h4><p id="passengerRouteEta">--</p></div>
+                <div class="route-stat"><h4>Driver to Pickup</h4><p id="passengerDriverPickupEta">--</p></div>
+              </div>
+              <div class="route-message" id="passengerRouteMessage">Waiting for your trip.</div>
+            </div>
+            <p>See current and past trip activity with driver, fare, and payment status.</p>
+            <div id="riderTrips"><p class="empty-text">No trips yet.</p></div>
+          </div>
         </div>
       </div>
 
-      <div class="panel-box">
-        <h3>Completed Trip History</h3>
-        <div id="tripHistoryList">
-          <p class="empty-text">No completed trips yet.</p>
+      <div id="driver" class="section">
+        <div class="section-head"><div><h2>Driver App</h2><p>Drivers only receive trips after Admin assigns them.</p><div id="driverSelectedText" class="driver-selected">No driver selected.</div></div><div class="section-badge">Driver View</div></div>
+        <div class="driver-layout">
+          <div class="mini-panel">
+            <h3>Driver Workflow</h3><p>Receive assigned trip, track location, and let trip status update from GPS.</p>
+            <div class="hero-steps" style="margin-top:14px; grid-template-columns:repeat(4,1fr);">
+              <div class="step-chip"><strong>Assigned</strong>Ready to begin</div>
+              <div class="step-chip"><strong>En Route</strong>Heading to pickup</div>
+              <div class="step-chip"><strong>Arrived</strong>At pickup point</div>
+              <div class="step-chip"><strong>Complete</strong>Trip closed</div>
+            </div>
+            <div class="gps-row">
+              <button class="driver" onclick="startGPS()">Start Live GPS</button>
+              <button class="delete-btn" onclick="stopGPS()">Stop GPS</button>
+              <div class="pill" style="background:rgba(20,184,166,.14);border-color:rgba(20,184,166,.18);">GPS LIVE</div>
+            </div>
+            <div class="gps-status" id="gpsStatusText">GPS stopped.</div>
+          </div>
+          <div class="list-card">
+            <h3>My Trips</h3><p>Only trips assigned by Admin are shown below.</p>
+            <div class="map-panel" style="margin-top:14px;">
+              <h3 style="font-size:18px;">Driver Route Map</h3>
+              <p>View the live route from pickup to destination.</p>
+              <div id="driverMapFrame" class="real-map-frame"></div>
+              <div class="route-stats">
+                <div class="route-stat"><h4>Route</h4><p id="driverRouteDistance">--</p></div>
+                <div class="route-stat"><h4>ETA</h4><p id="driverRouteEta">--</p></div>
+                <div class="route-stat"><h4>Driver to Pickup</h4><p id="driverDriverPickupEta">--</p></div>
+              </div>
+              <div class="route-message" id="driverRouteMessage">Waiting for assigned trip.</div>
+            </div>
+            <div id="driverTrips"><p class="empty-text">No assigned trips yet.</p></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="admin-grid" style="margin-top:20px;">
-      <div class="panel-box">
-        <h3>Driver Management</h3>
-        <p style="margin-bottom:12px;">See all drivers and their current trip load.</p>
-        <div id="adminDriversList">
-          <p class="empty-text">No drivers found.</p>
+      <div id="admin" class="section">
+        <div class="section-head"><div><h2>Admin Panel</h2><p>Receive pending bookings, assign drivers, edit bookings, monitor statuses, review payment state, and export NDIS invoices.</p></div><div class="section-badge">Operations View</div></div>
+        <div class="admin-stats">
+          <div class="stat-card"><h4>Total Bookings</h4><p id="totalBookings">0</p></div>
+          <div class="stat-card"><h4>Pending</h4><p id="pendingBookings">0</p></div>
+          <div class="stat-card"><h4>Assigned</h4><p id="assignedBookings">0</p></div>
+          <div class="stat-card"><h4>In Progress</h4><p id="progressBookings">0</p></div>
+          <div class="stat-card"><h4>Completed</h4><p id="completedBookings">0</p></div>
+        </div>
+        <div class="today-stats">
+          <div class="stat-card"><h4>Today's Trips</h4><p id="todayTrips">0</p></div>
+          <div class="stat-card"><h4>Today's Pending</h4><p id="todayPending">0</p></div>
+          <div class="stat-card"><h4>Today's Assigned</h4><p id="todayAssigned">0</p></div>
+          <div class="stat-card"><h4>Today's Completed</h4><p id="todayCompleted">0</p></div>
+        </div>
+        <div class="admin-grid">
+          <div class="panel-box">
+            <h3>Active Booking Requests</h3>
+            <div class="side-card" style="margin-top:0; margin-bottom:14px; background:rgba(20,184,166,0.08); border-color:rgba(20,184,166,0.14);">
+              <h3 style="font-size:16px; margin-bottom:6px;">Smart Driver Assignment</h3>
+              <p style="margin-bottom:10px;">UVEL recommends the least busy driver based on current active trips.</p>
+              <div class="pill" id="recommendedDriverPill">Recommended: --</div>
+            </div>
+            <div class="admin-filters">
+              <input id="searchInput" type="text" placeholder="Search passenger, pickup, destination, booking ID" oninput="renderAdminBookings()">
+              <select id="statusFilter" onchange="renderAdminBookings()">
+                <option value="All">All Statuses</option><option value="Pending">Pending</option><option value="Assigned">Assigned</option><option value="Driver En Route">Driver En Route</option><option value="Arrived">Arrived</option><option value="In Progress">In Progress</option>
+              </select>
+              <select id="driverFilter" onchange="renderAdminBookings()"><option value="All">All Drivers</option><option value="Unassigned">Unassigned</option></select>
+              <input id="dateFilter" type="date" onchange="renderAdminBookings()">
+              <button class="filter-btn" onclick="clearAdminFilters()">Clear</button>
+            </div>
+            <div class="export-bar">
+              <button class="export-btn" onclick="exportActiveBookingsCSV()">Export Active CSV</button>
+              <button class="export-btn" onclick="exportCompletedTripsCSV()">Export Completed CSV</button>
+              <button class="pdf-btn" onclick="printAdminReport()">Export PDF</button>
+            </div>
+            <div id="bookingList"><p class="empty-text">No bookings yet.</p></div>
+          </div>
+          <div class="panel-box"><h3>Completed Trip History</h3><div id="tripHistoryList"><p class="empty-text">No completed trips yet.</p></div></div>
+        </div>
+        <div class="admin-grid" style="margin-top:20px;">
+          <div class="panel-box"><h3>Driver Management</h3><p style="margin-bottom:12px;">See all drivers and their current trip load.</p><div id="adminDriversList"><p class="empty-text">No drivers found.</p></div></div>
+          <div class="panel-box"><h3>Passenger Management</h3><p style="margin-bottom:12px;">See all passengers and how many bookings they created.</p><div id="adminPassengersList"><p class="empty-text">No passengers found.</p></div></div>
         </div>
       </div>
 
-      <div class="panel-box">
-        <h3>Passenger Management</h3>
-        <p style="margin-bottom:12px;">See all passengers and how many bookings they created.</p>
-        <div id="adminPassengersList">
-          <p class="empty-text">No passengers found.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="footer-note">UVEL full localStorage single-file version with NDIS invoice PDF export, notifications, Edit, Auto Assign, searchable driver selector, GPS auto status, and NDIS invoice pricing.</div>
-</main>
-```
-
+      <div class="footer-note">UVEL full single-file version with NDIS invoice PDF export, notifications, Edit, Auto Assign, searchable driver selector, GPS auto status, and NDIS invoice pricing.</div>
+    </main>
   </div>
 
   <div class="modal" id="editModal">
     <div class="modal-content">
       <h3>Edit Booking</h3>
       <div class="modal-grid">
-        <div class="modal-field">
-          <label>Passenger Name</label>
-          <input id="editPassengerName" type="text">
-        </div>
-        <div class="modal-field">
-          <label>Trip Type</label>
-          <select id="editTripType">
-            <option value="Normal">Normal</option>
-            <option value="NDIS">NDIS</option>
-          </select>
-        </div>
-        <div class="modal-field">
-          <label>Pickup</label>
-          <input id="editPickup" type="text">
-        </div>
-        <div class="modal-field">
-          <label>Destination</label>
-          <input id="editDestination" type="text">
-        </div>
-        <div class="modal-field">
-          <label>Date</label>
-          <input id="editTripDate" type="date">
-        </div>
-        <div class="modal-field">
-          <label>Time</label>
-          <input id="editTripTime" type="time">
-        </div>
-        <div class="modal-field full">
-          <label>Notes</label>
-          <textarea id="editTripNotes"></textarea>
-        </div>
+        <div class="modal-field"><label>Passenger Name</label><input id="editPassengerName" type="text"></div>
+        <div class="modal-field"><label>Trip Type</label><select id="editTripType"><option value="Normal">Normal</option><option value="NDIS">NDIS</option></select></div>
+        <div class="modal-field"><label>Pickup</label><input id="editPickup" type="text"></div>
+        <div class="modal-field"><label>Destination</label><input id="editDestination" type="text"></div>
+        <div class="modal-field"><label>Date</label><input id="editTripDate" type="date"></div>
+        <div class="modal-field"><label>Time</label><input id="editTripTime" type="time"></div>
+        <div class="modal-field full"><label>Notes</label><textarea id="editTripNotes"></textarea></div>
       </div>
       <div class="modal-actions">
         <button class="modal-cancel" onclick="closeEditModal()">Cancel</button>
@@ -740,8 +389,15 @@
     let gpsWatchId = null;
     let editingBookingId = "";
 
-    const UVEL_BOOKINGS_KEY = "uvel_bookings_v4";
-    const UVEL_ABN = "14688659912";
+    const UVEL_BOOKINGS_KEY = "uvel_bookings_v5";
+    const PROVIDER = {
+      name: "UVEL",
+      abn: "14688659912",
+      email: "invoice@uvel.com.au",
+      phone: "0469924723",
+      address1: "Unit 3 / 14 Forbes Street",
+      address2: "Liverpool NSW 2170"
+    };
 
     function loadBookingsFromStorage() {
       try {
@@ -752,33 +408,18 @@
         liveBookings = [];
       }
     }
-
     function saveBookingsToStorage() {
-      try {
-        localStorage.setItem(UVEL_BOOKINGS_KEY, JSON.stringify(liveBookings));
-      } catch (error) {
-        console.error("Failed to save bookings to localStorage:", error);
-      }
+      try { localStorage.setItem(UVEL_BOOKINGS_KEY, JSON.stringify(liveBookings)); }
+      catch (error) { console.error("Failed to save bookings to localStorage:", error); }
     }
-
-    function syncAndRenderBookings() {
-      saveBookingsToStorage();
-      renderEverything();
-      refreshAllMaps();
-    }
+    function syncAndRenderBookings() { saveBookingsToStorage(); renderEverything(); refreshAllMaps(); }
 
     function showToast(title, message) {
       const container = document.getElementById("toastContainer");
-      if (!container) return;
-
       const toast = document.createElement("div");
       toast.className = "toast";
-      toast.innerHTML = `
-        <div class="toast-title">${title}</div>
-        <div class="toast-sub">${message}</div>
-      `;
+      toast.innerHTML = `<div class="toast-title">${title}</div><div class="toast-sub">${message}</div>`;
       container.appendChild(toast);
-
       setTimeout(() => {
         toast.style.opacity = "0";
         toast.style.transform = "translateY(-6px)";
@@ -797,31 +438,19 @@
         if (currentRole === "Admin") {
           const oldIds = new Set(before.map(b => b.id));
           const newBookings = liveBookings.filter(b => !oldIds.has(b.id));
-          newBookings.forEach(b => {
-            showToast("New Booking Request", `${b.passengerName} requested ${b.pickup} → ${b.destination}`);
+          newBookings.forEach(b => showToast("New Booking Request", `${b.passengerName} requested ${b.pickup} → ${b.destination}`));
+        }
+        if (currentRole === "Passenger" && currentUser) {
+          liveBookings.filter(b => b.createdBy === currentUser.id && b.driver).forEach(b => {
+            const old = before.find(x => x.id === b.id);
+            if (old && !old.driver && b.driver) showToast("Driver Assigned", `${b.driver} has been assigned to your trip.`);
           });
         }
-
-        if (currentRole === "Passenger" && currentUser) {
-          liveBookings
-            .filter(b => b.createdBy === currentUser.id && b.driver)
-            .forEach(b => {
-              const old = before.find(x => x.id === b.id);
-              if (old && !old.driver && b.driver) {
-                showToast("Driver Assigned", `${b.driver} has been assigned to your trip.`);
-              }
-            });
-        }
-
         if (currentRole === "Driver" && currentDriver) {
-          liveBookings
-            .filter(b => b.driver === currentDriver)
-            .forEach(b => {
-              const old = before.find(x => x.id === b.id);
-              if (!old || old.driver !== currentDriver) {
-                showToast("New Assigned Trip", `${b.passengerName}: ${b.pickup} → ${b.destination}`);
-              }
-            });
+          liveBookings.filter(b => b.driver === currentDriver).forEach(b => {
+            const old = before.find(x => x.id === b.id);
+            if (!old || old.driver !== currentDriver) showToast("New Assigned Trip", `${b.passengerName}: ${b.pickup} → ${b.destination}`);
+          });
         }
       }
     });
@@ -832,54 +461,30 @@
       { id: "u-driver-2", role: "Driver", name: "Daniel", driverName: "Daniel", email: "daniel@uvel.app" },
       { id: "u-admin-1", role: "Admin", name: "Admin User", email: "admin@uvel.app" }
     ];
-
     let driverUsers = ["Michael", "Daniel"];
     const mapStore = {};
 
     function createEmojiIcon(emoji, bgColor) {
       return L.divIcon({
         className: "",
-        html: `
-          <div style="
-            width:34px;height:34px;border-radius:50%;
-            background:${bgColor};
-            border:2px solid white;
-            display:flex;align-items:center;justify-content:center;
-            font-size:18px;
-            box-shadow:0 6px 16px rgba(0,0,0,.28);
-          ">${emoji}</div>
-        `,
-        iconSize: [34, 34],
-        iconAnchor: [17, 17]
+        html: `<div style="width:34px;height:34px;border-radius:50%;background:${bgColor};border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 6px 16px rgba(0,0,0,.28);">${emoji}</div>`,
+        iconSize: [34, 34], iconAnchor: [17, 17]
       });
     }
-
     const pickupIcon = createEmojiIcon("📍", "#16a34a");
     const destinationIcon = createEmojiIcon("🏁", "#dc2626");
     const driverIcon = createEmojiIcon("🚗", "#2563eb");
 
     function ensureMap(mapId) {
       if (mapStore[mapId]?.map) return mapStore[mapId];
-
       const map = L.map(mapId, { zoomControl: true }).setView([-33.8688, 151.2093], 11);
-
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
-        maxZoom: 19
+        attribution: "&copy; OpenStreetMap contributors", maxZoom: 19
       }).addTo(map);
-
-      mapStore[mapId] = {
-        map,
-        pickupMarker: null,
-        destinationMarker: null,
-        driverMarker: null,
-        routeLine: null
-      };
-
+      mapStore[mapId] = { map, pickupMarker:null, destinationMarker:null, driverMarker:null, routeLine:null };
       setTimeout(() => map.invalidateSize(), 250);
       return mapStore[mapId];
     }
-
     function clearMapObjects(store) {
       if (store.pickupMarker) { store.map.removeLayer(store.pickupMarker); store.pickupMarker = null; }
       if (store.destinationMarker) { store.map.removeLayer(store.destinationMarker); store.destinationMarker = null; }
@@ -889,60 +494,40 @@
 
     async function geocodeLocation(place) {
       if (!place) return null;
-      const q = `${place}, Sydney, NSW, Australia`;
-      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
-
       try {
+        const q = `${place}, Sydney, NSW, Australia`;
+        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
         const res = await fetch(url);
         const data = await res.json();
         if (!data || !data.length) return null;
-        return {
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon)
-        };
-      } catch (error) {
-        console.error("Geocoding failed:", error);
-        return null;
-      }
+        return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+      } catch { return null; }
     }
-
     function haversineKm(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a =
-        Math.sin(dLat / 2) ** 2 +
-        Math.cos(lat1 * Math.PI / 180) *
-        Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) ** 2;
-      return 2 * R * Math.asin(Math.sqrt(a));
+      const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+      return 2*R*Math.asin(Math.sqrt(a));
     }
-
     async function fetchRoadRoute(start, end) {
       const endpoints = [
         `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`,
         `https://routing.openstreetmap.de/routed-car/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`
       ];
-
       for (const url of endpoints) {
         try {
-          const res = await fetch(url);
-          const data = await res.json();
-          if (data.routes && data.routes.length) {
+          const res = await fetch(url); const data = await res.json();
+          if (data.routes?.length) {
             return {
               coords: data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]),
-              distanceKm: (data.routes[0].distance / 1000).toFixed(1),
-              durationMin: Math.ceil(data.routes[0].duration / 60),
+              distanceKm: (data.routes[0].distance/1000).toFixed(1),
+              durationMin: Math.ceil(data.routes[0].duration/60)
             };
           }
-        } catch (e) {
-          console.warn("Routing endpoint failed:", e);
-        }
+        } catch {}
       }
       return null;
     }
-
-    function setRouteUI(prefix, distance = "--", eta = "--", driverPickupEta = "--", message = "Waiting for booking.") {
+    function setRouteUI(prefix, distance="--", eta="--", driverPickupEta="--", message="Waiting for booking.") {
       document.getElementById(`${prefix}RouteDistance`).textContent = distance;
       document.getElementById(`${prefix}RouteEta`).textContent = eta;
       document.getElementById(`${prefix}DriverPickupEta`).textContent = driverPickupEta;
@@ -952,93 +537,56 @@
     async function renderBookingMap(mapId, prefix, booking) {
       const store = ensureMap(mapId);
       clearMapObjects(store);
-
       if (!booking || !booking.pickup || !booking.destination) {
         store.map.setView([-33.8688, 151.2093], 11);
-        setRouteUI(prefix, "--", "--", "--", "Waiting for active booking.");
+        setRouteUI(prefix);
         return;
       }
-
       const pickupPoint = booking.pickupCoords || await geocodeLocation(booking.pickup);
       const destinationPoint = booking.destinationCoords || await geocodeLocation(booking.destination);
-
       if (!pickupPoint || !destinationPoint) {
         store.map.setView([-33.8688, 151.2093], 11);
         setRouteUI(prefix, "--", "--", "--", "Could not match one of the addresses. Try a more specific Sydney address.");
         return;
       }
-
-      booking.pickupCoords = pickupPoint;
-      booking.destinationCoords = destinationPoint;
-
+      booking.pickupCoords = pickupPoint; booking.destinationCoords = destinationPoint;
       store.pickupMarker = L.marker([pickupPoint.lat, pickupPoint.lng], { icon: pickupIcon }).addTo(store.map);
       store.destinationMarker = L.marker([destinationPoint.lat, destinationPoint.lng], { icon: destinationIcon }).addTo(store.map);
 
-      let route = await fetchRoadRoute(pickupPoint, destinationPoint);
-      let routeMessage = "";
-      let distanceValue = "--";
-      let etaValue = "--";
-
+      const route = await fetchRoadRoute(pickupPoint, destinationPoint);
+      let distanceValue="--", etaValue="--", routeMessage="";
       if (route) {
-        store.routeLine = L.polyline(route.coords, {
-          color: "#3b82f6",
-          weight: 5,
-          opacity: .85
-        }).addTo(store.map);
-        distanceValue = `${route.distanceKm} km`;
-        etaValue = `${route.durationMin} min`;
-        routeMessage = "Road routing loaded.";
+        store.routeLine = L.polyline(route.coords, { color:"#3b82f6", weight:5, opacity:.85 }).addTo(store.map);
+        distanceValue = `${route.distanceKm} km`; etaValue = `${route.durationMin} min`; routeMessage = "Road routing loaded.";
       } else {
-        const directCoords = [
-          [pickupPoint.lat, pickupPoint.lng],
-          [destinationPoint.lat, destinationPoint.lng]
-        ];
-        const km = haversineKm(pickupPoint.lat, pickupPoint.lng, destinationPoint.lat, destinationPoint.lng).toFixed(1);
-        const fallbackEta = Math.ceil(Number(km) * 2.5);
-        store.routeLine = L.polyline(directCoords, {
-          color: "#8b5cf6",
-          weight: 5,
-          opacity: .85,
-          dashArray: "10,8"
-        }).addTo(store.map);
-        distanceValue = `${km} km`;
-        etaValue = `${fallbackEta} min`;
-        routeMessage = "Routing service unavailable. Showing fallback direct path.";
+        const directCoords = [[pickupPoint.lat,pickupPoint.lng],[destinationPoint.lat,destinationPoint.lng]];
+        const km = haversineKm(pickupPoint.lat,pickupPoint.lng,destinationPoint.lat,destinationPoint.lng).toFixed(1);
+        const fallbackEta = Math.ceil(Number(km)*2.5);
+        store.routeLine = L.polyline(directCoords, { color:"#8b5cf6", weight:5, opacity:.85, dashArray:"10,8" }).addTo(store.map);
+        distanceValue = `${km} km`; etaValue = `${fallbackEta} min`; routeMessage = "Routing service unavailable. Showing fallback direct path.";
       }
-
-      let driverPickupEta = "--";
-      const points = [
-        [pickupPoint.lat, pickupPoint.lng],
-        [destinationPoint.lat, destinationPoint.lng]
-      ];
-
+      let driverPickupEta="--";
+      const points = [[pickupPoint.lat,pickupPoint.lng],[destinationPoint.lat,destinationPoint.lng]];
       if (booking.driverLocation?.lat && booking.driverLocation?.lng) {
         store.driverMarker = L.marker([booking.driverLocation.lat, booking.driverLocation.lng], { icon: driverIcon }).addTo(store.map);
         points.push([booking.driverLocation.lat, booking.driverLocation.lng]);
-
-        const driverKm = haversineKm(
-          booking.driverLocation.lat,
-          booking.driverLocation.lng,
-          pickupPoint.lat,
-          pickupPoint.lng
-        );
-        driverPickupEta = `${Math.max(1, Math.ceil(driverKm * 2.2))} min`;
+        const driverKm = haversineKm(booking.driverLocation.lat, booking.driverLocation.lng, pickupPoint.lat, pickupPoint.lng);
+        driverPickupEta = `${Math.max(1, Math.ceil(driverKm*2.2))} min`;
       }
-
-      store.map.fitBounds(points, { padding: [40, 40] });
+      store.map.fitBounds(points, { padding:[40,40] });
       setRouteUI(prefix, distanceValue, etaValue, driverPickupEta, routeMessage);
     }
 
     function getCurrentPassengerBooking() {
       if (!currentUser || currentRole !== "Passenger") return null;
-      return liveBookings.find(b => b.createdBy === currentUser.id && b.status !== "Completed") || liveBookings.find(b => b.createdBy === currentUser.id) || null;
+      return liveBookings.find(b => b.createdBy === currentUser.id && b.status !== "Completed")
+        || liveBookings.find(b => b.createdBy === currentUser.id) || null;
     }
-
     function getCurrentDriverBooking() {
       if (!currentDriver) return null;
-      return liveBookings.find(b => b.driver === currentDriver && b.status !== "Completed") || liveBookings.find(b => b.driver === currentDriver) || null;
+      return liveBookings.find(b => b.driver === currentDriver && b.status !== "Completed")
+        || liveBookings.find(b => b.driver === currentDriver) || null;
     }
-
     function getAdminFocusedBooking() {
       if (selectedAdminBookingId) {
         const found = liveBookings.find(b => b.id === selectedAdminBookingId);
@@ -1046,30 +594,14 @@
       }
       return liveBookings.find(b => b.status !== "Completed") || liveBookings[0] || null;
     }
-
     async function refreshAllMaps() {
       await renderBookingMap("liveMapFrame", "live", getAdminFocusedBooking());
       await renderBookingMap("passengerMapFrame", "passenger", getCurrentPassengerBooking());
       await renderBookingMap("driverMapFrame", "driver", getCurrentDriverBooking());
     }
 
-    function showMessage(text) {
-      const box = document.getElementById("authMessage");
-      const error = document.getElementById("authError");
-      error.style.display = "none";
-      box.textContent = text;
-      box.style.display = "block";
-      setTimeout(() => box.style.display = "none", 2500);
-    }
-
-    function showError(text) {
-      const box = document.getElementById("authError");
-      const success = document.getElementById("authMessage");
-      success.style.display = "none";
-      box.textContent = text;
-      box.style.display = "block";
-      setTimeout(() => box.style.display = "none", 3000);
-    }
+    function showMessage(text){const box=document.getElementById("authMessage");const error=document.getElementById("authError");error.style.display="none";box.textContent=text;box.style.display="block";setTimeout(()=>box.style.display="none",2500)}
+    function showError(text){const box=document.getElementById("authError");const success=document.getElementById("authMessage");success.style.display="none";box.textContent=text;box.style.display="block";setTimeout(()=>box.style.display="none",3000)}
 
     function canAccessSection(section) {
       if (!currentUser || !currentRole) return false;
@@ -1078,45 +610,27 @@
       if (section === "admin") return currentRole === "Admin";
       return false;
     }
-
     function setActiveNav(section) {
-      ["rideNavBtn", "driverNavBtn", "adminNavBtn"].forEach(id => {
-        document.getElementById(id)?.classList.remove("active-link");
-      });
-      const map = { ride: "rideNavBtn", driver: "driverNavBtn", admin: "adminNavBtn" };
+      ["rideNavBtn","driverNavBtn","adminNavBtn"].forEach(id => document.getElementById(id)?.classList.remove("active-link"));
+      const map = { ride:"rideNavBtn", driver:"driverNavBtn", admin:"adminNavBtn" };
       document.getElementById(map[section])?.classList.add("active-link");
     }
-
     function updateHeroVisibility() {
       const hero = document.getElementById("heroSection");
       if (!hero) return;
-      if (!currentUser || !currentRole) {
-        hero.style.display = "block";
-        return;
-      }
-      hero.style.display = currentRole === "Admin" ? "block" : "none";
+      hero.style.display = (!currentUser || !currentRole || currentRole === "Admin") ? "block" : "none";
     }
-
     function updateNavVisibility() {
       const rideNavBtn = document.getElementById("rideNavBtn");
       const driverNavBtn = document.getElementById("driverNavBtn");
       const adminNavBtn = document.getElementById("adminNavBtn");
-      if (!rideNavBtn || !driverNavBtn || !adminNavBtn) return;
-
-      rideNavBtn.style.display = "none";
-      driverNavBtn.style.display = "none";
-      adminNavBtn.style.display = "none";
-
-      if (currentRole === "Passenger") rideNavBtn.style.display = "flex";
-      if (currentRole === "Driver") driverNavBtn.style.display = "flex";
-      if (currentRole === "Admin") adminNavBtn.style.display = "flex";
+      rideNavBtn.style.display = currentRole === "Passenger" ? "flex" : "none";
+      driverNavBtn.style.display = currentRole === "Driver" ? "flex" : "none";
+      adminNavBtn.style.display = currentRole === "Admin" ? "flex" : "none";
     }
-
     function updateDriverHeader() {
-      const text = document.getElementById("driverSelectedText");
-      text.textContent = currentDriver ? `Logged in as: ${currentDriver}` : "No driver selected.";
+      document.getElementById("driverSelectedText").textContent = currentDriver ? `Logged in as: ${currentDriver}` : "No driver selected.";
     }
-
     function applyRoleUI() {
       const sessionBar = document.getElementById("sessionBar");
       const navButtons = document.getElementById("navButtons");
@@ -1124,32 +638,20 @@
       const roleBadge = document.getElementById("roleBadge");
 
       if (!currentUser || !currentRole) {
-        sessionBar.style.display = "none";
-        navButtons.style.display = "none";
-        loginSection.style.display = "block";
-
+        sessionBar.style.display = "none"; navButtons.style.display = "none"; loginSection.style.display = "block";
         document.getElementById("ride").style.display = "none";
         document.getElementById("driver").style.display = "none";
         document.getElementById("admin").style.display = "none";
-
-        updateHeroVisibility();
-        return;
+        updateHeroVisibility(); return;
       }
 
-      sessionBar.style.display = "block";
-      navButtons.style.display = "grid";
-      loginSection.style.display = "none";
-
+      sessionBar.style.display = "block"; navButtons.style.display = "grid"; loginSection.style.display = "none";
       roleBadge.textContent = `Role: ${currentRole}${currentRole === "Driver" && currentDriver ? ` (${currentDriver})` : ""}`;
-
       document.getElementById("ride").style.display = currentRole === "Passenger" ? "block" : "none";
       document.getElementById("driver").style.display = currentRole === "Driver" ? "block" : "none";
       document.getElementById("admin").style.display = currentRole === "Admin" ? "block" : "none";
 
-      updateNavVisibility();
-      updateHeroVisibility();
-      updateDriverHeader();
-
+      updateNavVisibility(); updateHeroVisibility(); updateDriverHeader();
       if (currentRole === "Passenger") showSection("ride");
       if (currentRole === "Driver") showSection("driver");
       if (currentRole === "Admin") showSection("admin");
@@ -1160,86 +662,33 @@
       const name = document.getElementById("authName").value.trim();
       const email = document.getElementById("authEmail").value.trim();
       const driverNameInput = document.getElementById("authDriverName").value.trim();
-
-      if (!role) {
-        showError("Please select a role.");
-        return;
-      }
-
+      if (!role) return showError("Please select a role.");
       currentRole = role;
 
       if (role === "Passenger") {
-        currentUser = {
-          id: `passenger-${Date.now()}`,
-          name: name || "Passenger User",
-          email: email || "passenger@uvel.app",
-          role: "Passenger"
-        };
+        currentUser = { id:`passenger-${Date.now()}`, name:name || "Passenger User", email:email || "passenger@uvel.app", role:"Passenger" };
         document.getElementById("passengerName").value = currentUser.name;
-      }
-
-      if (role === "Driver") {
+      } else if (role === "Driver") {
         currentDriver = driverNameInput || "Michael";
-        currentUser = {
-          id: `driver-${Date.now()}`,
-          name: currentDriver,
-          email: email || "driver@uvel.app",
-          role: "Driver"
-        };
+        currentUser = { id:`driver-${Date.now()}`, name:currentDriver, email:email || "driver@uvel.app", role:"Driver" };
         if (!driverUsers.includes(currentDriver)) driverUsers.push(currentDriver);
-        const exists = allUsers.some(u => u.role === "Driver" && u.driverName === currentDriver);
-        if (!exists) {
-          allUsers.push({
-            id: currentUser.id,
-            role: "Driver",
-            name: currentDriver,
-            driverName: currentDriver,
-            email: currentUser.email
-          });
-        }
+      } else {
+        currentUser = { id:`admin-${Date.now()}`, name:name || "Admin User", email:email || "admin@uvel.app", role:"Admin" };
       }
-
-      if (role === "Admin") {
-        currentUser = {
-          id: `admin-${Date.now()}`,
-          name: name || "Admin User",
-          email: email || "admin@uvel.app",
-          role: "Admin"
-        };
-      }
-
-      applyRoleUI();
-      showMessage("Logged in successfully.");
-      refreshAllMaps();
-      renderEverything();
+      applyRoleUI(); showMessage("Logged in successfully."); refreshAllMaps(); renderEverything();
     }
-
     function logoutUser() {
-      currentUser = null;
-      currentRole = "";
-      currentDriver = "";
-      stopGPS();
-      document.getElementById("authRole").value = "";
-      document.getElementById("authName").value = "";
-      document.getElementById("authEmail").value = "";
-      document.getElementById("authDriverName").value = "";
+      currentUser = null; currentRole = ""; currentDriver = ""; stopGPS();
+      document.getElementById("authRole").value = ""; document.getElementById("authName").value = "";
+      document.getElementById("authEmail").value = ""; document.getElementById("authDriverName").value = "";
       applyRoleUI();
     }
-
     window.showSection = function(section) {
       if (!canAccessSection(section)) return;
-
-      ["ride", "driver", "admin"].forEach(id => {
-        document.getElementById(id)?.classList.remove("active");
-      });
-
+      ["ride","driver","admin"].forEach(id => document.getElementById(id)?.classList.remove("active"));
       document.getElementById(section)?.classList.add("active");
       setActiveNav(section);
-
-      setTimeout(() => {
-        Object.values(mapStore).forEach(item => item.map?.invalidateSize());
-        refreshAllMaps();
-      }, 250);
+      setTimeout(() => { Object.values(mapStore).forEach(item => item.map?.invalidateSize()); refreshAllMaps(); }, 250);
     };
 
     function getStatusClass(status) {
@@ -1250,19 +699,11 @@
       if (status === "Completed") return "completed";
       return "pending";
     }
-
-    function todayString() {
-      return new Date().toISOString().split("T")[0];
-    }
-
+    function todayString(){ return new Date().toISOString().split("T")[0]; }
     function calculateFare(estimatedKm, notes) {
       const kmValue = Number(estimatedKm || 8);
-      return Math.max(
-        15,
-        Math.round((12 + kmValue * 2.2 + (notes ? 3 : 0)) * 100) / 100
-      );
+      return Math.max(15, Math.round((12 + kmValue*2.2 + (notes ? 3 : 0))*100)/100);
     }
-
     function updateFarePreview() {
       const tripType = document.getElementById("tripType").value;
       const notes = document.getElementById("tripNotes").value.trim();
@@ -1280,131 +721,77 @@
       const tripTime = document.getElementById("tripTime").value;
       const notes = document.getElementById("tripNotes").value.trim();
 
-      if (!passengerName || !pickup || !destination || !tripDate || !tripTime) {
-        alert("Please complete all required fields.");
-        return;
-      }
+      if (!passengerName || !pickup || !destination || !tripDate || !tripTime) return alert("Please complete all required fields.");
 
       const pickupCoords = await geocodeLocation(pickup);
       const destinationCoords = await geocodeLocation(destination);
-
       const estimatedKm = pickupCoords && destinationCoords
-        ? haversineKm(pickupCoords.lat, pickupCoords.lng, destinationCoords.lat, destinationCoords.lng).toFixed(1)
-        : 8;
-
-      const calculatedFare = calculateFare(estimatedKm, notes);
-
+        ? haversineKm(pickupCoords.lat,pickupCoords.lng,destinationCoords.lat,destinationCoords.lng).toFixed(1) : 8;
       const booking = {
-        id: `b-${Date.now()}`,
-        passengerName,
-        tripType,
-        pickup,
-        destination,
-        pickupCoords: pickupCoords || null,
-        destinationCoords: destinationCoords || null,
-        tripDate,
-        tripTime,
-        notes,
-        driver: "",
-        status: "Pending",
-        estimatedKm: Number(estimatedKm),
-        fareAUD: calculatedFare,
-        paymentStatus: tripType === "NDIS" ? "NDIS / Invoice" : "Unpaid",
-        createdBy: currentUser?.id || "guest-passenger",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        driverLocation: null
+        id:`b-${Date.now()}`, passengerName, tripType, pickup, destination,
+        pickupCoords:pickupCoords || null, destinationCoords:destinationCoords || null,
+        tripDate, tripTime, notes, driver:"", status:"Pending", estimatedKm:Number(estimatedKm),
+        fareAUD:calculateFare(estimatedKm, notes), paymentStatus:tripType === "NDIS" ? "NDIS / Invoice" : "Unpaid",
+        createdBy:currentUser?.id || "guest-passenger", createdAt:new Date().toISOString(),
+        updatedAt:new Date().toISOString(), driverLocation:null
       };
-
       liveBookings.unshift(booking);
       syncAndRenderBookings();
-
       document.getElementById("successBox").style.display = "block";
-      setTimeout(() => {
-        document.getElementById("successBox").style.display = "none";
-      }, 2500);
-
-      if (currentRole === "Passenger") {
-        showToast("Ride Requested", "Your request was sent to Admin as Pending.");
-      }
+      setTimeout(() => document.getElementById("successBox").style.display = "none", 2500);
+      if (currentRole === "Passenger") showToast("Ride Requested", "Your request was sent to Admin as Pending.");
     }
 
     function getDriverLoad(driverName) {
-      const assignedTrips = liveBookings.filter(b => b.driver === driverName && b.status === "Assigned").length;
-      const enrouteTrips = liveBookings.filter(b => b.driver === driverName && b.status === "Driver En Route").length;
-      const arrivedTrips = liveBookings.filter(b => b.driver === driverName && b.status === "Arrived").length;
-      const progressTrips = liveBookings.filter(b => b.driver === driverName && b.status === "In Progress").length;
-      const completedTrips = liveBookings.filter(b => b.driver === driverName && b.status === "Completed").length;
+      const statuses = ["Assigned","Driver En Route","Arrived","In Progress","Completed"];
+      const counts = {};
+      statuses.forEach(s => counts[s] = liveBookings.filter(b => b.driver === driverName && b.status === s).length);
       return {
-        assignedTrips,
-        enrouteTrips,
-        arrivedTrips,
-        progressTrips,
-        completedTrips,
-        totalActive: assignedTrips + enrouteTrips + arrivedTrips + progressTrips
+        assignedTrips: counts["Assigned"], enrouteTrips: counts["Driver En Route"], arrivedTrips: counts["Arrived"],
+        progressTrips: counts["In Progress"], completedTrips: counts["Completed"],
+        totalActive: counts["Assigned"] + counts["Driver En Route"] + counts["Arrived"] + counts["In Progress"]
       };
     }
-
     function getRecommendedDriver() {
       if (!driverUsers.length) return "";
       const ranked = [...driverUsers].map(name => ({ name, ...getDriverLoad(name) }));
-      ranked.sort((a, b) => {
-        if (a.totalActive !== b.totalActive) return a.totalActive - b.totalActive;
-        return a.name.localeCompare(b.name);
-      });
+      ranked.sort((a,b) => a.totalActive !== b.totalActive ? a.totalActive - b.totalActive : a.name.localeCompare(b.name));
       return ranked[0]?.name || "";
     }
-
     function updateAdminStats() {
       const total = liveBookings.length;
       const pending = liveBookings.filter(b => b.status === "Pending").length;
-      const assigned = liveBookings.filter(b => ["Assigned", "Driver En Route", "Arrived"].includes(b.status)).length;
+      const assigned = liveBookings.filter(b => ["Assigned","Driver En Route","Arrived"].includes(b.status)).length;
       const progress = liveBookings.filter(b => b.status === "In Progress").length;
       const completed = liveBookings.filter(b => b.status === "Completed").length;
-
       const today = todayString();
-      const todayTrips = liveBookings.filter(b => b.tripDate === today).length;
-      const todayPending = liveBookings.filter(b => b.tripDate === today && b.status === "Pending").length;
-      const todayAssigned = liveBookings.filter(b => b.tripDate === today && ["Assigned", "Driver En Route", "Arrived"].includes(b.status)).length;
-      const todayCompleted = liveBookings.filter(b => b.tripDate === today && b.status === "Completed").length;
-
       document.getElementById("totalBookings").textContent = total;
       document.getElementById("pendingBookings").textContent = pending;
       document.getElementById("assignedBookings").textContent = assigned;
       document.getElementById("progressBookings").textContent = progress;
       document.getElementById("completedBookings").textContent = completed;
-      document.getElementById("todayTrips").textContent = todayTrips;
-      document.getElementById("todayPending").textContent = todayPending;
-      document.getElementById("todayAssigned").textContent = todayAssigned;
-      document.getElementById("todayCompleted").textContent = todayCompleted;
-
+      document.getElementById("todayTrips").textContent = liveBookings.filter(b => b.tripDate === today).length;
+      document.getElementById("todayPending").textContent = liveBookings.filter(b => b.tripDate === today && b.status === "Pending").length;
+      document.getElementById("todayAssigned").textContent = liveBookings.filter(b => b.tripDate === today && ["Assigned","Driver En Route","Arrived"].includes(b.status)).length;
+      document.getElementById("todayCompleted").textContent = liveBookings.filter(b => b.tripDate === today && b.status === "Completed").length;
       document.getElementById("recommendedDriverPill").textContent = `Recommended: ${getRecommendedDriver() || "--"}`;
     }
-
     function getFilteredActiveBookings() {
       const searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
       const statusValue = document.getElementById("statusFilter").value;
       const driverValue = document.getElementById("driverFilter").value;
       const dateValue = document.getElementById("dateFilter").value;
-
-      return liveBookings
-        .filter(b => b.status !== "Completed")
-        .filter(b => {
-          if (statusValue !== "All" && b.status !== statusValue) return false;
-          if (driverValue === "Unassigned" && b.driver) return false;
-          if (driverValue !== "All" && driverValue !== "Unassigned" && b.driver !== driverValue) return false;
-          if (dateValue && b.tripDate !== dateValue) return false;
-
-          if (!searchValue) return true;
-          const text = `${b.id} ${b.passengerName} ${b.pickup} ${b.destination} ${b.driver} ${b.tripType} ${b.notes}`.toLowerCase();
-          return text.includes(searchValue);
-        });
+      return liveBookings.filter(b => b.status !== "Completed").filter(b => {
+        if (statusValue !== "All" && b.status !== statusValue) return false;
+        if (driverValue === "Unassigned" && b.driver) return false;
+        if (driverValue !== "All" && driverValue !== "Unassigned" && b.driver !== driverValue) return false;
+        if (dateValue && b.tripDate !== dateValue) return false;
+        if (!searchValue) return true;
+        const text = `${b.id} ${b.passengerName} ${b.pickup} ${b.destination} ${b.driver} ${b.tripType} ${b.notes}`.toLowerCase();
+        return text.includes(searchValue);
+      });
     }
-
-    function getCompletedTrips() {
-      return liveBookings.filter(b => b.status === "Completed");
-    }
-
+    function getCompletedTrips(){ return liveBookings.filter(b => b.status === "Completed"); }
     function clearAdminFilters() {
       document.getElementById("searchInput").value = "";
       document.getElementById("statusFilter").value = "All";
@@ -1412,50 +799,22 @@
       document.getElementById("dateFilter").value = "";
       renderAdminBookings();
     }
-
-    function focusBookingOnMap(bookingId) {
-      selectedAdminBookingId = bookingId;
-      refreshAllMaps();
-    }
-
-    function populateDriverSearchList(bookingId, filterText = "") {
+    function focusBookingOnMap(bookingId){ selectedAdminBookingId = bookingId; refreshAllMaps(); }
+    function populateDriverSearchList(bookingId, filterText="") {
       const list = document.getElementById(`driverList-${bookingId}`);
-      if (!list) return;
-
-      const filtered = driverUsers.filter(driver =>
-        driver.toLowerCase().includes(filterText.toLowerCase())
-      );
-
-      if (!filtered.length) {
-        list.innerHTML = `<div class="driver-item">No matching driver</div>`;
-        return;
-      }
-
-      list.innerHTML = filtered.map(driver => `
-        <div class="driver-item" onclick="assignSelectedDriver('${bookingId}', '${driver.replace(/'/g, "\\'")}')">${driver}</div>
-      `).join("");
+      const filtered = driverUsers.filter(driver => driver.toLowerCase().includes((filterText || "").toLowerCase()));
+      list.innerHTML = filtered.length
+        ? filtered.map(driver => `<div class="driver-item" onclick="assignSelectedDriver('${bookingId}', '${driver.replace(/'/g, "\\'")}')">${driver}</div>`).join("")
+        : `<div class="driver-item">No matching driver</div>`;
     }
-
-    function toggleDriverList(bookingId, show) {
-      const list = document.getElementById(`driverList-${bookingId}`);
-      if (!list) return;
-      list.style.display = show ? "block" : "none";
-    }
-
-    function filterDriverOptions(inputEl, bookingId) {
-      populateDriverSearchList(bookingId, inputEl.value || "");
-      toggleDriverList(bookingId, true);
-    }
+    function toggleDriverList(bookingId, show){ const list = document.getElementById(`driverList-${bookingId}`); if (list) list.style.display = show ? "block" : "none"; }
+    function filterDriverOptions(inputEl, bookingId){ populateDriverSearchList(bookingId, inputEl.value || ""); toggleDriverList(bookingId, true); }
 
     function renderAdminBookings() {
       updateAdminStats();
       const bookingList = document.getElementById("bookingList");
       const bookings = getFilteredActiveBookings();
-
-      if (!bookings.length) {
-        bookingList.innerHTML = `<p class="empty-text">No matching active bookings found.</p>`;
-        return;
-      }
+      if (!bookings.length) { bookingList.innerHTML = `<p class="empty-text">No matching active bookings found.</p>`; return; }
 
       bookingList.innerHTML = bookings.map(booking => `
         <div class="booking-card">
@@ -1470,90 +829,45 @@
           <p><strong>Fare:</strong> $${Number(booking.fareAUD || 0).toFixed(2)}</p>
           <p><strong>Payment:</strong> ${booking.tripType === "NDIS" ? "NDIS / Invoice" : booking.paymentStatus}</p>
           <p><strong>Notes:</strong> ${booking.notes || "None"}</p>
-
-          <div class="status-row">
-            <span class="status ${getStatusClass(booking.status)}">${booking.status}</span>
-          </div>
-
+          <div class="status-row"><span class="status ${getStatusClass(booking.status)}">${booking.status}</span></div>
           ${booking.status === "Pending" ? `
             <div class="action-row">
               <div class="driver-combobox">
-                <input
-                  class="driver-input"
-                  placeholder="Search driver..."
-                  oninput="filterDriverOptions(this, '${booking.id}')"
-                  onclick="filterDriverOptions(this, '${booking.id}')"
-                  onfocus="filterDriverOptions(this, '${booking.id}')"
-                  onblur="setTimeout(() => toggleDriverList('${booking.id}', false), 200)"
-                />
+                <input class="driver-input" placeholder="Search driver..." oninput="filterDriverOptions(this, '${booking.id}')" onclick="filterDriverOptions(this, '${booking.id}')" onfocus="filterDriverOptions(this, '${booking.id}')" onblur="setTimeout(() => toggleDriverList('${booking.id}', false), 200)" />
                 <div class="driver-list" id="driverList-${booking.id}"></div>
               </div>
               <button class="driver" onclick="assignRecommendedDriver('${booking.id}')">Auto Assign</button>
-            </div>
-          ` : ""}
-
+            </div>` : ""}
           <div class="action-row">
             <button class="admin" onclick="openEditBooking('${booking.id}')">Edit</button>
             <button class="secondary" onclick="focusBookingOnMap('${booking.id}')">Show on Map</button>
             <button class="start-btn" onclick="moveBookingStatus('${booking.id}', 'In Progress')">Mark In Progress</button>
             <button class="complete-btn" onclick="moveBookingStatus('${booking.id}', 'Completed')">Mark Completed</button>
-            ${booking.tripType === "NDIS"
-              ? `<button class="pdf-btn" onclick="generateNDISInvoicePDF('${booking.id}')">Invoice PDF</button>`
-              : ""
-            }
+            ${booking.tripType === "NDIS" ? `<button class="pdf-btn" onclick="generateNDISInvoicePDF('${booking.id}')">Invoice PDF</button>` : ""}
             <button class="delete-btn" onclick="deleteBooking('${booking.id}')">Delete</button>
           </div>
-        </div>
-      `).join("");
+        </div>`).join("");
 
-      bookings.forEach(booking => {
-        if (booking.status === "Pending") {
-          populateDriverSearchList(booking.id, "");
-        }
-      });
+      bookings.forEach(booking => { if (booking.status === "Pending") populateDriverSearchList(booking.id, ""); });
     }
 
     function assignSelectedDriver(bookingId, driverName) {
       if (!driverName) return;
-      const booking = liveBookings.find(b => b.id === bookingId);
-      if (!booking) return;
-
-      booking.driver = driverName;
-      booking.status = "Assigned";
-      booking.updatedAt = new Date().toISOString();
-
+      const booking = liveBookings.find(b => b.id === bookingId); if (!booking) return;
+      booking.driver = driverName; booking.status = "Assigned"; booking.updatedAt = new Date().toISOString();
       syncAndRenderBookings();
-
-      if (currentRole === "Admin") {
-        showToast("Driver Assigned", `${driverName} assigned to ${booking.passengerName}.`);
-      }
+      if (currentRole === "Admin") showToast("Driver Assigned", `${driverName} assigned to ${booking.passengerName}.`);
     }
-
     function assignRecommendedDriver(bookingId) {
-      const booking = liveBookings.find(b => b.id === bookingId);
-      if (!booking) return;
-
-      const rec = getRecommendedDriver();
-      if (!rec) {
-        alert("No driver available.");
-        return;
-      }
-
-      booking.driver = rec;
-      booking.status = "Assigned";
-      booking.updatedAt = new Date().toISOString();
-
+      const booking = liveBookings.find(b => b.id === bookingId); if (!booking) return;
+      const rec = getRecommendedDriver(); if (!rec) return alert("No driver available.");
+      booking.driver = rec; booking.status = "Assigned"; booking.updatedAt = new Date().toISOString();
       syncAndRenderBookings();
-
-      if (currentRole === "Admin") {
-        showToast("Auto Assign Complete", `${rec} assigned to ${booking.passengerName}.`);
-      }
+      if (currentRole === "Admin") showToast("Auto Assign Complete", `${rec} assigned to ${booking.passengerName}.`);
     }
 
     function openEditBooking(bookingId) {
-      const booking = liveBookings.find(b => b.id === bookingId);
-      if (!booking) return;
-
+      const booking = liveBookings.find(b => b.id === bookingId); if (!booking) return;
       editingBookingId = bookingId;
       document.getElementById("editPassengerName").value = booking.passengerName || "";
       document.getElementById("editTripType").value = booking.tripType || "Normal";
@@ -1564,16 +878,9 @@
       document.getElementById("editTripNotes").value = booking.notes || "";
       document.getElementById("editModal").style.display = "flex";
     }
-
-    function closeEditModal() {
-      editingBookingId = "";
-      document.getElementById("editModal").style.display = "none";
-    }
-
+    function closeEditModal(){ editingBookingId = ""; document.getElementById("editModal").style.display = "none"; }
     async function saveBookingEdit() {
-      const booking = liveBookings.find(b => b.id === editingBookingId);
-      if (!booking) return;
-
+      const booking = liveBookings.find(b => b.id === editingBookingId); if (!booking) return;
       booking.passengerName = document.getElementById("editPassengerName").value.trim() || booking.passengerName;
       booking.tripType = document.getElementById("editTripType").value;
       booking.pickup = document.getElementById("editPickup").value.trim() || booking.pickup;
@@ -1581,119 +888,114 @@
       booking.tripDate = document.getElementById("editTripDate").value || booking.tripDate;
       booking.tripTime = document.getElementById("editTripTime").value || booking.tripTime;
       booking.notes = document.getElementById("editTripNotes").value.trim();
-
       booking.pickupCoords = await geocodeLocation(booking.pickup);
       booking.destinationCoords = await geocodeLocation(booking.destination);
-
       const estimatedKm = booking.pickupCoords && booking.destinationCoords
-        ? haversineKm(booking.pickupCoords.lat, booking.pickupCoords.lng, booking.destinationCoords.lat, booking.destinationCoords.lng).toFixed(1)
-        : 8;
-
+        ? haversineKm(booking.pickupCoords.lat, booking.pickupCoords.lng, booking.destinationCoords.lat, booking.destinationCoords.lng).toFixed(1) : 8;
       booking.estimatedKm = Number(estimatedKm);
       booking.fareAUD = calculateFare(estimatedKm, booking.notes);
       booking.paymentStatus = booking.tripType === "NDIS" ? "NDIS / Invoice" : (booking.paymentStatus === "NDIS / Invoice" ? "Unpaid" : booking.paymentStatus);
       booking.updatedAt = new Date().toISOString();
-
-      closeEditModal();
-      syncAndRenderBookings();
-
-      if (currentRole === "Admin") {
-        showToast("Booking Updated", `${booking.passengerName}'s trip details were updated.`);
-      }
+      closeEditModal(); syncAndRenderBookings();
+      if (currentRole === "Admin") showToast("Booking Updated", `${booking.passengerName}'s trip details were updated.`);
     }
 
     function generateNDISInvoicePDF(bookingId) {
       const booking = liveBookings.find(b => b.id === bookingId);
       if (!booking) return;
-
-      if (booking.tripType !== "NDIS") {
-        alert("Invoice PDF is only for NDIS bookings.");
-        return;
-      }
+      if (booking.tripType !== "NDIS") return alert("Invoice PDF is only for NDIS bookings.");
 
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-
       const invoiceNumber = `INV-${booking.id}`;
       const issueDate = new Date().toLocaleDateString();
+      const fare = Number(booking.fareAUD || 0).toFixed(2);
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(22);
-      doc.text("UVEL", 20, 20);
+      doc.text(PROVIDER.name, 20, 20);
 
-      doc.setFontSize(11);
       doc.setFont("helvetica", "normal");
-      doc.text("Reliable community transport", 20, 27);
-      doc.text(`ABN: ${UVEL_ABN}`, 20, 33);
+      doc.setFontSize(10);
+      doc.text("Reliable community transport", 20, 26);
 
-      doc.setDrawColor(200, 210, 220);
-      doc.line(20, 38, 190, 38);
+      doc.setFontSize(10);
+      doc.text(`ABN: ${PROVIDER.abn}`, 130, 20);
+      doc.text(PROVIDER.address1, 130, 26);
+      doc.text(PROVIDER.address2, 130, 32);
+      doc.text(`Phone: ${PROVIDER.phone}`, 130, 38);
+      doc.text(`Email: ${PROVIDER.email}`, 130, 44);
+
+      doc.setDrawColor(200);
+      doc.line(20, 50, 190, 50);
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(18);
-      doc.text("NDIS Invoice", 20, 48);
+      doc.text("NDIS INVOICE", 20, 62);
 
+      doc.setFont("helvetica", "normal");
       doc.setFontSize(11);
-      doc.setFont("helvetica", "normal");
-      doc.text(`Invoice Number: ${invoiceNumber}`, 20, 58);
-      doc.text(`Issue Date: ${issueDate}`, 20, 65);
-      doc.text(`Payment Mode: NDIS / Invoice`, 20, 72);
+      doc.text(`Invoice #: ${invoiceNumber}`, 20, 72);
+      doc.text(`Issue Date: ${issueDate}`, 20, 78);
+      doc.text(`Payment: NDIS / Invoice`, 20, 84);
 
       doc.setFont("helvetica", "bold");
-      doc.text("Participant Details", 20, 86);
+      doc.text("Participant:", 20, 96);
       doc.setFont("helvetica", "normal");
-      doc.text(`Name: ${booking.passengerName || "-"}`, 20, 94);
+      doc.text(booking.passengerName || "-", 20, 102);
+
+      const startY = 115;
+      doc.setFont("helvetica", "bold");
+      doc.setFillColor(230, 235, 245);
+      doc.rect(20, startY, 170, 8, "F");
+      doc.text("Description", 22, startY + 6);
+      doc.text("Date", 110, startY + 6);
+      doc.text("Amount", 160, startY + 6);
+
+      const desc = `${booking.pickup} → ${booking.destination}`;
+      const rowY = startY + 14;
+      doc.setFont("helvetica", "normal");
+      const splitDesc = doc.splitTextToSize(desc, 82);
+      doc.text(splitDesc, 22, rowY);
+      doc.text(booking.tripDate || "-", 110, rowY);
+      doc.text(`AUD ${fare}`, 160, rowY);
+      const rowBottom = rowY + Math.max(6, splitDesc.length * 5);
+      doc.line(20, rowBottom, 190, rowBottom);
 
       doc.setFont("helvetica", "bold");
-      doc.text("Trip Details", 20, 108);
+      doc.text("Total:", 130, rowBottom + 12);
+      doc.text(`AUD ${fare}`, 160, rowBottom + 12);
+
+      doc.text("Trip details", 20, rowBottom + 26);
       doc.setFont("helvetica", "normal");
-      doc.text(`Pickup: ${booking.pickup || "-"}`, 20, 116);
-      doc.text(`Destination: ${booking.destination || "-"}`, 20, 123);
-      doc.text(`Trip Date: ${booking.tripDate || "-"}`, 20, 130);
-      doc.text(`Trip Time: ${booking.tripTime || "-"}`, 20, 137);
-      doc.text(`Driver: ${booking.driver || "Unassigned"}`, 20, 144);
-      doc.text(`Status: ${booking.status || "-"}`, 20, 151);
+      doc.text(`Time: ${booking.tripTime || "-"}`, 20, rowBottom + 34);
+      doc.text(`Driver: ${booking.driver || "Unassigned"}`, 20, rowBottom + 41);
+      doc.text(`Status: ${booking.status || "-"}`, 20, rowBottom + 48);
 
       doc.setFont("helvetica", "bold");
-      doc.text("Charges", 20, 165);
+      doc.text("Notes:", 20, rowBottom + 62);
       doc.setFont("helvetica", "normal");
-      doc.text(`Estimated Fare: AUD ${Number(booking.fareAUD || 0).toFixed(2)}`, 20, 173);
-
-      doc.setFont("helvetica", "bold");
-      doc.text("Notes", 20, 187);
-      doc.setFont("helvetica", "normal");
-
-      const notesText = booking.notes && booking.notes.trim()
-        ? booking.notes
-        : "No additional notes provided.";
-
+      const notesText = booking.notes && booking.notes.trim() ? booking.notes : "No additional notes.";
       const splitNotes = doc.splitTextToSize(notesText, 170);
-      doc.text(splitNotes, 20, 195);
+      doc.text(splitNotes, 20, rowBottom + 70);
 
-      const footerY = 250;
+      const footerY = 268;
       doc.setDrawColor(220, 220, 220);
-      doc.line(20, footerY, 190, footerY);
-
+      doc.line(20, footerY - 6, 190, footerY - 6);
       doc.setFontSize(10);
-      doc.text("Generated by UVEL Admin Panel", 20, footerY + 8);
-      doc.text("For NDIS referral / invoice processing", 20, footerY + 14);
-      doc.text(`ABN: ${UVEL_ABN}`, 20, footerY + 20);
+      doc.setTextColor(120);
+      doc.text("Generated by UVEL Admin Panel", 20, footerY);
+      doc.text("NDIS transport service invoice", 20, footerY + 6);
+      doc.text(`ABN: ${PROVIDER.abn}`, 20, footerY + 12);
 
       doc.save(`UVEL_NDIS_Invoice_${booking.id}.pdf`);
-
-      if (currentRole === "Admin") {
-        showToast("Invoice PDF Ready", `NDIS invoice downloaded for ${booking.passengerName}.`);
-      }
+      if (currentRole === "Admin") showToast("Invoice PDF Ready", `NDIS invoice downloaded for ${booking.passengerName}.`);
     }
 
     function renderTripHistory() {
       const el = document.getElementById("tripHistoryList");
       const trips = getCompletedTrips();
-      if (!trips.length) {
-        el.innerHTML = `<p class="empty-text">No completed trips yet.</p>`;
-        return;
-      }
-
+      if (!trips.length) return el.innerHTML = `<p class="empty-text">No completed trips yet.</p>`;
       el.innerHTML = trips.map(trip => `
         <div class="history-card">
           <p><strong>Booking ID:</strong> ${trip.id}</p>
@@ -1707,34 +1009,18 @@
           <p><strong>Fare:</strong> $${Number(trip.fareAUD || 0).toFixed(2)}</p>
           <p><strong>Payment:</strong> ${trip.tripType === "NDIS" ? "NDIS / Invoice" : trip.paymentStatus}</p>
           <div class="status-row"><span class="status completed">Completed</span></div>
-        </div>
-      `).join("");
+        </div>`).join("");
     }
 
     function renderPassengerTrips() {
       const riderTrips = document.getElementById("riderTrips");
-      if (!currentUser || currentRole !== "Passenger") {
-        riderTrips.innerHTML = `<p class="empty-text">No trips yet.</p>`;
-        return;
-      }
-
+      if (!currentUser || currentRole !== "Passenger") return riderTrips.innerHTML = `<p class="empty-text">No trips yet.</p>`;
       const myTrips = liveBookings.filter(trip => trip.createdBy === currentUser.id);
-      if (!myTrips.length) {
-        riderTrips.innerHTML = `<p class="empty-text">No trips yet.</p>`;
-        return;
-      }
-
+      if (!myTrips.length) return riderTrips.innerHTML = `<p class="empty-text">No trips yet.</p>`;
       riderTrips.innerHTML = myTrips.map(trip => {
-        const payButton = trip.tripType !== "NDIS" && trip.paymentStatus !== "Paid"
-          ? `<button class="ride" onclick="payWithStripe('${trip.id}')">Pay with Stripe</button>`
-          : "";
-
-        const paymentMode = trip.tripType === "NDIS"
-          ? "NDIS referral / invoice"
-          : "Stripe card";
-
+        const payButton = trip.tripType !== "NDIS" && trip.paymentStatus !== "Paid" ? `<button class="ride" onclick="payWithStripe('${trip.id}')">Pay with Stripe</button>` : "";
+        const paymentMode = trip.tripType === "NDIS" ? "NDIS referral / invoice" : "Stripe card";
         const fareText = "$" + Number(trip.fareAUD || 0).toFixed(2);
-
         return `
           <div class="rider-card">
             <p><strong>Booking ID:</strong> ${trip.id}</p>
@@ -1749,24 +1035,15 @@
             <p><strong>Status:</strong> ${trip.paymentStatus}</p>
             <div class="status-row"><span class="status ${getStatusClass(trip.status)}">${trip.status}</span></div>
             <div class="action-row">${payButton}</div>
-          </div>
-        `;
+          </div>`;
       }).join("");
     }
 
     function renderDriverTrips() {
       const driverTrips = document.getElementById("driverTrips");
-      if (!currentDriver) {
-        driverTrips.innerHTML = `<p class="empty-text">No driver selected.</p>`;
-        return;
-      }
-
+      if (!currentDriver) return driverTrips.innerHTML = `<p class="empty-text">No driver selected.</p>`;
       const myTrips = liveBookings.filter(trip => trip.driver === currentDriver);
-      if (!myTrips.length) {
-        driverTrips.innerHTML = `<p class="empty-text">No trips assigned to ${currentDriver} yet.</p>`;
-        return;
-      }
-
+      if (!myTrips.length) return driverTrips.innerHTML = `<p class="empty-text">No trips assigned to ${currentDriver} yet.</p>`;
       driverTrips.innerHTML = myTrips.map(trip => `
         <div class="driver-card">
           <p><strong>Booking ID:</strong> ${trip.id}</p>
@@ -1783,24 +1060,18 @@
             <button class="start-btn" onclick="moveBookingStatus('${trip.id}', 'In Progress')">Mark In Progress</button>
             <button class="complete-btn" onclick="moveBookingStatus('${trip.id}', 'Completed')">Complete Trip</button>
           </div>
-        </div>
-      `).join("");
+        </div>`).join("");
     }
 
     function renderAdminDrivers() {
       const el = document.getElementById("adminDriversList");
       const drivers = allUsers.filter(u => u.role === "Driver");
-      if (!drivers.length) {
-        el.innerHTML = `<p class="empty-text">No drivers found.</p>`;
-        return;
-      }
-
+      if (!drivers.length) return el.innerHTML = `<p class="empty-text">No drivers found.</p>`;
       el.innerHTML = drivers.map(driver => {
         const name = driver.driverName || driver.name || driver.email;
         const stats = getDriverLoad(name);
         const statusLabel = stats.totalActive > 0 ? "Active" : "Available";
         const statusClass = stats.totalActive > 0 ? "assigned" : "completed";
-
         return `
           <div class="driver-card">
             <p><strong>Driver:</strong> ${name}</p>
@@ -1811,19 +1082,14 @@
             <p><strong>In Progress:</strong> ${stats.progressTrips}</p>
             <p><strong>Completed:</strong> ${stats.completedTrips}</p>
             <div class="status-row"><span class="status ${statusClass}">${statusLabel}</span></div>
-          </div>
-        `;
+          </div>`;
       }).join("");
     }
 
     function renderAdminPassengers() {
       const el = document.getElementById("adminPassengersList");
       const passengers = allUsers.filter(u => u.role === "Passenger");
-      if (!passengers.length) {
-        el.innerHTML = `<p class="empty-text">No passengers found.</p>`;
-        return;
-      }
-
+      if (!passengers.length) return el.innerHTML = `<p class="empty-text">No passengers found.</p>`;
       el.innerHTML = passengers.map(passenger => {
         const total = liveBookings.filter(b => b.createdBy === passenger.id).length;
         const active = liveBookings.filter(b => b.createdBy === passenger.id && b.status !== "Completed").length;
@@ -1834,22 +1100,17 @@
             <p><strong>Total Bookings:</strong> ${total}</p>
             <p><strong>Active Bookings:</strong> ${active}</p>
             <div class="status-row"><span class="status ${total > 0 ? "assigned" : "pending"}">${total > 0 ? "Active User" : "No Trips Yet"}</span></div>
-          </div>
-        `;
+          </div>`;
       }).join("");
     }
 
     function renderDriverFilterOptions() {
       const driverFilter = document.getElementById("driverFilter");
       const current = driverFilter.value || "All";
-      const options = [
-        `<option value="All">All Drivers</option>`,
-        `<option value="Unassigned">Unassigned</option>`
-      ].concat(driverUsers.map(d => `<option value="${d}">${d}</option>`));
+      const options = [`<option value="All">All Drivers</option>`,`<option value="Unassigned">Unassigned</option>`].concat(driverUsers.map(d => `<option value="${d}">${d}</option>`));
       driverFilter.innerHTML = options.join("");
       driverFilter.value = [...driverUsers, "All", "Unassigned"].includes(current) ? current : "All";
     }
-
     function renderEverything() {
       renderDriverFilterOptions();
       renderPassengerTrips();
@@ -1861,56 +1122,25 @@
     }
 
     function moveBookingStatus(bookingId, status) {
-      const booking = liveBookings.find(b => b.id === bookingId);
-      if (!booking) return;
-
-      booking.status = status;
-      booking.updatedAt = new Date().toISOString();
-
-      if (status === "Completed") {
-        booking.paymentStatus = booking.tripType === "NDIS"
-          ? "NDIS / Invoice"
-          : booking.paymentStatus;
-      }
-
+      const booking = liveBookings.find(b => b.id === bookingId); if (!booking) return;
+      booking.status = status; booking.updatedAt = new Date().toISOString();
+      if (status === "Completed") booking.paymentStatus = booking.tripType === "NDIS" ? "NDIS / Invoice" : booking.paymentStatus;
       syncAndRenderBookings();
-
-      if (currentRole === "Admin") {
-        showToast("Status Updated", `${booking.passengerName} → ${status}`);
-      }
-
-      if (currentRole === "Driver") {
-        showToast("Trip Status", `Booking moved to ${status}`);
-      }
+      if (currentRole === "Admin") showToast("Status Updated", `${booking.passengerName} → ${status}`);
+      if (currentRole === "Driver") showToast("Trip Status", `Booking moved to ${status}`);
     }
-
     function deleteBooking(bookingId) {
       liveBookings = liveBookings.filter(b => b.id !== bookingId);
       syncAndRenderBookings();
-      if (currentRole === "Admin") {
-        showToast("Booking Deleted", `Booking ${bookingId} was removed.`);
-      }
+      if (currentRole === "Admin") showToast("Booking Deleted", `Booking ${bookingId} was removed.`);
     }
-
     function payWithStripe(bookingId) {
-      const booking = liveBookings.find(b => b.id === bookingId);
-      if (!booking) return;
-
-      if (booking.tripType === "NDIS") {
-        alert("NDIS bookings are invoice / referral only.");
-        return;
-      }
-
-      booking.paymentStatus = "Paid";
-      booking.updatedAt = new Date().toISOString();
-
+      const booking = liveBookings.find(b => b.id === bookingId); if (!booking) return;
+      if (booking.tripType === "NDIS") return alert("NDIS bookings are invoice / referral only.");
+      booking.paymentStatus = "Paid"; booking.updatedAt = new Date().toISOString();
       syncAndRenderBookings();
-
-      if (currentRole === "Passenger") {
-        showToast("Payment Successful", `Payment recorded for booking ${booking.id}.`);
-      }
+      if (currentRole === "Passenger") showToast("Payment Successful", `Payment recorded for booking ${booking.id}.`);
     }
-
     function clearAllBookings() {
       if (!confirm("Clear all saved bookings from this browser?")) return;
       localStorage.removeItem(UVEL_BOOKINGS_KEY);
@@ -1923,146 +1153,60 @@
     function downloadCSV(filename, rows) {
       if (!rows.length) return;
       const escapeCell = value => `"${String(value ?? "").replace(/"/g, '""')}"`;
-      const csv = rows.map(row => row.map(escapeCell).join(",")).join("\n");
+      const csv = rows.map(row => row.map(escapeCell).join(",")).join("\\n");
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
+      const a = document.createElement("a"); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
     }
-
     function exportActiveBookingsCSV() {
-      const rows = [
-        ["Booking ID","Passenger","Type","Pickup","Destination","Date","Time","Driver","Status","Fare","Payment"],
-        ...getFilteredActiveBookings().map(b => [
-          b.id, b.passengerName, b.tripType, b.pickup, b.destination, b.tripDate, b.tripTime, b.driver || "", b.status, b.fareAUD || 0, b.paymentStatus
-        ])
-      ];
+      const rows = [["Booking ID","Passenger","Type","Pickup","Destination","Date","Time","Driver","Status","Fare","Payment"], ...getFilteredActiveBookings().map(b => [b.id,b.passengerName,b.tripType,b.pickup,b.destination,b.tripDate,b.tripTime,b.driver || "",b.status,b.fareAUD || 0,b.paymentStatus])];
       downloadCSV("uvel-active-bookings.csv", rows);
     }
-
     function exportCompletedTripsCSV() {
-      const rows = [
-        ["Booking ID","Passenger","Type","Pickup","Destination","Date","Time","Driver","Status","Fare","Payment"],
-        ...getCompletedTrips().map(b => [
-          b.id, b.passengerName, b.tripType, b.pickup, b.destination, b.tripDate, b.tripTime, b.driver || "", b.status, b.fareAUD || 0, b.paymentStatus
-        ])
-      ];
+      const rows = [["Booking ID","Passenger","Type","Pickup","Destination","Date","Time","Driver","Status","Fare","Payment"], ...getCompletedTrips().map(b => [b.id,b.passengerName,b.tripType,b.pickup,b.destination,b.tripDate,b.tripTime,b.driver || "",b.status,b.fareAUD || 0,b.paymentStatus])];
       downloadCSV("uvel-completed-trips.csv", rows);
     }
-
-    function printAdminReport() {
-      window.print();
-    }
+    function printAdminReport(){ window.print(); }
 
     async function autoUpdateTripStatus(booking, driverLat, driverLng) {
       if (!booking?.pickupCoords || !booking?.destinationCoords) return;
-
-      const pickupKm = haversineKm(
-        driverLat, driverLng,
-        booking.pickupCoords.lat, booking.pickupCoords.lng
-      );
-
-      const destinationKm = haversineKm(
-        driverLat, driverLng,
-        booking.destinationCoords.lat, booking.destinationCoords.lng
-      );
-
+      const pickupKm = haversineKm(driverLat, driverLng, booking.pickupCoords.lat, booking.pickupCoords.lng);
+      const destinationKm = haversineKm(driverLat, driverLng, booking.destinationCoords.lat, booking.destinationCoords.lng);
       let nextStatus = booking.status;
-
-      if (booking.status === "Assigned" && pickupKm <= 3) {
-        nextStatus = "Driver En Route";
-      }
-      if (["Assigned", "Driver En Route"].includes(booking.status) && pickupKm <= 0.15) {
-        nextStatus = "Arrived";
-      }
-      if (["Arrived", "Driver En Route"].includes(booking.status) && pickupKm > 0.2) {
-        nextStatus = "In Progress";
-      }
-      if (booking.status === "In Progress" && destinationKm <= 0.15) {
-        nextStatus = "Completed";
-      }
-
-      if (nextStatus !== booking.status) {
-        booking.status = nextStatus;
-        booking.updatedAt = new Date().toISOString();
-      }
+      if (booking.status === "Assigned" && pickupKm <= 3) nextStatus = "Driver En Route";
+      if (["Assigned","Driver En Route"].includes(booking.status) && pickupKm <= 0.15) nextStatus = "Arrived";
+      if (["Arrived","Driver En Route"].includes(booking.status) && pickupKm > 0.2) nextStatus = "In Progress";
+      if (booking.status === "In Progress" && destinationKm <= 0.15) nextStatus = "Completed";
+      if (nextStatus !== booking.status) { booking.status = nextStatus; booking.updatedAt = new Date().toISOString(); }
     }
-
     function startGPS() {
-      if (currentRole !== "Driver" || !currentDriver) {
-        alert("Driver login required.");
-        return;
-      }
-
-      if (!navigator.geolocation) {
-        alert("Geolocation not supported in this browser.");
-        return;
-      }
-
+      if (currentRole !== "Driver" || !currentDriver) return alert("Driver login required.");
+      if (!navigator.geolocation) return alert("Geolocation not supported in this browser.");
       if (gpsWatchId !== null) return;
-
       document.getElementById("gpsStatusText").textContent = "GPS running...";
-
       gpsWatchId = navigator.geolocation.watchPosition(async pos => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
+        const lat = pos.coords.latitude, lng = pos.coords.longitude;
         const booking = getCurrentDriverBooking();
-
-        if (!booking) {
-          document.getElementById("gpsStatusText").textContent = "No active assigned trip.";
-          return;
-        }
-
-        booking.driverLocation = { lat, lng };
-        booking.updatedAt = new Date().toISOString();
+        if (!booking) { document.getElementById("gpsStatusText").textContent = "No active assigned trip."; return; }
+        booking.driverLocation = { lat, lng }; booking.updatedAt = new Date().toISOString();
         await autoUpdateTripStatus(booking, lat, lng);
-
         document.getElementById("gpsStatusText").textContent = `Live GPS active: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
         syncAndRenderBookings();
-      }, err => {
-        console.error(err);
-        document.getElementById("gpsStatusText").textContent = "Location permission denied or unavailable.";
-      }, {
-        enableHighAccuracy: true,
-        maximumAge: 5000,
-        timeout: 15000
-      });
+      }, () => document.getElementById("gpsStatusText").textContent = "Location permission denied or unavailable.", { enableHighAccuracy:true, maximumAge:5000, timeout:15000 });
     }
-
     function stopGPS() {
-      if (gpsWatchId !== null) {
-        navigator.geolocation.clearWatch(gpsWatchId);
-        gpsWatchId = null;
-      }
-      const el = document.getElementById("gpsStatusText");
-      if (el) el.textContent = "GPS stopped.";
+      if (gpsWatchId !== null) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
+      const el = document.getElementById("gpsStatusText"); if (el) el.textContent = "GPS stopped.";
     }
 
     document.getElementById("tripType").addEventListener("change", updateFarePreview);
     document.getElementById("tripNotes").addEventListener("input", updateFarePreview);
 
     window.addEventListener("load", () => {
-      ensureMap("liveMapFrame");
-      ensureMap("passengerMapFrame");
-      ensureMap("driverMapFrame");
-
-      loadBookingsFromStorage();
-      updateFarePreview();
-      applyRoleUI();
-      renderEverything();
-      refreshAllMaps();
-
-      allUsers.push({
-        id: "u-passenger-2",
-        role: "Passenger",
-        name: "Dean",
-        email: "dean@uvel.app"
-      });
+      ensureMap("liveMapFrame"); ensureMap("passengerMapFrame"); ensureMap("driverMapFrame");
+      loadBookingsFromStorage(); updateFarePreview(); applyRoleUI(); renderEverything(); refreshAllMaps();
+      allUsers.push({ id:"u-passenger-2", role:"Passenger", name:"Dean", email:"dean@uvel.app" });
     });
   </script>
-
 </body>
 </html>
