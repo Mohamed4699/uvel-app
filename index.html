@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UVEL Working Auth + Full App</title>
+  <title>UVEL Firebase All-in-One</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -153,9 +153,6 @@
 .pulse-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#57d08b;box-shadow:0 0 0 rgba(87,208,139,.7);animation:pulse 1.8s infinite}
 .live-badge{display:inline-flex;align-items:center;gap:8px}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(87,208,139,.7)}70%{box-shadow:0 0 0 12px rgba(87,208,139,0)}100%{box-shadow:0 0 0 0 rgba(87,208,139,0)}}
-.pickup-pin,.destination-pin{width:18px;height:18px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 6px rgba(255,255,255,.12)}
-.pickup-pin{background:#49c4d5}
-.destination-pin{background:#ef6d6d}
     @media (max-width: 1100px){ .eta-box,.edit-grid{grid-template-columns:1fr} }
     @media (max-width: 1100px){
       .grid-2,.split,.login-wrap,.grid-4,.grid-3,.stats,.toolbar,.row,.meta{grid-template-columns:1fr}
@@ -171,7 +168,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Working auth + full app</div>
+            <div class="subtitle">Firebase production-ready starter</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -196,10 +193,14 @@
       </div>
 
       <div class="card auth-card">
-        <div class="section-title">Account access</div><div class="section-sub">Use Sign in for existing accounts or Sign up for a new account.</div>
+        <div class="tabs">
+          <button class="tab btn active" id="loginTabBtn" type="button">Sign in</button>
+          <button class="tab btn" id="signupTabBtn" type="button">Sign up</button>
+        </div>
 
-        <form id="loginForm"><div class="section-title">Sign in</div>
-
+        <form id="loginForm">
+          <div class="section-title">Welcome back</div>
+          <div class="section-sub">Sign in with your real Firebase user account.</div>
           <label>Email</label>
           <input type="email" id="loginEmail" placeholder="admin@uvel.com.au" required />
           <label class="top-gap">Password</label>
@@ -210,8 +211,9 @@
           </div>
         </form>
 
-        <div class="line" style="margin:22px 0"></div><form id="signupForm">
-<div class="section-title">Sign up</div><div class="section-sub">Create a new account and user profile.</div>
+        <form id="signupForm" class="hidden">
+          <div class="section-title">Create account</div>
+          <div class="section-sub">New users are saved to Firestore with their role profile.</div>
           <label>Full name</label>
           <input type="text" id="signupName" placeholder="Mohamed Khamis" required />
           <label class="top-gap">Email</label>
@@ -321,7 +323,6 @@
             <div class="section-title">Live route map</div>
             <div class="section-sub">Preview the selected booking route.</div>
             <div id="passengerMap" class="map"></div>
-            <div id="passengerMapDebug" class="footer-note">Map status: waiting</div>
             <div class="grid-2 top-gap">
               <div class="list-card">
                 <div class="tiny">Route</div>
@@ -392,7 +393,6 @@
           <div class="card section">
             <div class="trip-head"><div><div class="section-title">Active route map</div><div class="section-sub">Shows the selected active booking with live driver marker when available.</div></div><div class="select-booking"><select id="adminMapBookingSelect"></select></div></div>
             <div id="adminMap" class="map"></div>
-            <div id="adminMapDebug" class="footer-note">Map status: waiting</div>
             <div class="eta-box">              <div class="item"><div class="tiny">Route distance</div><div id="adminRouteKm">--</div></div>              <div class="item"><div class="tiny">ETA to destination</div><div id="adminRouteEta">--</div></div>              <div class="item"><div class="tiny">Driver live status</div><div id="adminDriverLive">--</div></div>              <div class="item"><div class="tiny">Navigator</div><div id="adminNavigatorLabel">Driver app</div></div>            </div>
             <div class="footer-note">This map updates from shared Firestore booking data and browser GPS when the driver enables live tracking.</div>
           </div>
@@ -423,7 +423,6 @@
             <div class="trip-head"><div><div class="section-title">Driver map</div>
             <div class="section-sub">Shows your most recent assigned trip with live sharing and navigator support.</div></div>            <div class="seg"><span id="driverTrackingState" class="pill tracking-off">Tracking: off</span>            <button class="btn small brand" id="startTrackingBtn">Start live tracking</button>            <button class="btn small" id="stopTrackingBtn">Stop tracking</button></div></div>
             <div id="driverMap" class="map"></div>
-            <div id="driverMapDebug" class="footer-note">Map status: waiting</div>
             <div class="eta-box">              <div class="item"><div class="tiny">Live ETA</div><div id="driverLiveEta">--</div></div>              <div class="item"><div class="tiny">Remaining km</div><div id="driverRemainingKm">--</div></div>              <div class="item"><div class="tiny">Current speed</div><div id="driverSpeedLabel">--</div></div>              <div class="item"><div class="tiny">Route mode</div><div id="driverRouteMode">OSRM route</div></div>            </div>
           </div>
         </div>
@@ -435,7 +434,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
     import {
       getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-      onAuthStateChanged, signOut, sendPasswordResetEmail, sendPasswordResetEmail
+      onAuthStateChanged, signOut, sendPasswordResetEmail
     } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
     import {
       getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc,
@@ -490,9 +489,7 @@
     let adminMapState = { markers: [], line: null };
     let driverMapState = { markers: [], line: null };
 
-
     const $ = (id) => document.getElementById(id);
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     function showMsg(msg, isError = false) {
       $("authMsg").textContent = msg;
@@ -503,59 +500,65 @@
       const box = $("authDebug");
       if (!box) return;
       if (!content) {
-        box.style.display = "none";
+        box.classList.add("hidden");
         box.innerHTML = "";
         return;
       }
-      box.style.display = "block";
+      box.classList.remove("hidden");
       box.innerHTML = content;
     }
 
     function translateFirebaseError(err) {
       const code = err?.code || "";
       const msg = err?.message || "Unknown error";
-      if (code.includes("auth/unauthorized-domain")) return ["This domain is not authorised.", "Add <code>uvel-app.vercel.app</code> in Firebase Authentication → Settings → Authorized domains."];
-      if (code.includes("auth/email-already-in-use")) return ["This email already exists.", "Use Sign in or Reset password, or use a different email."];
-      if (code.includes("auth/invalid-login-credentials") || code.includes("auth/user-not-found") || code.includes("auth/wrong-password") || code.includes("auth/invalid-credential")) return ["Email or password is incorrect.", "Check the password, use Reset password, or try a fresh test email."];
-      if (code.includes("auth/operation-not-allowed")) return ["Email/Password sign-in is disabled.", "Enable Email/Password in Firebase Authentication → Sign-in method."];
-      if (code.includes("permission-denied") || msg.toLowerCase().includes("permission")) return ["Firestore blocked this action.", "Check Firestore rules and make sure the <code>users</code> collection can be read/written."];
+      if (code.includes("auth/unauthorized-domain")) {
+        return ["This domain is not authorised.", "Add <code>uvel-app.vercel.app</code> in Firebase Authentication → Settings → Authorized domains."];
+      }
+      if (code.includes("auth/email-already-in-use")) {
+        return ["This email already exists.", "Use Sign in, or use a different email."];
+      }
+      if (code.includes("auth/invalid-login-credentials") || code.includes("auth/user-not-found") || code.includes("auth/wrong-password")) {
+        return ["Email or password is incorrect.", "Check the password, or create the account with Sign up first."];
+      }
+      if (code.includes("auth/operation-not-allowed")) {
+        return ["Email/Password sign-in is disabled.", "Enable Email/Password in Firebase Authentication → Sign-in method."];
+      }
+      if (code.includes("permission-denied") || msg.toLowerCase().includes("permission")) {
+        return ["Firestore blocked this action.", "Check Firestore rules and make sure the <code>users</code> collection can be read/written."];
+      }
       return [msg, code ? `Firebase code: <code>${escapeHtml(code)}</code>` : ""];
     }
 
-    async function getOrCreateUserProfile(user) {
-      let snap = null;
-      for (let i = 0; i < 5; i++) {
-        snap = await getDoc(doc(db, "users", user.uid));
-        if (snap.exists()) return snap;
-        await sleep(300);
-      }
-
-      const email = user.email || "";
-      const inferredRole =
-        email.startsWith("admin") ? "admin" :
-        email.startsWith("driver") ? "driver" : "passenger";
-
-      await setDoc(doc(db, "users", user.uid), {
-        name: email.split("@")[0] || "User",
-        email,
-        role: inferredRole,
-        activeLoad: 0,
-        availability: inferredRole === "driver" ? "online" : null,
-        vehicle: inferredRole === "driver" ? "Toyota HiAce" : null,
-        createdAt: serverTimestamp()
-      }, { merge: true });
-
-      return await getDoc(doc(db, "users", user.uid));
+    function switchAuthTab(type) {
+      $("loginForm").classList.toggle("hidden", type !== "login");
+      $("signupForm").classList.toggle("hidden", type !== "signup");
+      $("loginTabBtn").classList.toggle("active", type === "login");
+      $("signupTabBtn").classList.toggle("active", type === "signup");
     }
+
+    $("loginTabBtn").onclick = () => switchAuthTab("login");
+    $("signupTabBtn").onclick = () => switchAuthTab("signup");
+    $("resetPasswordBtn").onclick = async () => {
+      const email = $("loginEmail").value.trim();
+      if (!email) return showMsg("Enter your email first, then press Reset password.", true);
+      showDebug("");
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showMsg("Password reset email sent.");
+        showDebug(`<div><strong>Password reset sent</strong></div><div>Check <code>${escapeHtml(email)}</code> inbox and spam.</div>`);
+      } catch (err) {
+        const [shortMsg, helpMsg] = translateFirebaseError(err);
+        showMsg(shortMsg, true);
+        showDebug(`<div><strong>Password reset failed</strong></div><div>${helpMsg}</div><div class="footer-note">${escapeHtml(err.message || "")}</div>`);
+      }
+    };
 
     $("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       showDebug("");
       try {
         showMsg("Signing in...");
-        const email = $("loginEmail").value.trim();
-        const pass = $("loginPassword").value;
-        await signInWithEmailAndPassword(auth, email, pass);
+        await signInWithEmailAndPassword(auth, $("loginEmail").value.trim(), $("loginPassword").value);
       } catch (err) {
         const [shortMsg, helpMsg] = translateFirebaseError(err);
         showMsg(shortMsg, true);
@@ -572,10 +575,9 @@
         const name = $("signupName").value.trim();
         const email = $("signupEmail").value.trim();
         const password = $("signupPassword").value;
-        const role = String($("signupRole").value).toLowerCase().trim();
+        const role = $("signupRole").value;
         if (!name) throw new Error("Full name is required.");
         if (password.length < 6) throw new Error("Password must be at least 6 characters.");
-
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         await setDoc(doc(db, "users", cred.user.uid), {
           name, email, role,
@@ -583,11 +585,9 @@
           availability: role === "driver" ? "online" : null,
           vehicle: role === "driver" ? "Toyota HiAce" : null,
           createdAt: serverTimestamp()
-        }, { merge: true });
-
-        await sleep(400);
-        showMsg("Account created. Signing you in...");
-        showDebug(`<div><strong>Account created</strong></div><div>Email: <code>${escapeHtml(email)}</code></div><div>Role: <code>${escapeHtml(role)}</code></div>`);
+        });
+        showMsg("Account created.");
+        showDebug(`<div><strong>Account created successfully</strong></div><div>Email: <code>${escapeHtml(email)}</code></div><div>Role: <code>${escapeHtml(role)}</code></div>`);
       } catch (err) {
         const [shortMsg, helpMsg] = translateFirebaseError(err);
         showMsg(shortMsg, true);
@@ -596,26 +596,11 @@
       }
     });
 
-    $("resetPasswordBtn").onclick = async () => {
-      try {
-        const email = ($("loginEmail")?.value || $("signupEmail")?.value || "").trim();
-        if (!email) return showMsg("Enter your email first, then press Reset password.", true);
-        await sendPasswordResetEmail(auth, email);
-        showMsg("Password reset email sent.");
-        showDebug(`<div><strong>Password reset sent</strong></div><div>Check <code>${escapeHtml(email)}</code> inbox and spam.</div>`);
-      } catch (err) {
-        const [shortMsg, helpMsg] = translateFirebaseError(err);
-        showMsg(shortMsg, true);
-        showDebug(`<div><strong>Password reset failed</strong></div><div>${helpMsg}</div><div class="footer-note">${escapeHtml(err.message || "")}</div>`);
-      }
-    };
-
     $("logoutBtn").onclick = async () => {
       await signOut(auth);
     };
 
     $("seedDriversBtn").onclick = seedDemoDrivers;
-
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
@@ -626,32 +611,25 @@
         $("authScreen").classList.remove("hidden");
         $("appScreen").classList.add("hidden");
         showMsg("");
-        showDebug(`<div><strong>Ready</strong></div><div>Use a fresh test email first if an older one keeps failing.</div>`);
+        showDebug(`Running on <code>${escapeHtml(location.hostname)}</code>. If auth fails, check Authorized domains and Firestore users collection.`);
         return;
       }
 
       currentUser = user;
-      const snap = await getOrCreateUserProfile(user);
+      let snap = await getDoc(doc(db, "users", user.uid));
       if (!snap.exists()) {
-        showMsg("Could not load user profile.", true);
-        return;
-      }
-
-      currentProfile = { uid: user.uid, ...snap.data() };
-      currentProfile.role = String(currentProfile.role || "passenger").toLowerCase().trim();
-
-      $("authScreen").classList.add("hidden");
-      $("appScreen").classList.remove("hidden");
-      showDebug("");
-      $("whoAmI").innerHTML = `Signed in as <strong style="color:#fff">${escapeHtml(currentProfile.name || currentProfile.email)}</strong> • ${escapeHtml(currentProfile.role)}`;
-      if ($("passengerName")) $("passengerName").value = currentProfile.name || "";
-
-      initMaps();
-      subscribeUsers();
-      subscribeBookings();
-      setRoleView(currentProfile.role);
-      if (typeof startMetricsRefreshLoop === "function") startMetricsRefreshLoop();
-    });
+        const inferredRole =
+          user.email?.startsWith("admin") ? "admin" :
+          user.email?.startsWith("driver") ? "driver" : "passenger";
+        await setDoc(doc(db, "users", user.uid), {
+          name: user.email?.split("@")[0] || "User",
+          email: user.email || "",
+          role: inferredRole,
+          activeLoad: 0,
+          availability: inferredRole === "driver" ? "online" : null,
+          vehicle: inferredRole === "driver" ? "Toyota HiAce" : null,
+          createdAt: serverTimestamp()
+        });
         snap = await getDoc(doc(db, "users", user.uid));
       }
       currentProfile = { uid: user.uid, ...snap.data() };
@@ -712,48 +690,6 @@
       });
     }
 
-    function pickupIcon() {
-      return L.divIcon({
-        className: "",
-        html: `<div class="pickup-pin"></div>`,
-        iconSize: [18, 18],
-        iconAnchor: [9, 9]
-      });
-    }
-
-    function destinationIcon() {
-      return L.divIcon({
-        className: "",
-        html: `<div class="destination-pin"></div>`,
-        iconSize: [18, 18],
-        iconAnchor: [9, 9]
-      });
-    }
-
-    function setMapDebug(target, message) {
-      const el = $(target);
-      if (el) el.textContent = message;
-    }
-
-    async function resolveBookingCoordinates(booking) {
-      let from = null;
-      let to = null;
-
-      if (booking.pickupLat && booking.pickupLng) {
-        from = { lat: Number(booking.pickupLat), lon: Number(booking.pickupLng) };
-      } else if (booking.pickup) {
-        from = await geocodeAddress(booking.pickup);
-      }
-
-      if (booking.destinationLat && booking.destinationLng) {
-        to = { lat: Number(booking.destinationLat), lon: Number(booking.destinationLng) };
-      } else if (booking.destination) {
-        to = await geocodeAddress(booking.destination);
-      }
-
-      return { from, to };
-    }
-
     function ensureLiveMarker(map, liveKey, key, latlng, popupText) {
       if (!mapLiveState[liveKey].markers[key]) {
         mapLiveState[liveKey].markers[key] = L.marker(latlng, { icon: driverIcon() }).addTo(map).bindPopup(popupText || "Live");
@@ -793,41 +729,21 @@
     }
 
     async function updateMapForBooking(map, state, booking, liveKey) {
-      const debugTarget =
-        liveKey === "passenger" ? "passengerMapDebug" :
-        liveKey === "admin" ? "adminMapDebug" :
-        liveKey === "driver" ? "driverMapDebug" : null;
-
       clearMapState(map, state, liveKey);
+      if (!booking?.pickup || !booking?.destination) return null;
+      const from = await geocodeAddress(booking.pickup);
+      const to = await geocodeAddress(booking.destination);
+      if (!from || !to) return null;
 
-      if (!booking?.pickup || !booking?.destination) {
-        setMapDebug(debugTarget, "Map status: missing pickup or destination.");
-        return null;
-      }
-
-      const { from, to } = await resolveBookingCoordinates(booking);
-
-      if (!from || !to) {
-        setMapDebug(debugTarget, "Map status: could not resolve pickup or destination coordinates.");
-        return null;
-      }
-
-      const pickupMarker = L.marker([from.lat, from.lon], { icon: pickupIcon() }).addTo(map).bindPopup("Pickup");
-      const destinationMarker = L.marker([to.lat, to.lon], { icon: destinationIcon() }).addTo(map).bindPopup("Destination");
+      const pickupMarker = L.marker([from.lat, from.lon]).addTo(map).bindPopup("Pickup");
+      const destinationMarker = L.marker([to.lat, to.lon]).addTo(map).bindPopup("Destination");
       state.markers.push(pickupMarker, destinationMarker);
 
-      let route = await fetchRoutePoints(from, to);
+      const route = await fetchRoutePoints(from, to);
       if (route?.coords?.length) {
         state.line = L.polyline(route.coords).addTo(map);
-        setMapDebug(debugTarget, `Map status: route loaded • ${route.km.toFixed(1)} km • ${Math.round(route.minutes)} min`);
       } else {
         state.line = L.polyline([[from.lat, from.lon], [to.lat, to.lon]]).addTo(map);
-        route = {
-          km: Number(booking.distanceKm || 0),
-          minutes: null,
-          coords: [[from.lat, from.lon], [to.lat, to.lon]]
-        };
-        setMapDebug(debugTarget, "Map status: fallback line used because route service did not return a route.");
       }
 
       if (booking.driverLat && booking.driverLng && liveKey) {
@@ -836,7 +752,6 @@
       }
 
       map.fitBounds(state.line.getBounds(), { padding: [30, 30] });
-
       return {
         bookingKm: route?.km ?? Number(booking.distanceKm || 0),
         bookingEta: route?.minutes ?? null,
@@ -844,7 +759,7 @@
       };
     }
 
-    async function fetchDriverToDestinationMetrics(booking) {(booking) {
+    async function fetchDriverToDestinationMetrics(booking) {
       if (!booking?.driverLat || !booking?.driverLng || !booking?.destination) return null;
       const to = await geocodeAddress(booking.destination);
       if (!to) return null;
@@ -904,7 +819,6 @@
       updateMapForBooking(passengerMap, passengerMapState, tempBooking, "passenger");
       $("passengerRouteLabel").textContent = `${pickup} → ${destination}`;
       $("passengerStatusLabel").textContent = "draft";
-      setMapDebug("passengerMapDebug", "Map status: preview route loaded from entered addresses.");
     };
 
     $("bookingForm").addEventListener("submit", async (e) => {
@@ -921,10 +835,8 @@
         return alert("Please fill all required booking fields.");
       }
 
-      const from = await geocodeAddress(pickup);
-      const to = await geocodeAddress(destination);
       const km = await estimateDistanceKm(pickup, destination);
-      if (!km || !from || !to) return alert("Could not estimate route distance. Try a more specific address.");
+      if (!km) return alert("Could not estimate route distance. Try a more specific address.");
       const fare = calculateFare(km, rideType);
 
       await addDoc(collection(db, "bookings"), {
@@ -934,10 +846,6 @@
         rideType,
         pickup,
         destination,
-        pickupLat: from.lat,
-        pickupLng: from.lon,
-        destinationLat: to.lat,
-        destinationLng: to.lon,
         tripDate,
         tripTime,
         notes,
@@ -1349,18 +1257,11 @@
       const tripTime = document.getElementById(`edit-tripTime-${bookingId}`)?.value || "";
       const notes = document.getElementById(`edit-notes-${bookingId}`)?.value?.trim() || "";
       if (!pickup || !destination || !tripDate || !tripTime) return alert("Please complete the edit fields.");
-      const from = await geocodeAddress(pickup);
-      const to = await geocodeAddress(destination);
       const km = await estimateDistanceKm(pickup, destination);
-      if (!km || !from || !to) return alert("Could not recalculate route. Use a clearer pickup and destination.");
+      if (!km) return alert("Could not recalculate route. Use a clearer pickup and destination.");
       const fare = calculateFare(km, rideType);
       await updateDoc(doc(db, "bookings", bookingId), {
-        passengerName, rideType, pickup, destination,
-        pickupLat: from.lat,
-        pickupLng: from.lon,
-        destinationLat: to.lat,
-        destinationLng: to.lon,
-        tripDate, tripTime, notes,
+        passengerName, rideType, pickup, destination, tripDate, tripTime, notes,
         distanceKm: Number(km.toFixed(1)),
         fare: Number(fare.toFixed(2)),
         paymentMethod: rideType === "ndis" ? "Invoice / Referral" : "Card / Direct",
