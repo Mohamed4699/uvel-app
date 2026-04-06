@@ -138,8 +138,6 @@
     .empty{padding:18px;border:1px dashed var(--line);border-radius:16px;color:var(--muted)}
     .note{font-size:13px;color:var(--muted);line-height:1.5}
     .footer-note{margin-top:16px;color:var(--muted);font-size:13px}
-.auth-help{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);font-size:13px;line-height:1.6;color:var(--muted)}
-.auth-help code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:8px}
     .status-row{display:flex;gap:8px;flex-wrap:wrap}
     .status-chip{padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px;font-weight:700}
     .eta-box{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
@@ -150,9 +148,6 @@
 .tracking-off{color:#ffb1b1}
 .seg{display:flex;gap:8px;flex-wrap:wrap}
 .select-booking{max-width:360px}
-.pulse-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#57d08b;box-shadow:0 0 0 rgba(87,208,139,.7);animation:pulse 1.8s infinite}
-.live-badge{display:inline-flex;align-items:center;gap:8px}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(87,208,139,.7)}70%{box-shadow:0 0 0 12px rgba(87,208,139,0)}100%{box-shadow:0 0 0 0 rgba(87,208,139,0)}}
     @media (max-width: 1100px){ .eta-box,.edit-grid{grid-template-columns:1fr} }
     @media (max-width: 1100px){
       .grid-2,.split,.login-wrap,.grid-4,.grid-3,.stats,.toolbar,.row,.meta{grid-template-columns:1fr}
@@ -229,17 +224,9 @@
             <button class="btn brand" type="submit">Create account</button>
           </div>
           <div class="footer-note">For a live public app, do not let normal users self-create admin accounts. Keep that for internal setup only.</div>
-        <div class="auth-help">
-          <div><strong>Testing checklist</strong></div>
-          <div>1. Firebase Authentication → Email/Password must be enabled.</div>
-          <div>2. Firebase Authentication → Authorized domains must include <code>uvel-app.vercel.app</code>.</div>
-          <div>3. Firestore Database must exist and allow signed-in users to read/write during testing.</div>
-          <div>4. Use <strong>Sign up</strong> first to create admin, driver, and passenger accounts.</div>
-        </div>
         </form>
 
         <div id="authMsg" class="footer-note"></div>
-        <div id="authDebug" class="auth-help hidden"></div>
       </div>
     </div>
 
@@ -249,7 +236,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Level 5 smooth tracking • animated live map • shared bookings • multi-browser sync</div>
+            <div class="subtitle">Level 5 upgrade • live driver GPS • shared bookings • multi-browser sync</div>
           </div>
         </div>
         <div class="userbox">
@@ -456,9 +443,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    console.log("UVEL Firebase project:", firebaseConfig.projectId);
-    console.log("UVEL Firebase authDomain:", firebaseConfig.authDomain);
-
     const PROVIDER = {
       name: "UVEL / Access Awaits Pty Ltd",
       abn: "14688659912",
@@ -479,12 +463,6 @@
     let passengerMap, adminMap, driverMap;
     let driverWatchId = null;
     let selectedAdminMapBookingId = null;
-    let mapLiveState = {
-      passenger: { markers: {}, raf: null },
-      admin: { markers: {}, raf: null },
-      driver: { markers: {}, raf: null }
-    };
-    let metricsTimer = null;
     let passengerMapState = { markers: [], line: null };
     let adminMapState = { markers: [], line: null };
     let driverMapState = { markers: [], line: null };
@@ -494,63 +472,6 @@
     function showMsg(msg, isError = false) {
       $("authMsg").textContent = msg;
       $("authMsg").style.color = isError ? "#ff9f9f" : "#9ec3da";
-    }
-
-    function showDebug(htmlText = "") {
-      const box = $("authDebug");
-      if (!box) return;
-      if (!htmlText) {
-        box.classList.add("hidden");
-        box.innerHTML = "";
-        return;
-      }
-      box.classList.remove("hidden");
-      box.innerHTML = htmlText;
-    }
-
-    function friendlyAuthError(err) {
-      const code = err?.code || "";
-      const message = err?.message || "Unknown error";
-      if (code.includes("unauthorized-domain")) {
-        return {
-          short: "Firebase blocked this domain.",
-          details: `Add <code>uvel-app.vercel.app</code> to Firebase Authentication → Settings → Authorized domains.`
-        };
-      }
-      if (code.includes("email-already-in-use")) {
-        return {
-          short: "That email already has an account.",
-          details: "Use Sign in instead, or use a different email for testing."
-        };
-      }
-      if (code.includes("invalid-login-credentials") || code.includes("wrong-password") || code.includes("user-not-found")) {
-        return {
-          short: "Email or password is incorrect.",
-          details: "Use Sign up first if this account does not exist yet."
-        };
-      }
-      if (code.includes("operation-not-allowed")) {
-        return {
-          short: "Email/Password sign-in is disabled.",
-          details: "Enable Email/Password in Firebase Authentication → Sign-in method."
-        };
-      }
-      if (code.includes("network-request-failed")) {
-        return {
-          short: "Network request failed.",
-          details: "Check internet connection, browser extensions, or CORS-blocking extensions."
-        };
-      }
-      if (code.includes("permission-denied") || message.toLowerCase().includes("permission")) {
-        return {
-          short: "Firestore permissions blocked this action.",
-          details: "Create Firestore Database and use temporary testing rules that allow signed-in users to read/write."
-        };
-      }
-      return {
-        short: message,
-        details: code ? `Firebase code: <code>${escapeHtml(code)}</code>` : ""
-      };
     }
 
     function switchAuthTab(type) {
@@ -563,35 +484,24 @@
     $("loginTabBtn").onclick = () => switchAuthTab("login");
     $("signupTabBtn").onclick = () => switchAuthTab("signup");
 
-    if (location.hostname.includes("vercel.app")) {
-      showDebug(`Running on <code>${escapeHtml(location.hostname)}</code>. Make sure this domain is added in Firebase Authorized domains and Firestore is enabled.`);
-    }
-
     $("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      showDebug("");
       try {
         showMsg("Signing in...");
         await signInWithEmailAndPassword(auth, $("loginEmail").value.trim(), $("loginPassword").value);
       } catch (err) {
-        const info = friendlyAuthError(err);
-        showMsg(info.short, true);
-        showDebug(`<div><strong>Login failed</strong></div><div>${info.details}</div><div class="footer-note">${escapeHtml(err.message || "")}</div>`);
-        console.error("UVEL sign-in error:", err);
+        showMsg(err.message, true);
       }
     });
 
     $("signupForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      showDebug("");
       try {
         showMsg("Creating account...");
         const name = $("signupName").value.trim();
         const email = $("signupEmail").value.trim();
         const password = $("signupPassword").value;
         const role = $("signupRole").value;
-        if (!name) throw new Error("Full name is required.");
-        if (password.length < 6) throw new Error("Password must be at least 6 characters.");
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         await setDoc(doc(db, "users", cred.user.uid), {
           name, email, role,
@@ -600,13 +510,9 @@
           vehicle: role === "driver" ? "Toyota HiAce" : null,
           createdAt: serverTimestamp()
         });
-        showMsg(`Account created for ${role}.`);
-        showDebug(`<div><strong>Account created</strong></div><div>Email: <code>${escapeHtml(email)}</code></div><div>Role: <code>${escapeHtml(role)}</code></div>`);
+        showMsg("Account created.");
       } catch (err) {
-        const info = friendlyAuthError(err);
-        showMsg(info.short, true);
-        showDebug(`<div><strong>Signup failed</strong></div><div>${info.details}</div><div class="footer-note">${escapeHtml(err.message || "")}</div>`);
-        console.error("UVEL sign-up error:", err);
+        showMsg(err.message, true);
       }
     });
 
@@ -631,17 +537,13 @@
       currentUser = user;
       const snap = await getDoc(doc(db, "users", user.uid));
       if (!snap.exists()) {
-        $("authScreen").classList.remove("hidden");
-        $("appScreen").classList.add("hidden");
-        showMsg("User exists in Authentication, but profile is missing in Firestore.", true);
-        showDebug(`<div><strong>Profile missing</strong></div><div>Create a Firestore document in <code>users/${escapeHtml(user.uid)}</code> with fields <code>name</code>, <code>email</code>, and <code>role</code>. Or sign up again with a fresh test account.</div>`);
+        showMsg("User profile missing in Firestore.", true);
         return;
       }
       currentProfile = { uid: user.uid, ...snap.data() };
       currentProfile.role = String(currentProfile.role || "passenger").toLowerCase().trim();
       $("authScreen").classList.add("hidden");
       $("appScreen").classList.remove("hidden");
-      showDebug("");
       $("whoAmI").innerHTML = `Signed in as <strong style="color:#fff">${escapeHtml(currentProfile.name || currentProfile.email)}</strong> • ${escapeHtml(currentProfile.role)}`;
       $("passengerName").value = currentProfile.name || "";
 
@@ -649,7 +551,6 @@
       subscribeUsers();
       subscribeBookings();
       setRoleView(currentProfile.role);
-      startMetricsRefreshLoop();
     });
 
     function setRoleView(role) {
@@ -674,50 +575,11 @@
       return map;
     }
 
-    function clearMapState(map, state, liveStateKey) {
+    function clearMapState(map, state) {
       state.markers.forEach(m => map.removeLayer(m));
       state.markers = [];
       if (state.line) map.removeLayer(state.line);
       state.line = null;
-      const live = mapLiveState[liveStateKey];
-      if (live?.markers) {
-        Object.values(live.markers).forEach(m => {
-          try { map.removeLayer(m); } catch(e) {}
-        });
-        live.markers = {};
-      }
-    }
-
-    function driverIcon() {
-      return L.divIcon({
-        className: "",
-        html: `<div style="width:18px;height:18px;border-radius:50%;background:#57d08b;border:3px solid white;box-shadow:0 0 0 8px rgba(87,208,139,.18)"></div>`,
-        iconSize: [18, 18],
-        iconAnchor: [9, 9]
-      });
-    }
-
-    function ensureLiveMarker(map, liveStateKey, markerKey, latlng, popupText) {
-      const live = mapLiveState[liveStateKey];
-      if (!live.markers[markerKey]) {
-        live.markers[markerKey] = L.marker(latlng, { icon: driverIcon() }).addTo(map).bindPopup(popupText || "Live");
-      }
-      return live.markers[markerKey];
-    }
-
-    function animateMarkerTo(marker, targetLatLng, duration = 1800) {
-      const start = marker.getLatLng();
-      const startTime = performance.now();
-      const dLat = targetLatLng[0] - start.lat;
-      const dLng = targetLatLng[1] - start.lng;
-
-      function step(now) {
-        const p = Math.min(1, (now - startTime) / duration);
-        const eased = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
-        marker.setLatLng([start.lat + dLat * eased, start.lng + dLng * eased]);
-        if (p < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
     }
 
     async function fetchRoutePoints(from, to) {
@@ -737,10 +599,9 @@
       }
     }
 
-    async function updateMapForBooking(map, state, booking, liveStateKey) {
-      clearMapState(map, state, liveStateKey);
+    async function updateMapForBooking(map, state, booking) {
+      clearMapState(map, state);
       if (!booking?.pickup || !booking?.destination) return null;
-
       const from = await geocodeAddress(booking.pickup);
       const to = await geocodeAddress(booking.destination);
       if (!from || !to) return null;
@@ -757,8 +618,8 @@
       }
 
       if (booking.driverLat && booking.driverLng) {
-        const liveMarker = ensureLiveMarker(map, liveStateKey, "driver", [booking.driverLat, booking.driverLng], "Driver live");
-        animateMarkerTo(liveMarker, [booking.driverLat, booking.driverLng], 2000);
+        const driverMarker = L.marker([booking.driverLat, booking.driverLng]).addTo(map).bindPopup("Driver live");
+        state.markers.push(driverMarker);
       }
 
       map.fitBounds(state.line.getBounds(), { padding: [30, 30] });
@@ -769,7 +630,14 @@
       };
     }
 
-    async function geocodeAddress(address) {(address) {
+    async function fetchDriverToDestinationMetrics(booking) {
+      if (!booking?.driverLat || !booking?.driverLng || !booking?.destination) return null;
+      const to = await geocodeAddress(booking.destination);
+      if (!to) return null;
+      return await fetchRoutePoints({ lat: booking.driverLat, lon: booking.driverLng }, to);
+    }
+
+    async function geocodeAddress(address) {
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`);
         const data = await res.json();
@@ -819,7 +687,7 @@
       const payment = rideType === "ndis" ? "Invoice / Referral" : "Card / Direct";
       $("farePreview").textContent = `Estimated fare: $${fare.toFixed(2)} • Distance: ${km.toFixed(1)} km • Payment: ${payment}`;
       const tempBooking = { pickup, destination, status: "draft" };
-      updateMapForBooking(passengerMap, passengerMapState, tempBooking, "passenger");
+      updateMapForBooking(passengerMap, passengerMapState, tempBooking);
       $("passengerRouteLabel").textContent = `${pickup} → ${destination}`;
       $("passengerStatusLabel").textContent = "draft";
     };
@@ -891,14 +759,6 @@
         renderAdminMapBookingSelect();
         renderEverything();
       });
-    }
-
-
-    function startMetricsRefreshLoop() {
-      if (metricsTimer) clearInterval(metricsTimer);
-      metricsTimer = setInterval(() => {
-        updateMapsFromLatest();
-      }, 8000);
     }
 
     function renderEverything() {
@@ -1062,7 +922,7 @@
           <div class="item"><div class="tiny">Fare</div><div>$${Number(b.fare || 0).toFixed(2)}</div></div>
           <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}</div></div>
         </div>
-        ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}${b.driverStage ? `<div class="footer-note">Driver stage: ${escapeHtml(b.driverStage)}</div>` : ""}${b.driverLat ? `<div class="footer-note">Live tracking: on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}${b.driverLastSeenAt ? ` • updated ${new Date(b.driverLastSeenAt).toLocaleTimeString()}` : ""}</div>` : ""}${b.cancellationReason ? `<div class="footer-note">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
+        ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}${b.driverStage ? `<div class="footer-note">Driver stage: ${escapeHtml(b.driverStage)}</div>` : ""}${b.driverLat ? `<div class="footer-note">Live tracking: on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}</div>` : ""}${b.cancellationReason ? `<div class="footer-note">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
       `;
     }
 
@@ -1127,9 +987,9 @@
     async function updateMapsFromLatest() {
       const latestPassenger = currentProfile?.role === "passenger" ? getPassengerBookings()[0] : null;
       if (latestPassenger) {
-        await updateMapForBooking(passengerMap, passengerMapState, latestPassenger, "passenger");
+        await updateMapForBooking(passengerMap, passengerMapState, latestPassenger);
         const live = await fetchDriverToDestinationMetrics(latestPassenger);
-        $("passengerDriverLive").innerHTML = latestPassenger.driverLat ? `<span class="live-badge"><span class="pulse-dot"></span>Live</span>` : "Waiting";
+        $("passengerDriverLive").textContent = latestPassenger.driverLat ? "Live" : "Waiting";
         $("passengerLiveKm").textContent = live ? `${live.km.toFixed(1)} km` : "--";
         $("passengerLiveEta").textContent = live ? `${Math.max(1, Math.round(live.minutes))} min` : "--";
         $("passengerDriverSpeed").textContent = latestPassenger.driverSpeedKmh ? `${Number(latestPassenger.driverSpeedKmh).toFixed(0)} km/h` : "--";
@@ -1139,11 +999,11 @@
         ? allBookings.find(b => b.id === selectedAdminMapBookingId)
         : (allBookings.find(b => b.status === "pending" || b.status === "assigned") || allBookings[0]);
       if (latestAdmin) {
-        const summary = await updateMapForBooking(adminMap, adminMapState, latestAdmin, "admin");
+        const summary = await updateMapForBooking(adminMap, adminMapState, latestAdmin);
         const live = await fetchDriverToDestinationMetrics(latestAdmin);
         $("adminRouteKm").textContent = summary?.bookingKm ? `${summary.bookingKm.toFixed(1)} km` : `${Number(latestAdmin.distanceKm || 0).toFixed(1)} km`;
         $("adminRouteEta").textContent = live ? `${Math.max(1, Math.round(live.minutes))} min` : getEtaLabel(latestAdmin);
-        $("adminDriverLive").innerHTML = latestAdmin.driverLat ? `<span class="live-badge"><span class="pulse-dot"></span>Live • ${escapeHtml(latestAdmin.driverStage || "tracking")}</span>` : "Not sharing";
+        $("adminDriverLive").textContent = latestAdmin.driverLat ? `Live • ${latestAdmin.driverStage || "tracking"}` : "Not sharing";
         $("adminNavigatorLabel").textContent = latestAdmin.assignedDriverName || "No driver";
       }
 
@@ -1151,7 +1011,7 @@
         ? allBookings.find(b => b.assignedDriverUid === currentUser.uid && b.status !== "completed" && b.status !== "cancelled")
         : null;
       if (latestDriver) {
-        await updateMapForBooking(driverMap, driverMapState, latestDriver, "driver");
+        await updateMapForBooking(driverMap, driverMapState, latestDriver);
         const live = await fetchDriverToDestinationMetrics(latestDriver);
         $("driverLiveEta").textContent = live ? `${Math.max(1, Math.round(live.minutes))} min` : getEtaLabel(latestDriver);
         $("driverRemainingKm").textContent = live ? `${live.km.toFixed(1)} km` : `${Number(latestDriver.distanceKm || 0).toFixed(1)} km`;
@@ -1218,14 +1078,12 @@
 
       driverWatchId = navigator.geolocation.watchPosition(async (pos) => {
         const speedKmh = pos.coords.speed != null ? pos.coords.speed * 3.6 : null;
-        const stage = speedKmh && speedKmh > 8 ? "in_progress" : "routing";
         await updateDoc(doc(db, "bookings", active.id), {
           driverLat: pos.coords.latitude,
           driverLng: pos.coords.longitude,
           driverAccuracy: pos.coords.accuracy,
           driverSpeedKmh: speedKmh,
           driverLastSeenAt: new Date().toISOString(),
-          driverStage: stage,
           updatedAt: serverTimestamp()
         });
       }, (err) => {
@@ -1237,20 +1095,13 @@
       });
     }
 
-    async function stopDriverTracking() {
+    function stopDriverTracking() {
       if (driverWatchId != null) navigator.geolocation.clearWatch(driverWatchId);
       driverWatchId = null;
       if ($("driverTrackingState")) {
         $("driverTrackingState").textContent = "Tracking: off";
         $("driverTrackingState").classList.remove("tracking-on");
         $("driverTrackingState").classList.add("tracking-off");
-      }
-      const active = allBookings.find(b => b.assignedDriverUid === currentUser?.uid && b.status !== "completed" && b.status !== "cancelled");
-      if (active) {
-        await updateDoc(doc(db, "bookings", active.id), {
-          driverLastSeenAt: new Date().toISOString(),
-          updatedAt: serverTimestamp()
-        });
       }
     }
 
@@ -1293,10 +1144,9 @@
     function getEtaLabel(b) {
       const km = Number(b.distanceKm || 0);
       if (!km) return "--";
-      const mins = Math.max(4, Math.round((km / 38) * 60));
+      const mins = Math.max(6, Math.round((km / 35) * 60));
       if (b.status === "completed") return "Arrived";
       if (b.status === "cancelled") return "Cancelled";
-      if (b.driverLat) return `${mins} min (live est.)`;
       return `${mins} min`;
     }
 
