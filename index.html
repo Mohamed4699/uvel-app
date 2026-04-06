@@ -530,21 +530,27 @@
     let gpsWatchId = null;
     let editingBookingId = "";
 
-    const UVEL_BOOKINGS_KEY = "uvel_bookings_v5";
+    const UVEL_BOOKINGS_KEY = "uvel_bookings_v6";
+    const UVEL_SESSION_KEY = "uvel_session_v1";
+    const UVEL_USERS_KEY = "uvel_users_v1";
+    const UVEL_DRIVERS_KEY = "uvel_drivers_v1";
     const UVEL_ABN = "14688659912";
     const PROVIDER_EMAIL = "invoice@uvel.com.au";
     const PROVIDER_PHONE = "0469924723";
     const PROVIDER_ADDRESS_1 = "Unit 3 / 14 Forbes Street";
     const PROVIDER_ADDRESS_2 = "Liverpool NSW 2170";
 
-    let allUsers = [
+    const defaultUsers = [
       { id: "u-passenger-1", role: "Passenger", name: "Passenger User", email: "passenger@uvel.app" },
       { id: "u-driver-1", role: "Driver", name: "Michael", driverName: "Michael", email: "michael@uvel.app" },
       { id: "u-driver-2", role: "Driver", name: "Daniel", driverName: "Daniel", email: "daniel@uvel.app" },
       { id: "u-admin-1", role: "Admin", name: "Admin User", email: "admin@uvel.app" }
     ];
 
-    let driverUsers = ["Michael", "Daniel"];
+    const defaultDrivers = ["Michael", "Daniel"];
+
+    let allUsers = [...defaultUsers];
+    let driverUsers = [...defaultDrivers];
     const mapStore = {};
 
     function loadBookingsFromStorage() {
@@ -565,8 +571,61 @@
       }
     }
 
+    function loadUsersFromStorage() {
+      try {
+        const rawUsers = localStorage.getItem(UVEL_USERS_KEY);
+        const rawDrivers = localStorage.getItem(UVEL_DRIVERS_KEY);
+        allUsers = rawUsers ? JSON.parse(rawUsers) : [...defaultUsers];
+        driverUsers = rawDrivers ? JSON.parse(rawDrivers) : [...defaultDrivers];
+      } catch (error) {
+        console.error("Failed to load users from localStorage:", error);
+        allUsers = [...defaultUsers];
+        driverUsers = [...defaultDrivers];
+      }
+    }
+
+    function saveUsersToStorage() {
+      try {
+        localStorage.setItem(UVEL_USERS_KEY, JSON.stringify(allUsers));
+        localStorage.setItem(UVEL_DRIVERS_KEY, JSON.stringify(driverUsers));
+      } catch (error) {
+        console.error("Failed to save users to localStorage:", error);
+      }
+    }
+
+    function persistSession() {
+      try {
+        localStorage.setItem(UVEL_SESSION_KEY, JSON.stringify({
+          currentRole,
+          currentUser,
+          currentDriver
+        }));
+      } catch (error) {
+        console.error("Failed to save session:", error);
+      }
+    }
+
+    function restoreSession() {
+      try {
+        const raw = localStorage.getItem(UVEL_SESSION_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        currentRole = saved?.currentRole || "";
+        currentUser = saved?.currentUser || null;
+        currentDriver = saved?.currentDriver || "";
+      } catch (error) {
+        console.error("Failed to restore session:", error);
+      }
+    }
+
+    function clearSession() {
+      localStorage.removeItem(UVEL_SESSION_KEY);
+    }
+
     function syncAndRenderBookings() {
       saveBookingsToStorage();
+      saveUsersToStorage();
+      persistSession();
       renderEverything();
       refreshAllMaps();
     }
@@ -882,23 +941,39 @@
       const driverNameInput = document.getElementById("authDriverName").value.trim();
 
       if (!role) return showError("Please select a role.");
+      if (!email) return showError("Please enter an email address.");
+
       currentRole = role;
 
       if (role === "Passenger") {
-        currentUser = { id: `passenger-${Date.now()}`, name: name || "Passenger User", email: email || "passenger@uvel.app", role: "Passenger" };
+        const existingPassenger = allUsers.find(u => u.role === "Passenger" && u.email?.toLowerCase() === email.toLowerCase());
+        currentUser = existingPassenger || { id: `passenger-${Date.now()}`, name: name || "Passenger User", email, role: "Passenger" };
+        currentUser.name = name || currentUser.name || "Passenger User";
+        currentUser.email = email;
+        if (!allUsers.some(u => u.id === currentUser.id)) allUsers.push({ ...currentUser });
         document.getElementById("passengerName").value = currentUser.name;
-        allUsers.push({ ...currentUser });
       } else if (role === "Driver") {
-        currentDriver = driverNameInput || "Michael";
-        currentUser = { id: `driver-${Date.now()}`, name: currentDriver, email: email || "driver@uvel.app", role: "Driver" };
+        currentDriver = driverNameInput || name || "Michael";
+        const existingDriver = allUsers.find(u =>
+          u.role === "Driver" &&
+          ((u.driverName || u.name || "").toLowerCase() === currentDriver.toLowerCase() || (u.email || "").toLowerCase() === email.toLowerCase())
+        );
+        currentUser = existingDriver || { id: `driver-${Date.now()}`, name: currentDriver, email, role: "Driver", driverName: currentDriver };
+        currentUser.name = currentDriver;
+        currentUser.driverName = currentDriver;
+        currentUser.email = email;
         if (!driverUsers.includes(currentDriver)) driverUsers.push(currentDriver);
-        if (!allUsers.some(u => u.role === "Driver" && (u.driverName === currentDriver || u.name === currentDriver))) {
-          allUsers.push({ id: currentUser.id, role: "Driver", name: currentDriver, driverName: currentDriver, email: currentUser.email });
-        }
+        if (!allUsers.some(u => u.id === currentUser.id)) allUsers.push({ ...currentUser });
       } else {
-        currentUser = { id: `admin-${Date.now()}`, name: name || "Admin User", email: email || "admin@uvel.app", role: "Admin" };
+        const existingAdmin = allUsers.find(u => u.role === "Admin" && u.email?.toLowerCase() === email.toLowerCase());
+        currentUser = existingAdmin || { id: `admin-${Date.now()}`, name: name || "Admin User", email, role: "Admin" };
+        currentUser.name = name || currentUser.name || "Admin User";
+        currentUser.email = email;
+        if (!allUsers.some(u => u.id === currentUser.id)) allUsers.push({ ...currentUser });
       }
 
+      saveUsersToStorage();
+      persistSession();
       applyRoleUI();
       showMessage("Logged in successfully.");
       renderEverything();
@@ -910,6 +985,7 @@
       currentRole = "";
       currentDriver = "";
       stopGPS();
+      clearSession();
       document.getElementById("authRole").value = "";
       document.getElementById("authName").value = "";
       document.getElementById("authEmail").value = "";
@@ -963,7 +1039,12 @@
       const tripTime = document.getElementById("tripTime").value;
       const notes = document.getElementById("tripNotes").value.trim();
 
+      if (currentRole !== "Passenger" || !currentUser) return alert("Please login as a Passenger first.");
       if (!passengerName || !pickup || !destination || !tripDate || !tripTime) return alert("Please complete all required fields.");
+
+      const requestedAt = new Date(`${tripDate}T${tripTime}`);
+      if (Number.isNaN(requestedAt.getTime())) return alert("Please choose a valid date and time.");
+      if (requestedAt.getTime() < Date.now() - 60000) return alert("Trip date and time cannot be in the past.");
 
       const pickupCoords = await geocodeLocation(pickup);
       const destinationCoords = await geocodeLocation(destination);
@@ -980,7 +1061,7 @@
         estimatedKm: Number(estimatedKm),
         fareAUD: calculateFare(estimatedKm, notes),
         paymentStatus: tripType === "NDIS" ? "NDIS / Invoice" : "Unpaid",
-        createdBy: currentUser?.id || "guest-passenger",
+        createdBy: currentUser.id,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         driverLocation: null
@@ -988,6 +1069,12 @@
 
       liveBookings.unshift(booking);
       syncAndRenderBookings();
+
+      ["pickup", "destination", "tripDate", "tripTime", "tripNotes"].forEach(id => {
+        document.getElementById(id).value = "";
+      });
+      updateFarePreview();
+
       document.getElementById("successBox").style.display = "block";
       setTimeout(() => document.getElementById("successBox").style.display = "none", 2500);
       if (currentRole === "Passenger") showToast("Ride Requested", "Your request was sent to Admin as Pending.");
@@ -1035,7 +1122,9 @@
       const driverValue = document.getElementById("driverFilter").value;
       const dateValue = document.getElementById("dateFilter").value;
 
-      return liveBookings.filter(b => b.status !== "Completed").filter(b => {
+      return liveBookings
+        .filter(b => b.status !== "Completed")
+        .filter(b => {
         if (statusValue !== "All" && b.status !== statusValue) return false;
         if (driverValue === "Unassigned" && b.driver) return false;
         if (driverValue !== "All" && driverValue !== "Unassigned" && b.driver !== driverValue) return false;
@@ -1043,11 +1132,14 @@
         if (!searchValue) return true;
         const text = `${b.id} ${b.passengerName} ${b.pickup} ${b.destination} ${b.driver} ${b.tripType} ${b.notes}`.toLowerCase();
         return text.includes(searchValue);
-      });
+      })
+      .sort((a, b) => new Date(`${a.tripDate}T${a.tripTime}`) - new Date(`${b.tripDate}T${b.tripTime}`));
     }
 
     function getCompletedTrips() {
-      return liveBookings.filter(b => b.status === "Completed");
+      return liveBookings
+        .filter(b => b.status === "Completed")
+        .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
     }
 
     function clearAdminFilters() {
@@ -1492,12 +1584,22 @@
     }
 
     function clearAllBookings() {
-      if (!confirm("Clear all saved bookings from this browser?")) return;
+      if (!confirm("Clear all saved bookings, users, drivers, and the current session from this browser?")) return;
       localStorage.removeItem(UVEL_BOOKINGS_KEY);
+      localStorage.removeItem(UVEL_USERS_KEY);
+      localStorage.removeItem(UVEL_DRIVERS_KEY);
+      clearSession();
       liveBookings = [];
+      allUsers = [...defaultUsers];
+      driverUsers = [...defaultDrivers];
+      currentUser = null;
+      currentRole = "";
+      currentDriver = "";
+      stopGPS();
+      applyRoleUI();
       renderEverything();
       refreshAllMaps();
-      alert("Saved bookings cleared.");
+      alert("Saved UVEL demo data cleared.");
     }
 
     function downloadCSV(filename, rows) {
@@ -1585,7 +1687,20 @@
       ensureMap("passengerMapFrame");
       ensureMap("driverMapFrame");
 
+      loadUsersFromStorage();
       loadBookingsFromStorage();
+      restoreSession();
+
+      if (currentRole === "Passenger" && currentUser) {
+        document.getElementById("passengerName").value = currentUser.name || "";
+      }
+      if (currentUser) {
+        document.getElementById("authRole").value = currentRole || "";
+        document.getElementById("authName").value = currentUser.name || "";
+        document.getElementById("authEmail").value = currentUser.email || "";
+        document.getElementById("authDriverName").value = currentDriver || currentUser.driverName || "";
+      }
+
       updateFarePreview();
       applyRoleUI();
       renderEverything();
