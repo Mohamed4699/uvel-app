@@ -515,6 +515,7 @@
         return;
       }
       currentProfile = { uid: user.uid, ...snap.data() };
+      currentProfile.role = String(currentProfile.role || "passenger").toLowerCase().trim();
       $("authScreen").classList.add("hidden");
       $("appScreen").classList.remove("hidden");
       $("whoAmI").innerHTML = `Signed in as <strong style="color:#fff">${escapeHtml(currentProfile.name || currentProfile.email)}</strong> • ${escapeHtml(currentProfile.role)}`;
@@ -671,7 +672,7 @@
     function subscribeUsers() {
       if (unsubUsers) unsubUsers();
       unsubUsers = onSnapshot(collection(db, "users"), (snap) => {
-        allUsers = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+        allUsers = snap.docs.map(d => ({ uid: d.id, ...d.data(), role: String(d.data().role || "").toLowerCase().trim() }));
         allDrivers = allUsers.filter(u => u.role === "driver");
         renderDriverFilter();
         renderDriverManagement();
