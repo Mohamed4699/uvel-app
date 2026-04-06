@@ -197,8 +197,8 @@
 
       <div class="card auth-card">
         <div class="tabs">
-          <button class="tab btn active" id="loginTabBtn" type="button">Sign in</button>
-          <button class="tab btn" id="signupTabBtn" type="button">Sign up</button>
+          <button class="tab btn active" id="loginTabBtn" type="button" onclick="switchAuthTab('login')">Sign in</button>
+          <button class="tab btn" id="signupTabBtn" type="button" onclick="switchAuthTab('signup')">Sign up</button>
         </div>
 
         <form id="loginForm">
@@ -243,6 +243,7 @@
         </form>
 
         <div id="authMsg" class="footer-note"></div>
+        <div class="footer-note">Hard refresh after deploy: Ctrl + F5</div>
         <div id="authDebug" class="auth-help hidden"></div>
       </div>
     </div>
@@ -536,14 +537,14 @@
     }
 
     function switchAuthTab(type) {
-      $("loginForm").classList.toggle("hidden", type !== "login");
-      $("signupForm").classList.toggle("hidden", type !== "signup");
-      $("loginTabBtn").classList.toggle("active", type === "login");
-      $("signupTabBtn").classList.toggle("active", type === "signup");
+      document.getElementById("loginForm").classList.toggle("hidden", type !== "login");
+      document.getElementById("signupForm").classList.toggle("hidden", type !== "signup");
+      document.getElementById("loginTabBtn").classList.toggle("active", type === "login");
+      document.getElementById("signupTabBtn").classList.toggle("active", type === "signup");
     }
 
-    $("loginTabBtn").onclick = () => switchAuthTab("login");
-    $("signupTabBtn").onclick = () => switchAuthTab("signup");
+    switchAuthTab("login");
+
     $("resetPasswordBtn").onclick = async () => {
       const email = $("loginEmail").value.trim();
       if (!email) return showMsg("Enter your email first, then press Reset password.", true);
