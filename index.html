@@ -3,509 +3,1052 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UVEL Level 4 Upgrade</title>
-  <link rel="preconnect" href="https://unpkg.com">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <title>UVEL Firebase All-in-One</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <style>
     :root{
-      --bg:#08131a;--panel:#0f1f29;--panel2:#132937;--text:#eef7fb;--muted:#9db8c7;
-      --brand:#2fa4a9;--brand2:#1f7c80;--ok:#1fb978;--warn:#f0b429;--danger:#ef5b5b;--line:#244250;
-      --shadow:0 12px 30px rgba(0,0,0,.22);
-      --radius:22px;
+      --bg:#061623;
+      --panel:#0a2337;
+      --panel2:#0e2d46;
+      --line:rgba(105,182,218,.22);
+      --text:#eef7ff;
+      --muted:#9ec3da;
+      --brand:#49c4d5;
+      --brand2:#2fa4a9;
+      --warn:#f0c24f;
+      --danger:#ef6d6d;
+      --ok:#57d08b;
+      --shadow:0 18px 50px rgba(0,0,0,.28);
+      --radius:20px;
     }
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#071116,#0b1820 30%,#0d1d26);color:var(--text)}
-    .wrap{max-width:1380px;margin:0 auto;padding:22px}
-    .topbar{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:22px;padding:16px 20px;background:rgba(15,31,41,.92);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);backdrop-filter:blur(10px);position:sticky;top:12px;z-index:50}
-    .brand{display:flex;gap:14px;align-items:center}.logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,var(--brand),#67d7db);display:grid;place-items:center;color:#062327;font-size:22px;font-weight:800}.brand h1{margin:0;font-size:21px}.brand p{margin:2px 0 0;color:var(--muted);font-size:13px}
-    .badge{padding:8px 12px;border-radius:999px;background:#102833;border:1px solid var(--line);font-size:13px;color:var(--muted)}
-    .btn{background:var(--brand);color:#042428;border:0;border-radius:14px;padding:12px 16px;font-weight:700;cursor:pointer;transition:.18s transform,.18s opacity}.btn:hover{transform:translateY(-1px)}
-    .btn.secondary{background:#173240;color:var(--text);border:1px solid var(--line)} .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text)} .btn.warn{background:var(--warn);color:#201400} .btn.danger{background:var(--danger);color:#fff}
-    .btn.small{padding:8px 11px;border-radius:12px;font-size:12px}
-    .grid{display:grid;gap:18px}.hero{grid-template-columns:1.15fr .85fr;align-items:stretch}.card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
-    .card h2,.card h3,.card h4{margin:0 0 10px}.muted{color:var(--muted)} .tiny{font-size:12px;color:var(--muted)}
-    .stats{grid-template-columns:repeat(4,minmax(0,1fr))}.stat{padding:18px;border-radius:20px;background:#10202a;border:1px solid var(--line)} .stat .v{font-size:28px;font-weight:800;margin-top:8px}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#11232d;color:var(--text);font-size:12px}
-    .status{font-weight:700;padding:8px 10px;border-radius:999px;font-size:12px;display:inline-block}.pending{background:rgba(240,180,41,.16);color:#ffd97a}.assigned,.driverenroute,.arrived{background:rgba(47,164,169,.16);color:#80eef2}.inprogress{background:rgba(31,185,120,.16);color:#89f0bf}.completed{background:rgba(31,185,120,.16);color:#89f0bf}.cancelled{background:rgba(239,91,91,.16);color:#ff9c9c}
-    .row{display:flex;gap:12px;flex-wrap:wrap}.between{display:flex;justify-content:space-between;gap:12px;align-items:center}.stack{display:flex;flex-direction:column;gap:12px}
-    input,select,textarea{width:100%;background:#0d1c24;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:12px 13px;outline:none} input:focus,select:focus,textarea:focus{border-color:#4ad2d7;box-shadow:0 0 0 4px rgba(74,210,215,.08)} label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
-    .form-grid{display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr))}.form-grid .full{grid-column:1/-1}
-    .list{display:grid;gap:12px}.item{padding:16px;border:1px solid var(--line);border-radius:18px;background:#10202a}.itemHeader{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
-    .itemGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}.kv{padding:10px 12px;border-radius:14px;background:#0c1a21;border:1px solid #1c3441}.kv b{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
-    .auth{max-width:980px;margin:40px auto}.auth .grid{grid-template-columns:1fr 1fr}.tabs{display:flex;gap:8px;margin-bottom:12px}.tab{flex:1}
-    .map{height:320px;border-radius:20px;overflow:hidden;border:1px solid var(--line)} .map.small{height:240px}
-    table{width:100%;border-collapse:collapse} th,td{padding:12px 10px;border-bottom:1px solid #1d3542;text-align:left;font-size:14px} th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
-    .hidden{display:none!important}.searchWrap{display:grid;grid-template-columns:1fr 180px 180px 160px;gap:12px}.notice{padding:12px 14px;border-radius:14px;background:#0f2831;border:1px solid var(--line);color:#b8dde5}
-    .footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
-    .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-    @media (max-width:1100px){.hero,.stats,.searchWrap,.two,.auth .grid,.itemGrid,.form-grid{grid-template-columns:1fr}.topbar{position:static}.wrap{padding:14px}}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(73,196,213,.12), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(47,164,169,.12), transparent 20%),
+        linear-gradient(180deg,#05111b 0%,#061623 100%);
+      min-height:100vh;
+    }
+    .container{max-width:1440px;margin:0 auto;padding:20px}
+    .card{
+      background:linear-gradient(180deg, rgba(10,35,55,.96), rgba(8,26,40,.98));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .header{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      padding:18px 22px;margin-bottom:20px;
+      position:sticky;top:12px;z-index:20;backdrop-filter: blur(10px);
+    }
+    .brand{display:flex;align-items:center;gap:16px}
+    .logo{
+      width:54px;height:54px;border-radius:16px;
+      background:linear-gradient(135deg,var(--brand),#7ee7f1);
+      color:#082030;display:grid;place-items:center;font-weight:800;font-size:32px;
+    }
+    .subtitle{color:var(--muted);margin-top:4px}
+    .userbox{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .pill{
+      border:1px solid var(--line);padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.03);
+      color:var(--muted)
+    }
+    .btn, button{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      border-radius:16px;
+      padding:12px 16px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.18s transform,.18s background,.18s border-color;
+    }
+    .btn:hover, button:hover{transform:translateY(-1px);background:rgba(255,255,255,.07)}
+    .btn.brand{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#082030;border:none}
+    .btn.warn{background:rgba(240,194,79,.12)}
+    .btn.danger{background:rgba(239,109,109,.12)}
+    .btn.small{padding:9px 12px;border-radius:12px;font-size:13px}
+    .grid-2{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .section{padding:22px}
+    .section-title{font-size:18px;font-weight:800;margin-bottom:4px}
+    .section-sub{color:var(--muted);font-size:14px;margin-bottom:16px}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
+    input, select, textarea{
+      width:100%;
+      background:#071827;
+      color:var(--text);
+      border:1px solid rgba(97,166,196,.25);
+      padding:14px 14px;
+      border-radius:16px;
+      outline:none;
+    }
+    textarea{min-height:102px;resize:vertical}
+    input:focus, select:focus, textarea:focus{border-color:var(--brand)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .muted{color:var(--muted)}
+    .login-wrap{
+      max-width:980px;margin:40px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:18px;
+    }
+    .hero{
+      padding:30px;min-height:540px;display:flex;flex-direction:column;justify-content:center;
+      background:
+      radial-gradient(circle at 20% 20%, rgba(73,196,213,.17), transparent 22%),
+      linear-gradient(180deg, rgba(10,35,55,.96), rgba(8,26,40,.98));
+    }
+    .hero h1{font-size:42px;line-height:1.05;margin:0 0 12px}
+    .hero p{color:var(--muted);font-size:17px;line-height:1.6}
+    .auth-card{padding:24px}
+    .tabs{display:flex;gap:10px;margin-bottom:16px}
+    .tab.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#082030;border:none}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+    .stat{padding:18px}
+    .stat .k{font-size:28px;font-weight:900}
+    .stat .t{color:var(--muted);font-size:13px}
+    .hidden{display:none !important}
+    .book-card,.list-card{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03)}
+    .booking-list{display:grid;gap:12px}
+    .badge{
+      display:inline-block;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800;
+      text-transform:capitalize;border:1px solid transparent
+    }
+    .badge.pending{background:rgba(240,194,79,.12);color:#ffd76f}
+    .badge.assigned{background:rgba(73,196,213,.12);color:#7ee7f1}
+    .badge.completed{background:rgba(87,208,139,.12);color:#87ebb0}
+    .badge.cancelled{background:rgba(239,109,109,.12);color:#ff9f9f}
+    .trip-head{display:flex;justify-content:space-between;gap:16px;align-items:start}
+    .route{font-size:21px;font-weight:800;margin-top:4px}
+    .meta{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+    .meta .item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .tiny{font-size:12px;color:var(--muted)}
+    .toolbar{display:grid;grid-template-columns:1.2fr .7fr .7fr .6fr;gap:12px;margin:14px 0}
+    .map{height:340px;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
+    .split{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}
+    .line{height:1px;background:var(--line);margin:14px 0}
+    .right-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .top-gap{margin-top:18px}
+    .empty{padding:18px;border:1px dashed var(--line);border-radius:16px;color:var(--muted)}
+    .note{font-size:13px;color:var(--muted);line-height:1.5}
+    .footer-note{margin-top:16px;color:var(--muted);font-size:13px}
+    @media (max-width: 1100px){
+      .grid-2,.split,.login-wrap,.grid-4,.grid-3,.stats,.toolbar,.row,.meta{grid-template-columns:1fr}
+      .header{position:static}
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="brand">
-        <div class="logo">U</div>
-        <div>
-          <h1>UVEL</h1>
-          <p>Level 4 upgrade • cleaner auth • clearer operations • NDIS-ready invoicing</p>
+  <div class="container">
+    <div id="authScreen" class="login-wrap">
+      <div class="card hero">
+        <div class="brand">
+          <div class="logo">U</div>
+          <div>
+            <div style="font-size:34px;font-weight:900">UVEL</div>
+            <div class="subtitle">Firebase production-ready starter</div>
+          </div>
+        </div>
+        <h1>Real-time transport platform for admin, driver, and passenger.</h1>
+        <p>
+          This version uses Firebase Authentication + Firestore, so bookings created by a passenger
+          appear for admin and driver across different browsers and devices.
+        </p>
+        <div class="grid-3 top-gap">
+          <div class="list-card">
+            <div class="section-title">Live bookings</div>
+            <div class="note">Passenger requests save to Firestore and update in real time.</div>
+          </div>
+          <div class="list-card">
+            <div class="section-title">Role-based dashboards</div>
+            <div class="note">Admin, Driver, and Passenger see only the tools they need.</div>
+          </div>
+          <div class="list-card">
+            <div class="section-title">NDIS-ready invoicing</div>
+            <div class="note">Generate a clean invoice PDF with provider details and fare lines.</div>
+          </div>
         </div>
       </div>
-      <div class="row" id="sessionBar"></div>
-    </div>
 
-    <div id="authView" class="auth hidden">
-      <div class="grid">
-        <div class="card stack">
-          <span class="pill">Startup-ready transport workflow</span>
-          <h2>Upgrade UVEL to a stronger MVP</h2>
-          <p class="muted">This version fixes the main gaps from the live demo: proper sign up and sign in, clear role-based dashboards, accurate fare estimation, manual or auto driver assignment, CSV export, professional NDIS invoices, and live map support using OpenStreetMap.</p>
-          <div class="grid stats">
-            <div class="stat"><div class="tiny">Role access</div><div class="v">3</div><div class="tiny">Passenger, Driver, Admin</div></div>
-            <div class="stat"><div class="tiny">Booking flow</div><div class="v">5</div><div class="tiny">Pending → Assigned → En Route → In Progress → Completed</div></div>
-            <div class="stat"><div class="tiny">Exports</div><div class="v">3</div><div class="tiny">Active CSV, Completed CSV, Invoice PDF</div></div>
-            <div class="stat"><div class="tiny">Maps</div><div class="v">OSM</div><div class="tiny">Leaflet + Nominatim</div></div>
-          </div>
-          <div class="notice">Seeded demo accounts: admin@uvel.com.au / password123 • driver1@uvel.com.au / password123 • passenger@uvel.com.au / password123</div>
+      <div class="card auth-card">
+        <div class="tabs">
+          <button class="tab btn active" id="loginTabBtn" type="button">Sign in</button>
+          <button class="tab btn" id="signupTabBtn" type="button">Sign up</button>
         </div>
-        <div class="card">
-          <div class="tabs">
-            <button class="btn tab" id="showSignIn">Sign in</button>
-            <button class="btn secondary tab" id="showSignUp">Sign up</button>
+
+        <form id="loginForm">
+          <div class="section-title">Welcome back</div>
+          <div class="section-sub">Sign in with your real Firebase user account.</div>
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="admin@uvel.com.au" required />
+          <label class="top-gap">Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required />
+          <div class="top-gap">
+            <button class="btn brand" type="submit">Sign in</button>
           </div>
-          <form id="signInForm" class="stack">
-            <div><label>Email</label><input id="signinEmail" type="email" placeholder="admin@uvel.com.au" required></div>
-            <div><label>Password</label><input id="signinPassword" type="password" placeholder="password" required></div>
-            <button class="btn" type="submit">Enter UVEL</button>
-            <div class="tiny">Demo mode stores users and bookings in localStorage. Replace with Firebase Auth / Firestore when you move to production.</div>
-          </form>
-          <form id="signUpForm" class="stack hidden">
-            <div><label>Full name</label><input id="signupName" required placeholder="Your name"></div>
-            <div><label>Email</label><input id="signupEmail" type="email" required placeholder="you@uvel.com.au"></div>
-            <div><label>Password</label><input id="signupPassword" type="password" minlength="6" required placeholder="Min 6 characters"></div>
-            <div><label>Role</label><select id="signupRole"><option value="passenger">Passenger</option><option value="driver">Driver</option><option value="admin">Admin</option></select></div>
-            <button class="btn" type="submit">Create account</button>
-          </form>
-        </div>
+        </form>
+
+        <form id="signupForm" class="hidden">
+          <div class="section-title">Create account</div>
+          <div class="section-sub">New users are saved to Firestore with their role profile.</div>
+          <label>Full name</label>
+          <input type="text" id="signupName" placeholder="Mohamed Khamis" required />
+          <label class="top-gap">Email</label>
+          <input type="email" id="signupEmail" placeholder="passenger@uvel.com.au" required />
+          <label class="top-gap">Password</label>
+          <input type="password" id="signupPassword" placeholder="Minimum 6 characters" required />
+          <label class="top-gap">Role</label>
+          <select id="signupRole">
+            <option value="passenger">Passenger</option>
+            <option value="driver">Driver</option>
+            <option value="admin">Admin</option>
+          </select>
+          <div class="top-gap">
+            <button class="btn brand" type="submit">Create account</button>
+          </div>
+          <div class="footer-note">For a live public app, do not let normal users self-create admin accounts. Keep that for internal setup only.</div>
+        </form>
+
+        <div id="authMsg" class="footer-note"></div>
       </div>
     </div>
 
-    <div id="appView" class="hidden"></div>
+    <div id="appScreen" class="hidden">
+      <div class="card header">
+        <div class="brand">
+          <div class="logo">U</div>
+          <div>
+            <div style="font-size:22px;font-weight:900">UVEL</div>
+            <div class="subtitle">Real-time Firebase version • shared bookings • multi-browser sync</div>
+          </div>
+        </div>
+        <div class="userbox">
+          <div class="pill" id="whoAmI">Signed in</div>
+          <button id="seedDriversBtn" class="btn">Seed demo drivers</button>
+          <button id="logoutBtn" class="btn brand">Logout</button>
+        </div>
+      </div>
 
-    <div class="footer">UVEL single-file upgrade • replace demo auth with Firebase later • ABN 14 688 659 912</div>
+      <div class="stats" id="statsBar">
+        <div class="card stat"><div class="k" id="statTotal">0</div><div class="t">Total bookings</div></div>
+        <div class="card stat"><div class="k" id="statPending">0</div><div class="t">Pending</div></div>
+        <div class="card stat"><div class="k" id="statAssigned">0</div><div class="t">Assigned</div></div>
+        <div class="card stat"><div class="k" id="statCompleted">0</div><div class="t">Completed</div></div>
+      </div>
+
+      <div id="passengerView" class="hidden">
+        <div class="grid-2">
+          <div class="card section">
+            <div class="section-title">Passenger booking</div>
+            <div class="section-sub">Create a trip request that admin can see in another browser instantly.</div>
+            <form id="bookingForm">
+              <div class="row">
+                <div>
+                  <label>Passenger name</label>
+                  <input id="passengerName" required />
+                </div>
+                <div>
+                  <label>Ride type</label>
+                  <select id="rideType">
+                    <option value="normal">Normal</option>
+                    <option value="ndis">NDIS</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row top-gap">
+                <div>
+                  <label>Pickup</label>
+                  <input id="pickup" placeholder="Liverpool Hospital, NSW" required />
+                </div>
+                <div>
+                  <label>Destination</label>
+                  <input id="destination" placeholder="Westmead Hospital, NSW" required />
+                </div>
+              </div>
+              <div class="row top-gap">
+                <div>
+                  <label>Date</label>
+                  <input type="date" id="tripDate" required />
+                </div>
+                <div>
+                  <label>Time</label>
+                  <input type="time" id="tripTime" required />
+                </div>
+              </div>
+              <div class="top-gap">
+                <label>Notes</label>
+                <textarea id="notes" placeholder="Mobility needs, pickup instructions, support notes"></textarea>
+              </div>
+              <div class="right-actions top-gap">
+                <button class="btn" id="estimateFareBtn" type="button">Estimate fare</button>
+                <button class="btn brand" type="submit">Request ride</button>
+              </div>
+              <div class="line"></div>
+              <div id="farePreview" class="muted">Estimated fare: -- • Distance: -- • Payment: --</div>
+            </form>
+          </div>
+
+          <div class="card section">
+            <div class="section-title">Live route map</div>
+            <div class="section-sub">Preview the selected booking route.</div>
+            <div id="passengerMap" class="map"></div>
+            <div class="grid-2 top-gap">
+              <div class="list-card">
+                <div class="tiny">Route</div>
+                <div id="passengerRouteLabel" style="font-size:18px;font-weight:800;margin-top:6px">--</div>
+              </div>
+              <div class="list-card">
+                <div class="tiny">Status</div>
+                <div id="passengerStatusLabel" style="font-size:18px;font-weight:800;margin-top:6px">--</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card section top-gap">
+          <div class="trip-head">
+            <div>
+              <div class="section-title">My trips</div>
+              <div class="section-sub">Passenger sees only their own bookings.</div>
+            </div>
+          </div>
+          <div id="passengerTrips" class="booking-list"></div>
+        </div>
+      </div>
+
+      <div id="adminView" class="hidden">
+        <div class="split">
+          <div class="card section">
+            <div class="trip-head">
+              <div>
+                <div class="section-title">Operations control</div>
+                <div class="section-sub">Search, assign, export, and manage live bookings.</div>
+              </div>
+              <div class="pill">Assignment mode: <strong id="assignModeLabel" style="margin-left:6px;color:#fff">manual</strong></div>
+            </div>
+            <div class="right-actions">
+              <button class="btn brand" id="manualAssignBtn">Manual assign</button>
+              <button class="btn" id="autoAssignBtn">Auto assign</button>
+              <button class="btn" id="exportActiveBtn">Export active CSV</button>
+              <button class="btn" id="exportCompletedBtn">Export completed CSV</button>
+            </div>
+            <div class="toolbar">
+              <input id="adminSearch" placeholder="Search passenger, pickup, destination" />
+              <select id="statusFilter">
+                <option value="">All statuses</option>
+                <option value="pending">Pending</option>
+                <option value="assigned">Assigned</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <select id="driverFilter"></select>
+              <button class="btn brand" id="applyFiltersBtn">Apply</button>
+            </div>
+            <div id="adminBookings" class="booking-list"></div>
+          </div>
+
+          <div class="card section">
+            <div class="section-title">Active route map</div>
+            <div class="section-sub">Shows the latest active booking.</div>
+            <div id="adminMap" class="map"></div>
+            <div class="footer-note">This map updates from shared Firestore booking data.</div>
+          </div>
+        </div>
+
+        <div class="grid-2 top-gap">
+          <div class="card section">
+            <div class="section-title">Driver management</div>
+            <div class="section-sub">Least busy driver is recommended first.</div>
+            <div id="driverManagement" class="booking-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Passenger management</div>
+            <div class="section-sub">Simple admin summary of passengers and booking counts.</div>
+            <div id="passengerManagement" class="booking-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="driverView" class="hidden">
+        <div class="grid-2">
+          <div class="card section">
+            <div class="section-title">Assigned trips</div>
+            <div class="section-sub">Driver sees only trips assigned to them.</div>
+            <div id="driverTrips" class="booking-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Driver map</div>
+            <div class="section-sub">Shows your most recent assigned trip.</div>
+            <div id="driverMap" class="map"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-<script>
-const STORE = {
-  users:'uvel_users_v4', bookings:'uvel_bookings_v4', session:'uvel_session_v4', settings:'uvel_settings_v4'
-};
-const provider = {
-  legalName:'Access Awaits Pty Ltd', brand:'UVEL', abn:'14 688 659 912',
-  email:'invoice@uvel.com.au', phone:'0469 924 723', address:'Unit 3 / 14 Forbes Street, Liverpool NSW 2170'
-};
-const defaults = {
-  users:[
-    {id:uid(), name:'UVEL Admin', email:'admin@uvel.com.au', password:'password123', role:'admin'},
-    {id:uid(), name:'Michael Driver', email:'driver1@uvel.com.au', password:'password123', role:'driver', vehicle:'Toyota HiAce', availability:true},
-    {id:uid(), name:'Daniel Driver', email:'driver2@uvel.com.au', password:'password123', role:'driver', vehicle:'Kia Carnival', availability:true},
-    {id:uid(), name:'Passenger Demo', email:'passenger@uvel.com.au', password:'password123', role:'passenger'}
-  ],
-  bookings:[],
-  settings:{assignmentMode:'manual'}
-};
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import {
+      getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+      onAuthStateChanged, signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import {
+      getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc,
+      collection, onSnapshot, query, where, orderBy, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
-function uid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-5)}
-function load(key,fallback){try{return JSON.parse(localStorage.getItem(key)) ?? fallback}catch{return fallback}}
-function save(key,val){localStorage.setItem(key, JSON.stringify(val))}
-function seed(){
-  if(!localStorage.getItem(STORE.users)) save(STORE.users, defaults.users);
-  if(!localStorage.getItem(STORE.bookings)) save(STORE.bookings, defaults.bookings);
-  if(!localStorage.getItem(STORE.settings)) save(STORE.settings, defaults.settings);
-}
-seed();
+    // =========================
+    // 1) PASTE YOUR FIREBASE CONFIG BELOW
+    // =========================
+    const firebaseConfig = {
+      apiKey: "PASTE_YOUR_API_KEY",
+      authDomain: "PASTE_YOUR_AUTH_DOMAIN",
+      projectId: "PASTE_YOUR_PROJECT_ID",
+      storageBucket: "PASTE_YOUR_STORAGE_BUCKET",
+      messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
+      appId: "PASTE_YOUR_APP_ID"
+    };
 
-const state = {
-  get users(){return load(STORE.users, defaults.users)}, set users(v){save(STORE.users,v)},
-  get bookings(){return load(STORE.bookings, defaults.bookings)}, set bookings(v){save(STORE.bookings,v)},
-  get session(){return load(STORE.session, null)}, set session(v){save(STORE.session,v)},
-  get settings(){return load(STORE.settings, defaults.settings)}, set settings(v){save(STORE.settings,v)}
-};
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-function currentUser(){ return state.session ? state.users.find(u=>u.id===state.session.userId) : null; }
-function fmtDate(s){ if(!s) return '--'; const d = new Date(s); return d.toLocaleString('en-AU',{dateStyle:'medium', timeStyle:'short'}); }
-function money(n){ return new Intl.NumberFormat('en-AU',{style:'currency', currency:'AUD'}).format(Number(n||0)); }
-function statusClass(s){ return (s||'pending').toLowerCase().replace(/\s+/g,''); }
-function badgeStatus(s){ return `<span class="status ${statusClass(s)}">${s}</span>`; }
-function drivers(){ return state.users.filter(u=>u.role==='driver'); }
-function passengers(){ return state.users.filter(u=>u.role==='passenger'); }
-function getDriver(id){ return state.users.find(u=>u.id===id); }
-function bookingLoad(driverId){ return state.bookings.filter(b=>b.driverId===driverId && !['completed','cancelled'].includes(b.status)).length; }
-function todayLocalDate(){ return new Date().toISOString().slice(0,10); }
-function notify(msg){ alert(msg); }
+    const PROVIDER = {
+      name: "UVEL / Access Awaits Pty Ltd",
+      abn: "14688659912",
+      email: "invoice@uvel.com.au",
+      phone: "0469924723",
+      address: "Unit 3 / 14 Forbes Street, Liverpool NSW 2170"
+    };
 
-async function geocode(q){
-  if(!q) return null;
-  try{
-    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=au&q=${encodeURIComponent(q)}`, {headers:{'Accept':'application/json'}});
-    const j = await r.json();
-    if(!j?.length) return null;
-    return {lat:parseFloat(j[0].lat), lng:parseFloat(j[0].lon), label:j[0].display_name};
-  }catch(e){ return null; }
-}
-function haversine(a,b){
-  const R=6371; const toRad=x=>x*Math.PI/180; const dLat=toRad(b.lat-a.lat), dLon=toRad(b.lng-a.lng);
-  const x=Math.sin(dLat/2)**2+Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLon/2)**2;
-  return 2*R*Math.asin(Math.sqrt(x));
-}
-async function estimateFare(pickup,destination,tripType){
-  const pa = await geocode(pickup); const da = await geocode(destination);
-  const fallback = {distanceKm: 12, fare: tripType==='ndis' ? 28.8 : 33.6, pickupCoord:null, destCoord:null};
-  if(!pa || !da) return fallback;
-  const distanceKm = Math.max(1, haversine(pa,da) * 1.25);
-  const base = tripType==='ndis' ? 8 : 10;
-  const perKm = tripType==='ndis' ? 1.95 : 2.4;
-  const fare = +(base + distanceKm * perKm).toFixed(2);
-  return {distanceKm:+distanceKm.toFixed(1), fare, pickupCoord:pa, destCoord:da};
-}
-function appShell(content){
-  document.getElementById('appView').innerHTML = content;
-  mountMaps();
-}
-function updateSessionBar(){
-  const user = currentUser(); const el = document.getElementById('sessionBar');
-  if(!user){ el.innerHTML=''; return; }
-  el.innerHTML = `<span class="badge">Signed in as <b style="color:#fff">${user.name}</b> • ${user.role}</span><button class="btn secondary" id="logoutBtn">Logout</button>`;
-  document.getElementById('logoutBtn').onclick = ()=>{ state.session = null; render(); };
-}
-function render(){
-  updateSessionBar();
-  const user = currentUser();
-  document.getElementById('authView').classList.toggle('hidden', !!user);
-  document.getElementById('appView').classList.toggle('hidden', !user);
-  if(!user) return;
-  if(user.role==='admin') return renderAdmin(user);
-  if(user.role==='driver') return renderDriver(user);
-  return renderPassenger(user);
-}
+    let currentUser = null;
+    let currentProfile = null;
+    let allBookings = [];
+    let allDrivers = [];
+    let allUsers = [];
+    let assignMode = "manual";
+    let unsubBookings = null;
+    let unsubUsers = null;
 
-function renderPassenger(user){
-  const my = state.bookings.filter(b=>b.passengerId===user.id).sort((a,b)=>+new Date(b.createdAt)-+new Date(a.createdAt));
-  const active = my.find(b=>!['completed','cancelled'].includes(b.status));
-  appShell(`
-    <div class="grid hero">
-      <div class="card stack">
-        <span class="pill">Passenger app</span>
-        <h2>Book a ride</h2>
-        <div class="form-grid" id="bookingFormWrap">
-          <div><label>Passenger name</label><input id="p_name" value="${user.name}" /></div>
-          <div><label>Trip type</label><select id="p_type"><option value="normal">Normal</option><option value="ndis">NDIS</option></select></div>
-          <div><label>Pickup</label><input id="p_pickup" placeholder="Liverpool Hospital, NSW" /></div>
-          <div><label>Destination</label><input id="p_destination" placeholder="Westmead Hospital, NSW" /></div>
-          <div><label>Date</label><input id="p_date" type="date" value="${todayLocalDate()}" /></div>
-          <div><label>Time</label><input id="p_time" type="time" value="09:00" /></div>
-          <div class="full"><label>Notes</label><textarea id="p_notes" rows="3" placeholder="Mobility needs, pickup instructions, support notes"></textarea></div>
-          <div class="full row">
-            <button class="btn" id="estimateBtn">Estimate fare</button>
-            <button class="btn secondary" id="bookBtn">Request ride</button>
+    let passengerMap, adminMap, driverMap;
+    let passengerMapState = { markers: [], line: null };
+    let adminMapState = { markers: [], line: null };
+    let driverMapState = { markers: [], line: null };
+
+    const $ = (id) => document.getElementById(id);
+
+    function showMsg(msg, isError = false) {
+      $("authMsg").textContent = msg;
+      $("authMsg").style.color = isError ? "#ff9f9f" : "#9ec3da";
+    }
+
+    function switchAuthTab(type) {
+      $("loginForm").classList.toggle("hidden", type !== "login");
+      $("signupForm").classList.toggle("hidden", type !== "signup");
+      $("loginTabBtn").classList.toggle("active", type === "login");
+      $("signupTabBtn").classList.toggle("active", type === "signup");
+    }
+
+    $("loginTabBtn").onclick = () => switchAuthTab("login");
+    $("signupTabBtn").onclick = () => switchAuthTab("signup");
+
+    $("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      try {
+        showMsg("Signing in...");
+        await signInWithEmailAndPassword(auth, $("loginEmail").value.trim(), $("loginPassword").value);
+      } catch (err) {
+        showMsg(err.message, true);
+      }
+    });
+
+    $("signupForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      try {
+        showMsg("Creating account...");
+        const name = $("signupName").value.trim();
+        const email = $("signupEmail").value.trim();
+        const password = $("signupPassword").value;
+        const role = $("signupRole").value;
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, "users", cred.user.uid), {
+          name, email, role,
+          activeLoad: 0,
+          availability: role === "driver" ? "online" : null,
+          vehicle: role === "driver" ? "Toyota HiAce" : null,
+          createdAt: serverTimestamp()
+        });
+        showMsg("Account created.");
+      } catch (err) {
+        showMsg(err.message, true);
+      }
+    });
+
+    $("logoutBtn").onclick = async () => {
+      await signOut(auth);
+    };
+
+    $("seedDriversBtn").onclick = seedDemoDrivers;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        currentUser = null;
+        currentProfile = null;
+        if (unsubBookings) unsubBookings();
+        if (unsubUsers) unsubUsers();
+        $("authScreen").classList.remove("hidden");
+        $("appScreen").classList.add("hidden");
+        showMsg("");
+        return;
+      }
+
+      currentUser = user;
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (!snap.exists()) {
+        showMsg("User profile missing in Firestore.", true);
+        return;
+      }
+      currentProfile = { uid: user.uid, ...snap.data() };
+      $("authScreen").classList.add("hidden");
+      $("appScreen").classList.remove("hidden");
+      $("whoAmI").innerHTML = `Signed in as <strong style="color:#fff">${escapeHtml(currentProfile.name || currentProfile.email)}</strong> • ${escapeHtml(currentProfile.role)}`;
+      $("passengerName").value = currentProfile.name || "";
+
+      initMaps();
+      subscribeUsers();
+      subscribeBookings();
+      setRoleView(currentProfile.role);
+    });
+
+    function setRoleView(role) {
+      $("passengerView").classList.toggle("hidden", role !== "passenger");
+      $("adminView").classList.toggle("hidden", role !== "admin");
+      $("driverView").classList.toggle("hidden", role !== "driver");
+      $("statsBar").classList.toggle("hidden", role === "passenger");
+    }
+
+    function initMaps() {
+      if (!passengerMap) passengerMap = createMap("passengerMap");
+      if (!adminMap) adminMap = createMap("adminMap");
+      if (!driverMap) driverMap = createMap("driverMap");
+    }
+
+    function createMap(id) {
+      const map = L.map(id).setView([-33.8688, 151.2093], 10);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19, attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+      setTimeout(() => map.invalidateSize(), 300);
+      return map;
+    }
+
+    function clearMapState(map, state) {
+      state.markers.forEach(m => map.removeLayer(m));
+      state.markers = [];
+      if (state.line) map.removeLayer(state.line);
+      state.line = null;
+    }
+
+    async function updateMapForBooking(map, state, booking) {
+      clearMapState(map, state);
+      if (!booking?.pickup || !booking?.destination) return;
+      const from = await geocodeAddress(booking.pickup);
+      const to = await geocodeAddress(booking.destination);
+      if (!from || !to) return;
+      const m1 = L.marker([from.lat, from.lon]).addTo(map).bindPopup("Pickup");
+      const m2 = L.marker([to.lat, to.lon]).addTo(map).bindPopup("Destination");
+      state.markers.push(m1, m2);
+      state.line = L.polyline([[from.lat, from.lon], [to.lat, to.lon]]).addTo(map);
+      map.fitBounds(state.line.getBounds(), { padding: [30, 30] });
+    }
+
+    async function geocodeAddress(address) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`);
+        const data = await res.json();
+        if (!data?.length) return null;
+        return { lat: Number(data[0].lat), lon: Number(data[0].lon) };
+      } catch {
+        return null;
+      }
+    }
+
+    async function estimateDistanceKm(pickup, destination) {
+      const from = await geocodeAddress(pickup);
+      const to = await geocodeAddress(destination);
+      if (!from || !to) return null;
+      const R = 6371;
+      const dLat = toRad(to.lat - from.lat);
+      const dLon = toRad(to.lon - from.lon);
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(from.lat)) * Math.cos(toRad(to.lat)) * Math.sin(dLon / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return Math.max(1, R * c * 1.2);
+    }
+
+    function toRad(v) { return (v * Math.PI) / 180; }
+
+    function calculateFare(distanceKm, rideType) {
+      const base = rideType === "ndis" ? 8.5 : 6.5;
+      const perKm = rideType === "ndis" ? 2.4 : 1.95;
+      const supportFee = rideType === "ndis" ? 6.0 : 0;
+      const total = base + distanceKm * perKm + supportFee;
+      return Math.round(total * 100) / 100;
+    }
+
+    $("estimateFareBtn").onclick = async () => {
+      const pickup = $("pickup").value.trim();
+      const destination = $("destination").value.trim();
+      const rideType = $("rideType").value;
+      if (!pickup || !destination) return alert("Enter pickup and destination first.");
+      $("farePreview").textContent = "Calculating fare...";
+      const km = await estimateDistanceKm(pickup, destination);
+      if (!km) {
+        $("farePreview").textContent = "Estimated fare: unavailable • Distance: unavailable • Payment: --";
+        return;
+      }
+      const fare = calculateFare(km, rideType);
+      const payment = rideType === "ndis" ? "Invoice / Referral" : "Card / Direct";
+      $("farePreview").textContent = `Estimated fare: $${fare.toFixed(2)} • Distance: ${km.toFixed(1)} km • Payment: ${payment}`;
+      const tempBooking = { pickup, destination, status: "draft" };
+      updateMapForBooking(passengerMap, passengerMapState, tempBooking);
+      $("passengerRouteLabel").textContent = `${pickup} → ${destination}`;
+      $("passengerStatusLabel").textContent = "draft";
+    };
+
+    $("bookingForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const pickup = $("pickup").value.trim();
+      const destination = $("destination").value.trim();
+      const passengerName = $("passengerName").value.trim();
+      const rideType = $("rideType").value;
+      const tripDate = $("tripDate").value;
+      const tripTime = $("tripTime").value;
+      const notes = $("notes").value.trim();
+
+      if (!pickup || !destination || !tripDate || !tripTime) {
+        return alert("Please fill all required booking fields.");
+      }
+
+      const km = await estimateDistanceKm(pickup, destination);
+      if (!km) return alert("Could not estimate route distance. Try a more specific address.");
+      const fare = calculateFare(km, rideType);
+
+      await addDoc(collection(db, "bookings"), {
+        passengerUid: currentUser.uid,
+        passengerName,
+        passengerEmail: currentProfile.email,
+        rideType,
+        pickup,
+        destination,
+        tripDate,
+        tripTime,
+        notes,
+        distanceKm: Number(km.toFixed(1)),
+        fare: Number(fare.toFixed(2)),
+        paymentMethod: rideType === "ndis" ? "Invoice / Referral" : "Card / Direct",
+        status: "pending",
+        assignedDriverUid: null,
+        assignedDriverName: null,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      $("bookingForm").reset();
+      $("passengerName").value = currentProfile.name || "";
+      $("farePreview").textContent = "Estimated fare: -- • Distance: -- • Payment: --";
+      $("passengerStatusLabel").textContent = "pending";
+      alert("Ride request sent. Admin can now see it in another browser.");
+    });
+
+    function subscribeUsers() {
+      if (unsubUsers) unsubUsers();
+      unsubUsers = onSnapshot(collection(db, "users"), (snap) => {
+        allUsers = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+        allDrivers = allUsers.filter(u => u.role === "driver");
+        renderDriverFilter();
+        renderDriverManagement();
+        renderPassengerManagement();
+      });
+    }
+
+    function subscribeBookings() {
+      if (unsubBookings) unsubBookings();
+      unsubBookings = onSnapshot(query(collection(db, "bookings"), orderBy("tripDate", "desc")), (snap) => {
+        allBookings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderEverything();
+      });
+    }
+
+    function renderEverything() {
+      renderStats();
+      renderPassengerTrips();
+      renderAdminBookings();
+      renderDriverTrips();
+      renderPassengerManagement();
+      renderDriverManagement();
+      updateMapsFromLatest();
+    }
+
+    function renderStats() {
+      const total = allBookings.length;
+      const pending = allBookings.filter(b => b.status === "pending").length;
+      const assigned = allBookings.filter(b => b.status === "assigned").length;
+      const completed = allBookings.filter(b => b.status === "completed").length;
+      $("statTotal").textContent = total;
+      $("statPending").textContent = pending;
+      $("statAssigned").textContent = assigned;
+      $("statCompleted").textContent = completed;
+    }
+
+    function getPassengerBookings() {
+      return allBookings.filter(b => b.passengerUid === currentUser.uid);
+    }
+
+    function renderPassengerTrips() {
+      if (currentProfile?.role !== "passenger") return;
+      const trips = getPassengerBookings();
+      const wrap = $("passengerTrips");
+      if (!trips.length) {
+        wrap.innerHTML = `<div class="empty">No bookings yet.</div>`;
+        return;
+      }
+      wrap.innerHTML = trips.map(bookingCardHTML).join("");
+      const latest = trips[0];
+      $("passengerRouteLabel").textContent = `${latest.pickup} → ${latest.destination}`;
+      $("passengerStatusLabel").textContent = latest.status;
+    }
+
+    function getFilteredAdminBookings() {
+      const q = $("adminSearch").value.trim().toLowerCase();
+      const status = $("statusFilter").value;
+      const driver = $("driverFilter").value;
+      return allBookings.filter(b => {
+        const matchesQ = !q || [b.passengerName, b.pickup, b.destination, b.assignedDriverName].filter(Boolean)
+          .join(" ").toLowerCase().includes(q);
+        const matchesStatus = !status || b.status === status;
+        const matchesDriver = !driver || (driver === "__unassigned__" ? !b.assignedDriverUid : b.assignedDriverUid === driver);
+        return matchesQ && matchesStatus && matchesDriver;
+      });
+    }
+
+    $("applyFiltersBtn").onclick = renderAdminBookings;
+    $("adminSearch").addEventListener("input", renderAdminBookings);
+    $("statusFilter").addEventListener("change", renderAdminBookings);
+    $("driverFilter").addEventListener("change", renderAdminBookings);
+
+    function renderAdminBookings() {
+      if (currentProfile?.role !== "admin") return;
+      const wrap = $("adminBookings");
+      const items = getFilteredAdminBookings();
+      if (!items.length) {
+        wrap.innerHTML = `<div class="empty">No bookings match these filters.</div>`;
+        return;
+      }
+      wrap.innerHTML = items.map(b => `
+        <div class="book-card">
+          ${bookingCardHTML(b)}
+          <div class="right-actions top-gap">
+            <select id="driver-select-${b.id}" style="min-width:220px">
+              <option value="">Select driver</option>
+              ${allDrivers.map(d => `<option value="${d.uid}" ${b.assignedDriverUid === d.uid ? "selected" : ""}>${escapeHtml(d.name || d.email)} • load ${Number(d.activeLoad || 0)}</option>`).join("")}
+            </select>
+            <button class="btn small" onclick="window.assignDriver('${b.id}')">Assign</button>
+            <button class="btn small" onclick="window.completeBooking('${b.id}')">Complete</button>
+            <button class="btn small danger" onclick="window.cancelBooking('${b.id}')">Cancel</button>
+            <button class="btn small" onclick="window.exportInvoice('${b.id}')">Invoice PDF</button>
           </div>
         </div>
-        <div class="notice" id="farePanel">Estimated fare: <b>--</b> • Distance: <b>--</b> • Payment: <b>--</b></div>
-      </div>
-      <div class="card stack">
-        <span class="pill">Live map</span>
-        <h2>Current trip</h2>
-        <div id="passengerMap" class="map"></div>
-        <div class="two">
-          <div class="kv"><b>Route</b>${active ? `${active.pickup} → ${active.destination}` : 'Waiting for your trip.'}</div>
-          <div class="kv"><b>Status</b>${active ? active.status : '--'}</div>
-        </div>
-      </div>
-    </div>
-    <div class="card" style="margin-top:18px">
-      <div class="between"><h3>My trips</h3><span class="tiny">Passenger sees only their own bookings</span></div>
-      <div class="list">${my.length ? my.map(bookingCard).join('') : `<div class="item">No trips yet.</div>`}</div>
-    </div>
-  `);
+      `).join("");
+    }
 
-  let latestEstimate = null;
-  document.getElementById('estimateBtn').onclick = async ()=>{
-    const tripType = val('p_type');
-    latestEstimate = await estimateFare(val('p_pickup'), val('p_destination'), tripType);
-    document.getElementById('farePanel').innerHTML = `Estimated fare: <b>${money(latestEstimate.fare)}</b> • Distance: <b>${latestEstimate.distanceKm} km</b> • Payment: <b>${tripType==='ndis' ? 'Referral / Invoice' : 'Card / Stripe-ready'}</b>`;
-    window.__passengerMapData = latestEstimate.pickupCoord && latestEstimate.destCoord ? {pickup:latestEstimate.pickupCoord, destination:latestEstimate.destCoord} : null;
-    mountMaps();
-  };
-  document.getElementById('bookBtn').onclick = async ()=>{
-    const tripType = val('p_type');
-    const estimate = latestEstimate || await estimateFare(val('p_pickup'), val('p_destination'), tripType);
-    const booking = {
-      id:uid(), passengerId:user.id, passengerName:val('p_name'), tripType,
-      pickup:val('p_pickup'), destination:val('p_destination'), date:val('p_date'), time:val('p_time'), notes:val('p_notes'),
-      status:'pending', driverId:null, createdAt:new Date().toISOString(), fare:estimate.fare, distanceKm:estimate.distanceKm,
-      paymentMode: tripType==='ndis' ? 'Invoice / Referral' : 'Card', pickupCoord:estimate.pickupCoord, destCoord:estimate.destCoord
+    function renderDriverTrips() {
+      if (currentProfile?.role !== "driver") return;
+      const trips = allBookings.filter(b => b.assignedDriverUid === currentUser.uid);
+      const wrap = $("driverTrips");
+      if (!trips.length) {
+        wrap.innerHTML = `<div class="empty">No assigned trips yet.</div>`;
+        return;
+      }
+      wrap.innerHTML = trips.map(b => `
+        <div class="book-card">
+          ${bookingCardHTML(b)}
+          <div class="right-actions top-gap">
+            ${b.status !== "completed" ? `<button class="btn small brand" onclick="window.completeBooking('${b.id}')">Mark completed</button>` : ""}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function bookingCardHTML(b) {
+      return `
+        <div class="trip-head">
+          <div>
+            <div style="font-size:26px;font-weight:900">${escapeHtml(b.passengerName || "Passenger")}</div>
+            <div class="route">${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div>
+          </div>
+          <div><span class="badge ${escapeHtml(b.status)}">${escapeHtml(b.status)}</span></div>
+        </div>
+        <div class="meta">
+          <div class="item"><div class="tiny">Date / Time</div><div>${escapeHtml(b.tripDate || "--")} ${escapeHtml(b.tripTime || "")}</div></div>
+          <div class="item"><div class="tiny">Driver</div><div>${escapeHtml(b.assignedDriverName || "Unassigned")}</div></div>
+          <div class="item"><div class="tiny">Fare</div><div>$${Number(b.fare || 0).toFixed(2)}</div></div>
+          <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}</div></div>
+        </div>
+        ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}
+      `;
+    }
+
+    function renderDriverFilter() {
+      const sel = $("driverFilter");
+      sel.innerHTML = `
+        <option value="">All drivers</option>
+        <option value="__unassigned__">Unassigned</option>
+        ${allDrivers.map(d => `<option value="${d.uid}">${escapeHtml(d.name || d.email)}</option>`).join("")}
+      `;
+    }
+
+    function renderDriverManagement() {
+      if (currentProfile?.role !== "admin") return;
+      const counts = {};
+      allBookings.forEach(b => {
+        if (b.assignedDriverUid && b.status !== "completed" && b.status !== "cancelled") {
+          counts[b.assignedDriverUid] = (counts[b.assignedDriverUid] || 0) + 1;
+        }
+      });
+      const wrap = $("driverManagement");
+      if (!allDrivers.length) {
+        wrap.innerHTML = `<div class="empty">No drivers found. Click "Seed demo drivers" or sign up a driver account.</div>`;
+        return;
+      }
+      wrap.innerHTML = allDrivers
+        .sort((a, b) => (counts[a.uid] || 0) - (counts[b.uid] || 0))
+        .map(d => `
+          <div class="list-card">
+            <div class="trip-head">
+              <div>
+                <div style="font-size:20px;font-weight:800">${escapeHtml(d.name || d.email)}</div>
+                <div class="muted">${escapeHtml(d.vehicle || "Vehicle not set")}</div>
+              </div>
+              <div class="badge assigned">${escapeHtml(d.availability || "online")}</div>
+            </div>
+            <div class="footer-note">Active load: ${counts[d.uid] || 0}</div>
+          </div>
+        `).join("");
+    }
+
+    function renderPassengerManagement() {
+      if (currentProfile?.role !== "admin") return;
+      const passengers = allUsers.filter(u => u.role === "passenger");
+      const wrap = $("passengerManagement");
+      if (!passengers.length) {
+        wrap.innerHTML = `<div class="empty">No passengers found yet.</div>`;
+        return;
+      }
+      wrap.innerHTML = passengers.map(p => {
+        const count = allBookings.filter(b => b.passengerUid === p.uid).length;
+        return `
+          <div class="list-card">
+            <div style="font-size:20px;font-weight:800">${escapeHtml(p.name || p.email)}</div>
+            <div class="muted">${escapeHtml(p.email || "")}</div>
+            <div class="footer-note">Bookings: ${count}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function updateMapsFromLatest() {
+      const latestPassenger = currentProfile?.role === "passenger" ? getPassengerBookings()[0] : null;
+      if (latestPassenger) await updateMapForBooking(passengerMap, passengerMapState, latestPassenger);
+
+      const latestAdmin = allBookings.find(b => b.status === "pending" || b.status === "assigned") || allBookings[0];
+      if (latestAdmin) await updateMapForBooking(adminMap, adminMapState, latestAdmin);
+
+      const latestDriver = currentProfile?.role === "driver"
+        ? allBookings.find(b => b.assignedDriverUid === currentUser.uid)
+        : null;
+      if (latestDriver) await updateMapForBooking(driverMap, driverMapState, latestDriver);
+    }
+
+    async function assignDriver(bookingId) {
+      const sel = document.getElementById(`driver-select-${bookingId}`);
+      const driverUid = sel?.value;
+      if (!driverUid) return alert("Select a driver first.");
+      const driver = allDrivers.find(d => d.uid === driverUid);
+      if (!driver) return alert("Driver not found.");
+      await updateDoc(doc(db, "bookings", bookingId), {
+        assignedDriverUid: driver.uid,
+        assignedDriverName: driver.name || driver.email,
+        status: "assigned",
+        updatedAt: serverTimestamp()
+      });
+    }
+
+    async function completeBooking(bookingId) {
+      await updateDoc(doc(db, "bookings", bookingId), {
+        status: "completed",
+        updatedAt: serverTimestamp()
+      });
+    }
+
+    async function cancelBooking(bookingId) {
+      await updateDoc(doc(db, "bookings", bookingId), {
+        status: "cancelled",
+        updatedAt: serverTimestamp()
+      });
+    }
+
+    window.assignDriver = assignDriver;
+    window.completeBooking = completeBooking;
+    window.cancelBooking = cancelBooking;
+    window.exportInvoice = exportInvoice;
+
+    $("manualAssignBtn").onclick = () => {
+      assignMode = "manual";
+      $("assignModeLabel").textContent = "manual";
     };
-    const all = state.bookings; all.unshift(booking); state.bookings = all;
-    autoAssignIfEnabled(booking.id);
-    notify('Ride requested successfully.');
-    render();
-  };
-}
 
-function renderDriver(user){
-  const my = state.bookings.filter(b=>b.driverId===user.id).sort((a,b)=>+new Date(b.createdAt)-+new Date(a.createdAt));
-  const active = my.find(b=>!['completed','cancelled'].includes(b.status));
-  appShell(`
-    <div class="grid hero">
-      <div class="card stack">
-        <span class="pill">Driver app</span>
-        <h2>My active trip</h2>
-        ${active ? `
-          <div class="item">
-            <div class="itemHeader"><div><h3 style="margin:0">${active.passengerName}</h3><div class="muted">${active.pickup} → ${active.destination}</div></div>${badgeStatus(active.status)}</div>
-            <div class="itemGrid">
-              <div class="kv"><b>Date / Time</b>${active.date} ${active.time}</div>
-              <div class="kv"><b>Trip type</b>${active.tripType.toUpperCase()}</div>
-              <div class="kv"><b>Fare</b>${money(active.fare)}</div>
-              <div class="kv"><b>Distance</b>${active.distanceKm || '--'} km</div>
-            </div>
-            <div class="row" style="margin-top:14px">
-              <button class="btn small" data-status="assigned">Assigned</button>
-              <button class="btn small secondary" data-status="driver en route">En Route</button>
-              <button class="btn small secondary" data-status="arrived">Arrived</button>
-              <button class="btn small secondary" data-status="in progress">In Progress</button>
-              <button class="btn small" data-status="completed">Complete</button>
-            </div>
-          </div>` : `<div class="item">No assigned trips yet.</div>`}
-      </div>
-      <div class="card stack">
-        <span class="pill">Route map</span>
-        <h2>Driver route</h2>
-        <div id="driverMap" class="map"></div>
-        <div class="notice">The driver dashboard only shows trips assigned to this driver by Admin.</div>
-      </div>
-    </div>
-    <div class="card" style="margin-top:18px">
-      <div class="between"><h3>All assigned trips</h3><span class="tiny">${my.length} total</span></div>
-      <div class="list">${my.length ? my.map(bookingCard).join('') : `<div class="item">No trips yet.</div>`}</div>
-    </div>
-  `);
-  if(active){
-    document.querySelectorAll('[data-status]').forEach(btn=>btn.onclick=()=>updateBooking(active.id,{status:btn.dataset.status}));
-    window.__driverMapData = active.pickupCoord && active.destCoord ? {pickup:active.pickupCoord,destination:active.destCoord} : null;
-    mountMaps();
-  }
-}
+    $("autoAssignBtn").onclick = async () => {
+      assignMode = "auto";
+      $("assignModeLabel").textContent = "auto";
+      const pending = allBookings.filter(b => b.status === "pending");
+      if (!pending.length) return alert("No pending bookings.");
+      if (!allDrivers.length) return alert("No drivers found.");
+      const activeLoads = {};
+      allBookings.forEach(b => {
+        if (b.assignedDriverUid && b.status !== "completed" && b.status !== "cancelled") {
+          activeLoads[b.assignedDriverUid] = (activeLoads[b.assignedDriverUid] || 0) + 1;
+        }
+      });
+      for (const booking of pending) {
+        const bestDriver = [...allDrivers].sort((a, b) => (activeLoads[a.uid] || 0) - (activeLoads[b.uid] || 0))[0];
+        if (!bestDriver) continue;
+        await updateDoc(doc(db, "bookings", booking.id), {
+          assignedDriverUid: bestDriver.uid,
+          assignedDriverName: bestDriver.name || bestDriver.email,
+          status: "assigned",
+          updatedAt: serverTimestamp()
+        });
+        activeLoads[bestDriver.uid] = (activeLoads[bestDriver.uid] || 0) + 1;
+      }
+      alert("Auto assign completed.");
+    };
 
-function renderAdmin(user){
-  const bookings = state.bookings.slice().sort((a,b)=>+new Date(b.createdAt)-+new Date(a.createdAt));
-  const active = bookings.filter(b=>!['completed','cancelled'].includes(b.status));
-  const completed = bookings.filter(b=>b.status==='completed');
-  const today = todayLocalDate();
-  const s = state.settings;
-  appShell(`
-    <div class="grid stats">
-      <div class="stat"><div class="tiny">Total bookings</div><div class="v">${bookings.length}</div></div>
-      <div class="stat"><div class="tiny">Pending</div><div class="v">${bookings.filter(b=>b.status==='pending').length}</div></div>
-      <div class="stat"><div class="tiny">Assigned / Active</div><div class="v">${active.length}</div></div>
-      <div class="stat"><div class="tiny">Completed</div><div class="v">${completed.length}</div></div>
-    </div>
+    $("exportActiveBtn").onclick = () => exportCSV(allBookings.filter(b => b.status !== "completed"), "uvel_active_bookings.csv");
+    $("exportCompletedBtn").onclick = () => exportCSV(allBookings.filter(b => b.status === "completed"), "uvel_completed_bookings.csv");
 
-    <div class="grid hero" style="margin-top:18px">
-      <div class="card stack">
-        <div class="between"><div><span class="pill">Admin panel</span><h2 style="margin-top:10px">Operations control</h2></div><div class="pill">Assignment mode: <b style="color:#fff">${s.assignmentMode}</b></div></div>
-        <div class="row">
-          <button class="btn ${s.assignmentMode==='manual'?'':'secondary'}" id="setManual">Manual assign</button>
-          <button class="btn ${s.assignmentMode==='auto'?'':'secondary'}" id="setAuto">Auto assign</button>
-          <button class="btn secondary" id="exportActive">Export active CSV</button>
-          <button class="btn secondary" id="exportCompleted">Export completed CSV</button>
-          <button class="btn ghost" id="resetDemo">Clear demo data</button>
-        </div>
-        <div class="searchWrap">
-          <input id="searchTerm" placeholder="Search passenger, pickup, destination" />
-          <select id="filterStatus"><option value="">All statuses</option><option>pending</option><option>assigned</option><option>driver en route</option><option>arrived</option><option>in progress</option><option>completed</option></select>
-          <select id="filterDriver"><option value="">All drivers</option><option value="unassigned">Unassigned</option>${drivers().map(d=>`<option value="${d.id}">${d.name}</option>`).join('')}</select>
-          <button class="btn secondary" id="applyFilters">Apply</button>
-        </div>
-        <div id="bookingList" class="list"></div>
-      </div>
-      <div class="card stack">
-        <span class="pill">Admin map</span>
-        <h2>Active route map</h2>
-        <div id="adminMap" class="map"></div>
-        <div class="notice">This map focuses on the most recent active booking. Real GPS tracking can be wired in later through Firebase or WebSocket updates.</div>
-      </div>
-    </div>
-
-    <div class="grid two" style="margin-top:18px">
-      <div class="card">
-        <div class="between"><h3>Driver management</h3><span class="tiny">Least busy driver is recommended first</span></div>
-        <table><thead><tr><th>Driver</th><th>Vehicle</th><th>Availability</th><th>Active load</th></tr></thead><tbody>
-          ${drivers().map(d=>`<tr><td>${d.name}</td><td>${d.vehicle || '--'}</td><td>${d.availability===false?'Offline':'Online'}</td><td>${bookingLoad(d.id)}</td></tr>`).join('') || '<tr><td colspan="4">No drivers found.</td></tr>'}
-        </tbody></table>
-      </div>
-      <div class="card">
-        <div class="between"><h3>Passenger management</h3><span class="tiny">Simple admin summary</span></div>
-        <table><thead><tr><th>Passenger</th><th>Email</th><th>Bookings</th></tr></thead><tbody>
-          ${passengers().map(p=>`<tr><td>${p.name}</td><td>${p.email}</td><td>${state.bookings.filter(b=>b.passengerId===p.id).length}</td></tr>`).join('') || '<tr><td colspan="3">No passengers found.</td></tr>'}
-        </tbody></table>
-      </div>
-    </div>
-  `);
-
-  document.getElementById('setManual').onclick=()=>{state.settings={...state.settings,assignmentMode:'manual'}; render();};
-  document.getElementById('setAuto').onclick=()=>{state.settings={...state.settings,assignmentMode:'auto'}; state.bookings.filter(b=>b.status==='pending'&&!b.driverId).forEach(b=>autoAssignIfEnabled(b.id)); render();};
-  document.getElementById('exportActive').onclick=()=>downloadCSV('uvel_active_bookings.csv', active);
-  document.getElementById('exportCompleted').onclick=()=>downloadCSV('uvel_completed_bookings.csv', completed);
-  document.getElementById('resetDemo').onclick=()=>{if(confirm('Clear all demo users, bookings, and session?')){ localStorage.clear(); seed(); render(); }};
-  document.getElementById('applyFilters').onclick=paintBookings;
-  paintBookings();
-
-  const mapBooking = active[0];
-  window.__adminMapData = mapBooking?.pickupCoord && mapBooking?.destCoord ? {pickup:mapBooking.pickupCoord,destination:mapBooking.destCoord} : null;
-  mountMaps();
-
-  function paintBookings(){
-    const term=(document.getElementById('searchTerm').value||'').toLowerCase();
-    const status=document.getElementById('filterStatus').value; const driver=document.getElementById('filterDriver').value;
-    const filtered=bookings.filter(b=>{
-      const hit = !term || [b.passengerName,b.pickup,b.destination].join(' ').toLowerCase().includes(term);
-      const hitStatus = !status || b.status===status;
-      const hitDriver = !driver || (driver==='unassigned' ? !b.driverId : b.driverId===driver);
-      return hit && hitStatus && hitDriver;
-    });
-    document.getElementById('bookingList').innerHTML = filtered.length ? filtered.map(adminBookingCard).join('') : `<div class="item">No bookings match these filters.</div>`;
-    bindAdminActions();
-  }
-}
-
-function bookingCard(b){
-  const d = b.driverId ? getDriver(b.driverId)?.name || 'Assigned driver' : 'Unassigned';
-  return `<div class="item"><div class="itemHeader"><div><h4 style="margin:0">${b.passengerName}</h4><div class="muted">${b.pickup} → ${b.destination}</div></div>${badgeStatus(b.status)}</div><div class="itemGrid"><div class="kv"><b>Date / Time</b>${b.date} ${b.time}</div><div class="kv"><b>Driver</b>${d}</div><div class="kv"><b>Fare</b>${money(b.fare)}</div><div class="kv"><b>Payment</b>${b.paymentMode}</div></div></div>`;
-}
-function adminBookingCard(b){
-  const recommended = recommendDriver();
-  return `<div class="item" id="card_${b.id}">
-    <div class="itemHeader"><div><h3 style="margin:0">${b.passengerName}</h3><div class="muted">${b.pickup} → ${b.destination}</div><div class="tiny">Created ${fmtDate(b.createdAt)}</div></div>${badgeStatus(b.status)}</div>
-    <div class="itemGrid">
-      <div class="kv"><b>Trip type</b>${b.tripType.toUpperCase()}</div>
-      <div class="kv"><b>Fare</b>${money(b.fare)}</div>
-      <div class="kv"><b>Distance</b>${b.distanceKm || '--'} km</div>
-      <div class="kv"><b>Payment mode</b>${b.paymentMode}</div>
-    </div>
-    <div class="form-grid" style="margin-top:12px">
-      <div><label>Passenger name</label><input data-field="passengerName" data-id="${b.id}" value="${escapeAttr(b.passengerName)}"></div>
-      <div><label>Trip type</label><select data-field="tripType" data-id="${b.id}"><option value="normal" ${b.tripType==='normal'?'selected':''}>Normal</option><option value="ndis" ${b.tripType==='ndis'?'selected':''}>NDIS</option></select></div>
-      <div><label>Pickup</label><input data-field="pickup" data-id="${b.id}" value="${escapeAttr(b.pickup)}"></div>
-      <div><label>Destination</label><input data-field="destination" data-id="${b.id}" value="${escapeAttr(b.destination)}"></div>
-      <div><label>Date</label><input type="date" data-field="date" data-id="${b.id}" value="${b.date}"></div>
-      <div><label>Time</label><input type="time" data-field="time" data-id="${b.id}" value="${b.time}"></div>
-      <div class="full"><label>Notes</label><textarea rows="2" data-field="notes" data-id="${b.id}">${b.notes||''}</textarea></div>
-    </div>
-    <div class="row" style="margin-top:12px;align-items:center">
-      <input list="drivers_${b.id}" id="driverSearch_${b.id}" placeholder="Search driver to assign" style="max-width:260px" value="${b.driverId ? escapeAttr(getDriver(b.driverId)?.name || '') : ''}">
-      <datalist id="drivers_${b.id}">${drivers().map(d=>`<option value="${d.name}">`).join('')}</datalist>
-      <button class="btn small secondary" data-action="assignRecommended" data-id="${b.id}">Auto assign ${recommended ? `(${recommended.name})` : ''}</button>
-      <button class="btn small secondary" data-action="assignSelected" data-id="${b.id}">Assign selected</button>
-      <button class="btn small ghost" data-action="reprice" data-id="${b.id}">Recalculate fare</button>
-      <button class="btn small" data-action="save" data-id="${b.id}">Save changes</button>
-      ${b.tripType==='ndis' ? `<button class="btn small secondary" data-action="invoice" data-id="${b.id}">Export invoice PDF</button>` : ''}
-      <button class="btn small danger" data-action="cancel" data-id="${b.id}">Cancel</button>
-    </div>
-  </div>`;
-}
-function escapeAttr(s=''){return String(s).replace(/"/g,'&quot;')}
-
-function bindAdminActions(){
-  document.querySelectorAll('[data-action]').forEach(btn=>btn.onclick=async ()=>{
-    const id = btn.dataset.id; const booking = state.bookings.find(b=>b.id===id); if(!booking) return;
-    const action = btn.dataset.action;
-    if(action==='assignRecommended'){ const d = recommendDriver(); if(!d) return notify('No available drivers.'); updateBooking(id,{driverId:d.id,status:'assigned'}); }
-    if(action==='assignSelected'){
-      const name = document.getElementById(`driverSearch_${id}`).value.trim().toLowerCase();
-      const d = drivers().find(x=>x.name.toLowerCase()===name);
-      if(!d) return notify('Select a valid driver name from the list.');
-      updateBooking(id,{driverId:d.id,status:'assigned'});
+    function exportCSV(rows, fileName) {
+      if (!rows.length) return alert("No data to export.");
+      const headers = ["Passenger","Email","Pickup","Destination","Date","Time","Ride Type","Distance Km","Fare","Payment","Status","Driver","Notes"];
+      const csv = [
+        headers.join(","),
+        ...rows.map(r => [
+          r.passengerName, r.passengerEmail, r.pickup, r.destination, r.tripDate, r.tripTime,
+          r.rideType, r.distanceKm, r.fare, r.paymentMethod, r.status, r.assignedDriverName || "", r.notes || ""
+        ].map(csvCell).join(","))
+      ].join("\n");
+      downloadBlob(new Blob([csv], { type: "text/csv" }), fileName);
     }
-    if(action==='save'){
-      const patch = collectPatch(id); updateBooking(id,patch);
+
+    function csvCell(value) {
+      const s = String(value ?? "");
+      return `"${s.replace(/"/g, '""')}"`;
     }
-    if(action==='reprice'){
-      const patch = collectPatch(id);
-      const tripType = patch.tripType || booking.tripType;
-      const est = await estimateFare(patch.pickup || booking.pickup, patch.destination || booking.destination, tripType);
-      updateBooking(id,{...patch, fare:est.fare, distanceKm:est.distanceKm, paymentMode: tripType==='ndis' ? 'Invoice / Referral' : 'Card', pickupCoord:est.pickupCoord, destCoord:est.destCoord});
+
+    function downloadBlob(blob, fileName) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = fileName; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
-    if(action==='invoice') openInvoiceWindow(booking.id);
-    if(action==='cancel') updateBooking(id,{status:'cancelled'});
-  });
-}
-function collectPatch(id){
-  const patch={}; document.querySelectorAll(`[data-id="${id}"][data-field]`).forEach(el=>patch[el.dataset.field]=el.value); return patch;
-}
-function updateBooking(id, patch){
-  const bookings = state.bookings.map(b=>b.id===id?{...b,...patch}:b); state.bookings = bookings; render();
-}
-function recommendDriver(){
-  return drivers().filter(d=>d.availability!==false).sort((a,b)=>bookingLoad(a.id)-bookingLoad(b.id))[0] || null;
-}
-function autoAssignIfEnabled(id){
-  if(state.settings.assignmentMode!=='auto') return;
-  const d = recommendDriver(); if(!d) return;
-  updateBooking(id,{driverId:d.id,status:'assigned'});
-}
-function downloadCSV(filename,rows){
-  const cols=['id','passengerName','tripType','pickup','destination','date','time','status','fare','distanceKm','paymentMode','driverId'];
-  const csv = [cols.join(',')].concat(rows.map(r=>cols.map(c=>`"${String(r[c] ?? '').replace(/"/g,'""')}"`).join(','))).join('\n');
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=filename; a.click();
-}
-function val(id){return document.getElementById(id).value.trim();}
 
-function openInvoiceWindow(id){
-  const b = state.bookings.find(x=>x.id===id); if(!b) return;
-  const driver = b.driverId ? getDriver(b.driverId)?.name || 'Assigned driver' : 'Unassigned';
-  const gst = +(b.fare/11).toFixed(2); const ex = +(b.fare-gst).toFixed(2);
-  const w = window.open('', '_blank', 'width=980,height=900');
-  w.document.write(`<!doctype html><html><head><title>UVEL Invoice ${b.id}</title><style>
-    body{font-family:Arial,sans-serif;padding:28px;color:#18252b} h1,h2,h3,p{margin:0} .row{display:flex;justify-content:space-between;gap:20px} .box{border:1px solid #cfdce2;border-radius:14px;padding:16px} table{width:100%;border-collapse:collapse;margin-top:18px} th,td{border:1px solid #d5e1e6;padding:12px;text-align:left} th{background:#edf6f7} .brand{color:#1f7c80} .small{color:#54656f;font-size:12px}
-  </style></head><body>
-    <div class="row"><div><h1 class="brand">UVEL</h1><p>${provider.legalName}</p><p>ABN ${provider.abn}</p></div><div style="text-align:right"><h2>TAX INVOICE</h2><p><b>Invoice #</b> INV-${b.id.slice(-6).toUpperCase()}</p><p><b>Date</b> ${new Date().toLocaleDateString('en-AU')}</p></div></div>
-    <div class="row" style="margin-top:20px"><div class="box" style="flex:1"><h3>Provider</h3><p>${provider.address}</p><p>${provider.phone}</p><p>${provider.email}</p></div><div class="box" style="flex:1"><h3>Billed to</h3><p>${b.passengerName}</p><p>Trip type: ${b.tripType.toUpperCase()}</p><p>Driver: ${driver}</p></div></div>
-    <table><thead><tr><th>Description</th><th>Service date</th><th>Distance</th><th>Amount</th></tr></thead><tbody>
-      <tr><td>Community transport service from ${b.pickup} to ${b.destination}${b.notes ? `<br><span class="small">Notes: ${b.notes}</span>`:''}</td><td>${b.date} ${b.time}</td><td>${b.distanceKm || '--'} km</td><td>${money(ex)}</td></tr>
-      <tr><td colspan="3" style="text-align:right"><b>GST</b></td><td>${money(gst)}</td></tr>
-      <tr><td colspan="3" style="text-align:right"><b>Total</b></td><td><b>${money(b.fare)}</b></td></tr>
-    </tbody></table>
-    <p style="margin-top:18px" class="small">NDIS / referral invoice generated from UVEL admin dashboard.</p>
-    <script>window.onload=()=>window.print()<\/script>
-  </body></html>`);
-  w.document.close();
-}
+    async function exportInvoice(bookingId) {
+      const booking = allBookings.find(b => b.id === bookingId);
+      if (!booking) return alert("Booking not found.");
+      const { jsPDF } = window.jspdf;
+      const docPdf = new jsPDF();
 
-function mountMaps(){
-  mapMount('passengerMap', window.__passengerMapData);
-  mapMount('driverMap', window.__driverMapData);
-  mapMount('adminMap', window.__adminMapData);
-}
-function mapMount(id,data){
-  const el=document.getElementById(id); if(!el) return;
-  if(el._leaflet_id){ el._leaflet_id = null; el.innerHTML=''; }
-  const map=L.map(el).setView([-33.8688,151.2093],10);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19, attribution:'© OpenStreetMap'}).addTo(map);
-  if(data?.pickup){
-    const p=[data.pickup.lat,data.pickup.lng]; L.marker(p).addTo(map).bindPopup('Pickup'); map.setView(p,11);
-    if(data.destination){ const d=[data.destination.lat,data.destination.lng]; L.marker(d).addTo(map).bindPopup('Destination'); L.polyline([p,d]).addTo(map); map.fitBounds([p,d],{padding:[30,30]}); }
-  }
-}
+      let y = 18;
+      docPdf.setFontSize(20);
+      docPdf.text("UVEL NDIS Transport Invoice", 14, y);
+      y += 8;
 
-// Auth
-const signInForm=document.getElementById('signInForm'); const signUpForm=document.getElementById('signUpForm');
-document.getElementById('showSignIn').onclick=()=>{signInForm.classList.remove('hidden'); signUpForm.classList.add('hidden');};
-document.getElementById('showSignUp').onclick=()=>{signUpForm.classList.remove('hidden'); signInForm.classList.add('hidden');};
-signInForm.onsubmit=(e)=>{e.preventDefault(); const email=signinEmail.value.trim().toLowerCase(); const password=signinPassword.value; const u=state.users.find(x=>x.email.toLowerCase()===email && x.password===password); if(!u) return notify('Invalid email or password.'); state.session={userId:u.id}; render(); };
-signUpForm.onsubmit=(e)=>{e.preventDefault(); const email=signupEmail.value.trim().toLowerCase(); if(state.users.some(u=>u.email.toLowerCase()===email)) return notify('That email already exists.'); const user={id:uid(), name:signupName.value.trim(), email, password:signupPassword.value, role:signupRole.value, availability:true}; state.users=[...state.users,user]; state.session={userId:user.id}; render(); };
+      docPdf.setFontSize(10);
+      docPdf.text(PROVIDER.name, 14, y); y += 5;
+      docPdf.text(`ABN: ${PROVIDER.abn}`, 14, y); y += 5;
+      docPdf.text(`Email: ${PROVIDER.email}`, 14, y); y += 5;
+      docPdf.text(`Phone: ${PROVIDER.phone}`, 14, y); y += 5;
+      docPdf.text(`Address: ${PROVIDER.address}`, 14, y); y += 10;
 
-window.addEventListener('storage', ()=>render());
-render();
-</script>
+      docPdf.setFontSize(12);
+      docPdf.text(`Invoice for: ${booking.passengerName}`, 14, y); y += 6;
+      docPdf.text(`Email: ${booking.passengerEmail || "-"}`, 14, y); y += 6;
+      docPdf.text(`Trip Date / Time: ${booking.tripDate} ${booking.tripTime}`, 14, y); y += 6;
+      docPdf.text(`Route: ${booking.pickup} -> ${booking.destination}`, 14, y); y += 10;
+
+      docPdf.setFillColor(10, 35, 55);
+      docPdf.rect(14, y, 182, 10, "F");
+      docPdf.setTextColor(255,255,255);
+      docPdf.text("Description", 16, y + 7);
+      docPdf.text("Qty", 125, y + 7);
+      docPdf.text("Rate", 145, y + 7);
+      docPdf.text("Amount", 172, y + 7);
+      docPdf.setTextColor(0,0,0);
+      y += 14;
+
+      const rate = Number(booking.fare || 0);
+      docPdf.rect(14, y - 4, 182, 12);
+      docPdf.text(`${booking.rideType.toUpperCase()} transport service (${booking.distanceKm || 0} km)`, 16, y + 3);
+      docPdf.text("1", 127, y + 3);
+      docPdf.text(`$${rate.toFixed(2)}`, 145, y + 3);
+      docPdf.text(`$${rate.toFixed(2)}`, 172, y + 3);
+      y += 18;
+
+      docPdf.setFontSize(12);
+      docPdf.text(`Total: $${rate.toFixed(2)}`, 150, y);
+      y += 10;
+      docPdf.setFontSize(10);
+      docPdf.text(`Payment Method: ${booking.paymentMethod}`, 14, y); y += 5;
+      docPdf.text(`Assigned Driver: ${booking.assignedDriverName || "Unassigned"}`, 14, y); y += 5;
+      if (booking.notes) {
+        docPdf.text(`Notes: ${booking.notes}`, 14, y);
+      }
+
+      docPdf.save(`uvel-invoice-${booking.passengerName.replace(/\s+/g, "-").toLowerCase()}.pdf`);
+    }
+
+    async function seedDemoDrivers() {
+      if (!currentProfile || currentProfile.role !== "admin") return alert("Only admin should seed demo drivers.");
+      const samples = [
+        { name: "Michael Driver", email: "driver1@uvel.com.au", role: "driver", activeLoad: 0, availability: "online", vehicle: "Toyota HiAce" },
+        { name: "Sarah Driver", email: "driver2@uvel.com.au", role: "driver", activeLoad: 0, availability: "online", vehicle: "Kia Carnival" },
+        { name: "David Driver", email: "driver3@uvel.com.au", role: "driver", activeLoad: 0, availability: "online", vehicle: "Hyundai Staria" }
+      ];
+      for (const s of samples) {
+        const exists = allUsers.find(u => u.email === s.email);
+        if (!exists) {
+          await addDoc(collection(db, "seed_only_warning"), { createdAt: serverTimestamp(), note: "Create real auth accounts for drivers separately." });
+          await addDoc(collection(db, "users_seed_demo"), s);
+        }
+      }
+      alert('Seed note added. For real driver login, create real driver accounts from Sign up or Firebase Auth.');
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
 </body>
 </html>
