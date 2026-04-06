@@ -148,6 +148,8 @@
 .tracking-off{color:#ffb1b1}
 .seg{display:flex;gap:8px;flex-wrap:wrap}
 .select-booking{max-width:360px}
+.auth-help{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);font-size:13px;line-height:1.6;color:var(--muted)}
+.auth-help code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:8px}
     @media (max-width: 1100px){ .eta-box,.edit-grid{grid-template-columns:1fr} }
     @media (max-width: 1100px){
       .grid-2,.split,.login-wrap,.grid-4,.grid-3,.stats,.toolbar,.row,.meta{grid-template-columns:1fr}
@@ -224,9 +226,17 @@
             <button class="btn brand" type="submit">Create account</button>
           </div>
           <div class="footer-note">For a live public app, do not let normal users self-create admin accounts. Keep that for internal setup only.</div>
+          <div class="auth-help">
+            <div><strong>Quick testing checklist</strong></div>
+            <div>1. Firebase Authentication → Email/Password enabled</div>
+            <div>2. Firebase Authentication → Authorized domains includes <code>uvel-app.vercel.app</code></div>
+            <div>3. Firestore Database exists</div>
+            <div>4. Firestore has a <code>users</code> collection with a document for each signed-in UID</div>
+          </div>
         </form>
 
         <div id="authMsg" class="footer-note"></div>
+        <div id="authDebug" class="auth-help hidden"></div>
       </div>
     </div>
 
@@ -442,6 +452,8 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    console.log('UVEL Firebase project:', firebaseConfig.projectId);
+    console.log('UVEL host:', location.hostname);
 
     const PROVIDER = {
       name: "UVEL / Access Awaits Pty Ltd",
@@ -474,6 +486,39 @@
       $("authMsg").style.color = isError ? "#ff9f9f" : "#9ec3da";
     }
 
+    function showDebug(content = "") {
+      const box = $("authDebug");
+      if (!box) return;
+      if (!content) {
+        box.classList.add("hidden");
+        box.innerHTML = "";
+        return;
+      }
+      box.classList.remove("hidden");
+      box.innerHTML = content;
+    }
+
+    function translateFirebaseError(err) {
+      const code = err?.code || "";
+      const msg = err?.message || "Unknown error";
+      if (code.includes("auth/unauthorized-domain")) {
+        return ["This domain is not authorised.", "Add <code>uvel-app.vercel.app</code> in Firebase Authentication → Settings → Authorized domains."];
+      }
+      if (code.includes("auth/email-already-in-use")) {
+        return ["This email already exists.", "Use Sign in, or use a different email."];
+      }
+      if (code.includes("auth/invalid-login-credentials") || code.includes("auth/user-not-found") || code.includes("auth/wrong-password")) {
+        return ["Email or password is incorrect.", "Check the password, or create the account with Sign up first."];
+      }
+      if (code.includes("auth/operation-not-allowed")) {
+        return ["Email/Password sign-in is disabled.", "Enable Email/Password in Firebase Authentication → Sign-in method."];
+      }
+      if (code.includes("permission-denied") || msg.toLowerCase().includes("permission")) {
+        return ["Firestore blocked this action.", "Check Firestore rules and make sure the <code>users</code> collection can be read/written."];
+      }
+      return [msg, code ? `Firebase code: <code>${escapeHtml(code)}</code>` : ""];
+    }
+
     function switchAuthTab(type) {
       $("loginForm").classList.toggle("hidden", type !== "login");
       $("signupForm").classList.toggle("hidden", type !== "signup");
@@ -486,22 +531,29 @@
 
     $("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      showDebug("");
       try {
         showMsg("Signing in...");
         await signInWithEmailAndPassword(auth, $("loginEmail").value.trim(), $("loginPassword").value);
       } catch (err) {
-        showMsg(err.message, true);
+        const [shortMsg, helpMsg] = translateFirebaseError(err);
+        showMsg(shortMsg, true);
+        showDebug(`<div><strong>Login failed</strong></div><div>${helpMsg}</div><div class="footer-note">${escapeHtml(err.message || "")}</div>`);
+        console.error("UVEL sign-in error:", err);
       }
     });
 
     $("signupForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      showDebug("");
       try {
         showMsg("Creating account...");
         const name = $("signupName").value.trim();
         const email = $("signupEmail").value.trim();
         const password = $("signupPassword").value;
         const role = $("signupRole").value;
+        if (!name) throw new Error("Full name is required.");
+        if (password.length < 6) throw new Error("Password must be at least 6 characters.");
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         await setDoc(doc(db, "users", cred.user.uid), {
           name, email, role,
@@ -511,8 +563,12 @@
           createdAt: serverTimestamp()
         });
         showMsg("Account created.");
+        showDebug(`<div><strong>Account created successfully</strong></div><div>Email: <code>${escapeHtml(email)}</code></div><div>Role: <code>${escapeHtml(role)}</code></div>`);
       } catch (err) {
-        showMsg(err.message, true);
+        const [shortMsg, helpMsg] = translateFirebaseError(err);
+        showMsg(shortMsg, true);
+        showDebug(`<div><strong>Signup failed</strong></div><div>${helpMsg}</div><div class="footer-note">${escapeHtml(err.message || "")}</div>`);
+        console.error("UVEL sign-up error:", err);
       }
     });
 
@@ -531,14 +587,26 @@
         $("authScreen").classList.remove("hidden");
         $("appScreen").classList.add("hidden");
         showMsg("");
+        showDebug(`Running on <code>${escapeHtml(location.hostname)}</code>. If auth fails, check Authorized domains and Firestore users collection.`);
         return;
       }
 
       currentUser = user;
-      const snap = await getDoc(doc(db, "users", user.uid));
+      let snap = await getDoc(doc(db, "users", user.uid));
       if (!snap.exists()) {
-        showMsg("User profile missing in Firestore.", true);
-        return;
+        const inferredRole =
+          user.email?.startsWith("admin") ? "admin" :
+          user.email?.startsWith("driver") ? "driver" : "passenger";
+        await setDoc(doc(db, "users", user.uid), {
+          name: user.email?.split("@")[0] || "User",
+          email: user.email || "",
+          role: inferredRole,
+          activeLoad: 0,
+          availability: inferredRole === "driver" ? "online" : null,
+          vehicle: inferredRole === "driver" ? "Toyota HiAce" : null,
+          createdAt: serverTimestamp()
+        });
+        snap = await getDoc(doc(db, "users", user.uid));
       }
       currentProfile = { uid: user.uid, ...snap.data() };
       currentProfile.role = String(currentProfile.role || "passenger").toLowerCase().trim();
