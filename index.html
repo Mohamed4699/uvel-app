@@ -196,13 +196,8 @@
       </div>
 
       <div class="card auth-card">
-        <div class="tabs">
-          <button class="tab btn active" id="loginTabBtn" type="button">Sign in</button>
-          <button class="tab btn" id="signupTabBtn" type="button">Sign up</button>
-        </div>
-        <div class="footer-note"><button type="button" class="btn small" onclick="window.switchAuthTab && window.switchAuthTab('signup')">Open Sign up form</button></div>
-
-        <form id="loginForm">
+        <div class="section-title">Account access</div><div class="section-sub">Use Sign in for existing accounts or Sign up for a new account.</div>
+                <form id="loginForm"><div class="section-title">Sign in</div>
           <div class="section-title">Welcome back</div>
           <div class="section-sub">Sign in with your real Firebase user account.</div>
           <label>Email</label>
@@ -215,7 +210,7 @@
           </div>
         </form>
 
-        <form id="signupForm" class="hidden">
+        <div class="line" style="margin:22px 0"></div><form id="signupForm">
           <div class="section-title">Create account</div>
           <div class="section-sub">New users are saved to Firestore with their role profile.</div>
           <label>Full name</label>
@@ -246,6 +241,7 @@
         <div id="authMsg" class="footer-note"></div>
         <div class="footer-note">Hard refresh after deploy: Ctrl + F5</div>
         <div id="authDebug" class="auth-help hidden"></div>
+        <div class="auth-help"><strong>Auth rescue mode:</strong> both forms are always visible. If one email fails, try a fresh test email first.</div>
       </div>
     </div>
 
@@ -456,11 +452,10 @@
       window.switchAuthTab = switchAuthTab;
 
       document.addEventListener('DOMContentLoaded', function () {
-        var loginBtn = document.getElementById('loginTabBtn');
-        var signupBtn = document.getElementById('signupTabBtn');
-        if (loginBtn) loginBtn.onclick = function () { switchAuthTab('login'); };
-        if (signupBtn) signupBtn.onclick = function () { switchAuthTab('signup'); };
-        switchAuthTab('login');
+        var loginForm = document.getElementById('loginForm');
+        var signupForm = document.getElementById('signupForm');
+        if (loginForm) loginForm.classList.remove('hidden');
+        if (signupForm) signupForm.classList.remove('hidden');
       });
     })();
   </script>
@@ -584,7 +579,7 @@
         return ["This email already exists.", "Use Sign in, or use a different email."];
       }
       if (code.includes("auth/invalid-login-credentials") || code.includes("auth/user-not-found") || code.includes("auth/wrong-password")) {
-        return ["Email or password is incorrect.", "Check the password, or create the account with Sign up first."];
+        return ["Email or password is incorrect.", "Check the password, use Reset password, or create the account with Sign up first."];
       }
       if (code.includes("auth/operation-not-allowed")) {
         return ["Email/Password sign-in is disabled.", "Enable Email/Password in Firebase Authentication → Sign-in method."];
@@ -650,7 +645,7 @@
 
         // Give Firestore a moment so auth state does not beat profile creation
         await sleep(500);
-        showMsg("Account created. Signing you in...");
+        showMsg("Account created. Signing you in... Use Sign in if the account already existed.");
         showDebug(`<div><strong>Account created successfully</strong></div><div>Email: <code>${escapeHtml(email)}</code></div><div>Role: <code>${escapeHtml(role)}</code></div><div class="footer-note">If the dashboard takes a second, wait briefly while Firestore profile syncs.</div>`);
       } catch (err) {
         const [shortMsg, helpMsg] = translateFirebaseError(err);
