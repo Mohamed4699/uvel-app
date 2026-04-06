@@ -498,6 +498,14 @@
 
     const $ = (id) => document.getElementById(id);
 
+    document.addEventListener("DOMContentLoaded", () => {
+      const loginBtn = document.getElementById("loginTabBtn");
+      const signupBtn = document.getElementById("signupTabBtn");
+      if (loginBtn) loginBtn.addEventListener("click", () => window.switchAuthTab("login"));
+      if (signupBtn) signupBtn.addEventListener("click", () => window.switchAuthTab("signup"));
+      window.switchAuthTab("login");
+    });
+
     function showMsg(msg, isError = false) {
       $("authMsg").textContent = msg;
       $("authMsg").style.color = isError ? "#ff9f9f" : "#9ec3da";
@@ -536,14 +544,14 @@
       return [msg, code ? `Firebase code: <code>${escapeHtml(code)}</code>` : ""];
     }
 
-    function switchAuthTab(type) {
+    window.switchAuthTab = function(type) {
       document.getElementById("loginForm").classList.toggle("hidden", type !== "login");
       document.getElementById("signupForm").classList.toggle("hidden", type !== "signup");
       document.getElementById("loginTabBtn").classList.toggle("active", type === "login");
       document.getElementById("signupTabBtn").classList.toggle("active", type === "signup");
     }
 
-    switchAuthTab("login");
+    window.switchAuthTab("login");
 
     $("resetPasswordBtn").onclick = async () => {
       const email = $("loginEmail").value.trim();
