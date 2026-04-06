@@ -138,6 +138,8 @@
     .empty{padding:18px;border:1px dashed var(--line);border-radius:16px;color:var(--muted)}
     .note{font-size:13px;color:var(--muted);line-height:1.5}
     .footer-note{margin-top:16px;color:var(--muted);font-size:13px}
+.auth-help{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);font-size:13px;line-height:1.6;color:var(--muted)}
+.auth-help code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:8px}
     .status-row{display:flex;gap:8px;flex-wrap:wrap}
     .status-chip{padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px;font-weight:700}
     .eta-box{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
@@ -227,9 +229,17 @@
             <button class="btn brand" type="submit">Create account</button>
           </div>
           <div class="footer-note">For a live public app, do not let normal users self-create admin accounts. Keep that for internal setup only.</div>
+        <div class="auth-help">
+          <div><strong>Testing checklist</strong></div>
+          <div>1. Firebase Authentication → Email/Password must be enabled.</div>
+          <div>2. Firebase Authentication → Authorized domains must include <code>uvel-app.vercel.app</code>.</div>
+          <div>3. Firestore Database must exist and allow signed-in users to read/write during testing.</div>
+          <div>4. Use <strong>Sign up</strong> first to create admin, driver, and passenger accounts.</div>
+        </div>
         </form>
 
         <div id="authMsg" class="footer-note"></div>
+        <div id="authDebug" class="auth-help hidden"></div>
       </div>
     </div>
 
@@ -446,6 +456,9 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    console.log("UVEL Firebase project:", firebaseConfig.projectId);
+    console.log("UVEL Firebase authDomain:", firebaseConfig.authDomain);
+
     const PROVIDER = {
       name: "UVEL / Access Awaits Pty Ltd",
       abn: "14688659912",
@@ -483,6 +496,63 @@
       $("authMsg").style.color = isError ? "#ff9f9f" : "#9ec3da";
     }
 
+    function showDebug(htmlText = "") {
+      const box = $("authDebug");
+      if (!box) return;
+      if (!htmlText) {
+        box.classList.add("hidden");
+        box.innerHTML = "";
+        return;
+      }
+      box.classList.remove("hidden");
+      box.innerHTML = htmlText;
+    }
+
+    function friendlyAuthError(err) {
+      const code = err?.code || "";
+      const message = err?.message || "Unknown error";
+      if (code.includes("unauthorized-domain")) {
+        return {
+          short: "Firebase blocked this domain.",
+          details: `Add <code>uvel-app.vercel.app</code> to Firebase Authentication → Settings → Authorized domains.`
+        };
+      }
+      if (code.includes("email-already-in-use")) {
+        return {
+          short: "That email already has an account.",
+          details: "Use Sign in instead, or use a different email for testing."
+        };
+      }
+      if (code.includes("invalid-login-credentials") || code.includes("wrong-password") || code.includes("user-not-found")) {
+        return {
+          short: "Email or password is incorrect.",
+          details: "Use Sign up first if this account does not exist yet."
+        };
+      }
+      if (code.includes("operation-not-allowed")) {
+        return {
+          short: "Email/Password sign-in is disabled.",
+          details: "Enable Email/Password in Firebase Authentication → Sign-in method."
+        };
+      }
+      if (code.includes("network-request-failed")) {
+        return {
+          short: "Network request failed.",
+          details: "Check internet connection, browser extensions, or CORS-blocking extensions."
+        };
+      }
+      if (code.includes("permission-denied") || message.toLowerCase().includes("permission")) {
+        return {
+          short: "Firestore permissions blocked this action.",
+          details: "Create Firestore Database and use temporary testing rules that allow signed-in users to read/write."
+        };
+      }
+      return {
+        short: message,
+        details: code ? `Firebase code: <code>${escapeHtml(code)}</code>` : ""
+      };
+    }
+
     function switchAuthTab(type) {
       $("loginForm").classList.toggle("hidden", type !== "login");
       $("signupForm").classList.toggle("hidden", type !== "signup");
@@ -493,24 +563,35 @@
     $("loginTabBtn").onclick = () => switchAuthTab("login");
     $("signupTabBtn").onclick = () => switchAuthTab("signup");
 
+    if (location.hostname.includes("vercel.app")) {
+      showDebug(`Running on <code>${escapeHtml(location.hostname)}</code>. Make sure this domain is added in Firebase Authorized domains and Firestore is enabled.`);
+    }
+
     $("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      showDebug("");
       try {
         showMsg("Signing in...");
         await signInWithEmailAndPassword(auth, $("loginEmail").value.trim(), $("loginPassword").value);
       } catch (err) {
-        showMsg(err.message, true);
+        const info = friendlyAuthError(err);
+        showMsg(info.short, true);
+        showDebug(`<div><strong>Login failed</strong></div><div>${info.details}</div><div class="footer-note">${escapeHtml(err.message || "")}</div>`);
+        console.error("UVEL sign-in error:", err);
       }
     });
 
     $("signupForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      showDebug("");
       try {
         showMsg("Creating account...");
         const name = $("signupName").value.trim();
         const email = $("signupEmail").value.trim();
         const password = $("signupPassword").value;
         const role = $("signupRole").value;
+        if (!name) throw new Error("Full name is required.");
+        if (password.length < 6) throw new Error("Password must be at least 6 characters.");
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         await setDoc(doc(db, "users", cred.user.uid), {
           name, email, role,
@@ -519,9 +600,13 @@
           vehicle: role === "driver" ? "Toyota HiAce" : null,
           createdAt: serverTimestamp()
         });
-        showMsg("Account created.");
+        showMsg(`Account created for ${role}.`);
+        showDebug(`<div><strong>Account created</strong></div><div>Email: <code>${escapeHtml(email)}</code></div><div>Role: <code>${escapeHtml(role)}</code></div>`);
       } catch (err) {
-        showMsg(err.message, true);
+        const info = friendlyAuthError(err);
+        showMsg(info.short, true);
+        showDebug(`<div><strong>Signup failed</strong></div><div>${info.details}</div><div class="footer-note">${escapeHtml(err.message || "")}</div>`);
+        console.error("UVEL sign-up error:", err);
       }
     });
 
@@ -546,13 +631,17 @@
       currentUser = user;
       const snap = await getDoc(doc(db, "users", user.uid));
       if (!snap.exists()) {
-        showMsg("User profile missing in Firestore.", true);
+        $("authScreen").classList.remove("hidden");
+        $("appScreen").classList.add("hidden");
+        showMsg("User exists in Authentication, but profile is missing in Firestore.", true);
+        showDebug(`<div><strong>Profile missing</strong></div><div>Create a Firestore document in <code>users/${escapeHtml(user.uid)}</code> with fields <code>name</code>, <code>email</code>, and <code>role</code>. Or sign up again with a fresh test account.</div>`);
         return;
       }
       currentProfile = { uid: user.uid, ...snap.data() };
       currentProfile.role = String(currentProfile.role || "passenger").toLowerCase().trim();
       $("authScreen").classList.add("hidden");
       $("appScreen").classList.remove("hidden");
+      showDebug("");
       $("whoAmI").innerHTML = `Signed in as <strong style="color:#fff">${escapeHtml(currentProfile.name || currentProfile.email)}</strong> • ${escapeHtml(currentProfile.role)}`;
       $("passengerName").value = currentProfile.name || "";
 
