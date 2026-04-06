@@ -165,6 +165,9 @@
     .assigned{background:rgba(59,130,246,.18);color:#d9e9ff;border:1px solid rgba(59,130,246,.25)}
     .progress{background:rgba(139,92,246,.18);color:#eadfff;border:1px solid rgba(139,92,246,.25)}
     .completed{background:rgba(34,197,94,.18);color:#d8ffe5;border:1px solid rgba(34,197,94,.24)}
+    .cancelled{background:rgba(239,68,68,.18);color:#ffe1e1;border:1px solid rgba(239,68,68,.24)}
+    .offline{background:rgba(71,85,105,.26);color:#e2e8f0;border:1px solid rgba(148,163,184,.24)}
+    .online{background:rgba(34,197,94,.18);color:#d8ffe5;border:1px solid rgba(34,197,94,.24)}
     .enroute{background:rgba(14,165,233,.18);color:#d7f3ff;border:1px solid rgba(14,165,233,.24)}
     .arrived{background:rgba(236,72,153,.18);color:#ffe0f2;border:1px solid rgba(236,72,153,.22)}
     .empty-text{color:var(--muted);font-size:15px;text-align:center;padding:26px 10px}
@@ -296,7 +299,8 @@
 
         <div class="helper-text">
           Test method:<br>
-          Passenger creates request → open another tab in same browser → login as Admin → Admin sees pending request.
+          Passenger creates request → open another tab in same browser → login as Admin → Admin sees pending request.<br><br>
+          Demo drivers: Michael or Daniel.
         </div>
       </div>
 
@@ -393,6 +397,10 @@
               <div class="pill" style="background:rgba(20,184,166,.14);border-color:rgba(20,184,166,.18);">GPS LIVE</div>
             </div>
             <div class="gps-status" id="gpsStatusText">GPS stopped.</div>
+            <div class="status-row" style="margin-top:12px;">
+              <span class="status completed" id="driverAvailabilityBadge">Online</span>
+              <button class="secondary" onclick="toggleMyAvailability()">Toggle Availability</button>
+            </div>
           </div>
 
           <div class="list-card">
@@ -534,6 +542,7 @@
     const UVEL_SESSION_KEY = "uvel_session_v1";
     const UVEL_USERS_KEY = "uvel_users_v1";
     const UVEL_DRIVERS_KEY = "uvel_drivers_v1";
+    const UVEL_DRIVER_STATUS_KEY = "uvel_driver_status_v1";
     const UVEL_ABN = "14688659912";
     const PROVIDER_EMAIL = "invoice@uvel.com.au";
     const PROVIDER_PHONE = "0469924723";
@@ -542,8 +551,8 @@
 
     const defaultUsers = [
       { id: "u-passenger-1", role: "Passenger", name: "Passenger User", email: "passenger@uvel.app" },
-      { id: "u-driver-1", role: "Driver", name: "Michael", driverName: "Michael", email: "michael@uvel.app" },
-      { id: "u-driver-2", role: "Driver", name: "Daniel", driverName: "Daniel", email: "daniel@uvel.app" },
+      { id: "u-driver-1", role: "Driver", name: "Michael", driverName: "Michael", email: "michael@uvel.app", availability: "Online" },
+      { id: "u-driver-2", role: "Driver", name: "Daniel", driverName: "Daniel", email: "daniel@uvel.app", availability: "Online" },
       { id: "u-admin-1", role: "Admin", name: "Admin User", email: "admin@uvel.app" }
     ];
 
@@ -551,6 +560,7 @@
 
     let allUsers = [...defaultUsers];
     let driverUsers = [...defaultDrivers];
+    let driverAvailability = { Michael: "Online", Daniel: "Online" };
     const mapStore = {};
 
     function loadBookingsFromStorage() {
@@ -575,19 +585,35 @@
       try {
         const rawUsers = localStorage.getItem(UVEL_USERS_KEY);
         const rawDrivers = localStorage.getItem(UVEL_DRIVERS_KEY);
+        const rawDriverStatus = localStorage.getItem(UVEL_DRIVER_STATUS_KEY);
         allUsers = rawUsers ? JSON.parse(rawUsers) : [...defaultUsers];
         driverUsers = rawDrivers ? JSON.parse(rawDrivers) : [...defaultDrivers];
+        driverAvailability = rawDriverStatus ? JSON.parse(rawDriverStatus) : { Michael: "Online", Daniel: "Online" };
+        driverUsers.forEach(name => {
+          if (!driverAvailability[name]) driverAvailability[name] = "Online";
+        });
+        allUsers = allUsers.map(user => user.role === "Driver"
+          ? { ...user, availability: driverAvailability[user.driverName || user.name || user.email] || user.availability || "Online" }
+          : user
+        );
       } catch (error) {
         console.error("Failed to load users from localStorage:", error);
         allUsers = [...defaultUsers];
         driverUsers = [...defaultDrivers];
+      driverAvailability = { Michael: "Online", Daniel: "Online" };
+        driverAvailability = { Michael: "Online", Daniel: "Online" };
       }
     }
 
     function saveUsersToStorage() {
       try {
+        allUsers = allUsers.map(user => user.role === "Driver"
+          ? { ...user, availability: driverAvailability[user.driverName || user.name || user.email] || "Online" }
+          : user
+        );
         localStorage.setItem(UVEL_USERS_KEY, JSON.stringify(allUsers));
         localStorage.setItem(UVEL_DRIVERS_KEY, JSON.stringify(driverUsers));
+        localStorage.setItem(UVEL_DRIVER_STATUS_KEY, JSON.stringify(driverAvailability));
       } catch (error) {
         console.error("Failed to save users to localStorage:", error);
       }
@@ -620,6 +646,24 @@
 
     function clearSession() {
       localStorage.removeItem(UVEL_SESSION_KEY);
+    }
+
+
+    function getDriverAvailability(driverName) {
+      return driverAvailability[driverName] || "Online";
+    }
+
+    function setDriverAvailability(driverName, availability) {
+      driverAvailability[driverName] = availability;
+      allUsers = allUsers.map(user => {
+        const name = user.driverName || user.name || user.email;
+        return user.role === "Driver" && name === driverName ? { ...user, availability } : user;
+      });
+      saveUsersToStorage();
+    }
+
+    function getAvailableDrivers() {
+      return driverUsers.filter(name => getDriverAvailability(name) === "Online");
     }
 
     function syncAndRenderBookings() {
@@ -899,6 +943,15 @@
       document.getElementById("driverSelectedText").textContent = currentDriver ? `Logged in as: ${currentDriver}` : "No driver selected.";
     }
 
+
+    function updateDriverAvailabilityUI() {
+      const badge = document.getElementById("driverAvailabilityBadge");
+      if (!badge) return;
+      const availability = currentDriver ? getDriverAvailability(currentDriver) : "Offline";
+      badge.textContent = availability;
+      badge.className = `status ${availability === "Online" ? "online" : "offline"}`;
+    }
+
     function applyRoleUI() {
       const sessionBar = document.getElementById("sessionBar");
       const navButtons = document.getElementById("navButtons");
@@ -928,6 +981,7 @@
       updateNavVisibility();
       updateHeroVisibility();
       updateDriverHeader();
+      updateDriverAvailabilityUI();
 
       if (currentRole === "Passenger") showSection("ride");
       if (currentRole === "Driver") showSection("driver");
@@ -963,6 +1017,7 @@
         currentUser.driverName = currentDriver;
         currentUser.email = email;
         if (!driverUsers.includes(currentDriver)) driverUsers.push(currentDriver);
+        if (!driverAvailability[currentDriver]) driverAvailability[currentDriver] = "Online";
         if (!allUsers.some(u => u.id === currentUser.id)) allUsers.push({ ...currentUser });
       } else {
         const existingAdmin = allUsers.find(u => u.role === "Admin" && u.email?.toLowerCase() === email.toLowerCase());
@@ -978,6 +1033,23 @@
       showMessage("Logged in successfully.");
       renderEverything();
       refreshAllMaps();
+    }
+
+
+    function toggleMyAvailability() {
+      if (currentRole !== "Driver" || !currentDriver) return;
+      const next = getDriverAvailability(currentDriver) === "Online" ? "Offline" : "Online";
+      setDriverAvailability(currentDriver, next);
+      updateDriverAvailabilityUI();
+      syncAndRenderBookings();
+      showToast("Availability Updated", `${currentDriver} is now ${next}.`);
+    }
+
+    function toggleDriverAvailability(driverName) {
+      const next = getDriverAvailability(driverName) === "Online" ? "Offline" : "Online";
+      setDriverAvailability(driverName, next);
+      syncAndRenderBookings();
+      if (currentRole === "Admin") showToast("Driver Availability", `${driverName} is now ${next}.`);
     }
 
     function logoutUser() {
@@ -1010,6 +1082,7 @@
       if (status === "Arrived") return "arrived";
       if (status === "In Progress") return "progress";
       if (status === "Completed") return "completed";
+      if (status === "Cancelled") return "cancelled";
       return "pending";
     }
 
@@ -1041,6 +1114,11 @@
 
       if (currentRole !== "Passenger" || !currentUser) return alert("Please login as a Passenger first.");
       if (!passengerName || !pickup || !destination || !tripDate || !tripTime) return alert("Please complete all required fields.");
+
+      const selectedDateTime = new Date(`${tripDate}T${tripTime}`);
+      if (Number.isNaN(selectedDateTime.getTime()) || selectedDateTime.getTime() < Date.now() - 60000) {
+        return alert("Please choose a future trip date and time.");
+      }
 
       const requestedAt = new Date(`${tripDate}T${tripTime}`);
       if (Number.isNaN(requestedAt.getTime())) return alert("Please choose a valid date and time.");
@@ -1077,6 +1155,12 @@
 
       document.getElementById("successBox").style.display = "block";
       setTimeout(() => document.getElementById("successBox").style.display = "none", 2500);
+      document.getElementById("pickup").value = "";
+      document.getElementById("destination").value = "";
+      document.getElementById("tripDate").value = "";
+      document.getElementById("tripTime").value = "";
+      document.getElementById("tripNotes").value = "";
+      updateFarePreview();
       if (currentRole === "Passenger") showToast("Ride Requested", "Your request was sent to Admin as Pending.");
     }
 
@@ -1090,8 +1174,9 @@
     }
 
     function getRecommendedDriver() {
-      if (!driverUsers.length) return "";
-      const ranked = [...driverUsers].map(name => ({ name, ...getDriverLoad(name) }));
+      const pool = getAvailableDrivers();
+      if (!pool.length) return "";
+      const ranked = [...pool].map(name => ({ name, ...getDriverLoad(name) }));
       ranked.sort((a, b) => a.totalActive !== b.totalActive ? a.totalActive - b.totalActive : a.name.localeCompare(b.name));
       return ranked[0]?.name || "";
     }
@@ -1123,7 +1208,7 @@
       const dateValue = document.getElementById("dateFilter").value;
 
       return liveBookings
-        .filter(b => b.status !== "Completed")
+        .filter(b => !["Completed", "Cancelled"].includes(b.status))
         .filter(b => {
         if (statusValue !== "All" && b.status !== statusValue) return false;
         if (driverValue === "Unassigned" && b.driver) return false;
@@ -1227,6 +1312,7 @@
       if (!driverName) return;
       const booking = liveBookings.find(b => b.id === bookingId);
       if (!booking) return;
+      if (getDriverAvailability(driverName) !== "Online") return alert("Selected driver is offline.");
       booking.driver = driverName;
       booking.status = "Assigned";
       booking.updatedAt = new Date().toISOString();
@@ -1238,7 +1324,7 @@
       const booking = liveBookings.find(b => b.id === bookingId);
       if (!booking) return;
       const rec = getRecommendedDriver();
-      if (!rec) return alert("No driver available.");
+      if (!rec) return alert("No online drivers available.");
       booking.driver = rec;
       booking.status = "Assigned";
       booking.updatedAt = new Date().toISOString();
@@ -1425,8 +1511,8 @@
 
     function renderTripHistory() {
       const el = document.getElementById("tripHistoryList");
-      const trips = getCompletedTrips();
-      if (!trips.length) return el.innerHTML = `<p class="empty-text">No completed trips yet.</p>`;
+      const trips = liveBookings.filter(trip => ["Completed", "Cancelled"].includes(trip.status));
+      if (!trips.length) return el.innerHTML = `<p class="empty-text">No completed or cancelled trips yet.</p>`;
       el.innerHTML = trips.map(trip => `
         <div class="history-card">
           <p><strong>Booking ID:</strong> ${trip.id}</p>
@@ -1439,7 +1525,7 @@
           <p><strong>Driver:</strong> ${trip.driver || "-"}</p>
           <p><strong>Fare:</strong> $${Number(trip.fareAUD || 0).toFixed(2)}</p>
           <p><strong>Payment:</strong> ${trip.tripType === "NDIS" ? "NDIS / Invoice" : trip.paymentStatus}</p>
-          <div class="status-row"><span class="status completed">Completed</span></div>
+          <div class="status-row"><span class="status ${getStatusClass(trip.status)}">${trip.status}</span></div>
         </div>
       `).join("");
     }
@@ -1450,7 +1536,9 @@
       const myTrips = liveBookings.filter(trip => trip.createdBy === currentUser.id);
       if (!myTrips.length) return riderTrips.innerHTML = `<p class="empty-text">No trips yet.</p>`;
       riderTrips.innerHTML = myTrips.map(trip => {
-        const payButton = trip.tripType !== "NDIS" && trip.paymentStatus !== "Paid" ? `<button class="ride" onclick="payWithStripe('${trip.id}')">Pay with Stripe</button>` : "";
+        const payButton = trip.tripType !== "NDIS" && trip.paymentStatus !== "Paid" && trip.status !== "Cancelled" ? `<button class="ride" onclick="payWithStripe('${trip.id}')">Pay with Stripe</button>` : "";
+        const canCancel = ["Pending", "Assigned", "Driver En Route"].includes(trip.status);
+        const cancelButton = canCancel ? `<button class="delete-btn" onclick="cancelPassengerBooking('${trip.id}')">Cancel Trip</button>` : "";
         const paymentMode = trip.tripType === "NDIS" ? "NDIS referral / invoice" : "Stripe card";
         return `
           <div class="rider-card">
@@ -1462,10 +1550,10 @@
             <p><strong>Time:</strong> ${trip.tripTime}</p>
             <p><strong>Driver:</strong> ${trip.driver || "Waiting for admin assignment"}</p>
             <p><strong>Fare:</strong> $${Number(trip.fareAUD || 0).toFixed(2)}</p>
-            <p><strong>Payment:</strong> ${paymentMode}</p>
-            <p><strong>Status:</strong> ${trip.paymentStatus}</p>
+            <p><strong>Payment Mode:</strong> ${paymentMode}</p>
+            <p><strong>Payment Status:</strong> ${trip.paymentStatus}</p>
             <div class="status-row"><span class="status ${getStatusClass(trip.status)}">${trip.status}</span></div>
-            <div class="action-row">${payButton}</div>
+            <div class="action-row">${payButton}${cancelButton}</div>
           </div>
         `;
       }).join("");
@@ -1503,18 +1591,23 @@
       el.innerHTML = drivers.map(driver => {
         const name = driver.driverName || driver.name || driver.email;
         const stats = getDriverLoad(name);
-        const statusLabel = stats.totalActive > 0 ? "Active" : "Available";
-        const statusClass = stats.totalActive > 0 ? "assigned" : "completed";
+        const availability = getDriverAvailability(name);
+        const statusLabel = availability === "Online" ? (stats.totalActive > 0 ? "Active" : "Available") : "Offline";
+        const statusClass = availability === "Online" ? (stats.totalActive > 0 ? "assigned" : "completed") : "offline";
         return `
           <div class="driver-card">
             <p><strong>Driver:</strong> ${name}</p>
             <p><strong>Email:</strong> ${driver.email || "-"}</p>
+            <p><strong>Availability:</strong> ${availability}</p>
             <p><strong>Assigned:</strong> ${stats.assignedTrips}</p>
             <p><strong>En Route:</strong> ${stats.enrouteTrips}</p>
             <p><strong>Arrived:</strong> ${stats.arrivedTrips}</p>
             <p><strong>In Progress:</strong> ${stats.progressTrips}</p>
             <p><strong>Completed:</strong> ${stats.completedTrips}</p>
-            <div class="status-row"><span class="status ${statusClass}">${statusLabel}</span></div>
+            <div class="status-row">
+              <span class="status ${statusClass}">${statusLabel}</span>
+              <button class="secondary" onclick="toggleDriverAvailability('${name}')">${availability === "Online" ? "Set Offline" : "Set Online"}</button>
+            </div>
           </div>
         `;
       }).join("");
@@ -1573,6 +1666,20 @@
       if (currentRole === "Admin") showToast("Booking Deleted", `Booking ${bookingId} was removed.`);
     }
 
+
+    function cancelPassengerBooking(bookingId) {
+      const booking = liveBookings.find(b => b.id === bookingId && b.createdBy === currentUser?.id);
+      if (!booking) return;
+      if (!["Pending", "Assigned", "Driver En Route"].includes(booking.status)) {
+        return alert("This trip can no longer be cancelled from the passenger app.");
+      }
+      booking.status = "Cancelled";
+      booking.updatedAt = new Date().toISOString();
+      if (booking.tripType !== "NDIS" && booking.paymentStatus === "Paid") booking.paymentStatus = "Refund Review";
+      syncAndRenderBookings();
+      showToast("Trip Cancelled", `Booking ${booking.id} was cancelled.`);
+    }
+
     function payWithStripe(bookingId) {
       const booking = liveBookings.find(b => b.id === bookingId);
       if (!booking) return;
@@ -1588,10 +1695,12 @@
       localStorage.removeItem(UVEL_BOOKINGS_KEY);
       localStorage.removeItem(UVEL_USERS_KEY);
       localStorage.removeItem(UVEL_DRIVERS_KEY);
+      localStorage.removeItem(UVEL_DRIVER_STATUS_KEY);
       clearSession();
       liveBookings = [];
       allUsers = [...defaultUsers];
       driverUsers = [...defaultDrivers];
+      driverAvailability = { Michael: "Online", Daniel: "Online" };
       currentUser = null;
       currentRole = "";
       currentDriver = "";
