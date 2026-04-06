@@ -526,6 +526,36 @@
 
     const $ = (id) => document.getElementById(id);
 
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    async function getOrCreateUserProfile(user) {
+      let snap = null;
+
+      // Retry first in case signup created auth before Firestore profile finishes writing
+      for (let i = 0; i < 5; i++) {
+        snap = await getDoc(doc(db, "users", user.uid));
+        if (snap.exists()) return snap;
+        await sleep(350);
+      }
+
+      // Auto-create fallback profile if still missing
+      const inferredRole =
+        user.email?.startsWith("admin") ? "admin" :
+        user.email?.startsWith("driver") ? "driver" : "passenger";
+
+      await setDoc(doc(db, "users", user.uid), {
+        name: user.displayName || (user.email?.split("@")[0] || "User"),
+        email: user.email || "",
+        role: inferredRole,
+        activeLoad: 0,
+        availability: inferredRole === "driver" ? "online" : null,
+        vehicle: inferredRole === "driver" ? "Toyota HiAce" : null,
+        createdAt: serverTimestamp()
+      }, { merge: true });
+
+      return await getDoc(doc(db, "users", user.uid));
+    }
+
     
     function showMsg(msg, isError = false) {
       $("authMsg").textContent = msg;
@@ -611,14 +641,17 @@
         if (password.length < 6) throw new Error("Password must be at least 6 characters.");
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         await setDoc(doc(db, "users", cred.user.uid), {
-          name, email, role,
+          name, email, role: String(role).toLowerCase().trim(),
           activeLoad: 0,
           availability: role === "driver" ? "online" : null,
           vehicle: role === "driver" ? "Toyota HiAce" : null,
           createdAt: serverTimestamp()
-        });
-        showMsg("Account created.");
-        showDebug(`<div><strong>Account created successfully</strong></div><div>Email: <code>${escapeHtml(email)}</code></div><div>Role: <code>${escapeHtml(role)}</code></div>`);
+        }, { merge: true });
+
+        // Give Firestore a moment so auth state does not beat profile creation
+        await sleep(500);
+        showMsg("Account created. Signing you in...");
+        showDebug(`<div><strong>Account created successfully</strong></div><div>Email: <code>${escapeHtml(email)}</code></div><div>Role: <code>${escapeHtml(role)}</code></div><div class="footer-note">If the dashboard takes a second, wait briefly while Firestore profile syncs.</div>`);
       } catch (err) {
         const [shortMsg, helpMsg] = translateFirebaseError(err);
         showMsg(shortMsg, true);
@@ -647,21 +680,10 @@
       }
 
       currentUser = user;
-      let snap = await getDoc(doc(db, "users", user.uid));
+      const snap = await getOrCreateUserProfile(user);
       if (!snap.exists()) {
-        const inferredRole =
-          user.email?.startsWith("admin") ? "admin" :
-          user.email?.startsWith("driver") ? "driver" : "passenger";
-        await setDoc(doc(db, "users", user.uid), {
-          name: user.email?.split("@")[0] || "User",
-          email: user.email || "",
-          role: inferredRole,
-          activeLoad: 0,
-          availability: inferredRole === "driver" ? "online" : null,
-          vehicle: inferredRole === "driver" ? "Toyota HiAce" : null,
-          createdAt: serverTimestamp()
-        });
-        snap = await getDoc(doc(db, "users", user.uid));
+        showMsg("Could not load user profile.", true);
+        return;
       }
       currentProfile = { uid: user.uid, ...snap.data() };
       currentProfile.role = String(currentProfile.role || "passenger").toLowerCase().trim();
