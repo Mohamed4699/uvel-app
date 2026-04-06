@@ -150,6 +150,9 @@
 .select-booking{max-width:360px}
 .auth-help{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);font-size:13px;line-height:1.6;color:var(--muted)}
 .auth-help code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:8px}
+.pulse-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#57d08b;box-shadow:0 0 0 rgba(87,208,139,.7);animation:pulse 1.8s infinite}
+.live-badge{display:inline-flex;align-items:center;gap:8px}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(87,208,139,.7)}70%{box-shadow:0 0 0 12px rgba(87,208,139,0)}100%{box-shadow:0 0 0 0 rgba(87,208,139,0)}}
     @media (max-width: 1100px){ .eta-box,.edit-grid{grid-template-columns:1fr} }
     @media (max-width: 1100px){
       .grid-2,.split,.login-wrap,.grid-4,.grid-3,.stats,.toolbar,.row,.meta{grid-template-columns:1fr}
@@ -202,8 +205,9 @@
           <input type="email" id="loginEmail" placeholder="admin@uvel.com.au" required />
           <label class="top-gap">Password</label>
           <input type="password" id="loginPassword" placeholder="••••••••" required />
-          <div class="top-gap">
+          <div class="top-gap seg">
             <button class="btn brand" type="submit">Sign in</button>
+            <button class="btn" id="resetPasswordBtn" type="button">Reset password</button>
           </div>
         </form>
 
@@ -246,7 +250,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Level 5 upgrade • live driver GPS • shared bookings • multi-browser sync</div>
+            <div class="subtitle">Full Level 5 • smooth live tracking • route ETA • shared bookings</div>
           </div>
         </div>
         <div class="userbox">
@@ -430,7 +434,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
     import {
       getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-      onAuthStateChanged, signOut
+      onAuthStateChanged, signOut, sendPasswordResetEmail
     } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
     import {
       getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc,
@@ -475,6 +479,12 @@
     let passengerMap, adminMap, driverMap;
     let driverWatchId = null;
     let selectedAdminMapBookingId = null;
+    let mapLiveState = {
+      passenger: { markers: {} },
+      admin: { markers: {} },
+      driver: { markers: {} }
+    };
+    let metricsRefreshTimer = null;
     let passengerMapState = { markers: [], line: null };
     let adminMapState = { markers: [], line: null };
     let driverMapState = { markers: [], line: null };
@@ -528,6 +538,20 @@
 
     $("loginTabBtn").onclick = () => switchAuthTab("login");
     $("signupTabBtn").onclick = () => switchAuthTab("signup");
+    $("resetPasswordBtn").onclick = async () => {
+      const email = $("loginEmail").value.trim();
+      if (!email) return showMsg("Enter your email first, then press Reset password.", true);
+      showDebug("");
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showMsg("Password reset email sent.");
+        showDebug(`<div><strong>Password reset sent</strong></div><div>Check <code>${escapeHtml(email)}</code> inbox and spam.</div>`);
+      } catch (err) {
+        const [shortMsg, helpMsg] = translateFirebaseError(err);
+        showMsg(shortMsg, true);
+        showDebug(`<div><strong>Password reset failed</strong></div><div>${helpMsg}</div><div class="footer-note">${escapeHtml(err.message || "")}</div>`);
+      }
+    };
 
     $("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -619,6 +643,7 @@
       subscribeUsers();
       subscribeBookings();
       setRoleView(currentProfile.role);
+      startMetricsRefreshLoop();
     });
 
     function setRoleView(role) {
@@ -643,11 +668,47 @@
       return map;
     }
 
-    function clearMapState(map, state) {
+    function clearMapState(map, state, liveKey) {
       state.markers.forEach(m => map.removeLayer(m));
       state.markers = [];
       if (state.line) map.removeLayer(state.line);
       state.line = null;
+      if (liveKey && mapLiveState[liveKey]) {
+        Object.values(mapLiveState[liveKey].markers).forEach(marker => {
+          try { map.removeLayer(marker); } catch (e) {}
+        });
+        mapLiveState[liveKey].markers = {};
+      }
+    }
+
+    function driverIcon() {
+      return L.divIcon({
+        className: "",
+        html: `<div style="width:18px;height:18px;border-radius:50%;background:#57d08b;border:3px solid white;box-shadow:0 0 0 8px rgba(87,208,139,.18)"></div>`,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+      });
+    }
+
+    function ensureLiveMarker(map, liveKey, key, latlng, popupText) {
+      if (!mapLiveState[liveKey].markers[key]) {
+        mapLiveState[liveKey].markers[key] = L.marker(latlng, { icon: driverIcon() }).addTo(map).bindPopup(popupText || "Live");
+      }
+      return mapLiveState[liveKey].markers[key];
+    }
+
+    function animateMarkerTo(marker, latlng, duration = 1800) {
+      const start = marker.getLatLng();
+      const startTime = performance.now();
+      const dLat = latlng[0] - start.lat;
+      const dLng = latlng[1] - start.lng;
+      function step(now) {
+        const p = Math.min(1, (now - startTime) / duration);
+        const eased = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        marker.setLatLng([start.lat + dLat * eased, start.lng + dLng * eased]);
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
     }
 
     async function fetchRoutePoints(from, to) {
@@ -667,8 +728,8 @@
       }
     }
 
-    async function updateMapForBooking(map, state, booking) {
-      clearMapState(map, state);
+    async function updateMapForBooking(map, state, booking, liveKey) {
+      clearMapState(map, state, liveKey);
       if (!booking?.pickup || !booking?.destination) return null;
       const from = await geocodeAddress(booking.pickup);
       const to = await geocodeAddress(booking.destination);
@@ -685,9 +746,9 @@
         state.line = L.polyline([[from.lat, from.lon], [to.lat, to.lon]]).addTo(map);
       }
 
-      if (booking.driverLat && booking.driverLng) {
-        const driverMarker = L.marker([booking.driverLat, booking.driverLng]).addTo(map).bindPopup("Driver live");
-        state.markers.push(driverMarker);
+      if (booking.driverLat && booking.driverLng && liveKey) {
+        const liveMarker = ensureLiveMarker(map, liveKey, "driver", [booking.driverLat, booking.driverLng], "Driver live");
+        animateMarkerTo(liveMarker, [booking.driverLat, booking.driverLng], 2000);
       }
 
       map.fitBounds(state.line.getBounds(), { padding: [30, 30] });
@@ -755,7 +816,7 @@
       const payment = rideType === "ndis" ? "Invoice / Referral" : "Card / Direct";
       $("farePreview").textContent = `Estimated fare: $${fare.toFixed(2)} • Distance: ${km.toFixed(1)} km • Payment: ${payment}`;
       const tempBooking = { pickup, destination, status: "draft" };
-      updateMapForBooking(passengerMap, passengerMapState, tempBooking);
+      updateMapForBooking(passengerMap, passengerMapState, tempBooking, "passenger");
       $("passengerRouteLabel").textContent = `${pickup} → ${destination}`;
       $("passengerStatusLabel").textContent = "draft";
     };
@@ -827,6 +888,13 @@
         renderAdminMapBookingSelect();
         renderEverything();
       });
+    }
+
+    function startMetricsRefreshLoop() {
+      if (metricsRefreshTimer) clearInterval(metricsRefreshTimer);
+      metricsRefreshTimer = setInterval(() => {
+        updateMapsFromLatest();
+      }, 8000);
     }
 
     function renderEverything() {
@@ -990,7 +1058,7 @@
           <div class="item"><div class="tiny">Fare</div><div>$${Number(b.fare || 0).toFixed(2)}</div></div>
           <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}</div></div>
         </div>
-        ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}${b.driverStage ? `<div class="footer-note">Driver stage: ${escapeHtml(b.driverStage)}</div>` : ""}${b.driverLat ? `<div class="footer-note">Live tracking: on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}</div>` : ""}${b.cancellationReason ? `<div class="footer-note">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
+        ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}${b.driverStage ? `<div class="footer-note">Driver stage: ${escapeHtml(b.driverStage)}</div>` : ""}${b.driverLat ? `<div class="footer-note">Live tracking: on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}${b.driverLastSeenAt ? ` • updated ${new Date(b.driverLastSeenAt).toLocaleTimeString()}` : ""}</div>` : ""}${b.cancellationReason ? `<div class="footer-note">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
       `;
     }
 
@@ -1055,9 +1123,9 @@
     async function updateMapsFromLatest() {
       const latestPassenger = currentProfile?.role === "passenger" ? getPassengerBookings()[0] : null;
       if (latestPassenger) {
-        await updateMapForBooking(passengerMap, passengerMapState, latestPassenger);
+        await updateMapForBooking(passengerMap, passengerMapState, latestPassenger, "passenger");
         const live = await fetchDriverToDestinationMetrics(latestPassenger);
-        $("passengerDriverLive").textContent = latestPassenger.driverLat ? "Live" : "Waiting";
+        $("passengerDriverLive").innerHTML = latestPassenger.driverLat ? `<span class="live-badge"><span class="pulse-dot"></span>Live</span>` : "Waiting";
         $("passengerLiveKm").textContent = live ? `${live.km.toFixed(1)} km` : "--";
         $("passengerLiveEta").textContent = live ? `${Math.max(1, Math.round(live.minutes))} min` : "--";
         $("passengerDriverSpeed").textContent = latestPassenger.driverSpeedKmh ? `${Number(latestPassenger.driverSpeedKmh).toFixed(0)} km/h` : "--";
@@ -1067,11 +1135,11 @@
         ? allBookings.find(b => b.id === selectedAdminMapBookingId)
         : (allBookings.find(b => b.status === "pending" || b.status === "assigned") || allBookings[0]);
       if (latestAdmin) {
-        const summary = await updateMapForBooking(adminMap, adminMapState, latestAdmin);
+        const summary = await updateMapForBooking(adminMap, adminMapState, latestAdmin, "admin");
         const live = await fetchDriverToDestinationMetrics(latestAdmin);
         $("adminRouteKm").textContent = summary?.bookingKm ? `${summary.bookingKm.toFixed(1)} km` : `${Number(latestAdmin.distanceKm || 0).toFixed(1)} km`;
         $("adminRouteEta").textContent = live ? `${Math.max(1, Math.round(live.minutes))} min` : getEtaLabel(latestAdmin);
-        $("adminDriverLive").textContent = latestAdmin.driverLat ? `Live • ${latestAdmin.driverStage || "tracking"}` : "Not sharing";
+        $("adminDriverLive").innerHTML = latestAdmin.driverLat ? `<span class="live-badge"><span class="pulse-dot"></span>Live • ${escapeHtml(latestAdmin.driverStage || "tracking")}</span>` : "Not sharing";
         $("adminNavigatorLabel").textContent = latestAdmin.assignedDriverName || "No driver";
       }
 
@@ -1079,7 +1147,7 @@
         ? allBookings.find(b => b.assignedDriverUid === currentUser.uid && b.status !== "completed" && b.status !== "cancelled")
         : null;
       if (latestDriver) {
-        await updateMapForBooking(driverMap, driverMapState, latestDriver);
+        await updateMapForBooking(driverMap, driverMapState, latestDriver, "driver");
         const live = await fetchDriverToDestinationMetrics(latestDriver);
         $("driverLiveEta").textContent = live ? `${Math.max(1, Math.round(live.minutes))} min` : getEtaLabel(latestDriver);
         $("driverRemainingKm").textContent = live ? `${live.km.toFixed(1)} km` : `${Number(latestDriver.distanceKm || 0).toFixed(1)} km`;
@@ -1146,12 +1214,14 @@
 
       driverWatchId = navigator.geolocation.watchPosition(async (pos) => {
         const speedKmh = pos.coords.speed != null ? pos.coords.speed * 3.6 : null;
+        const stage = speedKmh && speedKmh > 8 ? "in_progress" : "routing";
         await updateDoc(doc(db, "bookings", active.id), {
           driverLat: pos.coords.latitude,
           driverLng: pos.coords.longitude,
           driverAccuracy: pos.coords.accuracy,
           driverSpeedKmh: speedKmh,
           driverLastSeenAt: new Date().toISOString(),
+          driverStage: stage,
           updatedAt: serverTimestamp()
         });
       }, (err) => {
@@ -1212,9 +1282,10 @@
     function getEtaLabel(b) {
       const km = Number(b.distanceKm || 0);
       if (!km) return "--";
-      const mins = Math.max(6, Math.round((km / 35) * 60));
+      const mins = Math.max(4, Math.round((km / 38) * 60));
       if (b.status === "completed") return "Arrived";
       if (b.status === "cancelled") return "Cancelled";
+      if (b.driverLat) return `${mins} min (live est.)`;
       return `${mins} min`;
     }
 
