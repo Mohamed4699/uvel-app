@@ -138,6 +138,13 @@
     .empty{padding:18px;border:1px dashed var(--line);border-radius:16px;color:var(--muted)}
     .note{font-size:13px;color:var(--muted);line-height:1.5}
     .footer-note{margin-top:16px;color:var(--muted);font-size:13px}
+    .status-row{display:flex;gap:8px;flex-wrap:wrap}
+    .status-chip{padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px;font-weight:700}
+    .eta-box{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+    .eta-box .item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .edit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+    .nav-link{display:inline-block;text-decoration:none}
+    @media (max-width: 1100px){ .eta-box,.edit-grid{grid-template-columns:1fr} }
     @media (max-width: 1100px){
       .grid-2,.split,.login-wrap,.grid-4,.grid-3,.stats,.toolbar,.row,.meta{grid-template-columns:1fr}
       .header{position:static}
@@ -308,6 +315,12 @@
                 <div id="passengerStatusLabel" style="font-size:18px;font-weight:800;margin-top:6px">--</div>
               </div>
             </div>
+            <div class="eta-box">
+              <div class="item"><div class="tiny">Driver stage</div><div id="passengerStageLabel">--</div></div>
+              <div class="item"><div class="tiny">ETA</div><div id="passengerEtaLabel">--</div></div>
+              <div class="item"><div class="tiny">Distance</div><div id="passengerKmLabel">--</div></div>
+              <div class="item"><div class="tiny">Navigator</div><div id="passengerNavLabel">Available on driver side</div></div>
+            </div>
           </div>
         </div>
 
@@ -355,7 +368,7 @@
 
           <div class="card section">
             <div class="section-title">Active route map</div>
-            <div class="section-sub">Shows the latest active booking.</div>
+            <div class="section-sub">Shows the latest active booking with pickup and destination points. Navigator opens on driver side.</div>
             <div id="adminMap" class="map"></div>
             <div class="footer-note">This map updates from shared Firestore booking data.</div>
           </div>
@@ -384,7 +397,7 @@
           </div>
           <div class="card section">
             <div class="section-title">Driver map</div>
-            <div class="section-sub">Shows your most recent assigned trip.</div>
+            <div class="section-sub">Shows your most recent assigned trip with route line. Use Navigator to open turn-by-turn directions.</div>
             <div id="driverMap" class="map"></div>
           </div>
         </div>
@@ -656,6 +669,7 @@
         fare: Number(fare.toFixed(2)),
         paymentMethod: rideType === "ndis" ? "Invoice / Referral" : "Card / Direct",
         status: "pending",
+        driverStage: "waiting",
         assignedDriverUid: null,
         assignedDriverName: null,
         createdAt: serverTimestamp(),
@@ -725,6 +739,9 @@
       const latest = trips[0];
       $("passengerRouteLabel").textContent = `${latest.pickup} → ${latest.destination}`;
       $("passengerStatusLabel").textContent = latest.status;
+      $("passengerStageLabel").textContent = latest.driverStage || latest.status || "--";
+      $("passengerEtaLabel").textContent = getEtaLabel(latest);
+      $("passengerKmLabel").textContent = `${Number(latest.distanceKm || 0).toFixed(1)} km`;
     }
 
     function getFilteredAdminBookings() {
@@ -761,10 +778,28 @@
               <option value="">Select driver</option>
               ${allDrivers.map(d => `<option value="${d.uid}" ${b.assignedDriverUid === d.uid ? "selected" : ""}>${escapeHtml(d.name || d.email)} • load ${Number(d.activeLoad || 0)}</option>`).join("")}
             </select>
+            <button class="btn small" onclick="window.toggleEdit('${b.id}')">Edit</button>
             <button class="btn small" onclick="window.assignDriver('${b.id}')">Assign</button>
             <button class="btn small" onclick="window.completeBooking('${b.id}')">Complete</button>
             <button class="btn small danger" onclick="window.cancelBooking('${b.id}')">Cancel</button>
             <button class="btn small" onclick="window.exportInvoice('${b.id}')">Invoice PDF</button>
+          </div>
+          <div id="edit-wrap-${b.id}" class="hidden top-gap">
+            <div class="edit-grid">
+              <input id="edit-passengerName-${b.id}" value="${escapeHtml(b.passengerName || "")}" placeholder="Passenger name" />
+              <select id="edit-rideType-${b.id}">
+                <option value="normal" ${b.rideType === "normal" ? "selected" : ""}>Normal</option>
+                <option value="ndis" ${b.rideType === "ndis" ? "selected" : ""}>NDIS</option>
+              </select>
+              <input id="edit-pickup-${b.id}" value="${escapeHtml(b.pickup || "")}" placeholder="Pickup" />
+              <input id="edit-destination-${b.id}" value="${escapeHtml(b.destination || "")}" placeholder="Destination" />
+              <input id="edit-tripDate-${b.id}" value="${escapeHtml(b.tripDate || "")}" type="date" />
+              <input id="edit-tripTime-${b.id}" value="${escapeHtml(b.tripTime || "")}" type="time" />
+            </div>
+            <textarea id="edit-notes-${b.id}" placeholder="Notes">${escapeHtml(b.notes || "")}</textarea>
+            <div class="right-actions top-gap">
+              <button class="btn small brand" onclick="window.saveBookingEdit('${b.id}')">Save edit</button>
+            </div>
           </div>
         </div>
       `).join("");
@@ -781,8 +816,18 @@
       wrap.innerHTML = trips.map(b => `
         <div class="book-card">
           ${bookingCardHTML(b)}
-          <div class="right-actions top-gap">
+          <div class="status-row top-gap">
+            <button class="btn small" onclick="window.updateDriverStage('${b.id}','started')">Start</button>
+            <button class="btn small" onclick="window.updateDriverStage('${b.id}','routing')">Routing</button>
+            <button class="btn small" onclick="window.updateDriverStage('${b.id}','in_progress')">In progress</button>
+            <a class="btn small nav-link" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(b.destination || '')}&origin=${encodeURIComponent(b.pickup || '')}">Navigator</a>
             ${b.status !== "completed" ? `<button class="btn small brand" onclick="window.completeBooking('${b.id}')">Mark completed</button>` : ""}
+          </div>
+          <div class="eta-box">
+            <div class="item"><div class="tiny">Stage</div><div>${escapeHtml(b.driverStage || "assigned")}</div></div>
+            <div class="item"><div class="tiny">ETA</div><div>${escapeHtml(getEtaLabel(b))}</div></div>
+            <div class="item"><div class="tiny">Distance</div><div>${Number(b.distanceKm || 0).toFixed(1)} km</div></div>
+            <div class="item"><div class="tiny">Navigator</div><div>${escapeHtml(b.pickup || "")}</div></div>
           </div>
         </div>
       `).join("");
@@ -803,7 +848,7 @@
           <div class="item"><div class="tiny">Fare</div><div>$${Number(b.fare || 0).toFixed(2)}</div></div>
           <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}</div></div>
         </div>
-        ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}
+        ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}${b.cancellationReason ? `<div class="footer-note">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
       `;
     }
 
@@ -900,16 +945,68 @@
     }
 
     async function cancelBooking(bookingId) {
+      const reason = prompt("Cancellation reason:", "Cancelled by admin");
       await updateDoc(doc(db, "bookings", bookingId), {
         status: "cancelled",
+        cancellationReason: reason || "Cancelled",
+        driverStage: "cancelled",
         updatedAt: serverTimestamp()
       });
+    }
+
+
+    function toggleEdit(bookingId) {
+      const el = document.getElementById(`edit-wrap-${bookingId}`);
+      if (el) el.classList.toggle("hidden");
+    }
+
+    async function saveBookingEdit(bookingId) {
+      const pickup = document.getElementById(`edit-pickup-${bookingId}`)?.value?.trim() || "";
+      const destination = document.getElementById(`edit-destination-${bookingId}`)?.value?.trim() || "";
+      const passengerName = document.getElementById(`edit-passengerName-${bookingId}`)?.value?.trim() || "";
+      const rideType = document.getElementById(`edit-rideType-${bookingId}`)?.value || "normal";
+      const tripDate = document.getElementById(`edit-tripDate-${bookingId}`)?.value || "";
+      const tripTime = document.getElementById(`edit-tripTime-${bookingId}`)?.value || "";
+      const notes = document.getElementById(`edit-notes-${bookingId}`)?.value?.trim() || "";
+      if (!pickup || !destination || !tripDate || !tripTime) return alert("Please complete the edit fields.");
+      const km = await estimateDistanceKm(pickup, destination);
+      if (!km) return alert("Could not recalculate route. Use a clearer pickup and destination.");
+      const fare = calculateFare(km, rideType);
+      await updateDoc(doc(db, "bookings", bookingId), {
+        passengerName, rideType, pickup, destination, tripDate, tripTime, notes,
+        distanceKm: Number(km.toFixed(1)),
+        fare: Number(fare.toFixed(2)),
+        paymentMethod: rideType === "ndis" ? "Invoice / Referral" : "Card / Direct",
+        updatedAt: serverTimestamp()
+      });
+      toggleEdit(bookingId);
+    }
+
+    async function updateDriverStage(bookingId, stage) {
+      const stageToStatus = stage === "in_progress" ? "assigned" : "assigned";
+      await updateDoc(doc(db, "bookings", bookingId), {
+        driverStage: stage,
+        status: stageToStatus,
+        updatedAt: serverTimestamp()
+      });
+    }
+
+    function getEtaLabel(b) {
+      const km = Number(b.distanceKm || 0);
+      if (!km) return "--";
+      const mins = Math.max(6, Math.round((km / 35) * 60));
+      if (b.status === "completed") return "Arrived";
+      if (b.status === "cancelled") return "Cancelled";
+      return `${mins} min`;
     }
 
     window.assignDriver = assignDriver;
     window.completeBooking = completeBooking;
     window.cancelBooking = cancelBooking;
     window.exportInvoice = exportInvoice;
+    window.toggleEdit = toggleEdit;
+    window.saveBookingEdit = saveBookingEdit;
+    window.updateDriverStage = updateDriverStage;
 
     $("manualAssignBtn").onclick = () => {
       assignMode = "manual";
