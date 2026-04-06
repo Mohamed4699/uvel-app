@@ -144,6 +144,10 @@
     .eta-box .item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
     .edit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
     .nav-link{display:inline-block;text-decoration:none}
+.tracking-on{color:#87ebb0}
+.tracking-off{color:#ffb1b1}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.select-booking{max-width:360px}
     @media (max-width: 1100px){ .eta-box,.edit-grid{grid-template-columns:1fr} }
     @media (max-width: 1100px){
       .grid-2,.split,.login-wrap,.grid-4,.grid-3,.stats,.toolbar,.row,.meta{grid-template-columns:1fr}
@@ -232,7 +236,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Real-time Firebase version • shared bookings • multi-browser sync</div>
+            <div class="subtitle">Level 5 upgrade • live driver GPS • shared bookings • multi-browser sync</div>
           </div>
         </div>
         <div class="userbox">
@@ -321,14 +325,20 @@
               <div class="item"><div class="tiny">Distance</div><div id="passengerKmLabel">--</div></div>
               <div class="item"><div class="tiny">Navigator</div><div id="passengerNavLabel">Available on driver side</div></div>
             </div>
+            <div class="eta-box">
+              <div class="item"><div class="tiny">Live driver status</div><div id="passengerDriverLive">--</div></div>
+              <div class="item"><div class="tiny">Live remaining km</div><div id="passengerLiveKm">--</div></div>
+              <div class="item"><div class="tiny">Live ETA</div><div id="passengerLiveEta">--</div></div>
+              <div class="item"><div class="tiny">Driver speed</div><div id="passengerDriverSpeed">--</div></div>
+            </div>
           </div>
         </div>
 
         <div class="card section top-gap">
           <div class="trip-head">
             <div>
-              <div class="section-title">My trips</div>
-              <div class="section-sub">Passenger sees only their own bookings.</div>
+              <div class="trip-head"><div><div class="section-title">My trips</div>
+              <div class="section-sub">Passenger sees only their own bookings with live driver location when shared.</div></div>              <div class="seg"><button class="btn small danger" id="passengerCancelBtn">Cancel latest trip</button></div></div>
             </div>
           </div>
           <div id="passengerTrips" class="booking-list"></div>
@@ -367,10 +377,10 @@
           </div>
 
           <div class="card section">
-            <div class="section-title">Active route map</div>
-            <div class="section-sub">Shows the latest active booking with pickup and destination points. Navigator opens on driver side.</div>
+            <div class="trip-head"><div><div class="section-title">Active route map</div><div class="section-sub">Shows the selected active booking with live driver marker when available.</div></div><div class="select-booking"><select id="adminMapBookingSelect"></select></div></div>
             <div id="adminMap" class="map"></div>
-            <div class="footer-note">This map updates from shared Firestore booking data.</div>
+            <div class="eta-box">              <div class="item"><div class="tiny">Route distance</div><div id="adminRouteKm">--</div></div>              <div class="item"><div class="tiny">ETA to destination</div><div id="adminRouteEta">--</div></div>              <div class="item"><div class="tiny">Driver live status</div><div id="adminDriverLive">--</div></div>              <div class="item"><div class="tiny">Navigator</div><div id="adminNavigatorLabel">Driver app</div></div>            </div>
+            <div class="footer-note">This map updates from shared Firestore booking data and browser GPS when the driver enables live tracking.</div>
           </div>
         </div>
 
@@ -396,9 +406,10 @@
             <div id="driverTrips" class="booking-list"></div>
           </div>
           <div class="card section">
-            <div class="section-title">Driver map</div>
-            <div class="section-sub">Shows your most recent assigned trip with route line. Use Navigator to open turn-by-turn directions.</div>
+            <div class="trip-head"><div><div class="section-title">Driver map</div>
+            <div class="section-sub">Shows your most recent assigned trip with live sharing and navigator support.</div></div>            <div class="seg"><span id="driverTrackingState" class="pill tracking-off">Tracking: off</span>            <button class="btn small brand" id="startTrackingBtn">Start live tracking</button>            <button class="btn small" id="stopTrackingBtn">Stop tracking</button></div></div>
             <div id="driverMap" class="map"></div>
+            <div class="eta-box">              <div class="item"><div class="tiny">Live ETA</div><div id="driverLiveEta">--</div></div>              <div class="item"><div class="tiny">Remaining km</div><div id="driverRemainingKm">--</div></div>              <div class="item"><div class="tiny">Current speed</div><div id="driverSpeedLabel">--</div></div>              <div class="item"><div class="tiny">Route mode</div><div id="driverRouteMode">OSRM route</div></div>            </div>
           </div>
         </div>
       </div>
@@ -450,6 +461,8 @@
     let unsubUsers = null;
 
     let passengerMap, adminMap, driverMap;
+    let driverWatchId = null;
+    let selectedAdminMapBookingId = null;
     let passengerMapState = { markers: [], line: null };
     let adminMapState = { markers: [], line: null };
     let driverMapState = { markers: [], line: null };
@@ -569,17 +582,59 @@
       state.line = null;
     }
 
+    async function fetchRoutePoints(from, to) {
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${from.lon},${from.lat};${to.lon},${to.lat}?overview=full&geometries=geojson`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const route = data?.routes?.[0];
+        if (!route) return null;
+        return {
+          km: route.distance / 1000,
+          minutes: route.duration / 60,
+          coords: route.geometry.coordinates.map(([lon, lat]) => [lat, lon])
+        };
+      } catch {
+        return null;
+      }
+    }
+
     async function updateMapForBooking(map, state, booking) {
       clearMapState(map, state);
-      if (!booking?.pickup || !booking?.destination) return;
+      if (!booking?.pickup || !booking?.destination) return null;
       const from = await geocodeAddress(booking.pickup);
       const to = await geocodeAddress(booking.destination);
-      if (!from || !to) return;
-      const m1 = L.marker([from.lat, from.lon]).addTo(map).bindPopup("Pickup");
-      const m2 = L.marker([to.lat, to.lon]).addTo(map).bindPopup("Destination");
-      state.markers.push(m1, m2);
-      state.line = L.polyline([[from.lat, from.lon], [to.lat, to.lon]]).addTo(map);
+      if (!from || !to) return null;
+
+      const pickupMarker = L.marker([from.lat, from.lon]).addTo(map).bindPopup("Pickup");
+      const destinationMarker = L.marker([to.lat, to.lon]).addTo(map).bindPopup("Destination");
+      state.markers.push(pickupMarker, destinationMarker);
+
+      const route = await fetchRoutePoints(from, to);
+      if (route?.coords?.length) {
+        state.line = L.polyline(route.coords).addTo(map);
+      } else {
+        state.line = L.polyline([[from.lat, from.lon], [to.lat, to.lon]]).addTo(map);
+      }
+
+      if (booking.driverLat && booking.driverLng) {
+        const driverMarker = L.marker([booking.driverLat, booking.driverLng]).addTo(map).bindPopup("Driver live");
+        state.markers.push(driverMarker);
+      }
+
       map.fitBounds(state.line.getBounds(), { padding: [30, 30] });
+      return {
+        bookingKm: route?.km ?? Number(booking.distanceKm || 0),
+        bookingEta: route?.minutes ?? null,
+        from, to
+      };
+    }
+
+    async function fetchDriverToDestinationMetrics(booking) {
+      if (!booking?.driverLat || !booking?.driverLng || !booking?.destination) return null;
+      const to = await geocodeAddress(booking.destination);
+      if (!to) return null;
+      return await fetchRoutePoints({ lat: booking.driverLat, lon: booking.driverLng }, to);
     }
 
     async function geocodeAddress(address) {
@@ -680,6 +735,9 @@
       $("passengerName").value = currentProfile.name || "";
       $("farePreview").textContent = "Estimated fare: -- • Distance: -- • Payment: --";
       $("passengerStatusLabel").textContent = "pending";
+      $("passengerStageLabel").textContent = "waiting";
+      $("passengerEtaLabel").textContent = "--";
+      $("passengerKmLabel").textContent = `${Number(km).toFixed(1)} km`;
       alert("Ride request sent. Admin can now see it in another browser.");
     });
 
@@ -698,6 +756,7 @@
       if (unsubBookings) unsubBookings();
       unsubBookings = onSnapshot(query(collection(db, "bookings"), orderBy("tripDate", "desc")), (snap) => {
         allBookings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAdminMapBookingSelect();
         renderEverything();
       });
     }
@@ -710,6 +769,17 @@
       renderPassengerManagement();
       renderDriverManagement();
       updateMapsFromLatest();
+    }
+
+    function renderAdminMapBookingSelect() {
+      const sel = $("adminMapBookingSelect");
+      if (!sel) return;
+      const active = allBookings.filter(b => b.status !== "completed" && b.status !== "cancelled");
+      sel.innerHTML = active.length
+        ? active.map(b => `<option value="${b.id}" ${selectedAdminMapBookingId === b.id ? "selected" : ""}>${escapeHtml(b.passengerName || "Passenger")} • ${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</option>`).join("")
+        : `<option value="">No active booking</option>`;
+      if (!selectedAdminMapBookingId && active[0]) selectedAdminMapBookingId = active[0].id;
+      if (sel.value && !selectedAdminMapBookingId) selectedAdminMapBookingId = sel.value;
     }
 
     function renderStats() {
@@ -761,6 +831,10 @@
     $("adminSearch").addEventListener("input", renderAdminBookings);
     $("statusFilter").addEventListener("change", renderAdminBookings);
     $("driverFilter").addEventListener("change", renderAdminBookings);
+    $("adminMapBookingSelect")?.addEventListener("change", (e) => { selectedAdminMapBookingId = e.target.value; updateMapsFromLatest(); });
+    $("startTrackingBtn")?.addEventListener("click", startDriverTracking);
+    $("stopTrackingBtn")?.addEventListener("click", stopDriverTracking);
+    $("passengerCancelBtn")?.addEventListener("click", passengerCancelLatestTrip);
 
     function renderAdminBookings() {
       if (currentProfile?.role !== "admin") return;
@@ -848,7 +922,7 @@
           <div class="item"><div class="tiny">Fare</div><div>$${Number(b.fare || 0).toFixed(2)}</div></div>
           <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}</div></div>
         </div>
-        ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}${b.cancellationReason ? `<div class="footer-note">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
+        ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}${b.driverStage ? `<div class="footer-note">Driver stage: ${escapeHtml(b.driverStage)}</div>` : ""}${b.driverLat ? `<div class="footer-note">Live tracking: on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}</div>` : ""}${b.cancellationReason ? `<div class="footer-note">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
       `;
     }
 
@@ -912,15 +986,37 @@
 
     async function updateMapsFromLatest() {
       const latestPassenger = currentProfile?.role === "passenger" ? getPassengerBookings()[0] : null;
-      if (latestPassenger) await updateMapForBooking(passengerMap, passengerMapState, latestPassenger);
+      if (latestPassenger) {
+        await updateMapForBooking(passengerMap, passengerMapState, latestPassenger);
+        const live = await fetchDriverToDestinationMetrics(latestPassenger);
+        $("passengerDriverLive").textContent = latestPassenger.driverLat ? "Live" : "Waiting";
+        $("passengerLiveKm").textContent = live ? `${live.km.toFixed(1)} km` : "--";
+        $("passengerLiveEta").textContent = live ? `${Math.max(1, Math.round(live.minutes))} min` : "--";
+        $("passengerDriverSpeed").textContent = latestPassenger.driverSpeedKmh ? `${Number(latestPassenger.driverSpeedKmh).toFixed(0)} km/h` : "--";
+      }
 
-      const latestAdmin = allBookings.find(b => b.status === "pending" || b.status === "assigned") || allBookings[0];
-      if (latestAdmin) await updateMapForBooking(adminMap, adminMapState, latestAdmin);
+      const latestAdmin = selectedAdminMapBookingId
+        ? allBookings.find(b => b.id === selectedAdminMapBookingId)
+        : (allBookings.find(b => b.status === "pending" || b.status === "assigned") || allBookings[0]);
+      if (latestAdmin) {
+        const summary = await updateMapForBooking(adminMap, adminMapState, latestAdmin);
+        const live = await fetchDriverToDestinationMetrics(latestAdmin);
+        $("adminRouteKm").textContent = summary?.bookingKm ? `${summary.bookingKm.toFixed(1)} km` : `${Number(latestAdmin.distanceKm || 0).toFixed(1)} km`;
+        $("adminRouteEta").textContent = live ? `${Math.max(1, Math.round(live.minutes))} min` : getEtaLabel(latestAdmin);
+        $("adminDriverLive").textContent = latestAdmin.driverLat ? `Live • ${latestAdmin.driverStage || "tracking"}` : "Not sharing";
+        $("adminNavigatorLabel").textContent = latestAdmin.assignedDriverName || "No driver";
+      }
 
       const latestDriver = currentProfile?.role === "driver"
-        ? allBookings.find(b => b.assignedDriverUid === currentUser.uid)
+        ? allBookings.find(b => b.assignedDriverUid === currentUser.uid && b.status !== "completed" && b.status !== "cancelled")
         : null;
-      if (latestDriver) await updateMapForBooking(driverMap, driverMapState, latestDriver);
+      if (latestDriver) {
+        await updateMapForBooking(driverMap, driverMapState, latestDriver);
+        const live = await fetchDriverToDestinationMetrics(latestDriver);
+        $("driverLiveEta").textContent = live ? `${Math.max(1, Math.round(live.minutes))} min` : getEtaLabel(latestDriver);
+        $("driverRemainingKm").textContent = live ? `${live.km.toFixed(1)} km` : `${Number(latestDriver.distanceKm || 0).toFixed(1)} km`;
+        $("driverSpeedLabel").textContent = latestDriver.driverSpeedKmh ? `${Number(latestDriver.driverSpeedKmh).toFixed(0)} km/h` : "--";
+      }
     }
 
     async function assignDriver(bookingId) {
@@ -933,6 +1029,7 @@
         assignedDriverUid: driver.uid,
         assignedDriverName: driver.name || driver.email,
         status: "assigned",
+        driverStage: "assigned",
         updatedAt: serverTimestamp()
       });
     }
@@ -940,6 +1037,7 @@
     async function completeBooking(bookingId) {
       await updateDoc(doc(db, "bookings", bookingId), {
         status: "completed",
+        driverStage: "completed",
         updatedAt: serverTimestamp()
       });
     }
@@ -954,6 +1052,58 @@
       });
     }
 
+
+    async function passengerCancelLatestTrip() {
+      const latest = getPassengerBookings()[0];
+      if (!latest) return alert("No trip to cancel.");
+      if (latest.status === "completed") return alert("Completed trips cannot be cancelled.");
+      const reason = prompt("Cancellation reason:", "Cancelled by passenger");
+      await updateDoc(doc(db, "bookings", latest.id), {
+        status: "cancelled",
+        cancellationReason: reason || "Cancelled by passenger",
+        driverStage: "cancelled",
+        updatedAt: serverTimestamp()
+      });
+    }
+
+    async function startDriverTracking() {
+      if (currentProfile?.role !== "driver") return;
+      const active = allBookings.find(b => b.assignedDriverUid === currentUser.uid && b.status !== "completed" && b.status !== "cancelled");
+      if (!active) return alert("No active assigned trip to track.");
+      if (!navigator.geolocation) return alert("Geolocation is not available in this browser.");
+      stopDriverTracking();
+      $("driverTrackingState").textContent = "Tracking: on";
+      $("driverTrackingState").classList.remove("tracking-off");
+      $("driverTrackingState").classList.add("tracking-on");
+
+      driverWatchId = navigator.geolocation.watchPosition(async (pos) => {
+        const speedKmh = pos.coords.speed != null ? pos.coords.speed * 3.6 : null;
+        await updateDoc(doc(db, "bookings", active.id), {
+          driverLat: pos.coords.latitude,
+          driverLng: pos.coords.longitude,
+          driverAccuracy: pos.coords.accuracy,
+          driverSpeedKmh: speedKmh,
+          driverLastSeenAt: new Date().toISOString(),
+          updatedAt: serverTimestamp()
+        });
+      }, (err) => {
+        alert("Live tracking failed: " + err.message);
+      }, {
+        enableHighAccuracy: true,
+        maximumAge: 5000,
+        timeout: 15000
+      });
+    }
+
+    function stopDriverTracking() {
+      if (driverWatchId != null) navigator.geolocation.clearWatch(driverWatchId);
+      driverWatchId = null;
+      if ($("driverTrackingState")) {
+        $("driverTrackingState").textContent = "Tracking: off";
+        $("driverTrackingState").classList.remove("tracking-on");
+        $("driverTrackingState").classList.add("tracking-off");
+      }
+    }
 
     function toggleEdit(bookingId) {
       const el = document.getElementById(`edit-wrap-${bookingId}`);
