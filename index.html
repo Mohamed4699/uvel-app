@@ -4,681 +4,1030 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UVEL Fixed v10</title>
+  <title>UVEL Working v11</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root{
-      --panel:rgba(13,27,47,0.95); --line:rgba(255,255,255,0.08); --text:#f8fafc;
-      --muted:#9eb0ca; --shadow:0 24px 50px rgba(0,0,0,.28);
+      --panel:rgba(13,27,47,0.95);
+      --line:rgba(255,255,255,0.08);
+      --text:#f8fafc;
+      --muted:#9eb0ca;
+      --shadow:0 24px 50px rgba(0,0,0,.28);
+      --green:#22c55e;
+      --blue:#3b82f6;
+      --purple:#8b5cf6;
+      --amber:#f59e0b;
+      --red:#ef4444;
     }
     *{box-sizing:border-box}
     body{
-      margin:0;font-family:Inter,Arial,sans-serif;color:var(--text);
+      margin:0;
+      font-family:Inter,Arial,sans-serif;
+      color:var(--text);
       background:
         radial-gradient(circle at top left, rgba(20,184,166,.14), transparent 28%),
         radial-gradient(circle at top right, rgba(59,130,246,.18), transparent 28%),
         linear-gradient(180deg,#06101d 0%,#08162a 45%,#0a1630 100%);
       min-height:100vh;
     }
-    .app-shell{width:min(1380px,96%);margin:0 auto;padding:22px 0 30px;display:grid;grid-template-columns:280px 1fr;gap:22px;min-height:100vh}
-    .sidebar{position:sticky;top:20px;align-self:start;background:linear-gradient(180deg, rgba(13,27,47,.98), rgba(11,23,48,.94));border:1px solid var(--line);border-radius:30px;box-shadow:var(--shadow);padding:22px}
+    .app-shell{
+      width:min(1380px,96%);
+      margin:0 auto;
+      padding:22px 0 30px;
+      display:grid;
+      grid-template-columns:280px 1fr;
+      gap:22px;
+      min-height:100vh;
+    }
+    .sidebar{
+      position:sticky;
+      top:20px;
+      align-self:start;
+      background:linear-gradient(180deg, rgba(13,27,47,.98), rgba(11,23,48,.94));
+      border:1px solid var(--line);
+      border-radius:30px;
+      box-shadow:var(--shadow);
+      padding:22px;
+    }
     .logo-wrap{display:flex;align-items:center;gap:14px;margin-bottom:24px}
-    .logo-box{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;font-size:28px;background:linear-gradient(135deg, rgba(20,184,166,.2), rgba(59,130,246,.22));border:1px solid rgba(255,255,255,.08)}
-    .logo-wrap h1{margin:0;font-size:26px}.logo-wrap p{margin:4px 0 0;color:var(--muted);font-size:13px}
+    .logo-box{
+      width:56px;height:56px;border-radius:18px;display:grid;place-items:center;font-size:28px;
+      background:linear-gradient(135deg, rgba(20,184,166,.2), rgba(59,130,246,.22));
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .logo-wrap h1{margin:0;font-size:26px}
+    .logo-wrap p{margin:4px 0 0;color:var(--muted);font-size:13px}
     .nav-title{margin:0 0 12px;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
     .side-nav{display:grid;gap:10px;margin-bottom:20px}
-    .side-link{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border:1px solid transparent;background:rgba(255,255,255,.04);color:var(--text);border-radius:16px;cursor:pointer;font-weight:700;font-size:14px;text-align:left}
+    .side-link{
+      width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:14px 16px;border:1px solid transparent;background:rgba(255,255,255,.04);
+      color:var(--text);border-radius:16px;cursor:pointer;font-weight:700;font-size:14px;text-align:left;
+    }
     .side-link:hover,.side-link.active-link{background:rgba(255,255,255,.08);border-color:rgba(20,184,166,.18)}
-    .side-card,.workflow-card,.chart-card,.panel-box,.form-card,.list-card,.mini-panel,.login-box,.stat-card,.booking-card{background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:22px}
-    .side-card{margin-top:18px;padding:16px}.side-card h3{margin:0 0 8px;font-size:16px}.side-card p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}
-    .pill{display:inline-flex;align-items:center;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-size:13px;font-weight:700}
-    .logout-btn{width:100%;margin-top:14px;background:rgba(239,68,68,.16);color:#fff;padding:12px 16px;border:1px solid rgba(239,68,68,.22);border-radius:14px;cursor:pointer;font-weight:800}
+    .side-card,.panel,.login-box,.booking-card{
+      background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:22px;
+    }
+    .side-card{margin-top:18px;padding:16px}
+    .side-card h3,.panel h3,.login-box h2{margin:0 0 8px}
+    .side-card p,.muted{margin:0;color:var(--muted);line-height:1.6}
     .main{min-width:0}
-    #heroSection{background:linear-gradient(135deg, rgba(13,27,47,.96), rgba(11,23,48,.94));border:1px solid var(--line);border-radius:30px;box-shadow:var(--shadow);padding:26px;margin-bottom:20px}
-    .hero-top{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}
-    .hero-copy h2{margin:0;font-size:clamp(28px,3vw,40px);letter-spacing:-.03em;line-height:1.1}
-    .hero-copy p{margin:10px 0 0;color:var(--muted);line-height:1.7;max-width:760px}
-    .hero-grid{margin-top:20px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
-    .workflow-card,.chart-card,.form-card,.list-card,.mini-panel,.panel-box,.login-box,.section{padding:18px}
-    .hero-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
-    .step-chip{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:18px;padding:16px 14px;text-align:center;font-size:13px;color:var(--muted)}
-    .step-chip strong{display:block;margin-bottom:6px;color:var(--text);font-size:15px}
-    .real-map-frame{margin-top:14px;width:100%;height:320px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:#0b1326;overflow:hidden}
+    .hero{
+      background:linear-gradient(135deg, rgba(13,27,47,.96), rgba(11,23,48,.94));
+      border:1px solid var(--line);
+      border-radius:30px;
+      box-shadow:var(--shadow);
+      padding:26px;
+      margin-bottom:20px;
+    }
+    .hero-grid,.two-col,.admin-grid{display:grid;gap:18px}
+    .hero-grid{grid-template-columns:1.15fr .85fr;margin-top:18px}
+    .two-col{grid-template-columns:1fr 1fr}
+    .admin-grid{grid-template-columns:1.2fr .8fr}
+    .hero h2{margin:0;font-size:clamp(28px,3vw,40px);line-height:1.1}
+    .hero p{margin:10px 0 0;color:var(--muted)}
+    .step-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+    .step{
+      background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:18px;padding:16px 14px;text-align:center;font-size:13px;color:var(--muted)
+    }
+    .step strong{display:block;margin-bottom:6px;color:var(--text);font-size:15px}
+    .panel{padding:18px;margin-bottom:20px}
+    .section{display:none}
+    .section.active{display:block}
+    .section-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:18px}
+    .section-badge{padding:10px 14px;border-radius:14px;background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.18);color:#d5fffb;font-size:13px;font-weight:800}
+    .login-box{max-width:760px;margin:0 auto 20px;padding:20px;text-align:center}
+    .auth-tabs{display:flex;gap:10px;justify-content:center;margin:16px 0}
+    .auth-tab{
+      padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:#fff;font-weight:800;cursor:pointer
+    }
+    .auth-tab.active{background:rgba(20,184,166,.15);border-color:rgba(20,184,166,.25)}
+    .grid2,.grid4{display:grid;gap:14px}
+    .grid2{grid-template-columns:1fr 1fr}
+    .grid4{grid-template-columns:repeat(4,1fr)}
+    input,select,textarea{
+      width:100%;padding:14px 15px;border-radius:14px;border:1px solid var(--line);
+      background:rgba(255,255,255,.06);color:var(--text);font-size:15px;outline:none;font-family:inherit;
+    }
+    textarea{min-height:96px;resize:vertical}
+    .full-width{grid-column:1 / -1}
+    button{border:none;cursor:pointer;font-weight:800;transition:transform .18s ease, opacity .18s ease}
+    button:hover{transform:translateY(-1px);opacity:.97}
+    .btn-green,.btn-signin{background:linear-gradient(135deg,var(--green),#16a34a);color:#fff;padding:13px 18px;border-radius:14px}
+    .btn-blue{background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;padding:13px 18px;border-radius:14px}
+    .btn-purple,.btn-signup{background:linear-gradient(135deg,var(--purple),#6d28d9);color:#fff;padding:13px 18px;border-radius:14px}
+    .btn-amber{background:linear-gradient(135deg,var(--amber),#d97706);color:#fff;padding:13px 18px;border-radius:14px}
+    .btn-red{background:rgba(239,68,68,.18);color:#fff;padding:13px 18px;border-radius:14px;border:1px solid rgba(239,68,68,.22)}
+    .pill{display:inline-flex;align-items:center;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-size:13px;font-weight:700}
+    .msg{display:none;margin-top:14px;padding:13px 14px;border-radius:14px;font-weight:800}
+    .ok{background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.24);color:#d7ffe5}
+    .err{background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.22);color:#ffe1e1}
+    .map-frame{
+      margin-top:14px;width:100%;height:320px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:#0b1326;overflow:hidden
+    }
     .route-stats{margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
     .route-stat{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
-    .route-stat h4{margin:0 0 6px;color:#9ec5ff;font-size:12px;text-transform:uppercase;letter-spacing:.08em}.route-stat p{margin:0;font-size:22px;font-weight:800}
+    .route-stat h4{margin:0 0 6px;color:#9ec5ff;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+    .route-stat p{margin:0;font-size:22px;font-weight:800}
     .route-message{margin-top:12px;color:#b7c8df;font-size:14px;line-height:1.6}
-    .section{display:none;margin-bottom:20px;background:rgba(13,27,47,.7);border:1px solid var(--line);border-radius:22px}
-    .active{display:block}
-    .section-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px}
-    .section-head h2{margin:0;font-size:28px}.section-head p{margin:6px 0 0;color:var(--muted);line-height:1.6;max-width:760px}
-    .section-badge{padding:10px 14px;border-radius:14px;background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.18);color:#d5fffb;font-size:13px;font-weight:800}
-    .login-box{max-width:760px;margin:0 auto 20px;text-align:center}
-    .login-grid,.form-grid,.admin-stats,.today-stats{display:grid;gap:14px}.login-grid,.form-grid{grid-template-columns:1fr 1fr;margin-top:18px}
-    .ride-layout,.driver-layout,.admin-grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:20px;align-items:start}
-    input,select,textarea{width:100%;padding:14px 15px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);font-size:15px;outline:none;font-family:inherit}
-    textarea{min-height:96px;resize:vertical}.full-width{grid-column:1 / -1}
-    button{border:none;cursor:pointer;font-weight:800;transition:transform .18s ease, opacity .18s ease}.ride,.driver,.admin,.secondary,.delete-btn,.signin-btn,.signup-btn{padding:13px 18px;border-radius:14px;color:#fff}
-    .ride,.signin-btn{background:linear-gradient(135deg,#22c55e,#16a34a)} .driver{background:linear-gradient(135deg,#3b82f6,#2563eb)}
-    .admin{background:linear-gradient(135deg,#f59e0b,#d97706)} .secondary,.signup-btn{background:linear-gradient(135deg,#8b5cf6,#6d28d9)}
-    .delete-btn{background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.2)}
-    .auth-tabs{display:flex;justify-content:center;gap:10px;margin-top:18px}
-    .auth-tab{padding:10px 16px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:#fff}
-    .auth-tab.active{background:rgba(20,184,166,.15);border-color:rgba(20,184,166,.3)}
-    .success-box,.auth-message,.error-box{display:none;margin-top:14px;padding:13px 14px;border-radius:14px;font-weight:800}
-    .success-box,.auth-message{background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.24);color:#d7ffe5}
-    .error-box{background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.22);color:#ffe1e1}
-    .payments-panel{margin-top:18px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:20px;padding:18px}
-    .payments-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
-    .payments-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-    .payment-box{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:16px;padding:16px}
-    .payment-box h4{margin:0 0 8px;font-size:14px;color:var(--muted)} .payment-box p{margin:0;font-size:18px;font-weight:800}
-    .admin-stats{grid-template-columns:repeat(5,1fr);margin-bottom:18px}.today-stats{grid-template-columns:repeat(4,1fr);margin-bottom:20px}
-    .stat-card{padding:20px}.stat-card h4{margin:0;color:var(--muted)} .stat-card p{margin:12px 0 0;font-size:30px;font-weight:800}
-    .booking-card{padding:18px;margin-top:14px;position:relative;overflow:hidden}.booking-card::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg, rgba(20,184,166,.85), rgba(59,130,246,.85))}
-    .booking-card p{margin:7px 0}.status-row,.action-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .booking-card{padding:18px;margin-top:14px;position:relative;overflow:hidden}
+    .booking-card::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg, rgba(20,184,166,.85), rgba(59,130,246,.85))}
+    .booking-card p{margin:7px 0}
+    .status-row,.action-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
     .status{display:inline-block;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800;text-transform:uppercase}
-    .pending{background:rgba(245,158,11,.18);color:#ffe4ae;border:1px solid rgba(245,158,11,.28)} .assigned{background:rgba(59,130,246,.18);color:#d9e9ff;border:1px solid rgba(59,130,246,.25)}
-    .completed{background:rgba(34,197,94,.18);color:#d8ffe5;border:1px solid rgba(34,197,94,.24)} .offline{background:rgba(71,85,105,.26);color:#e2e8f0;border:1px solid rgba(148,163,184,.24)} .online{background:rgba(34,197,94,.18);color:#d8ffe5;border:1px solid rgba(34,197,94,.24)}
-    .driver-combobox{position:relative;max-width:260px;min-width:220px}.driver-input{width:100%;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:rgba(15,23,42,.95);color:#fff;font-weight:600}
+    .pending{background:rgba(245,158,11,.18);color:#ffe4ae;border:1px solid rgba(245,158,11,.28)}
+    .assigned{background:rgba(59,130,246,.18);color:#d9e9ff;border:1px solid rgba(59,130,246,.25)}
+    .completed{background:rgba(34,197,94,.18);color:#d8ffe5;border:1px solid rgba(34,197,94,.24)}
+    .online{background:rgba(34,197,94,.18);color:#d8ffe5;border:1px solid rgba(34,197,94,.24)}
+    .offline{background:rgba(71,85,105,.26);color:#e2e8f0;border:1px solid rgba(148,163,184,.24)}
+    .driver-combobox{position:relative;max-width:260px;min-width:220px}
+    .driver-input{width:100%;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:rgba(15,23,42,.95);color:#fff;font-weight:600}
     .driver-list{position:absolute;top:100%;left:0;right:0;background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:12px;margin-top:6px;max-height:180px;overflow:auto;display:none;z-index:50;box-shadow:var(--shadow)}
-    .driver-item{padding:10px 12px;cursor:pointer}.driver-item:hover{background:#1e293b}
-    @media(max-width:1180px){.app-shell{grid-template-columns:1fr}.sidebar{position:static}.hero-grid,.ride-layout,.driver-layout,.admin-grid{grid-template-columns:1fr}.admin-stats{grid-template-columns:repeat(3,1fr)}.today-stats{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:860px){.login-grid,.form-grid,.hero-steps,.payments-grid,.route-stats{grid-template-columns:1fr}.admin-stats,.today-stats{grid-template-columns:1fr 1fr}}
+    .driver-item{padding:10px 12px;cursor:pointer}
+    .driver-item:hover{background:#1e293b}
+    .hidden{display:none!important}
+    @media(max-width:1180px){.app-shell{grid-template-columns:1fr}.sidebar{position:static}.hero-grid,.two-col,.admin-grid{grid-template-columns:1fr}.grid4{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:860px){.grid2,.grid4,.step-grid,.route-stats{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-<div class="app-shell">
-  <aside class="sidebar">
-    <div class="logo-wrap"><div class="logo-box">🚗</div><div><h1>UVEL</h1><p>Reliable community transport</p></div></div>
-    <div class="nav-title">Workspace</div>
-    <div class="side-nav" id="navButtons" style="display:none;">
-      <button class="side-link" id="rideNavBtn" onclick="showSection('ride')"><span>Ride App</span><small>Passenger</small></button>
-      <button class="side-link" id="driverNavBtn" onclick="showSection('driver')"><span>Driver App</span><small>Trips</small></button>
-      <button class="side-link" id="adminNavBtn" onclick="showSection('admin')"><span>Admin Panel</span><small>Dispatch</small></button>
-    </div>
-    <div id="sessionBar" style="display:none;"><div class="pill" id="roleBadge">Role: Guest</div><button class="logout-btn" onclick="logoutUser()">Logout</button></div>
-    <div class="side-card"><h3>Operations Flow</h3><p>Book trips, assign drivers, start rides, complete trips, track payments, and keep transport records in one dashboard.</p></div>
-    <div class="side-card"><h3>Auth + Maps Fixed</h3><p>This version fixes sign in / sign up and forces Leaflet maps to initialize correctly on load and section change.</p></div>
-  </aside>
-
-  <main class="main">
-    <div id="heroSection">
-      <div class="hero-top"><div class="hero-copy"><h2>Modern transport operations for community and NDIS-ready services.</h2><p>Passenger requests are saved locally and can be seen by Admin in another tab of the same browser.</p></div></div>
-      <div class="hero-grid">
-        <div class="workflow-card">
-          <h3>Operational Workflow</h3>
-          <p>Clear booking lifecycle from request to trip completion and payment tracking.</p>
-          <div class="hero-steps">
-            <div class="step-chip"><strong>Book</strong>Passenger submits request</div>
-            <div class="step-chip"><strong>Pending</strong>Admin receives request</div>
-            <div class="step-chip"><strong>Assign</strong>Admin selects driver</div>
-            <div class="step-chip"><strong>Complete</strong>Trip finalised</div>
-          </div>
-        </div>
-        <div class="chart-card">
-          <h3>Admin Live Trip Map</h3>
-          <p>Admin-only map for active bookings and driver locations.</p>
-          <div id="liveMapFrame" class="real-map-frame"></div>
-          <div class="route-stats">
-            <div class="route-stat"><h4>Route</h4><p id="liveRouteDistance">--</p></div>
-            <div class="route-stat"><h4>ETA</h4><p id="liveRouteEta">--</p></div>
-            <div class="route-stat"><h4>Driver to Pickup</h4><p id="liveDriverPickupEta">--</p></div>
-          </div>
-          <div class="route-message" id="liveRouteMessage">Waiting for active booking.</div>
-        </div>
-      </div>
-    </div>
-
-    <div id="loginSection" class="login-box">
-      <div class="section-head" style="margin-bottom:14px;">
-        <div><h2>Login / Role Switch</h2><p>This single-file version uses role simulation plus localStorage. Use the same browser for Passenger and Admin.</p></div>
-        <div class="section-badge">LocalStorage Mode</div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="logo-wrap">
+        <div class="logo-box">🚗</div>
+        <div><h1>UVEL</h1><p>Reliable community transport</p></div>
       </div>
 
-      <div class="auth-tabs">
-        <button class="auth-tab active" id="signInTab" onclick="setAuthMode('signin')">Sign In</button>
-        <button class="auth-tab" id="signUpTab" onclick="setAuthMode('signup')">Sign Up</button>
+      <div class="nav-title">Workspace</div>
+      <div class="side-nav" id="navButtons" style="display:none;">
+        <button class="side-link" id="rideNavBtn" onclick="showSection('ride')"><span>Ride App</span><small>Passenger</small></button>
+        <button class="side-link" id="driverNavBtn" onclick="showSection('driver')"><span>Driver App</span><small>Trips</small></button>
+        <button class="side-link" id="adminNavBtn" onclick="showSection('admin')"><span>Admin Panel</span><small>Dispatch</small></button>
       </div>
 
-      <div class="login-grid">
-        <input id="authName" type="text" placeholder="Your name">
-        <input id="authEmail" type="email" placeholder="Email address">
-        <select id="authRole">
-          <option value="">Select role</option>
-          <option value="Passenger">Passenger</option>
-          <option value="Driver">Driver</option>
-          <option value="Admin">Admin</option>
-        </select>
-        <input id="authDriverName" type="text" placeholder="Driver name (for Driver role)">
-        <input id="authPassword" type="password" placeholder="Password">
-        <input id="authPasswordConfirm" type="password" placeholder="Confirm password">
+      <div id="sessionBar" style="display:none;">
+        <div class="pill" id="roleBadge">Role: Guest</div>
+        <button class="logout-btn" onclick="logoutUser()">Logout</button>
       </div>
 
-      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:18px;">
-        <button class="signin-btn" id="signInBtn" onclick="signInUser()">Sign In</button>
-        <button class="signup-btn" id="signUpBtn" style="display:none;" onclick="signUpUser()">Create Account</button>
-        <button class="delete-btn" onclick="clearAllBookings()">Clear Saved Bookings</button>
+      <div class="side-card">
+        <h3>Working Fix</h3>
+        <p>This version fixes the two things you asked for: sign in / sign up and visible working maps.</p>
       </div>
 
-      <div id="authMessage" class="auth-message"></div>
-      <div id="authError" class="error-box"></div>
-
-      <div class="helper-text">
-        Demo password for built-in users: <strong>123456</strong><br>
-        Built-in accounts: admin@uvel.app, passenger@uvel.app, michael@uvel.app, daniel@uvel.app
+      <div class="side-card">
+        <h3>Demo Password</h3>
+        <p><strong>123456</strong> for built-in demo accounts.</p>
       </div>
-    </div>
+    </aside>
 
-    <div id="ride" class="section">
-      <div class="section-head"><div><h2>Ride App</h2><p>Create a trip request, view payment mode, and track your current trip.</p></div><div class="section-badge">Passenger View</div></div>
-      <div class="ride-layout">
+    <main class="main">
+      <div id="heroSection" class="hero">
         <div>
-          <div class="form-card">
-            <h3>Book a Ride</h3>
-            <p>Enter trip details below to create a new booking.</p>
-            <div class="form-grid">
-              <input id="passengerName" type="text" placeholder="Passenger name">
-              <select id="tripType"><option value="Normal">Normal</option><option value="NDIS">NDIS</option></select>
-              <input id="pickup" type="text" placeholder="Pickup location">
-              <input id="destination" type="text" placeholder="Destination">
-              <input id="tripDate" type="date">
-              <input id="tripTime" type="time">
-              <textarea id="tripNotes" class="full-width" placeholder="Notes (wheelchair, assistance, escort, special instructions)"></textarea>
-            </div>
-            <button class="ride" style="width:100%;margin-top:14px" onclick="requestRide()">Request Ride</button>
-            <div id="successBox" class="success-box">Ride requested successfully ✅</div>
-          </div>
-          <div class="payments-panel">
-            <div class="payments-top"><h3 style="margin:0;">Payments</h3><div class="pill">Stripe-ready</div></div>
-            <p style="margin-top:10px;">Normal trips can be paid by card. NDIS trips are marked as referral / invoice and do not require card payment in this MVP.</p>
-            <div class="payments-grid">
-              <div class="payment-box"><h4>Estimated fare</h4><p id="previewFare">AUD 0.00</p></div>
-              <div class="payment-box"><h4>Payment mode</h4><p id="previewPaymentMode">Stripe card</p></div>
+          <h2>Modern transport operations for community and NDIS-ready services.</h2>
+          <p>Passenger requests are saved locally and can be seen by Admin in another tab of the same browser.</p>
+        </div>
+
+        <div class="hero-grid">
+          <div class="panel">
+            <h3>Operational Workflow</h3>
+            <p class="muted">Clear booking lifecycle from request to trip completion and payment tracking.</p>
+            <div class="step-grid">
+              <div class="step"><strong>Book</strong>Passenger submits request</div>
+              <div class="step"><strong>Pending</strong>Admin receives request</div>
+              <div class="step"><strong>Assign</strong>Admin selects driver</div>
+              <div class="step"><strong>Complete</strong>Trip finalised</div>
             </div>
           </div>
-        </div>
-        <div class="list-card">
-          <h3>My Trips</h3>
-          <div class="real-map-frame" id="passengerMapFrame"></div>
-          <div class="route-stats">
-            <div class="route-stat"><h4>Route</h4><p id="passengerRouteDistance">--</p></div>
-            <div class="route-stat"><h4>ETA</h4><p id="passengerRouteEta">--</p></div>
-            <div class="route-stat"><h4>Driver to Pickup</h4><p id="passengerDriverPickupEta">--</p></div>
+
+          <div class="panel">
+            <h3>Admin Live Trip Map</h3>
+            <p class="muted">Admin-only map for active bookings and driver locations.</p>
+            <div id="liveMapFrame" class="map-frame"></div>
+            <div class="route-stats">
+              <div class="route-stat"><h4>Route</h4><p id="liveRouteDistance">--</p></div>
+              <div class="route-stat"><h4>ETA</h4><p id="liveRouteEta">--</p></div>
+              <div class="route-stat"><h4>Driver to Pickup</h4><p id="liveDriverPickupEta">--</p></div>
+            </div>
+            <div class="route-message" id="liveRouteMessage">Waiting for active booking.</div>
           </div>
-          <div class="route-message" id="passengerRouteMessage">Waiting for your trip.</div>
-          <div id="riderTrips"></div>
         </div>
       </div>
-    </div>
 
-    <div id="driver" class="section">
-      <div class="section-head"><div><h2>Driver App</h2><p>Drivers only receive trips after Admin assigns them.</p><div id="driverSelectedText" class="pill">No driver selected.</div></div><div class="section-badge">Driver View</div></div>
-      <div class="driver-layout">
-        <div class="mini-panel">
-          <h3>Driver Workflow</h3>
-          <div class="hero-steps" style="margin-top:14px; grid-template-columns:repeat(4,1fr);">
-            <div class="step-chip"><strong>Assigned</strong>Ready to begin</div><div class="step-chip"><strong>En Route</strong>Heading to pickup</div><div class="step-chip"><strong>Arrived</strong>At pickup point</div><div class="step-chip"><strong>Complete</strong>Trip closed</div>
+      <div id="loginSection" class="login-box">
+        <div class="section-head" style="justify-content:center;">
+          <div>
+            <h2>Login / Role Switch</h2>
+            <p class="muted">Use built-in accounts or create a new local demo account.</p>
           </div>
-          <div class="status-row" style="margin-top:12px;"><span class="status completed" id="driverAvailabilityBadge">Online</span><button class="secondary" onclick="toggleMyAvailability()">Toggle Availability</button></div>
         </div>
-        <div class="list-card">
-          <h3>My Trips</h3>
-          <div class="real-map-frame" id="driverMapFrame"></div>
-          <div class="route-stats">
-            <div class="route-stat"><h4>Route</h4><p id="driverRouteDistance">--</p></div>
-            <div class="route-stat"><h4>ETA</h4><p id="driverRouteEta">--</p></div>
-            <div class="route-stat"><h4>Driver to Pickup</h4><p id="driverDriverPickupEta">--</p></div>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="signInTab" onclick="setAuthMode('signin')">Sign In</button>
+          <button class="auth-tab" id="signUpTab" onclick="setAuthMode('signup')">Sign Up</button>
+        </div>
+
+        <div class="grid2">
+          <input id="authName" type="text" placeholder="Your name">
+          <input id="authEmail" type="email" placeholder="Email address">
+          <select id="authRole">
+            <option value="">Select role</option>
+            <option value="Passenger">Passenger</option>
+            <option value="Driver">Driver</option>
+            <option value="Admin">Admin</option>
+          </select>
+          <input id="authDriverName" type="text" placeholder="Driver name (for Driver role)">
+          <input id="authPassword" type="password" placeholder="Password">
+          <input id="authPasswordConfirm" type="password" placeholder="Confirm password" class="hidden">
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px;">
+          <button class="btn-signin" id="signInBtn" onclick="signInUser()">Sign In</button>
+          <button class="btn-signup hidden" id="signUpBtn" onclick="signUpUser()">Create Account</button>
+          <button class="btn-red" onclick="resetDemoData()">Reset Demo Data</button>
+        </div>
+
+        <div id="authMessage" class="msg ok"></div>
+        <div id="authError" class="msg err"></div>
+
+        <div class="muted" style="margin-top:12px;">
+          Built-in accounts: admin@uvel.app, passenger@uvel.app, michael@uvel.app, daniel@uvel.app
+        </div>
+      </div>
+
+      <div id="ride" class="section panel">
+        <div class="section-head">
+          <div><h2>Ride App</h2><p class="muted">Create a trip request and track it.</p></div>
+          <div class="section-badge">Passenger View</div>
+        </div>
+
+        <div class="two-col">
+          <div>
+            <div class="panel">
+              <h3>Book a Ride</h3>
+              <div class="grid2">
+                <input id="passengerName" type="text" placeholder="Passenger name">
+                <select id="tripType"><option value="Normal">Normal</option><option value="NDIS">NDIS</option></select>
+                <input id="pickup" type="text" placeholder="Pickup location">
+                <input id="destination" type="text" placeholder="Destination">
+                <input id="tripDate" type="date">
+                <input id="tripTime" type="time">
+                <textarea id="tripNotes" class="full-width" placeholder="Notes"></textarea>
+              </div>
+              <button class="btn-green" style="width:100%;margin-top:14px" onclick="requestRide()">Request Ride</button>
+              <div id="successBox" class="msg ok">Ride requested successfully.</div>
+            </div>
+
+            <div class="panel">
+              <h3>Payments</h3>
+              <div class="grid2">
+                <div class="panel" style="margin:0;"><h3 style="font-size:16px">Estimated fare</h3><p id="previewFare">AUD 0.00</p></div>
+                <div class="panel" style="margin:0;"><h3 style="font-size:16px">Payment mode</h3><p id="previewPaymentMode">Stripe card</p></div>
+              </div>
+            </div>
           </div>
-          <div class="route-message" id="driverRouteMessage">Waiting for assigned trip.</div>
-          <div id="driverTrips"></div>
-        </div>
-      </div>
-    </div>
 
-    <div id="admin" class="section">
-      <div class="section-head"><div><h2>Admin Panel</h2><p>Receive pending bookings, assign drivers, edit bookings, monitor statuses, and review trip data.</p></div><div class="section-badge">Operations View</div></div>
-      <div class="admin-stats">
-        <div class="stat-card"><h4>Total Bookings</h4><p id="totalBookings">0</p></div>
-        <div class="stat-card"><h4>Pending</h4><p id="pendingBookings">0</p></div>
-        <div class="stat-card"><h4>Assigned</h4><p id="assignedBookings">0</p></div>
-        <div class="stat-card"><h4>In Progress</h4><p id="progressBookings">0</p></div>
-        <div class="stat-card"><h4>Completed</h4><p id="completedBookings">0</p></div>
-      </div>
-      <div class="admin-grid">
-        <div class="panel-box">
-          <h3>Active Booking Requests</h3>
-          <div id="bookingList"></div>
-        </div>
-        <div class="panel-box">
-          <h3>Driver Management</h3>
-          <div id="adminDriversList"></div>
-        </div>
-      </div>
-    </div>
-  </main>
-</div>
-
-<script>
-let liveBookings = [];
-let currentRole = "";
-let currentUser = null;
-let currentDriver = "";
-let selectedAdminBookingId = "";
-const UVEL_BOOKINGS_KEY = "uvel_bookings_v10";
-const UVEL_USERS_KEY = "uvel_users_v10";
-const UVEL_SESSION_KEY = "uvel_session_v10";
-const UVEL_DRIVERS_KEY = "uvel_drivers_v10";
-const UVEL_DRIVER_STATUS_KEY = "uvel_driver_status_v10";
-
-const defaultUsers = [
-  { id:"u-passenger-1", role:"Passenger", name:"Passenger User", email:"passenger@uvel.app", password:"123456" },
-  { id:"u-driver-1", role:"Driver", name:"Michael", driverName:"Michael", email:"michael@uvel.app", password:"123456", availability:"Online" },
-  { id:"u-driver-2", role:"Driver", name:"Daniel", driverName:"Daniel", email:"daniel@uvel.app", password:"123456", availability:"Online" },
-  { id:"u-admin-1", role:"Admin", name:"Admin User", email:"admin@uvel.app", password:"123456" }
-];
-const defaultDrivers = ["Michael","Daniel"];
-let allUsers = [];
-let driverUsers = [];
-let driverAvailability = {};
-let authMode = "signin";
-const mapStore = {};
-
-function seedDefaults(){
-  if(!localStorage.getItem(UVEL_USERS_KEY)) localStorage.setItem(UVEL_USERS_KEY, JSON.stringify(defaultUsers));
-  if(!localStorage.getItem(UVEL_BOOKINGS_KEY)) localStorage.setItem(UVEL_BOOKINGS_KEY, JSON.stringify([]));
-  if(!localStorage.getItem(UVEL_DRIVERS_KEY)) localStorage.setItem(UVEL_DRIVERS_KEY, JSON.stringify(defaultDrivers));
-  if(!localStorage.getItem(UVEL_DRIVER_STATUS_KEY)) localStorage.setItem(UVEL_DRIVER_STATUS_KEY, JSON.stringify({Michael:"Online", Daniel:"Online"}));
-}
-function loadBookingsFromStorage(){ seedDefaults(); liveBookings = JSON.parse(localStorage.getItem(UVEL_BOOKINGS_KEY) || "[]"); }
-function saveBookingsToStorage(){ localStorage.setItem(UVEL_BOOKINGS_KEY, JSON.stringify(liveBookings)); }
-function loadUsersFromStorage(){
-  seedDefaults();
-  allUsers = JSON.parse(localStorage.getItem(UVEL_USERS_KEY) || "[]");
-  driverUsers = JSON.parse(localStorage.getItem(UVEL_DRIVERS_KEY) || "[]");
-  driverAvailability = JSON.parse(localStorage.getItem(UVEL_DRIVER_STATUS_KEY) || "{}");
-  driverUsers.forEach(n => { if(!driverAvailability[n]) driverAvailability[n] = "Online"; });
-}
-function saveUsersToStorage(){
-  localStorage.setItem(UVEL_USERS_KEY, JSON.stringify(allUsers));
-  localStorage.setItem(UVEL_DRIVERS_KEY, JSON.stringify(driverUsers));
-  localStorage.setItem(UVEL_DRIVER_STATUS_KEY, JSON.stringify(driverAvailability));
-}
-function persistSession(){ localStorage.setItem(UVEL_SESSION_KEY, JSON.stringify({currentRole,currentUser,currentDriver})); }
-function restoreSession(){
-  const raw = localStorage.getItem(UVEL_SESSION_KEY);
-  if(!raw) return;
-  const saved = JSON.parse(raw);
-  currentRole = saved?.currentRole || ""; currentUser = saved?.currentUser || null; currentDriver = saved?.currentDriver || "";
-}
-function clearSession(){ localStorage.removeItem(UVEL_SESSION_KEY); }
-
-function setAuthMode(mode){
-  authMode = mode;
-  document.getElementById("signInTab").classList.toggle("active", mode === "signin");
-  document.getElementById("signUpTab").classList.toggle("active", mode === "signup");
-  document.getElementById("signInBtn").style.display = mode === "signin" ? "inline-block" : "none";
-  document.getElementById("signUpBtn").style.display = mode === "signup" ? "inline-block" : "none";
-  document.getElementById("authPasswordConfirm").style.display = mode === "signup" ? "block" : "none";
-}
-function showMessage(text){ const box=document.getElementById("authMessage"), error=document.getElementById("authError"); error.style.display="none"; box.textContent=text; box.style.display="block"; setTimeout(()=>box.style.display="none",2500); }
-function showError(text){ const box=document.getElementById("authError"), success=document.getElementById("authMessage"); success.style.display="none"; box.textContent=text; box.style.display="block"; }
-
-function signInUser(){
-  loadUsersFromStorage();
-  const role = document.getElementById("authRole").value;
-  const email = document.getElementById("authEmail").value.trim().toLowerCase();
-  const password = document.getElementById("authPassword").value;
-  const name = document.getElementById("authName").value.trim();
-  const driverNameInput = document.getElementById("authDriverName").value.trim();
-  if(!role || !email || !password) return showError("Please enter role, email, and password.");
-  const found = allUsers.find(u => u.role === role && (u.email || "").toLowerCase() === email && u.password === password);
-  if(!found) return showError("Invalid login details.");
-  currentRole = found.role;
-  currentUser = {...found};
-  if(name) currentUser.name = name;
-  currentDriver = found.role === "Driver" ? (driverNameInput || found.driverName || found.name) : "";
-  persistSession();
-  applyRoleUI();
-  renderEverything();
-  refreshAllMaps();
-  showMessage("Logged in successfully.");
-}
-function signUpUser(){
-  loadUsersFromStorage();
-  const role = document.getElementById("authRole").value;
-  const name = document.getElementById("authName").value.trim();
-  const email = document.getElementById("authEmail").value.trim().toLowerCase();
-  const driverNameInput = document.getElementById("authDriverName").value.trim();
-  const password = document.getElementById("authPassword").value;
-  const confirm = document.getElementById("authPasswordConfirm").value;
-  if(!role || !name || !email || !password) return showError("Please complete all sign up fields.");
-  if(password !== confirm) return showError("Passwords do not match.");
-  if(allUsers.some(u => (u.email || "").toLowerCase() === email)) return showError("Email already exists.");
-  const newUser = { id:`u-${Date.now()}`, role, name, email, password };
-  if(role === "Driver"){
-    newUser.driverName = driverNameInput || name;
-    newUser.availability = "Online";
-    if(!driverUsers.includes(newUser.driverName)) driverUsers.push(newUser.driverName);
-    driverAvailability[newUser.driverName] = "Online";
-  }
-  allUsers.push(newUser);
-  saveUsersToStorage();
-  showMessage("Account created. Now sign in.");
-  setAuthMode("signin");
-}
-function loginUser(){ signInUser(); }
-
-function getDriverAvailability(driverName){ return driverAvailability[driverName] || "Online"; }
-function setDriverAvailability(driverName, availability){
-  driverAvailability[driverName] = availability;
-  allUsers = allUsers.map(u => u.role === "Driver" && (u.driverName || u.name) === driverName ? {...u, availability} : u);
-  saveUsersToStorage();
-}
-function getAvailableDrivers(){ return driverUsers.filter(n => getDriverAvailability(n) === "Online"); }
-
-function applyRoleUI(){
-  const sessionBar = document.getElementById("sessionBar");
-  const navButtons = document.getElementById("navButtons");
-  const loginSection = document.getElementById("loginSection");
-  const roleBadge = document.getElementById("roleBadge");
-  if(!currentUser || !currentRole){
-    sessionBar.style.display = "none"; navButtons.style.display = "none"; loginSection.style.display = "block";
-    document.getElementById("ride").style.display = "none"; document.getElementById("driver").style.display = "none"; document.getElementById("admin").style.display = "none";
-    document.getElementById("heroSection").style.display = "block";
-    return;
-  }
-  sessionBar.style.display = "block"; navButtons.style.display = "grid"; loginSection.style.display = "none";
-  roleBadge.textContent = `Role: ${currentRole}${currentRole === "Driver" && currentDriver ? ` (${currentDriver})` : ""}`;
-  document.getElementById("ride").style.display = currentRole === "Passenger" ? "block" : "none";
-  document.getElementById("driver").style.display = currentRole === "Driver" ? "block" : "none";
-  document.getElementById("admin").style.display = currentRole === "Admin" ? "block" : "none";
-  document.getElementById("rideNavBtn").style.display = currentRole === "Passenger" ? "flex" : "none";
-  document.getElementById("driverNavBtn").style.display = currentRole === "Driver" ? "flex" : "none";
-  document.getElementById("adminNavBtn").style.display = currentRole === "Admin" ? "flex" : "none";
-  document.getElementById("heroSection").style.display = currentRole === "Admin" ? "block" : "none";
-  updateDriverHeader(); updateDriverAvailabilityUI();
-  if(currentRole === "Passenger") showSection("ride");
-  if(currentRole === "Driver") showSection("driver");
-  if(currentRole === "Admin") showSection("admin");
-}
-function logoutUser(){ currentUser=null; currentRole=""; currentDriver=""; clearSession(); applyRoleUI(); }
-function showSection(section){
-  ["ride","driver","admin"].forEach(id => document.getElementById(id).classList.remove("active"));
-  ["rideNavBtn","driverNavBtn","adminNavBtn"].forEach(id => document.getElementById(id)?.classList.remove("active-link"));
-  document.getElementById(section).classList.add("active");
-  const map = {ride:"rideNavBtn", driver:"driverNavBtn", admin:"adminNavBtn"};
-  document.getElementById(map[section])?.classList.add("active-link");
-  setTimeout(() => { Object.values(mapStore).forEach(item => item.map?.invalidateSize()); refreshAllMaps(); }, 250);
-}
-function updateDriverHeader(){ document.getElementById("driverSelectedText").textContent = currentDriver ? `Logged in as: ${currentDriver}` : "No driver selected."; }
-function updateDriverAvailabilityUI(){
-  const badge = document.getElementById("driverAvailabilityBadge");
-  if(!badge) return;
-  const availability = currentDriver ? getDriverAvailability(currentDriver) : "Offline";
-  badge.textContent = availability; badge.className = `status ${availability === "Online" ? "online" : "offline"}`;
-}
-function toggleMyAvailability(){
-  if(currentRole !== "Driver" || !currentDriver) return;
-  const next = getDriverAvailability(currentDriver) === "Online" ? "Offline" : "Online";
-  setDriverAvailability(currentDriver, next); updateDriverAvailabilityUI(); renderEverything();
-}
-
-function createEmojiIcon(emoji,bgColor){
-  return L.divIcon({className:"",html:`<div style="width:34px;height:34px;border-radius:50%;background:${bgColor};border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 6px 16px rgba(0,0,0,.28);">${emoji}</div>`,iconSize:[34,34],iconAnchor:[17,17]});
-}
-const pickupIcon = createEmojiIcon("📍","#16a34a");
-const destinationIcon = createEmojiIcon("🏁","#dc2626");
-const driverIcon = createEmojiIcon("🚗","#2563eb");
-
-function ensureMap(mapId){
-  if(mapStore[mapId]?.map) return mapStore[mapId];
-  const el = document.getElementById(mapId);
-  if(!el) return null;
-  const map = L.map(mapId,{zoomControl:true}).setView([-33.8688,151.2093],11);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"&copy; OpenStreetMap contributors",maxZoom:19}).addTo(map);
-  mapStore[mapId] = {map,pickupMarker:null,destinationMarker:null,driverMarker:null,routeLine:null};
-  setTimeout(() => map.invalidateSize(), 300);
-  return mapStore[mapId];
-}
-function clearMapObjects(store){
-  if(!store) return;
-  if(store.pickupMarker){store.map.removeLayer(store.pickupMarker);store.pickupMarker=null;}
-  if(store.destinationMarker){store.map.removeLayer(store.destinationMarker);store.destinationMarker=null;}
-  if(store.driverMarker){store.map.removeLayer(store.driverMarker);store.driverMarker=null;}
-  if(store.routeLine){store.map.removeLayer(store.routeLine);store.routeLine=null;}
-}
-async function geocodeLocation(place){
-  if(!place) return null;
-  const q = `${place}, Sydney, NSW, Australia`;
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
-  try{
-    const res = await fetch(url); const data = await res.json();
-    if(!data || !data.length) return null;
-    return {lat:parseFloat(data[0].lat), lng:parseFloat(data[0].lon)};
-  }catch(e){ return null; }
-}
-function haversineKm(lat1,lon1,lat2,lon2){
-  const R = 6371; const dLat = (lat2-lat1)*Math.PI/180; const dLon = (lon2-lon1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-  return 2*R*Math.asin(Math.sqrt(a));
-}
-function setRouteUI(prefix,distance="--",eta="--",driverPickupEta="--",message="Waiting for booking."){
-  document.getElementById(`${prefix}RouteDistance`).textContent = distance;
-  document.getElementById(`${prefix}RouteEta`).textContent = eta;
-  document.getElementById(`${prefix}DriverPickupEta`).textContent = driverPickupEta;
-  document.getElementById(`${prefix}RouteMessage`).textContent = message;
-}
-async function renderBookingMap(mapId,prefix,booking){
-  const store = ensureMap(mapId);
-  if(!store) return;
-  clearMapObjects(store);
-  if(!booking || !booking.pickup || !booking.destination){
-    store.map.setView([-33.8688,151.2093],11); setRouteUI(prefix,"--","--","--","Waiting for active booking."); return;
-  }
-  const pickupPoint = booking.pickupCoords || await geocodeLocation(booking.pickup);
-  const destinationPoint = booking.destinationCoords || await geocodeLocation(booking.destination);
-  if(!pickupPoint || !destinationPoint){
-    store.map.setView([-33.8688,151.2093],11); setRouteUI(prefix,"--","--","--","Could not match one of the addresses. Try a more specific Sydney address."); return;
-  }
-  booking.pickupCoords = pickupPoint; booking.destinationCoords = destinationPoint;
-  store.pickupMarker = L.marker([pickupPoint.lat,pickupPoint.lng],{icon:pickupIcon}).addTo(store.map);
-  store.destinationMarker = L.marker([destinationPoint.lat,destinationPoint.lng],{icon:destinationIcon}).addTo(store.map);
-  const coords = [[pickupPoint.lat,pickupPoint.lng],[destinationPoint.lat,destinationPoint.lng]];
-  const km = haversineKm(pickupPoint.lat,pickupPoint.lng,destinationPoint.lat,destinationPoint.lng).toFixed(1);
-  const eta = Math.ceil(Number(km)*2.5);
-  store.routeLine = L.polyline(coords,{color:"#8b5cf6",weight:5,opacity:.85,dashArray:"10,8"}).addTo(store.map);
-  store.map.fitBounds(coords,{padding:[40,40]});
-  setRouteUI(prefix,`${km} km`,`${eta} min`,`--`,"Route loaded.");
-}
-function getCurrentPassengerBooking(){
-  if(!currentUser || currentRole !== "Passenger") return null;
-  return liveBookings.find(b => b.createdBy === currentUser.id && b.status !== "Completed") || liveBookings.find(b => b.createdBy === currentUser.id) || null;
-}
-function getCurrentDriverBooking(){
-  if(!currentDriver) return null;
-  return liveBookings.find(b => (b.driver || "").toLowerCase() === currentDriver.toLowerCase() && b.status !== "Completed") || liveBookings.find(b => (b.driver || "").toLowerCase() === currentDriver.toLowerCase()) || null;
-}
-function getAdminFocusedBooking(){
-  if(selectedAdminBookingId){ const found = liveBookings.find(b => b.id === selectedAdminBookingId); if(found) return found; }
-  return liveBookings.find(b => b.status !== "Completed") || liveBookings[0] || null;
-}
-async function refreshAllMaps(){
-  await renderBookingMap("liveMapFrame","live",getAdminFocusedBooking());
-  await renderBookingMap("passengerMapFrame","passenger",getCurrentPassengerBooking());
-  await renderBookingMap("driverMapFrame","driver",getCurrentDriverBooking());
-}
-
-function calculateFare(estimatedKm,notes="",tripType="Normal"){
-  const kmValue = Math.max(0,Number(estimatedKm||0));
-  const baseFare = tripType === "NDIS" ? 14.5 : 8.5;
-  const perKm = tripType === "NDIS" ? 2.45 : 1.95;
-  const supportLoad = notes && notes.trim() ? 4.5 : 0;
-  const minimumFare = tripType === "NDIS" ? 22 : 14;
-  return Math.round(Math.max(minimumFare, baseFare + (kmValue * perKm) + supportLoad) * 100) / 100;
-}
-async function updateFarePreview(){
-  const tripType = document.getElementById("tripType").value;
-  const notes = document.getElementById("tripNotes").value.trim();
-  const pickup = document.getElementById("pickup").value.trim();
-  const destination = document.getElementById("destination").value.trim();
-  let kmValue = 0;
-  if(pickup && destination){
-    const pickupCoords = await geocodeLocation(pickup);
-    const destinationCoords = await geocodeLocation(destination);
-    if(pickupCoords && destinationCoords) kmValue = Number(haversineKm(pickupCoords.lat,pickupCoords.lng,destinationCoords.lat,destinationCoords.lng).toFixed(1));
-  }
-  const previewFare = calculateFare(kmValue,notes,tripType);
-  document.getElementById("previewFare").textContent = `AUD ${previewFare.toFixed(2)}`;
-  document.getElementById("previewPaymentMode").textContent = tripType === "NDIS" ? "Referral / invoice" : "Stripe card";
-}
-async function requestRide(){
-  const passengerName = document.getElementById("passengerName").value.trim();
-  const tripType = document.getElementById("tripType").value;
-  const pickup = document.getElementById("pickup").value.trim();
-  const destination = document.getElementById("destination").value.trim();
-  const tripDate = document.getElementById("tripDate").value;
-  const tripTime = document.getElementById("tripTime").value;
-  const notes = document.getElementById("tripNotes").value.trim();
-  if(currentRole !== "Passenger" || !currentUser) return alert("Please login as a Passenger first.");
-  if(!passengerName || !pickup || !destination || !tripDate || !tripTime) return alert("Please complete all required fields.");
-  const pickupCoords = await geocodeLocation(pickup);
-  const destinationCoords = await geocodeLocation(destination);
-  const estimatedKm = pickupCoords && destinationCoords ? Number(haversineKm(pickupCoords.lat,pickupCoords.lng,destinationCoords.lat,destinationCoords.lng).toFixed(1)) : 0;
-  const booking = {
-    id:`b-${Date.now()}`, passengerName, tripType, pickup, destination, pickupCoords, destinationCoords,
-    tripDate, tripTime, notes, driver:"", status:"Pending", estimatedKm, fareAUD: calculateFare(estimatedKm,notes,tripType),
-    paymentStatus: tripType === "NDIS" ? "NDIS / Invoice" : "Unpaid", createdBy: currentUser.id, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString()
-  };
-  liveBookings.unshift(booking);
-  saveBookingsToStorage(); renderEverything(); refreshAllMaps();
-  document.getElementById("successBox").style.display = "block"; setTimeout(()=>document.getElementById("successBox").style.display="none",2500);
-  ["pickup","destination","tripDate","tripTime","tripNotes"].forEach(id => document.getElementById(id).value = "");
-  updateFarePreview();
-}
-function getFilteredActiveBookings(){ return liveBookings.filter(b => !["Completed","Cancelled"].includes(b.status)); }
-function updateAdminStats(){
-  document.getElementById("totalBookings").textContent = liveBookings.length;
-  document.getElementById("pendingBookings").textContent = liveBookings.filter(b => b.status === "Pending").length;
-  document.getElementById("assignedBookings").textContent = liveBookings.filter(b => b.status === "Assigned").length;
-  document.getElementById("progressBookings").textContent = 0;
-  document.getElementById("completedBookings").textContent = liveBookings.filter(b => b.status === "Completed").length;
-}
-function getRecommendedDriver(){
-  const pool = getAvailableDrivers(); if(!pool.length) return "";
-  const ranked = [...pool].map(name => ({name, active: liveBookings.filter(b => (b.driver || "").toLowerCase() === name.toLowerCase() && b.status === "Assigned").length}));
-  ranked.sort((a,b) => a.active - b.active || a.name.localeCompare(b.name));
-  return ranked[0]?.name || "";
-}
-function populateDriverSearchList(bookingId, filterText=""){
-  const list = document.getElementById(`driverList-${bookingId}`); if(!list) return;
-  const filtered = driverUsers.filter(driver => driver.toLowerCase().includes(filterText.toLowerCase()));
-  list.innerHTML = filtered.length ? filtered.map(driver => `<div class="driver-item" onclick="assignSelectedDriver('${bookingId}','${driver}')">${driver}</div>`).join("") : `<div class="driver-item">No matching driver</div>`;
-}
-function toggleDriverList(bookingId,show){ const list = document.getElementById(`driverList-${bookingId}`); if(list) list.style.display = show ? "block" : "none"; }
-function filterDriverOptions(inputEl, bookingId){ populateDriverSearchList(bookingId, inputEl.value || ""); toggleDriverList(bookingId,true); }
-function assignSelectedDriver(bookingId, driverName){
-  const booking = liveBookings.find(b => b.id === bookingId); if(!booking) return;
-  if(getDriverAvailability(driverName) !== "Online") return alert("Selected driver is offline.");
-  booking.driver = driverName; booking.status = "Assigned"; booking.updatedAt = new Date().toISOString();
-  saveBookingsToStorage(); renderEverything(); refreshAllMaps();
-}
-function assignRecommendedDriver(bookingId){
-  const booking = liveBookings.find(b => b.id === bookingId); if(!booking) return;
-  const rec = getRecommendedDriver(); if(!rec) return alert("No online drivers available.");
-  booking.driver = rec; booking.status = "Assigned"; booking.updatedAt = new Date().toISOString();
-  saveBookingsToStorage(); renderEverything(); refreshAllMaps();
-}
-function moveBookingStatus(bookingId,status){
-  const booking = liveBookings.find(b => b.id === bookingId); if(!booking) return;
-  booking.status = status; booking.updatedAt = new Date().toISOString();
-  saveBookingsToStorage(); renderEverything(); refreshAllMaps();
-}
-function renderAdminBookings(){
-  updateAdminStats();
-  document.getElementById("recommendedDriverPill")?.textContent = `Recommended: ${getRecommendedDriver() || "--"}`;
-  const bookingList = document.getElementById("bookingList");
-  const items = getFilteredActiveBookings();
-  if(!items.length){ bookingList.innerHTML = `<p style="color:#9eb0ca;">No bookings yet.</p>`; return; }
-  bookingList.innerHTML = items.map(booking => `
-    <div class="booking-card">
-      <p><strong>Booking ID:</strong> ${booking.id}</p>
-      <p><strong>Passenger:</strong> ${booking.passengerName}</p>
-      <p><strong>Trip Type:</strong> ${booking.tripType}</p>
-      <p><strong>Pickup:</strong> ${booking.pickup}</p>
-      <p><strong>Destination:</strong> ${booking.destination}</p>
-      <p><strong>Date:</strong> ${booking.tripDate}</p>
-      <p><strong>Time:</strong> ${booking.tripTime}</p>
-      <p><strong>Driver:</strong> ${booking.driver || "Unassigned"}</p>
-      <p><strong>Fare:</strong> AUD ${Number(booking.fareAUD || 0).toFixed(2)}</p>
-      <div class="status-row"><span class="status ${booking.status === "Assigned" ? "assigned" : booking.status === "Completed" ? "completed" : "pending"}">${booking.status}</span></div>
-      ${booking.status === "Pending" ? `
-        <div class="action-row">
-          <div class="driver-combobox">
-            <input class="driver-input" placeholder="Search driver..." oninput="filterDriverOptions(this, '${booking.id}')" onclick="filterDriverOptions(this, '${booking.id}')" onfocus="filterDriverOptions(this, '${booking.id}')" onblur="setTimeout(() => toggleDriverList('${booking.id}', false), 200)">
-            <div class="driver-list" id="driverList-${booking.id}"></div>
+          <div class="panel">
+            <h3>Passenger Live Map</h3>
+            <div id="passengerMapFrame" class="map-frame"></div>
+            <div class="route-stats">
+              <div class="route-stat"><h4>Route</h4><p id="passengerRouteDistance">--</p></div>
+              <div class="route-stat"><h4>ETA</h4><p id="passengerRouteEta">--</p></div>
+              <div class="route-stat"><h4>Driver to Pickup</h4><p id="passengerDriverPickupEta">--</p></div>
+            </div>
+            <div class="route-message" id="passengerRouteMessage">Waiting for your trip.</div>
+            <div id="riderTrips"></div>
           </div>
-          <button class="driver" onclick="assignRecommendedDriver('${booking.id}')">Auto Assign</button>
-        </div>` : ""}
-      <div class="action-row">
-        <button class="secondary" onclick="selectedAdminBookingId='${booking.id}'; refreshAllMaps()">Show on Map</button>
-        ${booking.status !== "Completed" ? `<button class="ride" onclick="moveBookingStatus('${booking.id}','Completed')">Mark Completed</button>` : ""}
+        </div>
       </div>
-    </div>
-  `).join("");
-  items.forEach(b => b.status === "Pending" && populateDriverSearchList(b.id, ""));
-}
-function renderPassengerTrips(){
-  const el = document.getElementById("riderTrips");
-  if(!currentUser || currentRole !== "Passenger") return el.innerHTML = `<p style="color:#9eb0ca;">No trips yet.</p>`;
-  const trips = liveBookings.filter(b => b.createdBy === currentUser.id);
-  if(!trips.length) return el.innerHTML = `<p style="color:#9eb0ca;">No trips yet.</p>`;
-  el.innerHTML = trips.map(t => `<div class="booking-card"><p><strong>Booking ID:</strong> ${t.id}</p><p><strong>Pickup:</strong> ${t.pickup}</p><p><strong>Destination:</strong> ${t.destination}</p><p><strong>Driver:</strong> ${t.driver || "Waiting for admin assignment"}</p><p><strong>Fare:</strong> AUD ${Number(t.fareAUD || 0).toFixed(2)}</p><div class="status-row"><span class="status ${t.status === "Assigned" ? "assigned" : t.status === "Completed" ? "completed" : "pending"}">${t.status}</span></div></div>`).join("");
-}
-function renderDriverTrips(){
-  const el = document.getElementById("driverTrips");
-  if(!currentDriver) return el.innerHTML = `<p style="color:#9eb0ca;">No assigned trips yet.</p>`;
-  const trips = liveBookings.filter(b => (b.driver || "").toLowerCase() === currentDriver.toLowerCase());
-  if(!trips.length) return el.innerHTML = `<p style="color:#9eb0ca;">No assigned trips yet.</p>`;
-  el.innerHTML = trips.map(t => `<div class="booking-card"><p><strong>Booking ID:</strong> ${t.id}</p><p><strong>Passenger:</strong> ${t.passengerName}</p><p><strong>Pickup:</strong> ${t.pickup}</p><p><strong>Destination:</strong> ${t.destination}</p><p><strong>Status:</strong> ${t.status}</p></div>`).join("");
-}
-function renderAdminDrivers(){
-  const el = document.getElementById("adminDriversList");
-  const drivers = allUsers.filter(u => u.role === "Driver");
-  if(!drivers.length) return el.innerHTML = `<p style="color:#9eb0ca;">No drivers found.</p>`;
-  el.innerHTML = drivers.map(d => `<div class="booking-card"><p><strong>Driver:</strong> ${d.driverName || d.name}</p><p><strong>Email:</strong> ${d.email}</p><div class="status-row"><span class="status ${(d.availability || "Online") === "Online" ? "online" : "offline"}">${d.availability || "Online"}</span><button class="secondary" onclick="toggleDriverAvailability('${d.driverName || d.name}')">${(d.availability || "Online") === "Online" ? "Set Offline" : "Set Online"}</button></div></div>`).join("");
-}
-function toggleDriverAvailability(name){
-  const next = getDriverAvailability(name) === "Online" ? "Offline" : "Online";
-  setDriverAvailability(name, next); renderEverything();
-}
-function renderEverything(){
-  renderPassengerTrips(); renderDriverTrips(); renderAdminBookings(); renderAdminDrivers();
-  if(currentRole === "Passenger" && currentUser) document.getElementById("passengerName").value = currentUser.name || "";
-}
-function clearAllBookings(){
-  localStorage.removeItem(UVEL_BOOKINGS_KEY);
-  localStorage.removeItem(UVEL_USERS_KEY);
-  localStorage.removeItem(UVEL_DRIVERS_KEY);
-  localStorage.removeItem(UVEL_DRIVER_STATUS_KEY);
-  localStorage.removeItem(UVEL_SESSION_KEY);
-  liveBookings=[]; currentUser=null; currentRole=""; currentDriver="";
-  seedDefaults(); loadUsersFromStorage(); loadBookingsFromStorage(); applyRoleUI(); renderEverything(); refreshAllMaps(); showMessage("Demo data reset.");
-}
 
-window.addEventListener("storage", () => { loadUsersFromStorage(); loadBookingsFromStorage(); restoreSession(); renderEverything(); refreshAllMaps(); });
+      <div id="driver" class="section panel">
+        <div class="section-head">
+          <div><h2>Driver App</h2><p class="muted">Drivers only receive trips after Admin assigns them.</p><div class="pill" id="driverSelectedText">No driver selected.</div></div>
+          <div class="section-badge">Driver View</div>
+        </div>
 
-document.addEventListener("DOMContentLoaded", async () => {
-  loadUsersFromStorage(); loadBookingsFromStorage(); restoreSession();
-  setAuthMode("signin");
-  ensureMap("liveMapFrame"); ensureMap("passengerMapFrame"); ensureMap("driverMapFrame");
-  applyRoleUI(); renderEverything(); await updateFarePreview(); await refreshAllMaps();
-  document.getElementById("tripType")?.addEventListener("change", updateFarePreview);
-  document.getElementById("tripNotes")?.addEventListener("input", updateFarePreview);
-  document.getElementById("pickup")?.addEventListener("blur", updateFarePreview);
-  document.getElementById("destination")?.addEventListener("blur", updateFarePreview);
-});
-</script>
+        <div class="two-col">
+          <div class="panel">
+            <h3>Driver Availability</h3>
+            <div class="status-row">
+              <span class="status online" id="driverAvailabilityBadge">Online</span>
+              <button class="btn-purple" onclick="toggleMyAvailability()">Toggle Availability</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Driver Route Map</h3>
+            <div id="driverMapFrame" class="map-frame"></div>
+            <div class="route-stats">
+              <div class="route-stat"><h4>Route</h4><p id="driverRouteDistance">--</p></div>
+              <div class="route-stat"><h4>ETA</h4><p id="driverRouteEta">--</p></div>
+              <div class="route-stat"><h4>Driver to Pickup</h4><p id="driverDriverPickupEta">--</p></div>
+            </div>
+            <div class="route-message" id="driverRouteMessage">Waiting for assigned trip.</div>
+          </div>
+        </div>
+
+        <div id="driverTrips"></div>
+      </div>
+
+      <div id="admin" class="section panel">
+        <div class="section-head">
+          <div><h2>Admin Panel</h2><p class="muted">Review pending bookings and assign drivers.</p></div>
+          <div class="section-badge">Operations View</div>
+        </div>
+
+        <div class="grid4">
+          <div class="panel" style="margin:0;"><h3>Total Bookings</h3><p id="totalBookings">0</p></div>
+          <div class="panel" style="margin:0;"><h3>Pending</h3><p id="pendingBookings">0</p></div>
+          <div class="panel" style="margin:0;"><h3>Assigned</h3><p id="assignedBookings">0</p></div>
+          <div class="panel" style="margin:0;"><h3>Completed</h3><p id="completedBookings">0</p></div>
+        </div>
+
+        <div class="admin-grid" style="margin-top:20px;">
+          <div class="panel">
+            <h3>Active Booking Requests</h3>
+            <div id="bookingList"></div>
+          </div>
+          <div class="panel">
+            <h3>Driver Management</h3>
+            <div id="adminDriversList"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const USERS_KEY = "uvel_users_v11";
+    const BOOKINGS_KEY = "uvel_bookings_v11";
+    const DRIVERS_KEY = "uvel_drivers_v11";
+    const DRIVER_STATUS_KEY = "uvel_driver_status_v11";
+    const SESSION_KEY = "uvel_session_v11";
+
+    const defaultUsers = [
+      { id:"u-admin-1", role:"Admin", name:"Admin User", email:"admin@uvel.app", password:"123456" },
+      { id:"u-pass-1", role:"Passenger", name:"Passenger User", email:"passenger@uvel.app", password:"123456" },
+      { id:"u-driver-1", role:"Driver", name:"Michael", driverName:"Michael", email:"michael@uvel.app", password:"123456", availability:"Online" },
+      { id:"u-driver-2", role:"Driver", name:"Daniel", driverName:"Daniel", email:"daniel@uvel.app", password:"123456", availability:"Online" }
+    ];
+    const defaultDrivers = ["Michael","Daniel"];
+    const defaultStatus = { Michael:"Online", Daniel:"Online" };
+
+    let allUsers = [];
+    let liveBookings = [];
+    let driverUsers = [];
+    let driverAvailability = {};
+    let currentUser = null;
+    let currentRole = "";
+    let currentDriver = "";
+    let authMode = "signin";
+    let selectedAdminBookingId = "";
+    const mapStore = {};
+
+    function seedDefaults(){
+      if(!localStorage.getItem(USERS_KEY)) localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers));
+      if(!localStorage.getItem(BOOKINGS_KEY)) localStorage.setItem(BOOKINGS_KEY, JSON.stringify([]));
+      if(!localStorage.getItem(DRIVERS_KEY)) localStorage.setItem(DRIVERS_KEY, JSON.stringify(defaultDrivers));
+      if(!localStorage.getItem(DRIVER_STATUS_KEY)) localStorage.setItem(DRIVER_STATUS_KEY, JSON.stringify(defaultStatus));
+    }
+
+    function loadState(){
+      seedDefaults();
+      allUsers = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+      liveBookings = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || "[]");
+      driverUsers = JSON.parse(localStorage.getItem(DRIVERS_KEY) || "[]");
+      driverAvailability = JSON.parse(localStorage.getItem(DRIVER_STATUS_KEY) || "{}");
+    }
+
+    function saveState(){
+      localStorage.setItem(USERS_KEY, JSON.stringify(allUsers));
+      localStorage.setItem(BOOKINGS_KEY, JSON.stringify(liveBookings));
+      localStorage.setItem(DRIVERS_KEY, JSON.stringify(driverUsers));
+      localStorage.setItem(DRIVER_STATUS_KEY, JSON.stringify(driverAvailability));
+    }
+
+    function persistSession(){
+      localStorage.setItem(SESSION_KEY, JSON.stringify({currentUser,currentRole,currentDriver}));
+    }
+
+    function restoreSession(){
+      const raw = localStorage.getItem(SESSION_KEY);
+      if(!raw) return;
+      const s = JSON.parse(raw);
+      currentUser = s.currentUser || null;
+      currentRole = s.currentRole || "";
+      currentDriver = s.currentDriver || "";
+    }
+
+    function clearSession(){ localStorage.removeItem(SESSION_KEY); }
+
+    function setAuthMode(mode){
+      authMode = mode;
+      document.getElementById("signInTab").classList.toggle("active", mode === "signin");
+      document.getElementById("signUpTab").classList.toggle("active", mode === "signup");
+      document.getElementById("signInBtn").classList.toggle("hidden", mode !== "signin");
+      document.getElementById("signUpBtn").classList.toggle("hidden", mode !== "signup");
+      document.getElementById("authPasswordConfirm").classList.toggle("hidden", mode !== "signup");
+    }
+
+    function showMessage(text){
+      const ok = document.getElementById("authMessage");
+      const err = document.getElementById("authError");
+      err.style.display = "none";
+      ok.textContent = text;
+      ok.style.display = "block";
+      setTimeout(()=> ok.style.display = "none", 2500);
+    }
+
+    function showError(text){
+      const err = document.getElementById("authError");
+      const ok = document.getElementById("authMessage");
+      ok.style.display = "none";
+      err.textContent = text;
+      err.style.display = "block";
+    }
+
+    function signInUser(){
+      loadState();
+      const role = document.getElementById("authRole").value;
+      const email = document.getElementById("authEmail").value.trim().toLowerCase();
+      const password = document.getElementById("authPassword").value;
+      const name = document.getElementById("authName").value.trim();
+      const driverNameInput = document.getElementById("authDriverName").value.trim();
+
+      if(!role || !email || !password) return showError("Please enter role, email, and password.");
+
+      const user = allUsers.find(u => u.role === role && (u.email || "").toLowerCase() === email && u.password === password);
+      if(!user) return showError("Invalid login details.");
+
+      currentUser = {...user};
+      if(name) currentUser.name = name;
+      currentRole = user.role;
+      currentDriver = user.role === "Driver" ? (driverNameInput || user.driverName || user.name) : "";
+      persistSession();
+      applyRoleUI();
+      renderEverything();
+      refreshAllMaps();
+      showMessage("Signed in successfully.");
+    }
+
+    function signUpUser(){
+      loadState();
+      const role = document.getElementById("authRole").value;
+      const name = document.getElementById("authName").value.trim();
+      const email = document.getElementById("authEmail").value.trim().toLowerCase();
+      const driverNameInput = document.getElementById("authDriverName").value.trim();
+      const password = document.getElementById("authPassword").value;
+      const confirm = document.getElementById("authPasswordConfirm").value;
+
+      if(!role || !name || !email || !password) return showError("Please complete all sign up fields.");
+      if(password !== confirm) return showError("Passwords do not match.");
+      if(allUsers.some(u => (u.email || "").toLowerCase() === email)) return showError("Email already exists.");
+
+      const newUser = { id:`u-${Date.now()}`, role, name, email, password };
+      if(role === "Driver"){
+        newUser.driverName = driverNameInput || name;
+        newUser.availability = "Online";
+        if(!driverUsers.includes(newUser.driverName)) driverUsers.push(newUser.driverName);
+        driverAvailability[newUser.driverName] = "Online";
+      }
+
+      allUsers.push(newUser);
+      saveState();
+      setAuthMode("signin");
+      showMessage("Account created. Now sign in.");
+    }
+
+    function applyRoleUI(){
+      const sessionBar = document.getElementById("sessionBar");
+      const navButtons = document.getElementById("navButtons");
+      const loginSection = document.getElementById("loginSection");
+      const roleBadge = document.getElementById("roleBadge");
+
+      if(!currentUser || !currentRole){
+        sessionBar.style.display = "none";
+        navButtons.style.display = "none";
+        loginSection.style.display = "block";
+        document.getElementById("ride").style.display = "none";
+        document.getElementById("driver").style.display = "none";
+        document.getElementById("admin").style.display = "none";
+        document.getElementById("heroSection").style.display = "block";
+        return;
+      }
+
+      sessionBar.style.display = "block";
+      navButtons.style.display = "grid";
+      loginSection.style.display = "none";
+      roleBadge.textContent = `Role: ${currentRole}${currentRole === "Driver" && currentDriver ? ` (${currentDriver})` : ""}`;
+
+      document.getElementById("rideNavBtn").style.display = currentRole === "Passenger" ? "flex" : "none";
+      document.getElementById("driverNavBtn").style.display = currentRole === "Driver" ? "flex" : "none";
+      document.getElementById("adminNavBtn").style.display = currentRole === "Admin" ? "flex" : "none";
+
+      document.getElementById("ride").style.display = currentRole === "Passenger" ? "block" : "none";
+      document.getElementById("driver").style.display = currentRole === "Driver" ? "block" : "none";
+      document.getElementById("admin").style.display = currentRole === "Admin" ? "block" : "none";
+      document.getElementById("heroSection").style.display = currentRole === "Admin" ? "block" : "none";
+
+      updateDriverHeader();
+      updateDriverAvailabilityUI();
+
+      if(currentRole === "Passenger") showSection("ride");
+      if(currentRole === "Driver") showSection("driver");
+      if(currentRole === "Admin") showSection("admin");
+    }
+
+    function logoutUser(){
+      currentUser = null;
+      currentRole = "";
+      currentDriver = "";
+      clearSession();
+      applyRoleUI();
+    }
+
+    function showSection(section){
+      ["ride","driver","admin"].forEach(id => document.getElementById(id).classList.remove("active"));
+      ["rideNavBtn","driverNavBtn","adminNavBtn"].forEach(id => document.getElementById(id)?.classList.remove("active-link"));
+      document.getElementById(section).classList.add("active");
+      const map = { ride:"rideNavBtn", driver:"driverNavBtn", admin:"adminNavBtn" };
+      document.getElementById(map[section])?.classList.add("active-link");
+
+      setTimeout(() => {
+        Object.values(mapStore).forEach(x => x.map.invalidateSize());
+        refreshAllMaps();
+      }, 350);
+    }
+
+    function getDriverAvailability(name){ return driverAvailability[name] || "Online"; }
+
+    function setDriverAvailability(name, availability){
+      driverAvailability[name] = availability;
+      allUsers = allUsers.map(u => u.role === "Driver" && (u.driverName || u.name) === name ? {...u, availability} : u);
+      saveState();
+    }
+
+    function updateDriverHeader(){
+      document.getElementById("driverSelectedText").textContent = currentDriver ? `Logged in as: ${currentDriver}` : "No driver selected.";
+    }
+
+    function updateDriverAvailabilityUI(){
+      const badge = document.getElementById("driverAvailabilityBadge");
+      const availability = currentDriver ? getDriverAvailability(currentDriver) : "Offline";
+      badge.textContent = availability;
+      badge.className = `status ${availability === "Online" ? "online" : "offline"}`;
+    }
+
+    function toggleMyAvailability(){
+      if(currentRole !== "Driver" || !currentDriver) return;
+      const next = getDriverAvailability(currentDriver) === "Online" ? "Offline" : "Online";
+      setDriverAvailability(currentDriver, next);
+      updateDriverAvailabilityUI();
+      renderEverything();
+    }
+
+    function createEmojiIcon(emoji, bg){
+      return L.divIcon({
+        className:"",
+        html:`<div style="width:34px;height:34px;border-radius:50%;background:${bg};border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 6px 16px rgba(0,0,0,.28);">${emoji}</div>`,
+        iconSize:[34,34],
+        iconAnchor:[17,17]
+      });
+    }
+
+    const pickupIcon = createEmojiIcon("📍","#16a34a");
+    const destinationIcon = createEmojiIcon("🏁","#dc2626");
+    const driverIcon = createEmojiIcon("🚗","#2563eb");
+
+    function ensureMap(mapId){
+      if(mapStore[mapId]) return mapStore[mapId];
+      const el = document.getElementById(mapId);
+      if(!el) return null;
+
+      const map = L.map(mapId, { zoomControl:true, attributionControl:true }).setView([-33.8688,151.2093],11);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:"&copy; OpenStreetMap contributors",
+        maxZoom:19
+      }).addTo(map);
+
+      mapStore[mapId] = { map, pickupMarker:null, destinationMarker:null, driverMarker:null, routeLine:null };
+
+      setTimeout(() => map.invalidateSize(), 200);
+      setTimeout(() => map.invalidateSize(), 700);
+      return mapStore[mapId];
+    }
+
+    function clearMap(store){
+      if(!store) return;
+      if(store.pickupMarker){ store.map.removeLayer(store.pickupMarker); store.pickupMarker = null; }
+      if(store.destinationMarker){ store.map.removeLayer(store.destinationMarker); store.destinationMarker = null; }
+      if(store.driverMarker){ store.map.removeLayer(store.driverMarker); store.driverMarker = null; }
+      if(store.routeLine){ store.map.removeLayer(store.routeLine); store.routeLine = null; }
+    }
+
+    function setRouteUI(prefix, distance="--", eta="--", driverPickupEta="--", message="Waiting for booking."){
+      document.getElementById(`${prefix}RouteDistance`).textContent = distance;
+      document.getElementById(`${prefix}RouteEta`).textContent = eta;
+      document.getElementById(`${prefix}DriverPickupEta`).textContent = driverPickupEta;
+      document.getElementById(`${prefix}RouteMessage`).textContent = message;
+    }
+
+    async function geocodeLocation(place){
+      if(!place) return null;
+      const q = `${place}, Sydney, NSW, Australia`;
+      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
+      try{
+        const res = await fetch(url);
+        const data = await res.json();
+        if(!data || !data.length) return null;
+        return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+      }catch(e){
+        return null;
+      }
+    }
+
+    function haversineKm(lat1, lon1, lat2, lon2){
+      const R = 6371;
+      const dLat = (lat2-lat1) * Math.PI / 180;
+      const dLon = (lon2-lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+      return 2 * R * Math.asin(Math.sqrt(a));
+    }
+
+    async function renderBookingMap(mapId, prefix, booking){
+      const store = ensureMap(mapId);
+      if(!store) return;
+      clearMap(store);
+
+      if(!booking || !booking.pickup || !booking.destination){
+        store.map.setView([-33.8688,151.2093],11);
+        setRouteUI(prefix, "--", "--", "--", "Waiting for active booking.");
+        return;
+      }
+
+      const pickupPoint = booking.pickupCoords || await geocodeLocation(booking.pickup);
+      const destinationPoint = booking.destinationCoords || await geocodeLocation(booking.destination);
+
+      if(!pickupPoint || !destinationPoint){
+        store.map.setView([-33.8688,151.2093],11);
+        setRouteUI(prefix, "--", "--", "--", "Could not match one of the addresses. Try a more specific Sydney address.");
+        return;
+      }
+
+      booking.pickupCoords = pickupPoint;
+      booking.destinationCoords = destinationPoint;
+
+      store.pickupMarker = L.marker([pickupPoint.lat, pickupPoint.lng], { icon: pickupIcon }).addTo(store.map);
+      store.destinationMarker = L.marker([destinationPoint.lat, destinationPoint.lng], { icon: destinationIcon }).addTo(store.map);
+
+      const coords = [[pickupPoint.lat, pickupPoint.lng],[destinationPoint.lat, destinationPoint.lng]];
+      store.routeLine = L.polyline(coords, { color:"#8b5cf6", weight:5, opacity:.85, dashArray:"10,8" }).addTo(store.map);
+      store.map.fitBounds(coords, { padding:[40,40] });
+
+      const km = haversineKm(pickupPoint.lat, pickupPoint.lng, destinationPoint.lat, destinationPoint.lng).toFixed(1);
+      const eta = Math.ceil(Number(km) * 2.5);
+      let driverEta = "--";
+
+      if(booking.driverLocation){
+        store.driverMarker = L.marker([booking.driverLocation.lat, booking.driverLocation.lng], { icon: driverIcon }).addTo(store.map);
+        const dkm = haversineKm(booking.driverLocation.lat, booking.driverLocation.lng, pickupPoint.lat, pickupPoint.lng);
+        driverEta = `${Math.max(1, Math.ceil(dkm * 2.2))} min`;
+      }
+
+      setRouteUI(prefix, `${km} km`, `${eta} min`, driverEta, "Route loaded.");
+    }
+
+    function getCurrentPassengerBooking(){
+      if(!currentUser || currentRole !== "Passenger") return null;
+      return liveBookings.find(b => b.createdBy === currentUser.id && b.status !== "Completed") || liveBookings.find(b => b.createdBy === currentUser.id) || null;
+    }
+
+    function getCurrentDriverBooking(){
+      if(!currentDriver) return null;
+      return liveBookings.find(b => (b.driver || "").toLowerCase() === currentDriver.toLowerCase() && b.status !== "Completed")
+        || liveBookings.find(b => (b.driver || "").toLowerCase() === currentDriver.toLowerCase())
+        || null;
+    }
+
+    function getAdminFocusedBooking(){
+      if(selectedAdminBookingId){
+        const found = liveBookings.find(b => b.id === selectedAdminBookingId);
+        if(found) return found;
+      }
+      return liveBookings.find(b => b.status !== "Completed") || liveBookings[0] || null;
+    }
+
+    async function refreshAllMaps(){
+      await renderBookingMap("liveMapFrame","live",getAdminFocusedBooking());
+      await renderBookingMap("passengerMapFrame","passenger",getCurrentPassengerBooking());
+      await renderBookingMap("driverMapFrame","driver",getCurrentDriverBooking());
+    }
+
+    function calculateFare(estimatedKm, notes="", tripType="Normal"){
+      const kmValue = Math.max(0, Number(estimatedKm || 0));
+      const baseFare = tripType === "NDIS" ? 14.5 : 8.5;
+      const perKm = tripType === "NDIS" ? 2.45 : 1.95;
+      const supportLoad = notes && notes.trim() ? 4.5 : 0;
+      const minimumFare = tripType === "NDIS" ? 22 : 14;
+      return Math.round(Math.max(minimumFare, baseFare + (kmValue * perKm) + supportLoad) * 100) / 100;
+    }
+
+    async function updateFarePreview(){
+      const tripType = document.getElementById("tripType").value;
+      const notes = document.getElementById("tripNotes").value.trim();
+      const pickup = document.getElementById("pickup").value.trim();
+      const destination = document.getElementById("destination").value.trim();
+      let km = 0;
+
+      if(pickup && destination){
+        const p1 = await geocodeLocation(pickup);
+        const p2 = await geocodeLocation(destination);
+        if(p1 && p2) km = Number(haversineKm(p1.lat, p1.lng, p2.lat, p2.lng).toFixed(1));
+      }
+
+      const fare = calculateFare(km, notes, tripType);
+      document.getElementById("previewFare").textContent = `AUD ${fare.toFixed(2)}`;
+      document.getElementById("previewPaymentMode").textContent = tripType === "NDIS" ? "Referral / invoice" : "Stripe card";
+    }
+
+    async function requestRide(){
+      if(currentRole !== "Passenger" || !currentUser) return alert("Please sign in as Passenger first.");
+
+      const passengerName = document.getElementById("passengerName").value.trim() || currentUser.name;
+      const tripType = document.getElementById("tripType").value;
+      const pickup = document.getElementById("pickup").value.trim();
+      const destination = document.getElementById("destination").value.trim();
+      const tripDate = document.getElementById("tripDate").value;
+      const tripTime = document.getElementById("tripTime").value;
+      const notes = document.getElementById("tripNotes").value.trim();
+
+      if(!passengerName || !pickup || !destination || !tripDate || !tripTime) return alert("Please complete all required fields.");
+
+      const pickupCoords = await geocodeLocation(pickup);
+      const destinationCoords = await geocodeLocation(destination);
+      const estimatedKm = pickupCoords && destinationCoords ? Number(haversineKm(pickupCoords.lat, pickupCoords.lng, destinationCoords.lat, destinationCoords.lng).toFixed(1)) : 0;
+
+      const booking = {
+        id:`b-${Date.now()}`,
+        passengerName, tripType, pickup, destination,
+        pickupCoords, destinationCoords,
+        tripDate, tripTime, notes,
+        driver:"",
+        status:"Pending",
+        estimatedKm,
+        fareAUD: calculateFare(estimatedKm, notes, tripType),
+        paymentStatus: tripType === "NDIS" ? "NDIS / Invoice" : "Unpaid",
+        createdBy: currentUser.id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      liveBookings.unshift(booking);
+      saveState();
+      renderEverything();
+      refreshAllMaps();
+
+      document.getElementById("successBox").style.display = "block";
+      setTimeout(()=> document.getElementById("successBox").style.display = "none", 2000);
+      ["pickup","destination","tripDate","tripTime","tripNotes"].forEach(id => document.getElementById(id).value = "");
+      updateFarePreview();
+    }
+
+    function getAvailableDrivers(){
+      return driverUsers.filter(name => getDriverAvailability(name) === "Online");
+    }
+
+    function getRecommendedDriver(){
+      const pool = getAvailableDrivers();
+      if(!pool.length) return "";
+      const ranked = pool.map(name => ({
+        name,
+        active: liveBookings.filter(b => (b.driver || "").toLowerCase() === name.toLowerCase() && b.status === "Assigned").length
+      })).sort((a,b) => a.active - b.active || a.name.localeCompare(b.name));
+      return ranked[0]?.name || "";
+    }
+
+    function assignSelectedDriver(bookingId, driverName){
+      const booking = liveBookings.find(b => b.id === bookingId);
+      if(!booking) return;
+      if(getDriverAvailability(driverName) !== "Online") return alert("Selected driver is offline.");
+      booking.driver = driverName;
+      booking.status = "Assigned";
+      booking.updatedAt = new Date().toISOString();
+      saveState();
+      renderEverything();
+      refreshAllMaps();
+    }
+
+    function assignRecommendedDriver(bookingId){
+      const booking = liveBookings.find(b => b.id === bookingId);
+      if(!booking) return;
+      const rec = getRecommendedDriver();
+      if(!rec) return alert("No online drivers available.");
+      booking.driver = rec;
+      booking.status = "Assigned";
+      booking.updatedAt = new Date().toISOString();
+      saveState();
+      renderEverything();
+      refreshAllMaps();
+    }
+
+    function moveBookingStatus(bookingId, status){
+      const booking = liveBookings.find(b => b.id === bookingId);
+      if(!booking) return;
+      booking.status = status;
+      booking.updatedAt = new Date().toISOString();
+      saveState();
+      renderEverything();
+      refreshAllMaps();
+    }
+
+    function populateDriverSearchList(bookingId, filterText=""){
+      const list = document.getElementById(`driverList-${bookingId}`);
+      if(!list) return;
+      const filtered = driverUsers.filter(d => d.toLowerCase().includes(filterText.toLowerCase()));
+      list.innerHTML = filtered.length
+        ? filtered.map(driver => `<div class="driver-item" onclick="assignSelectedDriver('${bookingId}','${driver}')">${driver} (${getDriverAvailability(driver)})</div>`).join("")
+        : `<div class="driver-item">No matching driver</div>`;
+    }
+
+    function toggleDriverList(bookingId, show){
+      const list = document.getElementById(`driverList-${bookingId}`);
+      if(list) list.style.display = show ? "block" : "none";
+    }
+
+    function filterDriverOptions(inputEl, bookingId){
+      populateDriverSearchList(bookingId, inputEl.value || "");
+      toggleDriverList(bookingId, true);
+    }
+
+    function renderPassengerTrips(){
+      const el = document.getElementById("riderTrips");
+      if(!currentUser || currentRole !== "Passenger"){
+        el.innerHTML = `<p class="muted">No trips yet.</p>`;
+        return;
+      }
+      const trips = liveBookings.filter(b => b.createdBy === currentUser.id);
+      if(!trips.length){
+        el.innerHTML = `<p class="muted">No trips yet.</p>`;
+        return;
+      }
+      el.innerHTML = trips.map(t => `
+        <div class="booking-card">
+          <p><strong>Booking ID:</strong> ${t.id}</p>
+          <p><strong>Pickup:</strong> ${t.pickup}</p>
+          <p><strong>Destination:</strong> ${t.destination}</p>
+          <p><strong>Driver:</strong> ${t.driver || "Waiting for admin assignment"}</p>
+          <p><strong>Fare:</strong> AUD ${Number(t.fareAUD || 0).toFixed(2)}</p>
+          <div class="status-row"><span class="status ${t.status === "Assigned" ? "assigned" : t.status === "Completed" ? "completed" : "pending"}">${t.status}</span></div>
+        </div>`).join("");
+    }
+
+    function renderDriverTrips(){
+      const el = document.getElementById("driverTrips");
+      if(!currentDriver){
+        el.innerHTML = `<p class="muted">No assigned trips yet.</p>`;
+        return;
+      }
+      const trips = liveBookings.filter(b => (b.driver || "").toLowerCase() === currentDriver.toLowerCase());
+      if(!trips.length){
+        el.innerHTML = `<p class="muted">No assigned trips yet.</p>`;
+        return;
+      }
+      el.innerHTML = trips.map(t => `
+        <div class="booking-card">
+          <p><strong>Booking ID:</strong> ${t.id}</p>
+          <p><strong>Passenger:</strong> ${t.passengerName}</p>
+          <p><strong>Pickup:</strong> ${t.pickup}</p>
+          <p><strong>Destination:</strong> ${t.destination}</p>
+          <p><strong>Status:</strong> ${t.status}</p>
+          ${t.status !== "Completed" ? `<div class="action-row"><button class="btn-green" onclick="moveBookingStatus('${t.id}','Completed')">Mark Completed</button></div>` : ``}
+        </div>`).join("");
+    }
+
+    function renderAdminDrivers(){
+      const el = document.getElementById("adminDriversList");
+      const drivers = allUsers.filter(u => u.role === "Driver");
+      if(!drivers.length){
+        el.innerHTML = `<p class="muted">No drivers found.</p>`;
+        return;
+      }
+      el.innerHTML = drivers.map(d => `
+        <div class="booking-card">
+          <p><strong>Driver:</strong> ${d.driverName || d.name}</p>
+          <p><strong>Email:</strong> ${d.email}</p>
+          <div class="status-row">
+            <span class="status ${getDriverAvailability(d.driverName || d.name) === "Online" ? "online" : "offline"}">${getDriverAvailability(d.driverName || d.name)}</span>
+            <button class="btn-purple" onclick="toggleAdminDriver('${d.driverName || d.name}')">${getDriverAvailability(d.driverName || d.name) === "Online" ? "Set Offline" : "Set Online"}</button>
+          </div>
+        </div>`).join("");
+    }
+
+    function toggleAdminDriver(name){
+      const next = getDriverAvailability(name) === "Online" ? "Offline" : "Online";
+      setDriverAvailability(name, next);
+      renderEverything();
+    }
+
+    function renderAdminBookings(){
+      document.getElementById("totalBookings").textContent = liveBookings.length;
+      document.getElementById("pendingBookings").textContent = liveBookings.filter(b => b.status === "Pending").length;
+      document.getElementById("assignedBookings").textContent = liveBookings.filter(b => b.status === "Assigned").length;
+      document.getElementById("completedBookings").textContent = liveBookings.filter(b => b.status === "Completed").length;
+
+      const bookingList = document.getElementById("bookingList");
+      const items = liveBookings.filter(b => b.status !== "Completed");
+
+      if(!items.length){
+        bookingList.innerHTML = `<p class="muted">No bookings yet.</p>`;
+        return;
+      }
+
+      bookingList.innerHTML = items.map(booking => `
+        <div class="booking-card">
+          <p><strong>Booking ID:</strong> ${booking.id}</p>
+          <p><strong>Passenger:</strong> ${booking.passengerName}</p>
+          <p><strong>Trip Type:</strong> ${booking.tripType}</p>
+          <p><strong>Pickup:</strong> ${booking.pickup}</p>
+          <p><strong>Destination:</strong> ${booking.destination}</p>
+          <p><strong>Date:</strong> ${booking.tripDate}</p>
+          <p><strong>Time:</strong> ${booking.tripTime}</p>
+          <p><strong>Driver:</strong> ${booking.driver || "Unassigned"}</p>
+          <p><strong>Fare:</strong> AUD ${Number(booking.fareAUD || 0).toFixed(2)}</p>
+          <div class="status-row"><span class="status ${booking.status === "Assigned" ? "assigned" : "pending"}">${booking.status}</span></div>
+
+          ${booking.status === "Pending" ? `
+            <div class="action-row">
+              <div class="driver-combobox">
+                <input class="driver-input" placeholder="Search driver..." oninput="filterDriverOptions(this, '${booking.id}')" onclick="filterDriverOptions(this, '${booking.id}')" onfocus="filterDriverOptions(this, '${booking.id}')" onblur="setTimeout(() => toggleDriverList('${booking.id}', false), 200)">
+                <div class="driver-list" id="driverList-${booking.id}"></div>
+              </div>
+              <button class="btn-blue" onclick="assignRecommendedDriver('${booking.id}')">Auto Assign</button>
+            </div>` : ""}
+
+          <div class="action-row">
+            <button class="btn-purple" onclick="selectedAdminBookingId='${booking.id}'; refreshAllMaps()">Show on Map</button>
+            ${booking.status !== "Completed" ? `<button class="btn-green" onclick="moveBookingStatus('${booking.id}','Completed')">Mark Completed</button>` : ""}
+          </div>
+        </div>`).join("");
+
+      items.forEach(b => b.status === "Pending" && populateDriverSearchList(b.id, ""));
+    }
+
+    function renderEverything(){
+      renderPassengerTrips();
+      renderDriverTrips();
+      renderAdminBookings();
+      renderAdminDrivers();
+      if(currentRole === "Passenger" && currentUser) document.getElementById("passengerName").value = currentUser.name || "";
+      updateDriverHeader();
+      updateDriverAvailabilityUI();
+    }
+
+    function resetDemoData(){
+      localStorage.removeItem(USERS_KEY);
+      localStorage.removeItem(BOOKINGS_KEY);
+      localStorage.removeItem(DRIVERS_KEY);
+      localStorage.removeItem(DRIVER_STATUS_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      currentUser = null;
+      currentRole = "";
+      currentDriver = "";
+      loadState();
+      applyRoleUI();
+      renderEverything();
+      refreshAllMaps();
+      showMessage("Demo data reset.");
+    }
+
+    window.addEventListener("storage", () => {
+      loadState();
+      restoreSession();
+      applyRoleUI();
+      renderEverything();
+      refreshAllMaps();
+    });
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      loadState();
+      restoreSession();
+      setAuthMode("signin");
+
+      ensureMap("liveMapFrame");
+      ensureMap("passengerMapFrame");
+      ensureMap("driverMapFrame");
+
+      applyRoleUI();
+      renderEverything();
+      await updateFarePreview();
+      await refreshAllMaps();
+
+      document.getElementById("tripType").addEventListener("change", updateFarePreview);
+      document.getElementById("tripNotes").addEventListener("input", updateFarePreview);
+      document.getElementById("pickup").addEventListener("blur", updateFarePreview);
+      document.getElementById("destination").addEventListener("blur", updateFarePreview);
+    });
+  </script>
 </body>
 </html>
