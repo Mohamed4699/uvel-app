@@ -197,9 +197,10 @@
 
       <div class="card auth-card">
         <div class="tabs">
-          <button class="tab btn active" id="loginTabBtn" type="button" onclick="switchAuthTab('login')">Sign in</button>
-          <button class="tab btn" id="signupTabBtn" type="button" onclick="switchAuthTab('signup')">Sign up</button>
+          <button class="tab btn active" id="loginTabBtn" type="button">Sign in</button>
+          <button class="tab btn" id="signupTabBtn" type="button">Sign up</button>
         </div>
+        <div class="footer-note"><button type="button" class="btn small" onclick="window.switchAuthTab && window.switchAuthTab('signup')">Open Sign up form</button></div>
 
         <form id="loginForm">
           <div class="section-title">Welcome back</div>
@@ -437,7 +438,34 @@
     </div>
   </div>
 
-  <script type="module">
+  
+  <script>
+    (function () {
+      function switchAuthTab(type) {
+        var loginForm = document.getElementById('loginForm');
+        var signupForm = document.getElementById('signupForm');
+        var loginBtn = document.getElementById('loginTabBtn');
+        var signupBtn = document.getElementById('signupTabBtn');
+        if (!loginForm || !signupForm || !loginBtn || !signupBtn) return;
+        loginForm.classList.toggle('hidden', type !== 'login');
+        signupForm.classList.toggle('hidden', type !== 'signup');
+        loginBtn.classList.toggle('active', type === 'login');
+        signupBtn.classList.toggle('active', type === 'signup');
+      }
+
+      window.switchAuthTab = switchAuthTab;
+
+      document.addEventListener('DOMContentLoaded', function () {
+        var loginBtn = document.getElementById('loginTabBtn');
+        var signupBtn = document.getElementById('signupTabBtn');
+        if (loginBtn) loginBtn.onclick = function () { switchAuthTab('login'); };
+        if (signupBtn) signupBtn.onclick = function () { switchAuthTab('signup'); };
+        switchAuthTab('login');
+      });
+    })();
+  </script>
+
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
     import {
       getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
@@ -498,14 +526,7 @@
 
     const $ = (id) => document.getElementById(id);
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const loginBtn = document.getElementById("loginTabBtn");
-      const signupBtn = document.getElementById("signupTabBtn");
-      if (loginBtn) loginBtn.addEventListener("click", () => window.switchAuthTab("login"));
-      if (signupBtn) signupBtn.addEventListener("click", () => window.switchAuthTab("signup"));
-      window.switchAuthTab("login");
-    });
-
+    
     function showMsg(msg, isError = false) {
       $("authMsg").textContent = msg;
       $("authMsg").style.color = isError ? "#ff9f9f" : "#9ec3da";
@@ -544,14 +565,9 @@
       return [msg, code ? `Firebase code: <code>${escapeHtml(code)}</code>` : ""];
     }
 
-    window.switchAuthTab = function(type) {
-      document.getElementById("loginForm").classList.toggle("hidden", type !== "login");
-      document.getElementById("signupForm").classList.toggle("hidden", type !== "signup");
-      document.getElementById("loginTabBtn").classList.toggle("active", type === "login");
-      document.getElementById("signupTabBtn").classList.toggle("active", type === "signup");
-    }
+    
 
-    window.switchAuthTab("login");
+    
 
     $("resetPasswordBtn").onclick = async () => {
       const email = $("loginEmail").value.trim();
