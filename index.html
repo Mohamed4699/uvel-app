@@ -6,72 +6,8 @@
   <title>UVEL Full Updated Version</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">window.addEventListener("DOMContentLoaded", () => {
-      loadBookingsFromStorage();
-      loadUsersFromStorage();
-      restoreSession();
-      applyRoleUI();
-      renderEverything();
-      updateFarePreview();
-      refreshAllMaps();
-      refreshStateSnapshot();
-
-      ["tripType", "tripNotes"].forEach(id => {
-        document.getElementById(id)?.addEventListener("input", updateFarePreview);
-        document.getElementById(id)?.addEventListener("change", updateFarePreview);
-      });
-
-      window.addEventListener("focus", () => handleExternalStateRefresh("focus"));
-      setInterval(() => {
-        try {
-          const currentSnapshot = JSON.stringify({
-            bookings: JSON.parse(localStorage.getItem(UVEL_BOOKINGS_KEY) || "[]"),
-            users: JSON.parse(localStorage.getItem(UVEL_USERS_KEY) || JSON.stringify(defaultUsers)),
-            drivers: JSON.parse(localStorage.getItem(UVEL_DRIVERS_KEY) || JSON.stringify(defaultDrivers)),
-            driverAvailability: JSON.parse(localStorage.getItem(UVEL_DRIVER_STATUS_KEY) || JSON.stringify({ Michael: "Online", Daniel: "Online" }))
-          });
-          if (currentSnapshot !== stateSnapshot) {
-            handleExternalStateRefresh("poll");
-          }
-        } catch (error) {
-          console.error("UVEL sync polling failed:", error);
-        }
-      }, 1200);
-    });
-</script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">window.addEventListener("DOMContentLoaded", () => {
-      loadBookingsFromStorage();
-      loadUsersFromStorage();
-      restoreSession();
-      applyRoleUI();
-      renderEverything();
-      updateFarePreview();
-      refreshAllMaps();
-      refreshStateSnapshot();
-
-      ["tripType", "tripNotes"].forEach(id => {
-        document.getElementById(id)?.addEventListener("input", updateFarePreview);
-        document.getElementById(id)?.addEventListener("change", updateFarePreview);
-      });
-
-      window.addEventListener("focus", () => handleExternalStateRefresh("focus"));
-      setInterval(() => {
-        try {
-          const currentSnapshot = JSON.stringify({
-            bookings: JSON.parse(localStorage.getItem(UVEL_BOOKINGS_KEY) || "[]"),
-            users: JSON.parse(localStorage.getItem(UVEL_USERS_KEY) || JSON.stringify(defaultUsers)),
-            drivers: JSON.parse(localStorage.getItem(UVEL_DRIVERS_KEY) || JSON.stringify(defaultDrivers)),
-            driverAvailability: JSON.parse(localStorage.getItem(UVEL_DRIVER_STATUS_KEY) || JSON.stringify({ Michael: "Online", Daniel: "Online" }))
-          });
-          if (currentSnapshot !== stateSnapshot) {
-            handleExternalStateRefresh("poll");
-          }
-        } catch (error) {
-          console.error("UVEL sync polling failed:", error);
-        }
-      }, 1200);
-    });
-</script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
     :root{
@@ -736,7 +672,8 @@
         bookings: liveBookings,
         users: allUsers,
         drivers: driverUsers,
-        driverAvailability
+        driverAvailability,
+        session: { currentRole, currentUser, currentDriver }
       });
     }
 
@@ -744,18 +681,10 @@
       stateSnapshot = getStateSnapshot();
     }
 
-    function syncAndRenderBookings() {
-      saveBookingsToStorage();
-      saveUsersToStorage();
-      persistSession();
-      renderEverything();
-      refreshAllMaps();
-      refreshStateSnapshot();
-    }
-
     function handleExternalStateRefresh(sourceKey = "") {
       const beforeBookings = JSON.parse(JSON.stringify(liveBookings || []));
       const beforeDriverAvailability = JSON.parse(JSON.stringify(driverAvailability || {}));
+
       loadBookingsFromStorage();
       loadUsersFromStorage();
       renderEverything();
@@ -783,13 +712,20 @@
         });
       }
 
-      if ((sourceKey === UVEL_DRIVER_STATUS_KEY || sourceKey === UVEL_USERS_KEY) && currentRole === "Driver" && currentDriver) {
+      if ([UVEL_DRIVER_STATUS_KEY, UVEL_USERS_KEY].includes(sourceKey) && currentRole === "Driver" && currentDriver) {
         const previous = beforeDriverAvailability[currentDriver] || "Online";
         const current = getDriverAvailability(currentDriver);
-        if (previous !== current) {
-          showToast("Availability Updated", `Admin changed your status to ${current}.`);
-        }
+        if (previous !== current) showToast("Availability Updated", `Admin changed your status to ${current}.`);
       }
+    }
+
+    function syncAndRenderBookings() {
+      saveBookingsToStorage();
+      saveUsersToStorage();
+      persistSession();
+      renderEverything();
+      refreshAllMaps();
+      refreshStateSnapshot();
     }
 
     function showToast(title, message) {
@@ -810,17 +746,6 @@
     window.addEventListener("storage", (event) => {
       if ([UVEL_BOOKINGS_KEY, UVEL_USERS_KEY, UVEL_DRIVERS_KEY, UVEL_DRIVER_STATUS_KEY].includes(event.key)) {
         handleExternalStateRefresh(event.key);
-      }
-    });
-
-        }
-
-        if (currentRole === "Driver" && currentDriver) {
-          liveBookings.filter(b => b.driver === currentDriver).forEach(b => {
-            const old = before.find(x => x.id === b.id);
-            if (!old || old.driver !== currentDriver) showToast("New Assigned Trip", `${b.passengerName}: ${b.pickup} → ${b.destination}`);
-          });
-        }
       }
     });
 
@@ -1095,8 +1020,6 @@
     }
 
     function loginUser() {
-      loadBookingsFromStorage();
-      loadUsersFromStorage();
       const role = document.getElementById("authRole").value;
       const name = document.getElementById("authName").value.trim();
       const email = document.getElementById("authEmail").value.trim();
@@ -1898,8 +1821,8 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("tripType").addEventListener("change", updateFarePreview);
-      document.getElementById("tripNotes").addEventListener("input", updateFarePreview);
+      document.getElementById("tripType")?.addEventListener("change", updateFarePreview);
+      document.getElementById("tripNotes")?.addEventListener("input", updateFarePreview);
 
       ensureMap("liveMapFrame");
       ensureMap("passengerMapFrame");
@@ -1919,25 +1842,11 @@
         document.getElementById("authDriverName").value = currentDriver || currentUser.driverName || "";
       }
 
-      updateFarePreview();
-      applyRoleUI();
-      renderEverything();
-      refreshAllMaps();
-    });
-  window.addEventListener("DOMContentLoaded", () => {
-      loadBookingsFromStorage();
-      loadUsersFromStorage();
-      restoreSession();
       applyRoleUI();
       renderEverything();
       updateFarePreview();
       refreshAllMaps();
       refreshStateSnapshot();
-
-      ["tripType", "tripNotes"].forEach(id => {
-        document.getElementById(id)?.addEventListener("input", updateFarePreview);
-        document.getElementById(id)?.addEventListener("change", updateFarePreview);
-      });
 
       window.addEventListener("focus", () => handleExternalStateRefresh("focus"));
       setInterval(() => {
@@ -1946,7 +1855,8 @@
             bookings: JSON.parse(localStorage.getItem(UVEL_BOOKINGS_KEY) || "[]"),
             users: JSON.parse(localStorage.getItem(UVEL_USERS_KEY) || JSON.stringify(defaultUsers)),
             drivers: JSON.parse(localStorage.getItem(UVEL_DRIVERS_KEY) || JSON.stringify(defaultDrivers)),
-            driverAvailability: JSON.parse(localStorage.getItem(UVEL_DRIVER_STATUS_KEY) || JSON.stringify({ Michael: "Online", Daniel: "Online" }))
+            driverAvailability: JSON.parse(localStorage.getItem(UVEL_DRIVER_STATUS_KEY) || JSON.stringify({ Michael: "Online", Daniel: "Online" })),
+            session: JSON.parse(localStorage.getItem(UVEL_SESSION_KEY) || "null")
           });
           if (currentSnapshot !== stateSnapshot) {
             handleExternalStateRefresh("poll");
@@ -1956,6 +1866,6 @@
         }
       }, 1200);
     });
-</script>
+  </script>
 </body>
 </html>
