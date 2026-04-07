@@ -173,6 +173,14 @@
     .tag-high{color:#ffd76f}.tag-urgent{color:#ff9f9f}.tag-standard{color:#9ec3da}
     .mini-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 
+    .level7-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .kanban-col{padding:14px;border:1px solid var(--line);border-radius:16px;background:#061826}
+    .kanban-title{font-size:16px;font-weight:800;margin-bottom:10px}
+    .referral-grid,.template-list,.fleet-health-list{display:grid;gap:10px}
+    .template-item,.fleet-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .sla-ok{color:#87ebb0}.sla-watch{color:#ffd76f}.sla-risk{color:#ff9f9f}
+
   </style>
 </head>
 <body>
@@ -183,7 +191,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 6 operations platform</div>
+            <div class="subtitle">Firebase Level 7 operations platform</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -265,7 +273,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 6 • dispatch • saved places • SLA alerts • referral workflow</div>
+            <div class="subtitle">Full Level 7 • referrals • repeat rides • SLA controls • driver acceptance</div>
           </div>
         </div>
         <div class="userbox">
@@ -366,6 +374,40 @@
                 <label>Return time (optional)</label>
                 <input type="time" id="returnTime" />
               </div>
+              <div class="row top-gap">
+                <div>
+                  <label>Referral source</label>
+                  <select id="referralSource">
+                    <option value="self">Self</option>
+                    <option value="support_coordinator">Support coordinator</option>
+                    <option value="plan_manager">Plan manager</option>
+                    <option value="hospital">Hospital</option>
+                    <option value="family">Family</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Recurring pattern</label>
+                  <select id="recurringPattern">
+                    <option value="once">Once</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="fortnightly">Fortnightly</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row top-gap">
+                <div>
+                  <label>Plan manager / coordinator email</label>
+                  <input id="referralEmail" placeholder="manager@example.com" />
+                </div>
+                <div>
+                  <label>Pickup window</label>
+                  <select id="pickupWindow">
+                    <option value="exact">Exact time</option>
+                    <option value="15">± 15 minutes</option>
+                    <option value="30">± 30 minutes</option>
+                  </select>
+                </div>
+              </div>
               <div class="right-actions top-gap">
                 <button class="btn" id="estimateFareBtn" type="button">Estimate fare</button>
                 <button class="btn brand" id="requestRideBtn" type="submit">Request ride</button>
@@ -434,6 +476,34 @@
             <div class="section-title">Trip updates</div>
             <div class="section-sub">Recent notifications for your bookings.</div>
             <div id="passengerNotifications" class="notice-list"></div>
+          </div>
+        </div>
+
+        <div class="grid-2 top-gap">
+          <div class="card section">
+            <div class="section-title">Repeat ride templates</div>
+            <div class="section-sub">Save a recurring ride setup for fast rebooking.</div>
+            <div class="row">
+              <div><input id="templateLabel" placeholder="Template name e.g. Weekly therapy" /></div>
+              <div>
+                <select id="templateFrequency">
+                  <option value="weekly">Weekly</option>
+                  <option value="fortnightly">Fortnightly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+            </div>
+            <div class="mini-actions">
+              <button class="btn brand small" id="saveTemplateBtn">Save template</button>
+              <button class="btn small" id="applyLatestTemplateBtn">Apply latest template</button>
+            </div>
+            <div id="rideTemplatesList" class="template-list top-gap"></div>
+          </div>
+
+          <div class="card section">
+            <div class="section-title">Trip readiness</div>
+            <div class="section-sub">Referral and service readiness for your next trip.</div>
+            <div id="passengerReadiness" class="notice-list"></div>
           </div>
         </div>
       </div>
@@ -512,6 +582,37 @@
           </div>
         </div>
 
+        <div class="level7-grid top-gap">
+          <div class="card section">
+            <div class="section-title">Referral inbox</div>
+            <div class="section-sub">NDIS and partner bookings awaiting action.</div>
+            <div id="referralInbox" class="notice-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">SLA controls</div>
+            <div class="section-sub">Adjust service windows without changing auth flow.</div>
+            <div class="settings-grid">
+              <div>
+                <label>Upcoming alert window (mins)</label>
+                <input type="number" id="serviceWindowMinsInput" min="15" step="15" value="120" />
+              </div>
+              <div>
+                <label>Urgent threshold (mins)</label>
+                <input type="number" id="urgentThresholdMinsInput" min="15" step="5" value="45" />
+              </div>
+            </div>
+            <div class="mini-actions">
+              <button class="btn brand small" id="saveSlaSettingsBtn">Save SLA settings</button>
+            </div>
+            <div id="slaSummary" class="notice-list top-gap"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Fleet health</div>
+            <div class="section-sub">Driver availability, load, and wheelchair readiness.</div>
+            <div id="fleetHealth" class="fleet-health-list"></div>
+          </div>
+        </div>
+
         <div class="grid-2 top-gap">
           <div class="card section">
             <div class="section-title">Driver management</div>
@@ -576,6 +677,12 @@
             <div class="section-sub">Assignments and completion reminders.</div>
             <div id="driverNotifications" class="notice-list"></div>
           </div>
+        </div>
+
+        <div class="card section top-gap">
+          <div class="section-title">Driver acceptance board</div>
+          <div class="section-sub">Accept or decline newly assigned work.</div>
+          <div id="driverAcceptanceBoard" class="notice-list"></div>
         </div>
 
       </div>
@@ -1335,6 +1442,10 @@ if (!user) {
       const companionRequired = $("companionRequired")?.value || "no";
       const returnTrip = $("returnTrip")?.value || "no";
       const returnTime = $("returnTime")?.value || "";
+      const referralSource = $("referralSource")?.value || "self";
+      const recurringPattern = $("recurringPattern")?.value || "once";
+      const referralEmail = $("referralEmail")?.value.trim() || "";
+      const pickupWindow = $("pickupWindow")?.value || "exact";
 
       if (!pickup || !destination || !tripDate || !tripTime) {
         return alert("Please fill all required booking fields.");
@@ -1373,6 +1484,11 @@ if (!user) {
         companionRequired,
         returnTrip,
         returnTime,
+        referralSource,
+        recurringPattern,
+        referralEmail,
+        pickupWindow,
+        acceptanceStatus: "pending_driver",
         bookingCode: bookingCode(),
         status: "pending",
         driverStage: "waiting",
@@ -1389,6 +1505,10 @@ if (!user) {
       if ($("companionRequired")) $("companionRequired").value = "no";
       if ($("returnTrip")) $("returnTrip").value = "no";
       if ($("returnTime")) $("returnTime").value = "";
+      if ($("referralSource")) $("referralSource").value = "self";
+      if ($("recurringPattern")) $("recurringPattern").value = "once";
+      if ($("referralEmail")) $("referralEmail").value = "";
+      if ($("pickupWindow")) $("pickupWindow").value = "exact";
       $("farePreview").textContent = "Estimated fare: -- • Distance: -- • Payment: --";
       $("passengerStatusLabel").textContent = "pending";
       $("passengerStageLabel").textContent = "waiting";
@@ -1502,8 +1622,16 @@ if (!user) {
       renderServiceAlerts();
       renderAuditLog();
       renderLevel6Notifications();
+      renderReferralInbox();
+      renderSlaSummary();
+      renderFleetHealth();
+      renderPassengerReadiness();
+      renderDriverAcceptanceBoard();
       syncDriverControls();
-      if (currentProfile?.role === "passenger") await renderSavedPlaces();
+      if (currentProfile?.role === "passenger") {
+        await renderSavedPlaces();
+        await renderRideTemplates();
+      }
       updateMapsFromLatest();
     }
 
@@ -1656,6 +1784,8 @@ if (!user) {
         <div class="book-card">
           ${bookingCardHTML(b)}
           <div class="status-row top-gap">
+            ${b.acceptanceStatus !== "accepted" ? `<button class="btn small brand" onclick="window.driverRespondBooking('${b.id}','accepted')">Accept</button>` : ""}
+            ${b.acceptanceStatus !== "declined" ? `<button class="btn small danger" onclick="window.driverRespondBooking('${b.id}','declined')">Decline</button>` : ""}
             <button class="btn small" onclick="window.updateDriverStage('${b.id}','started')">Start</button>
             <button class="btn small" onclick="window.updateDriverStage('${b.id}','routing')">Routing</button>
             <button class="btn small" onclick="window.updateDriverStage('${b.id}','in_progress')">In progress</button>
@@ -1694,7 +1824,12 @@ if (!user) {
           <div class="item"><div class="tiny">Fare</div><div>$${Number(b.fare || 0).toFixed(2)}</div></div>
           <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}<br/><span class="badge ${b.paymentStatus === "paid" ? "completed" : "pending"}">${escapeHtml(b.paymentStatus || "unpaid")}</span>${b.stripeVerifiedAt ? `<div class="footer-note">Webhook verified</div>` : ""}</div></div>
         </div>
-        ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}${b.assignedDriverUid ? `<div class="footer-note">Driver earnings: $${getDriverEarningsAmount(b).toFixed(2)}</div>` : ""}${b.driverStage ? `<div class="footer-note">Driver stage: ${escapeHtml(b.driverStage)}</div>` : ""}${b.driverLat ? `<div class="footer-note">Live tracking: on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}${b.driverLastSeenAt ? ` • updated ${new Date(b.driverLastSeenAt).toLocaleTimeString()}` : ""}</div>` : ""}${b.cancellationReason ? `<div class="footer-note">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
+        ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}
+        <div class="footer-note">Referral: ${escapeHtml(b.referralSource || "self")} ${b.referralEmail ? `• ${escapeHtml(b.referralEmail)}` : ""} ${b.recurringPattern && b.recurringPattern !== "once" ? `• ${escapeHtml(b.recurringPattern)}` : ""} ${b.pickupWindow ? `• window ${escapeHtml(b.pickupWindow)}` : ""}</div>
+        ${b.assignedDriverUid ? `<div class="footer-note">Driver earnings: $${getDriverEarningsAmount(b).toFixed(2)}</div>` : ""}
+        ${b.driverStage ? `<div class="footer-note">Driver stage: ${escapeHtml(b.driverStage)} • acceptance: ${escapeHtml(b.acceptanceStatus || "pending_driver")}</div>` : ""}
+        ${b.driverLat ? `<div class="footer-note">Live tracking: on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}${b.driverLastSeenAt ? ` • updated ${new Date(b.driverLastSeenAt).toLocaleTimeString()}` : ""}</div>` : ""}
+        ${b.cancellationReason ? `<div class="footer-note">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
       `;
     }
 
@@ -1810,6 +1945,7 @@ if (!user) {
         assignedDriverUid: driver.uid,
         assignedDriverName: driver.name || driver.email,
         status: "assigned",
+        acceptanceStatus: "pending_driver",
         driverStage: "assigned",
         dispatchAssignedAt: new Date().toISOString(),
         updatedAt: serverTimestamp()
@@ -2148,8 +2284,10 @@ if (!user) {
         .map(b => {
           const dt = bookingDateTimeValue(b);
           const mins = dt ? Math.round((dt - nowMs()) / 60000) : null;
+          const threshold = getLevel6Settings().urgentThresholdMins;
+          const slaClass = mins == null ? "sla-watch" : mins < 0 || mins <= threshold ? "sla-risk" : "sla-ok";
           const label = mins == null ? "Schedule not set" : mins < 0 ? "Overdue" : `${mins} min away`;
-          return `<div class="notice-item"><strong>${escapeHtml(b.passengerName || "Passenger")}</strong> • ${escapeHtml(label)} • ${escapeHtml(b.priority || "standard")} • ${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div>`;
+          return `<div class="notice-item ${slaClass}"><strong>${escapeHtml(b.passengerName || "Passenger")}</strong> • ${escapeHtml(label)} • ${escapeHtml(b.priority || "standard")} • ${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div>`;
         });
       renderSimpleNoticeList("serviceAlerts", items, "No service alerts.");
     }
@@ -2185,9 +2323,190 @@ if (!user) {
     }
 
     function syncDriverControls() {
+      if (currentProfile?.role === "driver") {
+        if ($("driverAvailabilitySelect")) $("driverAvailabilitySelect").value = currentProfile.availability || "online";
+        if ($("driverVehicleInput")) $("driverVehicleInput").value = currentProfile.vehicle || "";
+      }
+      if (currentProfile?.role === "admin") {
+        const settings = getLevel6Settings();
+        if ($("serviceWindowMinsInput")) $("serviceWindowMinsInput").value = settings.serviceWindowMins;
+        if ($("urgentThresholdMinsInput")) $("urgentThresholdMinsInput").value = settings.urgentThresholdMins;
+      }
+    }
+
+
+    function renderReferralInbox() {
+      if (currentProfile?.role !== "admin") return;
+      const items = allBookings
+        .filter(b => b.rideType === "ndis" || (b.referralSource && b.referralSource !== "self"))
+        .slice()
+        .sort((a,b) => bookingDateTimeValue(a) - bookingDateTimeValue(b))
+        .slice(0,8)
+        .map(b => `<div class="notice-item"><strong>${escapeHtml(b.bookingCode || "Trip")}</strong> • ${escapeHtml(b.referralSource || "self")} ${b.referralEmail ? `• ${escapeHtml(b.referralEmail)}` : ""} • ${escapeHtml(b.passengerName || "Passenger")} • ${escapeHtml(b.status || "pending")}</div>`);
+      renderSimpleNoticeList("referralInbox", items, "No referral items.");
+    }
+
+    function renderSlaSummary() {
+      if (currentProfile?.role !== "admin") return;
+      const settings = getLevel6Settings();
+      const items = [
+        `<div class="notice-item">Upcoming alert window: <strong>${settings.serviceWindowMins} mins</strong></div>`,
+        `<div class="notice-item">Urgent threshold: <strong>${settings.urgentThresholdMins} mins</strong></div>`,
+        `<div class="notice-item">Upcoming jobs: <strong>${allBookings.filter(b => bookingIsUpcoming(b, settings.serviceWindowMins) && b.status !== "completed" && b.status !== "cancelled").length}</strong></div>`
+      ];
+      const el = $("slaSummary");
+      if (el) el.innerHTML = items.join("");
+    }
+
+    async function saveSlaSettings() {
+      const serviceWindowMins = Math.max(15, Number($("serviceWindowMinsInput")?.value || 120));
+      const urgentThresholdMins = Math.max(15, Number($("urgentThresholdMinsInput")?.value || 45));
+      localStorage.setItem(LEVEL6_SETTINGS_KEY, JSON.stringify({ serviceWindowMins, urgentThresholdMins }));
+      renderSlaSummary();
+      alert("SLA settings saved.");
+    }
+
+    function renderFleetHealth() {
+      if (currentProfile?.role !== "admin") return;
+      const el = $("fleetHealth");
+      if (!el) return;
+      if (!allDrivers.length) {
+        el.innerHTML = `<div class="empty">No drivers yet.</div>`;
+        return;
+      }
+      const activeLoads = {};
+      allBookings.forEach(b => {
+        if (b.assignedDriverUid && b.status !== "completed" && b.status !== "cancelled") {
+          activeLoads[b.assignedDriverUid] = (activeLoads[b.assignedDriverUid] || 0) + 1;
+        }
+      });
+      el.innerHTML = allDrivers.map(d => {
+        const wheelchairReady = /wheelchair|accessible|van/i.test(String(d.vehicle || ""));
+        return `<div class="fleet-item">
+          <div class="trip-head"><div><strong>${escapeHtml(d.name || d.email)}</strong><div class="muted">${escapeHtml(d.vehicle || "Vehicle not set")}</div></div><div class="badge assigned">${escapeHtml(d.availability || "online")}</div></div>
+          <div class="footer-note">Active load: ${activeLoads[d.uid] || 0} • Wheelchair ready: ${wheelchairReady ? "Yes" : "No"}</div>
+        </div>`;
+      }).join("");
+    }
+
+    function renderPassengerReadiness() {
+      if (currentProfile?.role !== "passenger") return;
+      const latest = getLatestPassengerBooking();
+      const items = [];
+      if (!latest) {
+        renderSimpleNoticeList("passengerReadiness", [], "No trip readiness items yet.");
+        return;
+      }
+      items.push(`Latest booking: ${escapeHtml(latest.bookingCode || latest.id || "Trip")} • ${escapeHtml(latest.priority || "standard")}`);
+      items.push(`Referral: ${escapeHtml(latest.referralSource || "self")} ${latest.referralEmail ? `• ${escapeHtml(latest.referralEmail)}` : ""}`);
+      items.push(`Service window: ${escapeHtml(latest.pickupWindow || "exact")} • Return: ${escapeHtml(latest.returnTrip || "no")}`);
+      renderSimpleNoticeList("passengerReadiness", items.map(v => escapeHtml(v)), "No trip readiness items yet.");
+    }
+
+    async function saveRideTemplate() {
+      if (!currentUser) return;
+      const latest = getLatestPassengerBooking();
+      const label = $("templateLabel")?.value.trim() || (latest ? `${latest.pickup} to ${latest.destination}` : "");
+      const frequency = $("templateFrequency")?.value || "weekly";
+      if (!label) return alert("Enter a template name or create a trip first.");
+      const payload = latest ? {
+        uid: currentUser.uid,
+        label,
+        frequency,
+        pickup: latest.pickup || $("pickup")?.value || "",
+        destination: latest.destination || $("destination")?.value || "",
+        rideType: latest.rideType || $("rideType")?.value || "normal",
+        notes: latest.notes || $("notes")?.value || "",
+        priority: latest.priority || $("bookingPriority")?.value || "standard",
+        wheelchairRequired: latest.wheelchairRequired || $("wheelchairRequired")?.value || "no",
+        companionRequired: latest.companionRequired || $("companionRequired")?.value || "no",
+        returnTrip: latest.returnTrip || $("returnTrip")?.value || "no",
+        returnTime: latest.returnTime || $("returnTime")?.value || "",
+        referralSource: latest.referralSource || $("referralSource")?.value || "self",
+        recurringPattern: frequency,
+        referralEmail: latest.referralEmail || $("referralEmail")?.value || "",
+        pickupWindow: latest.pickupWindow || $("pickupWindow")?.value || "exact",
+        createdAt: serverTimestamp()
+      } : null;
+      if (!payload) return alert("No trip data available for template.");
+      await addDoc(collection(db, "ride_templates"), payload);
+      $("templateLabel").value = "";
+      await renderRideTemplates();
+    }
+
+    async function renderRideTemplates() {
+      if (currentProfile?.role !== "passenger" || !currentUser) return;
+      const wrap = $("rideTemplatesList");
+      if (!wrap) return;
+      const snap = await getDocs(query(collection(db, "ride_templates"), where("uid","==",currentUser.uid)));
+      const templates = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      window.__uvelTemplates = templates;
+      if (!templates.length) {
+        wrap.innerHTML = `<div class="empty">No templates yet.</div>`;
+        return;
+      }
+      wrap.innerHTML = templates.slice().reverse().map(t => `<div class="template-item">
+        <div style="font-weight:800">${escapeHtml(t.label)}</div>
+        <div class="muted">${escapeHtml(t.pickup)} → ${escapeHtml(t.destination)} • ${escapeHtml(t.frequency || "weekly")}</div>
+        <div class="mini-actions"><button class="btn small" onclick="window.applyRideTemplate('${t.id}')">Apply</button></div>
+      </div>`).join("");
+    }
+
+    async function applyRideTemplate(templateId) {
+      const template = (window.__uvelTemplates || []).find(t => t.id === templateId);
+      if (!template) return;
+      $("pickup").value = template.pickup || "";
+      $("destination").value = template.destination || "";
+      $("rideType").value = template.rideType || "normal";
+      $("notes").value = template.notes || "";
+      if ($("bookingPriority")) $("bookingPriority").value = template.priority || "standard";
+      if ($("wheelchairRequired")) $("wheelchairRequired").value = template.wheelchairRequired || "no";
+      if ($("companionRequired")) $("companionRequired").value = template.companionRequired || "no";
+      if ($("returnTrip")) $("returnTrip").value = template.returnTrip || "no";
+      if ($("returnTime")) $("returnTime").value = template.returnTime || "";
+      if ($("referralSource")) $("referralSource").value = template.referralSource || "self";
+      if ($("recurringPattern")) $("recurringPattern").value = template.recurringPattern || "weekly";
+      if ($("referralEmail")) $("referralEmail").value = template.referralEmail || "";
+      if ($("pickupWindow")) $("pickupWindow").value = template.pickupWindow || "exact";
+      updatePaymentButton();
+      alert("Template applied.");
+    }
+
+    async function applyLatestRideTemplate() {
+      const latest = (window.__uvelTemplates || []).slice().reverse()[0];
+      if (!latest) return alert("No template saved yet.");
+      await applyRideTemplate(latest.id);
+    }
+
+    async function driverRespondBooking(bookingId, response) {
+      const booking = allBookings.find(b => b.id === bookingId);
+      if (!booking) return;
+      const patch = {
+        acceptanceStatus: response,
+        updatedAt: serverTimestamp()
+      };
+      if (response === "declined") {
+        patch.status = "pending";
+        patch.driverStage = "waiting";
+        patch.assignedDriverUid = null;
+        patch.assignedDriverName = null;
+      } else {
+        patch.status = "assigned";
+        patch.driverStage = booking.driverStage === "assigned" ? "accepted" : (booking.driverStage || "accepted");
+      }
+      await updateDoc(doc(db, "bookings", bookingId), patch);
+    }
+
+    function renderDriverAcceptanceBoard() {
       if (currentProfile?.role !== "driver") return;
-      if ($("driverAvailabilitySelect")) $("driverAvailabilitySelect").value = currentProfile.availability || "online";
-      if ($("driverVehicleInput")) $("driverVehicleInput").value = currentProfile.vehicle || "";
+      const wrap = $("driverAcceptanceBoard");
+      if (!wrap) return;
+      const rows = allBookings
+        .filter(b => b.assignedDriverUid === currentUser?.uid && b.status !== "completed" && b.status !== "cancelled")
+        .slice()
+        .sort((a,b) => bookingDateTimeValue(a) - bookingDateTimeValue(b))
+        .map(b => `<div class="notice-item"><strong>${escapeHtml(b.bookingCode || "Trip")}</strong> • ${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)} • acceptance: ${escapeHtml(b.acceptanceStatus || "pending_driver")}</div>`);
+      renderSimpleNoticeList("driverAcceptanceBoard", rows, "No driver decisions pending.");
     }
 
     window.assignDriver = assignDriver;
@@ -2198,6 +2517,8 @@ if (!user) {
     window.saveBookingEdit = saveBookingEdit;
     window.updateDriverStage = updateDriverStage;
     window.useSavedPlace = useSavedPlace;
+    window.applyRideTemplate = applyRideTemplate;
+    window.driverRespondBooking = driverRespondBooking;
 
     $("manualAssignBtn").onclick = () => {
       assignMode = "manual";
@@ -2216,11 +2537,23 @@ if (!user) {
           activeLoads[b.assignedDriverUid] = (activeLoads[b.assignedDriverUid] || 0) + 1;
         }
       });
-      for (const booking of pending.sort((a,b) => bookingPriorityRank(b.priority) - bookingPriorityRank(a.priority))) {
-        const availableDrivers = allDrivers.filter(d => (d.availability || "online") !== "offline");
+      for (const booking of pending.sort((a,b) => {
+        const p = bookingPriorityRank(b.priority) - bookingPriorityRank(a.priority);
+        if (p !== 0) return p;
+        return bookingDateTimeValue(a) - bookingDateTimeValue(b);
+      })) {
+        const availableDrivers = allDrivers.filter(d => {
+          const availability = (d.availability || "online");
+          if (availability === "offline" || availability === "break") return false;
+          if (booking.wheelchairRequired === "yes" && !/wheelchair|accessible|van/i.test(String(d.vehicle || ""))) return false;
+          return true;
+        });
         const bestDriver = [...availableDrivers].sort((a, b) => {
           const loadDiff = (activeLoads[a.uid] || 0) - (activeLoads[b.uid] || 0);
           if (loadDiff !== 0) return loadDiff;
+          const aBusy = (a.availability || "online") === "busy" ? 1 : 0;
+          const bBusy = (b.availability || "online") === "busy" ? 1 : 0;
+          if (aBusy !== bBusy) return aBusy - bBusy;
           return String(a.name || a.email).localeCompare(String(b.name || b.email));
         })[0];
         if (!bestDriver) continue;
@@ -2228,6 +2561,7 @@ if (!user) {
           assignedDriverUid: bestDriver.uid,
           assignedDriverName: bestDriver.name || bestDriver.email,
           status: "assigned",
+          acceptanceStatus: "pending_driver",
           driverStage: "assigned",
           dispatchAssignedAt: new Date().toISOString(),
           updatedAt: serverTimestamp()
