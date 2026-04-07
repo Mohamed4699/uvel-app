@@ -181,6 +181,14 @@
     .template-item,.fleet-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
     .sla-ok{color:#87ebb0}.sla-watch{color:#ffd76f}.sla-risk{color:#ff9f9f}
 
+
+    .level8-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .otp-box,.finance-item,.kanban-item,.proof-item,.trust-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .kanban-board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .otp-code{font-size:22px;font-weight:900;letter-spacing:2px}
+    .proof-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .mini-input{padding:10px 12px;border-radius:12px}
+
   </style>
 </head>
 <body>
@@ -191,7 +199,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 7 operations platform</div>
+            <div class="subtitle">Firebase Level 8 operations platform</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -273,7 +281,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 7 • referrals • repeat rides • SLA controls • driver acceptance</div>
+            <div class="subtitle">Full Level 8 • OTP ride security • finance queue • kanban dispatch • proof of completion</div>
           </div>
         </div>
         <div class="userbox">
@@ -406,6 +414,31 @@
                     <option value="15">± 15 minutes</option>
                     <option value="30">± 30 minutes</option>
                   </select>
+                </div>
+              </div>
+              <div class="row top-gap">
+                <div>
+                  <label>Service type</label>
+                  <select id="serviceType">
+                    <option value="medical">Medical</option>
+                    <option value="therapy">Therapy</option>
+                    <option value="community">Community access</option>
+                    <option value="airport">Airport / transfer</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Emergency contact</label>
+                  <input id="emergencyContact" placeholder="Name and phone" />
+                </div>
+              </div>
+              <div class="row top-gap">
+                <div>
+                  <label>Extra stop (optional)</label>
+                  <input id="extraStop" placeholder="Add one extra stop" />
+                </div>
+                <div>
+                  <label>Wait time (minutes)</label>
+                  <input type="number" id="waitMinutes" min="0" step="5" value="0" />
                 </div>
               </div>
               <div class="right-actions top-gap">
@@ -625,6 +658,24 @@
             <div id="passengerManagement" class="booking-list"></div>
           </div>
         </div>
+
+        <div class="level8-grid top-gap">
+          <div class="card section">
+            <div class="section-title">Kanban dispatch</div>
+            <div class="section-sub">Fast view of pending, assigned, and completed jobs.</div>
+            <div id="kanbanDispatch" class="kanban-board"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Finance reconciliation</div>
+            <div class="section-sub">Track unpaid, referral, and card-booked jobs.</div>
+            <div id="financeQueue" class="notice-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Passenger trust panel</div>
+            <div class="section-sub">Security and service readiness checks.</div>
+            <div id="passengerTrustPanel" class="notice-list"></div>
+          </div>
+        </div>
       </div>
 
       <div id="driverView" class="hidden">
@@ -683,6 +734,19 @@
           <div class="section-title">Driver acceptance board</div>
           <div class="section-sub">Accept or decline newly assigned work.</div>
           <div id="driverAcceptanceBoard" class="notice-list"></div>
+        </div>
+
+        <div class="grid-2 top-gap">
+          <div class="card section">
+            <div class="section-title">OTP trip security</div>
+            <div class="section-sub">Use one-time codes to verify pickup and drop-off.</div>
+            <div id="driverOtpPanel" class="notice-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Proof of completion</div>
+            <div class="section-sub">Save end-of-trip note or image link without changing login flow.</div>
+            <div id="driverProofPanel" class="notice-list"></div>
+          </div>
         </div>
 
       </div>
@@ -1415,7 +1479,7 @@ if (!user) {
           km = rideType === "ndis" ? 18 : 15;
         }
 
-        const fare = calculateFare(km, rideType);
+        const fare = computeLevel8FareAdjustments(calculateFare(km, rideType));
         $("farePreview").textContent = `Estimated fare: $${fare.toFixed(2)} • Distance: ${km.toFixed(1)} km • Payment: ${payment}`;
 
         const tempBooking = { pickup, destination, status: "draft" };
@@ -1446,6 +1510,10 @@ if (!user) {
       const recurringPattern = $("recurringPattern")?.value || "once";
       const referralEmail = $("referralEmail")?.value.trim() || "";
       const pickupWindow = $("pickupWindow")?.value || "exact";
+      const serviceType = $("serviceType")?.value || "medical";
+      const emergencyContact = $("emergencyContact")?.value.trim() || "";
+      const extraStop = $("extraStop")?.value.trim() || "";
+      const waitMinutes = Number($("waitMinutes")?.value || 0);
 
       if (!pickup || !destination || !tripDate || !tripTime) {
         return alert("Please fill all required booking fields.");
@@ -1461,7 +1529,7 @@ if (!user) {
         km = rideType === "ndis" ? 18 : 15;
       }
 
-      const fare = calculateFare(km, rideType);
+      const fare = computeLevel8FareAdjustments(calculateFare(km, rideType));
 
       await addDoc(collection(db, "bookings"), {
       paymentStatus: "unpaid",
@@ -1488,6 +1556,16 @@ if (!user) {
         recurringPattern,
         referralEmail,
         pickupWindow,
+        serviceType,
+        emergencyContact,
+        extraStop,
+        waitMinutes,
+        pickupOtp: generateOtpCode(),
+        dropoffOtp: generateOtpCode(),
+        pickupOtpVerified: false,
+        dropoffOtpVerified: false,
+        completionProofNote: "",
+        completionProofLink: "",
         acceptanceStatus: "pending_driver",
         bookingCode: bookingCode(),
         status: "pending",
@@ -1546,7 +1624,18 @@ if (!user) {
     }
 
 
-    function renderAdminCharts() {
+    
+    function generateOtpCode() {
+      return String(Math.floor(1000 + Math.random() * 9000));
+    }
+
+    function computeLevel8FareAdjustments(baseFare) {
+      const stopCharge = Number($("extraStop")?.value.trim() ? 7.5 : 0);
+      const waitCharge = Math.max(0, Number($("waitMinutes")?.value || 0)) * 0.65;
+      return Math.round((baseFare + stopCharge + waitCharge) * 100) / 100;
+    }
+
+function renderAdminCharts() {
       if (currentProfile?.role !== "admin" || typeof Chart === "undefined") return;
 
       const revenueCanvas = $("revenueChart");
@@ -1627,6 +1716,11 @@ if (!user) {
       renderFleetHealth();
       renderPassengerReadiness();
       renderDriverAcceptanceBoard();
+      renderKanbanDispatch();
+      renderFinanceQueue();
+      renderPassengerTrustPanel();
+      renderDriverOtpPanel();
+      renderDriverProofPanel();
       syncDriverControls();
       if (currentProfile?.role === "passenger") {
         await renderSavedPlaces();
@@ -1762,6 +1856,8 @@ if (!user) {
               <input id="edit-destination-${b.id}" value="${escapeHtml(b.destination || "")}" placeholder="Destination" />
               <input id="edit-tripDate-${b.id}" value="${escapeHtml(b.tripDate || "")}" type="date" />
               <input id="edit-tripTime-${b.id}" value="${escapeHtml(b.tripTime || "")}" type="time" />
+              <input id="edit-extraStop-${b.id}" value="${escapeHtml(b.extraStop || "")}" placeholder="Extra stop" />
+              <input id="edit-waitMinutes-${b.id}" value="${escapeHtml(b.waitMinutes || 0)}" type="number" min="0" step="5" placeholder="Wait minutes" />
             </div>
             <textarea id="edit-notes-${b.id}" placeholder="Notes">${escapeHtml(b.notes || "")}</textarea>
             <div class="right-actions top-gap">
@@ -1791,6 +1887,15 @@ if (!user) {
             <button class="btn small" onclick="window.updateDriverStage('${b.id}','in_progress')">In progress</button>
             <a class="btn small nav-link" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(b.destination || '')}&origin=${encodeURIComponent(b.pickup || '')}">Navigator</a>
             ${b.status !== "completed" ? `<button class="btn small brand" onclick="window.completeBooking('${b.id}')">Mark completed</button>` : ""}
+          </div>
+          <div class="proof-grid top-gap">
+            <input class="mini-input" id="pickup-otp-input-${b.id}" placeholder="Enter pickup OTP" />
+            <button class="btn small" onclick="window.verifyPickupOtp('${b.id}')">Verify pickup OTP</button>
+            <input class="mini-input" id="dropoff-otp-input-${b.id}" placeholder="Enter drop-off OTP" />
+            <button class="btn small" onclick="window.verifyDropoffOtp('${b.id}')">Verify drop-off OTP</button>
+            <input class="mini-input" id="proof-note-${b.id}" value="${escapeHtml(b.completionProofNote || "")}" placeholder="Completion note" />
+            <input class="mini-input" id="proof-link-${b.id}" value="${escapeHtml(b.completionProofLink || "")}" placeholder="Photo / document link" />
+            <button class="btn small brand" onclick="window.saveCompletionProof('${b.id}')">Save proof</button>
           </div>
           <div class="eta-box">
             <div class="item"><div class="tiny">Stage</div><div>${escapeHtml(b.driverStage || "assigned")}</div></div>
@@ -1826,6 +1931,8 @@ if (!user) {
         </div>
         ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}
         <div class="footer-note">Referral: ${escapeHtml(b.referralSource || "self")} ${b.referralEmail ? `• ${escapeHtml(b.referralEmail)}` : ""} ${b.recurringPattern && b.recurringPattern !== "once" ? `• ${escapeHtml(b.recurringPattern)}` : ""} ${b.pickupWindow ? `• window ${escapeHtml(b.pickupWindow)}` : ""}</div>
+        <div class="footer-note">Service: ${escapeHtml(b.serviceType || "medical")} ${b.extraStop ? `• extra stop ${escapeHtml(b.extraStop)}` : ""} ${Number(b.waitMinutes || 0) > 0 ? `• wait ${escapeHtml(b.waitMinutes)} min` : ""} ${b.emergencyContact ? `• emergency ${escapeHtml(b.emergencyContact)}` : ""}</div>
+        <div class="footer-note">OTP pickup: <strong>${escapeHtml(b.pickupOtp || "----")}</strong> ${b.pickupOtpVerified ? "• verified" : ""} | drop-off: <strong>${escapeHtml(b.dropoffOtp || "----")}</strong> ${b.dropoffOtpVerified ? "• verified" : ""}</div>
         ${b.assignedDriverUid ? `<div class="footer-note">Driver earnings: $${getDriverEarningsAmount(b).toFixed(2)}</div>` : ""}
         ${b.driverStage ? `<div class="footer-note">Driver stage: ${escapeHtml(b.driverStage)} • acceptance: ${escapeHtml(b.acceptanceStatus || "pending_driver")}</div>` : ""}
         ${b.driverLat ? `<div class="footer-note">Live tracking: on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}${b.driverLastSeenAt ? ` • updated ${new Date(b.driverLastSeenAt).toLocaleTimeString()}` : ""}</div>` : ""}
@@ -1953,9 +2060,15 @@ if (!user) {
     }
 
     async function completeBooking(bookingId) {
+      const booking = allBookings.find(b => b.id === bookingId);
+      if (booking && booking.dropoffOtp && !booking.dropoffOtpVerified) {
+        const ok = confirm("Drop-off OTP is not verified yet. Complete anyway?");
+        if (!ok) return;
+      }
       await updateDoc(doc(db, "bookings", bookingId), {
         status: "completed",
         driverStage: "completed",
+        completedAt: new Date().toISOString(),
         updatedAt: serverTimestamp()
       });
     }
@@ -2080,6 +2193,8 @@ if (!user) {
       const rideType = document.getElementById(`edit-rideType-${bookingId}`)?.value || "normal";
       const tripDate = document.getElementById(`edit-tripDate-${bookingId}`)?.value || "";
       const tripTime = document.getElementById(`edit-tripTime-${bookingId}`)?.value || "";
+      const extraStop = document.getElementById(`edit-extraStop-${bookingId}`)?.value?.trim() || "";
+      const waitMinutes = Number(document.getElementById(`edit-waitMinutes-${bookingId}`)?.value || 0);
       const notes = document.getElementById(`edit-notes-${bookingId}`)?.value?.trim() || "";
       if (!pickup || !destination || !tripDate || !tripTime) return alert("Please complete the edit fields.");
       const pickupCoords = await geocodeAddress(pickup);
@@ -2087,9 +2202,9 @@ if (!user) {
       if (!pickupCoords || !destinationCoords) return alert("Could not recalculate route. Use a clearer pickup and destination.");
       const km = await estimateDistanceKm(pickup, destination);
       if (!km) return alert("Could not recalculate route. Use a clearer pickup and destination.");
-      const fare = calculateFare(km, rideType);
+      const fare = Math.round((calculateFare(km, rideType) + (extraStop ? 7.5 : 0) + (waitMinutes * 0.65)) * 100) / 100;
       await updateDoc(doc(db, "bookings", bookingId), {
-        passengerName, rideType, pickup, destination, pickupCoords, destinationCoords, tripDate, tripTime, notes,
+        passengerName, rideType, pickup, destination, pickupCoords, destinationCoords, tripDate, tripTime, notes, extraStop, waitMinutes,
         distanceKm: Number(km.toFixed(1)),
         fare: Number(fare.toFixed(2)),
         paymentMethod: rideType === "ndis" ? "Invoice / Referral" : "Card / Direct",
@@ -2468,6 +2583,10 @@ if (!user) {
       if ($("recurringPattern")) $("recurringPattern").value = template.recurringPattern || "weekly";
       if ($("referralEmail")) $("referralEmail").value = template.referralEmail || "";
       if ($("pickupWindow")) $("pickupWindow").value = template.pickupWindow || "exact";
+      if ($("serviceType")) $("serviceType").value = template.serviceType || "medical";
+      if ($("emergencyContact")) $("emergencyContact").value = template.emergencyContact || "";
+      if ($("extraStop")) $("extraStop").value = template.extraStop || "";
+      if ($("waitMinutes")) $("waitMinutes").value = template.waitMinutes || 0;
       updatePaymentButton();
       alert("Template applied.");
     }
@@ -2509,6 +2628,105 @@ if (!user) {
       renderSimpleNoticeList("driverAcceptanceBoard", rows, "No driver decisions pending.");
     }
 
+
+    function renderKanbanDispatch() {
+      const el = $("kanbanDispatch");
+      if (!el || currentProfile?.role !== "admin") return;
+      const groups = [
+        { key: "pending", title: "Pending" },
+        { key: "assigned", title: "Assigned" },
+        { key: "completed", title: "Completed" }
+      ];
+      el.innerHTML = groups.map(group => {
+        const items = allBookings.filter(b => b.status === group.key).slice(0, 5);
+        const body = items.length
+          ? items.map(b => `<div class="kanban-item"><strong>${escapeHtml(b.passengerName || "Passenger")}</strong><div class="tiny">${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div><div class="tiny">${escapeHtml(b.tripDate || "--")} ${escapeHtml(b.tripTime || "")}</div></div>`).join("")
+          : `<div class="empty">No ${group.key} jobs</div>`;
+        return `<div class="kanban-col"><div class="kanban-title">${group.title} (${allBookings.filter(b => b.status === group.key).length})</div>${body}</div>`;
+      }).join("");
+    }
+
+    function renderFinanceQueue() {
+      const wrap = $("financeQueue");
+      if (!wrap || currentProfile?.role !== "admin") return;
+      const unpaid = allBookings.filter(b => b.paymentStatus !== "paid");
+      const referral = allBookings.filter(b => String(b.paymentMethod || "").includes("Invoice"));
+      const card = allBookings.filter(b => String(b.paymentMethod || "").includes("Card"));
+      const items = [
+        `<div class="finance-item"><strong>Unpaid jobs</strong><div class="ops-kpi">${unpaid.length}</div><div class="tiny">Needs follow-up or payment</div></div>`,
+        `<div class="finance-item"><strong>Referral jobs</strong><div class="ops-kpi">${referral.length}</div><div class="tiny">NDIS / invoice workflow</div></div>`,
+        `<div class="finance-item"><strong>Card jobs</strong><div class="ops-kpi">${card.length}</div><div class="tiny">Direct payment flow</div></div>`
+      ];
+      renderSimpleNoticeList("financeQueue", items, "No finance items.");
+    }
+
+    function renderPassengerTrustPanel() {
+      const wrap = $("passengerTrustPanel");
+      if (!wrap || currentProfile?.role !== "admin") return;
+      const rows = allBookings.slice(0, 6).map(b => {
+        const checks = [
+          b.emergencyContact ? "Emergency contact" : "Missing emergency contact",
+          b.pickupOtpVerified ? "Pickup verified" : "Pickup OTP pending",
+          b.dropoffOtpVerified ? "Drop-off verified" : "Drop-off OTP pending"
+        ].join(" • ");
+        return `<div class="trust-item"><strong>${escapeHtml(b.passengerName || "Passenger")}</strong><div class="tiny">${checks}</div></div>`;
+      });
+      renderSimpleNoticeList("passengerTrustPanel", rows, "No passenger trust checks yet.");
+    }
+
+    function renderDriverOtpPanel() {
+      const wrap = $("driverOtpPanel");
+      if (!wrap || currentProfile?.role !== "driver") return;
+      const trips = allBookings.filter(b => b.assignedDriverUid === currentUser?.uid && b.status !== "completed").slice(0, 4);
+      const rows = trips.map(b => `<div class="otp-box"><strong>${escapeHtml(b.bookingCode || "Trip")}</strong><div class="tiny">${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div><div class="otp-code">${escapeHtml(b.pickupOtp || "----")} / ${escapeHtml(b.dropoffOtp || "----")}</div><div class="tiny">Pickup ${b.pickupOtpVerified ? "verified" : "pending"} • Drop-off ${b.dropoffOtpVerified ? "verified" : "pending"}</div></div>`);
+      renderSimpleNoticeList("driverOtpPanel", rows, "No OTP trips assigned.");
+    }
+
+    function renderDriverProofPanel() {
+      const wrap = $("driverProofPanel");
+      if (!wrap || currentProfile?.role !== "driver") return;
+      const trips = allBookings.filter(b => b.assignedDriverUid === currentUser?.uid).slice(0, 4);
+      const rows = trips.map(b => `<div class="proof-item"><strong>${escapeHtml(b.bookingCode || "Trip")}</strong><div class="tiny">${escapeHtml(b.completionProofNote || "No proof note saved yet.")}</div>${b.completionProofLink ? `<div class="tiny">${escapeHtml(b.completionProofLink)}</div>` : ""}</div>`);
+      renderSimpleNoticeList("driverProofPanel", rows, "No completion proof yet.");
+    }
+
+    async function verifyPickupOtp(bookingId) {
+      const booking = allBookings.find(b => b.id === bookingId);
+      const value = document.getElementById(`pickup-otp-input-${bookingId}`)?.value?.trim();
+      if (!booking) return;
+      if (String(value) !== String(booking.pickupOtp || "")) return alert("Pickup OTP is incorrect.");
+      await updateDoc(doc(db, "bookings", bookingId), {
+        pickupOtpVerified: true,
+        driverStage: "pickup_verified",
+        updatedAt: serverTimestamp()
+      });
+      alert("Pickup OTP verified.");
+    }
+
+    async function verifyDropoffOtp(bookingId) {
+      const booking = allBookings.find(b => b.id === bookingId);
+      const value = document.getElementById(`dropoff-otp-input-${bookingId}`)?.value?.trim();
+      if (!booking) return;
+      if (String(value) !== String(booking.dropoffOtp || "")) return alert("Drop-off OTP is incorrect.");
+      await updateDoc(doc(db, "bookings", bookingId), {
+        dropoffOtpVerified: true,
+        driverStage: "dropoff_verified",
+        updatedAt: serverTimestamp()
+      });
+      alert("Drop-off OTP verified.");
+    }
+
+    async function saveCompletionProof(bookingId) {
+      const note = document.getElementById(`proof-note-${bookingId}`)?.value?.trim() || "";
+      const link = document.getElementById(`proof-link-${bookingId}`)?.value?.trim() || "";
+      await updateDoc(doc(db, "bookings", bookingId), {
+        completionProofNote: note,
+        completionProofLink: link,
+        updatedAt: serverTimestamp()
+      });
+      alert("Completion proof saved.");
+    }
+
     window.assignDriver = assignDriver;
     window.completeBooking = completeBooking;
     window.cancelBooking = cancelBooking;
@@ -2519,6 +2737,9 @@ if (!user) {
     window.useSavedPlace = useSavedPlace;
     window.applyRideTemplate = applyRideTemplate;
     window.driverRespondBooking = driverRespondBooking;
+    window.verifyPickupOtp = verifyPickupOtp;
+    window.verifyDropoffOtp = verifyDropoffOtp;
+    window.saveCompletionProof = saveCompletionProof;
 
     $("manualAssignBtn").onclick = () => {
       assignMode = "manual";
@@ -2576,12 +2797,12 @@ if (!user) {
 
     function exportCSV(rows, fileName) {
       if (!rows.length) return alert("No data to export.");
-      const headers = ["Passenger","Email","Pickup","Destination","Date","Time","Ride Type","Distance Km","Fare","Payment","Status","Driver","Notes"];
+      const headers = ["Passenger","Email","Pickup","Destination","Extra Stop","Wait Minutes","Service Type","Date","Time","Ride Type","Distance Km","Fare","Payment","Status","Driver","Notes"];
       const csv = [
         headers.join(","),
         ...rows.map(r => [
-          r.passengerName, r.passengerEmail, r.pickup, r.destination, r.tripDate, r.tripTime,
-          r.rideType, r.distanceKm, r.fare, r.paymentMethod, r.status, r.assignedDriverName || "", r.notes || ""
+          r.passengerName, r.passengerEmail, r.pickup, r.destination, r.extraStop || "", r.waitMinutes || 0, r.serviceType || "",
+          r.tripDate, r.tripTime, r.rideType, r.distanceKm, r.fare, r.paymentMethod, r.status, r.assignedDriverName || "", r.notes || ""
         ].map(csvCell).join(","))
       ].join("\n");
       downloadBlob(new Blob([csv], { type: "text/csv" }), fileName);
