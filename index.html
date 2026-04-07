@@ -164,6 +164,15 @@
     canvas{max-width:100%}
     #revenueChart,#paymentChart{min-height:280px}
 
+    .level6-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .chip{padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px}
+    .notice-list,.audit-list,.saved-places-list{display:grid;gap:10px}
+    .notice-item,.audit-item,.saved-place-item,.ops-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .ops-kpi{font-size:24px;font-weight:900}
+    .tag-high{color:#ffd76f}.tag-urgent{color:#ff9f9f}.tag-standard{color:#9ec3da}
+    .mini-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
   </style>
 </head>
 <body>
@@ -174,7 +183,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase production-ready starter</div>
+            <div class="subtitle">Firebase Level 6 operations platform</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -256,7 +265,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 5 • smooth live tracking • route ETA • shared bookings</div>
+            <div class="subtitle">Full Level 6 • dispatch • saved places • SLA alerts • referral workflow</div>
           </div>
         </div>
         <div class="userbox">
@@ -320,6 +329,43 @@
                 <label>Notes</label>
                 <textarea id="notes" placeholder="Mobility needs, pickup instructions, support notes"></textarea>
               </div>
+              <div class="row top-gap">
+                <div>
+                  <label>Priority</label>
+                  <select id="bookingPriority">
+                    <option value="standard">Standard</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Return trip</label>
+                  <select id="returnTrip">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row top-gap">
+                <div>
+                  <label>Wheelchair required</label>
+                  <select id="wheelchairRequired">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Companion travelling</label>
+                  <select id="companionRequired">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+              </div>
+              <div class="top-gap">
+                <label>Return time (optional)</label>
+                <input type="time" id="returnTime" />
+              </div>
               <div class="right-actions top-gap">
                 <button class="btn" id="estimateFareBtn" type="button">Estimate fare</button>
                 <button class="btn brand" id="requestRideBtn" type="submit">Request ride</button>
@@ -363,10 +409,32 @@
           <div class="trip-head">
             <div>
               <div class="trip-head"><div><div class="section-title">My trips</div>
-              <div class="section-sub">Passenger sees only their own bookings with live driver location when shared.</div></div>              <div class="seg"><button class="btn small danger" id="passengerCancelBtn">Cancel latest trip</button></div></div>
+              <div class="section-sub">Passenger sees only their own bookings with live driver location when shared.</div></div>              <div class="seg"><button class="btn small" id="rebookLatestBtn">Rebook latest</button><button class="btn small danger" id="passengerCancelBtn">Cancel latest trip</button></div></div>
             </div>
           </div>
           <div id="passengerTrips" class="booking-list"></div>
+        </div>
+
+        <div class="grid-2 top-gap">
+          <div class="card section">
+            <div class="section-title">Saved places</div>
+            <div class="section-sub">Quickly save common pickup and destination addresses.</div>
+            <div class="row">
+              <div><input id="savedPlaceLabel" placeholder="Place label e.g. Home" /></div>
+              <div><input id="savedPlaceAddress" placeholder="Full address" /></div>
+            </div>
+            <div class="mini-actions">
+              <button class="btn brand small" id="savePlaceBtn">Save place</button>
+              <button class="btn small" id="useHomeBtn">Use first saved place</button>
+            </div>
+            <div id="savedPlacesList" class="saved-places-list top-gap"></div>
+          </div>
+
+          <div class="card section">
+            <div class="section-title">Trip updates</div>
+            <div class="section-sub">Recent notifications for your bookings.</div>
+            <div id="passengerNotifications" class="notice-list"></div>
+          </div>
         </div>
       </div>
 
@@ -426,6 +494,24 @@
           </div>
         </div>
 
+        <div class="grid-3 top-gap">
+          <div class="card section">
+            <div class="section-title">Dispatch board</div>
+            <div class="section-sub">Priority queue, unpaid jobs, and service commitments.</div>
+            <div id="dispatchBoard" class="notice-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Service alerts</div>
+            <div class="section-sub">Trips needing attention in the next 2 hours.</div>
+            <div id="serviceAlerts" class="notice-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Audit log</div>
+            <div class="section-sub">Admin-friendly activity trail.</div>
+            <div id="auditLog" class="audit-list"></div>
+          </div>
+        </div>
+
         <div class="grid-2 top-gap">
           <div class="card section">
             <div class="section-title">Driver management</div>
@@ -460,6 +546,38 @@
             <div class="eta-box"><div class="item"><div class="tiny">Live ETA</div><div id="driverLiveEta">--</div></div><div class="item"><div class="tiny">Remaining km</div><div id="driverRemainingKm">--</div></div><div class="item"><div class="tiny">Current speed</div><div id="driverSpeedLabel">--</div></div><div class="item"><div class="tiny">Route mode</div><div id="driverRouteMode">OSRM route</div></div></div>
           </div>
         </div>
+
+
+        <div class="grid-2 top-gap">
+          <div class="card section">
+            <div class="section-title">Driver controls</div>
+            <div class="section-sub">Update availability and vehicle notes without changing login flow.</div>
+            <div class="row">
+              <div>
+                <label>Availability</label>
+                <select id="driverAvailabilitySelect">
+                  <option value="online">Online</option>
+                  <option value="busy">Busy</option>
+                  <option value="break">On break</option>
+                  <option value="offline">Offline</option>
+                </select>
+              </div>
+              <div>
+                <label>Vehicle</label>
+                <input id="driverVehicleInput" placeholder="Toyota HiAce" />
+              </div>
+            </div>
+            <div class="mini-actions">
+              <button class="btn brand small" id="saveDriverProfileBtn">Save driver profile</button>
+            </div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Driver notifications</div>
+            <div class="section-sub">Assignments and completion reminders.</div>
+            <div id="driverNotifications" class="notice-list"></div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -895,6 +1013,7 @@ if (!user) {
       $("passengerName").value = currentProfile.name || "";
       updatePaymentButton();
       await handlePaymentReturn();
+      syncDriverControls();
 
       initMaps();
       subscribeUsers();
@@ -1211,6 +1330,11 @@ if (!user) {
       const tripDate = $("tripDate").value;
       const tripTime = $("tripTime").value;
       const notes = $("notes").value.trim();
+      const priority = $("bookingPriority")?.value || "standard";
+      const wheelchairRequired = $("wheelchairRequired")?.value || "no";
+      const companionRequired = $("companionRequired")?.value || "no";
+      const returnTrip = $("returnTrip")?.value || "no";
+      const returnTime = $("returnTime")?.value || "";
 
       if (!pickup || !destination || !tripDate || !tripTime) {
         return alert("Please fill all required booking fields.");
@@ -1244,6 +1368,12 @@ if (!user) {
         distanceKm: Number(km.toFixed(1)),
         fare: Number(fare.toFixed(2)),
         paymentMethod: rideType === "ndis" ? "Invoice / Referral" : "Card / Direct",
+        priority,
+        wheelchairRequired,
+        companionRequired,
+        returnTrip,
+        returnTime,
+        bookingCode: bookingCode(),
         status: "pending",
         driverStage: "waiting",
         assignedDriverUid: null,
@@ -1254,6 +1384,11 @@ if (!user) {
 
       $("bookingForm").reset();
       $("passengerName").value = currentProfile.name || "";
+      if ($("bookingPriority")) $("bookingPriority").value = "standard";
+      if ($("wheelchairRequired")) $("wheelchairRequired").value = "no";
+      if ($("companionRequired")) $("companionRequired").value = "no";
+      if ($("returnTrip")) $("returnTrip").value = "no";
+      if ($("returnTime")) $("returnTime").value = "";
       $("farePreview").textContent = "Estimated fare: -- • Distance: -- • Payment: --";
       $("passengerStatusLabel").textContent = "pending";
       $("passengerStageLabel").textContent = "waiting";
@@ -1354,7 +1489,7 @@ if (!user) {
       });
     }
 
-    function renderEverything() {
+    async function renderEverything() {
       renderStats();
       renderPassengerTrips();
       renderAdminBookings();
@@ -1363,6 +1498,12 @@ if (!user) {
       renderDriverManagement();
       renderDriverEarningsSummary();
       renderAdminCharts();
+      renderDispatchBoard();
+      renderServiceAlerts();
+      renderAuditLog();
+      renderLevel6Notifications();
+      syncDriverControls();
+      if (currentProfile?.role === "passenger") await renderSavedPlaces();
       updateMapsFromLatest();
     }
 
@@ -1451,6 +1592,14 @@ if (!user) {
       const latest = getLatestPassengerBooking();
       await startStripeCheckout(latest);
     });
+    $("savePlaceBtn")?.addEventListener("click", savePlace);
+    $("rebookLatestBtn")?.addEventListener("click", rebookLatestTrip);
+    $("useHomeBtn")?.addEventListener("click", () => {
+      const place = (window.__uvelSavedPlaces || [])[0];
+      if (!place) return alert("No saved place yet.");
+      $("pickup").value = place.address;
+    });
+    $("saveDriverProfileBtn")?.addEventListener("click", saveDriverProfileLevel6);
 
     function renderAdminBookings() {
       if (currentProfile?.role !== "admin") return;
@@ -1529,6 +1678,13 @@ if (!user) {
           <div>
             <div style="font-size:26px;font-weight:900">${escapeHtml(b.passengerName || "Passenger")}</div>
             <div class="route">${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div>
+            <div class="chip-row">
+              <span class="chip">${escapeHtml(b.bookingCode || "No code")}</span>
+              <span class="chip tag-${escapeHtml(b.priority || "standard")}">${escapeHtml(b.priority || "standard")}</span>
+              ${b.wheelchairRequired === "yes" ? `<span class="chip">Wheelchair</span>` : ""}
+              ${b.companionRequired === "yes" ? `<span class="chip">Companion</span>` : ""}
+              ${b.returnTrip === "yes" ? `<span class="chip">Return ${escapeHtml(b.returnTime || "")}</span>` : ""}
+            </div>
           </div>
           <div><span class="badge ${escapeHtml(b.status)}">${escapeHtml(b.status)}</span></div>
         </div>
@@ -1655,6 +1811,7 @@ if (!user) {
         assignedDriverName: driver.name || driver.email,
         status: "assigned",
         driverStage: "assigned",
+        dispatchAssignedAt: new Date().toISOString(),
         updatedAt: serverTimestamp()
       });
     }
@@ -1824,6 +1981,215 @@ if (!user) {
       return `${mins} min`;
     }
 
+    // =========================
+    // Level 6 enhancements
+    // =========================
+    const LEVEL6_SETTINGS_KEY = "uvel_level6_settings_v1";
+
+    function uidSafeText(v, fallback="--") {
+      return escapeHtml(v == null || v === "" ? fallback : String(v));
+    }
+
+    function getLevel6Settings() {
+      const defaults = { serviceWindowMins: 120, urgentThresholdMins: 45 };
+      try {
+        return { ...defaults, ...(JSON.parse(localStorage.getItem(LEVEL6_SETTINGS_KEY) || "{}")) };
+      } catch {
+        return defaults;
+      }
+    }
+
+    function bookingDateTimeValue(booking) {
+      const raw = `${booking?.tripDate || ""}T${booking?.tripTime || "00:00"}`;
+      const ms = new Date(raw).getTime();
+      return Number.isFinite(ms) ? ms : 0;
+    }
+
+    function bookingPriorityRank(priority) {
+      return priority === "urgent" ? 3 : priority === "high" ? 2 : 1;
+    }
+
+    function nowMs() { return Date.now(); }
+
+    function bookingIsUpcoming(booking, windowMinutes = 120) {
+      const dt = bookingDateTimeValue(booking);
+      const diff = dt - nowMs();
+      return diff >= 0 && diff <= windowMinutes * 60 * 1000;
+    }
+
+    function bookingCode() {
+      return "UVL-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+    }
+
+    function getNotificationsForRole(role) {
+      let bookings = [];
+      if (role === "passenger") bookings = getPassengerBookings();
+      else if (role === "driver") bookings = allBookings.filter(b => b.assignedDriverUid === currentUser?.uid);
+      else bookings = allBookings;
+      return bookings
+        .slice()
+        .sort((a,b) => bookingDateTimeValue(b) - bookingDateTimeValue(a))
+        .slice(0, 6)
+        .map(b => {
+          const live = b.driverLat ? "Driver sharing live location" : "Waiting for driver update";
+          const prefix = b.status === "completed" ? "Completed" : b.status === "cancelled" ? "Cancelled" : "Active";
+          return `${prefix}: ${b.pickup} → ${b.destination} • ${b.driverStage || b.status || "pending"} • ${live}`;
+        });
+    }
+
+    function renderSimpleNoticeList(elId, items, emptyText) {
+      const el = $(elId);
+      if (!el) return;
+      if (!items?.length) {
+        el.innerHTML = `<div class="empty">${emptyText}</div>`;
+        return;
+      }
+      el.innerHTML = items.map(item => `<div class="notice-item">${item}</div>`).join("");
+    }
+
+    async function savePlace() {
+      const label = $("savedPlaceLabel")?.value.trim();
+      const address = $("savedPlaceAddress")?.value.trim();
+      if (!label || !address || !currentUser) return alert("Enter place label and address.");
+      await addDoc(collection(db, "saved_places"), {
+        uid: currentUser.uid,
+        label,
+        address,
+        createdAt: serverTimestamp()
+      });
+      $("savedPlaceLabel").value = "";
+      $("savedPlaceAddress").value = "";
+      await renderSavedPlaces();
+    }
+
+    async function renderSavedPlaces() {
+      if (currentProfile?.role !== "passenger" || !currentUser) return;
+      const wrap = $("savedPlacesList");
+      if (!wrap) return;
+      const snap = await getDocs(query(collection(db, "saved_places"), where("uid","==",currentUser.uid)));
+      const places = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      if (!places.length) {
+        wrap.innerHTML = `<div class="empty">No saved places yet.</div>`;
+        return;
+      }
+      wrap.innerHTML = places.map(p => `
+        <div class="saved-place-item">
+          <div style="font-weight:800">${escapeHtml(p.label)}</div>
+          <div class="muted">${escapeHtml(p.address)}</div>
+          <div class="mini-actions">
+            <button class="btn small" onclick="window.useSavedPlace('${p.id}','pickup')">Use as pickup</button>
+            <button class="btn small" onclick="window.useSavedPlace('${p.id}','destination')">Use as destination</button>
+          </div>
+        </div>
+      `).join("");
+      window.__uvelSavedPlaces = places;
+    }
+
+    async function useSavedPlace(placeId, target) {
+      const places = window.__uvelSavedPlaces || [];
+      const place = places.find(p => p.id === placeId);
+      if (!place) return;
+      if (target === "pickup") $("pickup").value = place.address;
+      else $("destination").value = place.address;
+    }
+
+    async function rebookLatestTrip() {
+      const latest = getLatestPassengerBooking();
+      if (!latest) return alert("No trip to rebook yet.");
+      $("pickup").value = latest.pickup || "";
+      $("destination").value = latest.destination || "";
+      $("tripDate").value = latest.tripDate || "";
+      $("tripTime").value = latest.tripTime || "";
+      $("notes").value = latest.notes || "";
+      $("rideType").value = latest.rideType || "normal";
+      if ($("bookingPriority")) $("bookingPriority").value = latest.priority || "standard";
+      if ($("wheelchairRequired")) $("wheelchairRequired").value = latest.wheelchairRequired || "no";
+      if ($("companionRequired")) $("companionRequired").value = latest.companionRequired || "no";
+      if ($("returnTrip")) $("returnTrip").value = latest.returnTrip || "no";
+      if ($("returnTime")) $("returnTime").value = latest.returnTime || "";
+      updatePaymentButton();
+      alert("Latest trip loaded into booking form.");
+    }
+
+    function renderDispatchBoard() {
+      if (currentProfile?.role !== "admin") return;
+      const wrap = $("dispatchBoard");
+      if (!wrap) return;
+      const active = allBookings.filter(b => b.status !== "completed" && b.status !== "cancelled");
+      const sorted = active.slice().sort((a,b) => {
+        const p = bookingPriorityRank(b.priority) - bookingPriorityRank(a.priority);
+        return p !== 0 ? p : bookingDateTimeValue(a) - bookingDateTimeValue(b);
+      }).slice(0,6);
+      if (!sorted.length) {
+        wrap.innerHTML = `<div class="empty">No active dispatch items.</div>`;
+        return;
+      }
+      wrap.innerHTML = sorted.map(b => `
+        <div class="ops-item">
+          <div class="trip-head">
+            <div>
+              <div style="font-weight:800">${escapeHtml(b.bookingCode || b.id?.slice(0,6) || "Trip")}</div>
+              <div class="muted">${escapeHtml(b.passengerName || "Passenger")} • ${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div>
+            </div>
+            <div class="chip tag-${escapeHtml(b.priority || "standard")}">${escapeHtml(b.priority || "standard")}</div>
+          </div>
+          <div class="footer-note">Driver: ${escapeHtml(b.assignedDriverName || "Unassigned")} • Payment: ${escapeHtml(b.paymentStatus || "unpaid")} • ETA: ${escapeHtml(getEtaLabel(b))}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderServiceAlerts() {
+      if (currentProfile?.role !== "admin") return;
+      const items = allBookings
+        .filter(b => b.status !== "completed" && b.status !== "cancelled")
+        .filter(b => bookingIsUpcoming(b, getLevel6Settings().serviceWindowMins) || (b.priority === "urgent"))
+        .sort((a,b) => bookingDateTimeValue(a) - bookingDateTimeValue(b))
+        .slice(0,6)
+        .map(b => {
+          const dt = bookingDateTimeValue(b);
+          const mins = dt ? Math.round((dt - nowMs()) / 60000) : null;
+          const label = mins == null ? "Schedule not set" : mins < 0 ? "Overdue" : `${mins} min away`;
+          return `<div class="notice-item"><strong>${escapeHtml(b.passengerName || "Passenger")}</strong> • ${escapeHtml(label)} • ${escapeHtml(b.priority || "standard")} • ${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div>`;
+        });
+      renderSimpleNoticeList("serviceAlerts", items, "No service alerts.");
+    }
+
+    function renderAuditLog() {
+      const items = allBookings
+        .slice()
+        .sort((a,b) => {
+          const aMs = a.updatedAt?.seconds ? a.updatedAt.seconds : bookingDateTimeValue(a)/1000;
+          const bMs = b.updatedAt?.seconds ? b.updatedAt.seconds : bookingDateTimeValue(b)/1000;
+          return bMs - aMs;
+        })
+        .slice(0,8)
+        .map(b => `<div class="audit-item">${escapeHtml(b.bookingCode || b.id?.slice(0,6) || "Trip")} • ${escapeHtml(b.status || "pending")} • ${escapeHtml(b.driverStage || "waiting")} • ${escapeHtml(b.assignedDriverName || "unassigned")}</div>`);
+      renderSimpleNoticeList("auditLog", items, "No audit activity yet.");
+    }
+
+    function renderLevel6Notifications() {
+      renderSimpleNoticeList("passengerNotifications", getNotificationsForRole("passenger").map(v => escapeHtml(v)), "No passenger updates yet.");
+      renderSimpleNoticeList("driverNotifications", getNotificationsForRole("driver").map(v => escapeHtml(v)), "No driver updates yet.");
+    }
+
+    async function saveDriverProfileLevel6() {
+      if (currentProfile?.role !== "driver" || !currentUser) return;
+      const availability = $("driverAvailabilitySelect")?.value || "online";
+      const vehicle = $("driverVehicleInput")?.value?.trim() || "Vehicle not set";
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        availability,
+        vehicle,
+        updatedAt: serverTimestamp()
+      });
+      alert("Driver profile updated.");
+    }
+
+    function syncDriverControls() {
+      if (currentProfile?.role !== "driver") return;
+      if ($("driverAvailabilitySelect")) $("driverAvailabilitySelect").value = currentProfile.availability || "online";
+      if ($("driverVehicleInput")) $("driverVehicleInput").value = currentProfile.vehicle || "";
+    }
+
     window.assignDriver = assignDriver;
     window.completeBooking = completeBooking;
     window.cancelBooking = cancelBooking;
@@ -1831,6 +2197,7 @@ if (!user) {
     window.toggleEdit = toggleEdit;
     window.saveBookingEdit = saveBookingEdit;
     window.updateDriverStage = updateDriverStage;
+    window.useSavedPlace = useSavedPlace;
 
     $("manualAssignBtn").onclick = () => {
       assignMode = "manual";
@@ -1849,18 +2216,25 @@ if (!user) {
           activeLoads[b.assignedDriverUid] = (activeLoads[b.assignedDriverUid] || 0) + 1;
         }
       });
-      for (const booking of pending) {
-        const bestDriver = [...allDrivers].sort((a, b) => (activeLoads[a.uid] || 0) - (activeLoads[b.uid] || 0))[0];
+      for (const booking of pending.sort((a,b) => bookingPriorityRank(b.priority) - bookingPriorityRank(a.priority))) {
+        const availableDrivers = allDrivers.filter(d => (d.availability || "online") !== "offline");
+        const bestDriver = [...availableDrivers].sort((a, b) => {
+          const loadDiff = (activeLoads[a.uid] || 0) - (activeLoads[b.uid] || 0);
+          if (loadDiff !== 0) return loadDiff;
+          return String(a.name || a.email).localeCompare(String(b.name || b.email));
+        })[0];
         if (!bestDriver) continue;
         await updateDoc(doc(db, "bookings", booking.id), {
           assignedDriverUid: bestDriver.uid,
           assignedDriverName: bestDriver.name || bestDriver.email,
           status: "assigned",
+          driverStage: "assigned",
+          dispatchAssignedAt: new Date().toISOString(),
           updatedAt: serverTimestamp()
         });
         activeLoads[bestDriver.uid] = (activeLoads[bestDriver.uid] || 0) + 1;
       }
-      alert("Auto assign completed.");
+      alert("Smart auto assign completed.");
     };
 
     $("exportActiveBtn").onclick = () => exportCSV(allBookings.filter(b => b.status !== "completed"), "uvel_active_bookings.csv");
@@ -1911,6 +2285,7 @@ if (!user) {
 
       docPdf.setFontSize(12);
       docPdf.text(`Invoice for: ${booking.passengerName}`, 14, y); y += 6;
+      docPdf.text(`Booking Code: ${booking.bookingCode || booking.id}`, 14, y); y += 6;
       docPdf.text(`Email: ${booking.passengerEmail || "-"}`, 14, y); y += 6;
       docPdf.text(`Trip Date / Time: ${booking.tripDate} ${booking.tripTime}`, 14, y); y += 6;
       docPdf.text(`Route: ${booking.pickup} -> ${booking.destination}`, 14, y); y += 10;
