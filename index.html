@@ -421,9 +421,9 @@
           </div>
           <div class="card section">
             <div class="trip-head"><div><div class="section-title">Driver map</div>
-            <div class="section-sub">Shows your most recent assigned trip with live sharing and navigator support.</div></div>            <div class="seg"><span id="driverTrackingState" class="pill tracking-off">Tracking: off</span>            <button class="btn small brand" id="startTrackingBtn">Start live tracking</button>            <button class="btn small" id="stopTrackingBtn">Stop tracking</button></div></div>
+            <div class="section-sub">Improved live driver map with driver → pickup → destination route.</div></div><div class="seg"><span id="driverTrackingState" class="pill tracking-off">Tracking: off</span><button class="btn small brand" id="startTrackingBtn">Start live tracking</button><button class="btn small" id="stopTrackingBtn">Stop tracking</button><button class="btn small" id="driverRecenterBtn">My location</button><button class="btn small" id="driverFitRouteBtn">Fit route</button></div></div>
             <div id="driverMap" class="map"></div>
-            <div class="eta-box">              <div class="item"><div class="tiny">Live ETA</div><div id="driverLiveEta">--</div></div>              <div class="item"><div class="tiny">Remaining km</div><div id="driverRemainingKm">--</div></div>              <div class="item"><div class="tiny">Current speed</div><div id="driverSpeedLabel">--</div></div>              <div class="item"><div class="tiny">Route mode</div><div id="driverRouteMode">OSRM route</div></div>            </div>
+            <div class="eta-box"><div class="item"><div class="tiny">Live ETA</div><div id="driverLiveEta">--</div></div><div class="item"><div class="tiny">Remaining km</div><div id="driverRemainingKm">--</div></div><div class="item"><div class="tiny">Current speed</div><div id="driverSpeedLabel">--</div></div><div class="item"><div class="tiny">Route mode</div><div id="driverRouteMode">OSRM route</div></div></div>
           </div>
         </div>
       </div>
@@ -485,9 +485,11 @@
       driver: { markers: {} }
     };
     let metricsRefreshTimer = null;
-    let passengerMapState = { markers: [], line: null };
-    let adminMapState = { markers: [], line: null };
-    let driverMapState = { markers: [], line: null };
+    let passengerMapState = { markers: [], lines: [], liveMarker: null };
+    let adminMapState = { markers: [], lines: [], liveMarker: null };
+    let driverMapState = { markers: [], lines: [], liveMarker: null };
+    const geocodeCache = new Map();
+    let lastDriverWrite = { lat: null, lng: null, at: 0 };
 
     const $ = (id) => document.getElementById(id);
 
@@ -669,10 +671,18 @@
     }
 
     function clearMapState(map, state, liveKey) {
-      state.markers.forEach(m => map.removeLayer(m));
+      state.markers.forEach(m => {
+        try { map.removeLayer(m); } catch (e) {}
+      });
       state.markers = [];
-      if (state.line) map.removeLayer(state.line);
-      state.line = null;
+      (state.lines || []).forEach(l => {
+        try { map.removeLayer(l); } catch (e) {}
+      });
+      state.lines = [];
+      if (state.liveMarker) {
+        try { map.removeLayer(state.liveMarker); } catch (e) {}
+        state.liveMarker = null;
+      }
       if (liveKey && mapLiveState[liveKey]) {
         Object.values(mapLiveState[liveKey].markers).forEach(marker => {
           try { map.removeLayer(marker); } catch (e) {}
@@ -690,14 +700,33 @@
       });
     }
 
-    function ensureLiveMarker(map, liveKey, key, latlng, popupText) {
-      if (!mapLiveState[liveKey].markers[key]) {
-        mapLiveState[liveKey].markers[key] = L.marker(latlng, { icon: driverIcon() }).addTo(map).bindPopup(popupText || "Live");
-      }
-      return mapLiveState[liveKey].markers[key];
+    function pickupIcon() {
+      return L.divIcon({
+        className: "",
+        html: `<div style="width:16px;height:16px;border-radius:50%;background:#49c4d5;border:3px solid white"></div>`,
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
+      });
     }
 
-    function animateMarkerTo(marker, latlng, duration = 1800) {
+    function destinationIcon() {
+      return L.divIcon({
+        className: "",
+        html: `<div style="width:16px;height:16px;border-radius:50%;background:#f0c24f;border:3px solid white"></div>`,
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
+      });
+    }
+
+    function ensureLiveMarker(map, state, latlng, popupText = "Driver live") {
+      if (!state.liveMarker) {
+        state.liveMarker = L.marker(latlng, { icon: driverIcon() }).addTo(map).bindPopup(popupText);
+        return state.liveMarker;
+      }
+      return state.liveMarker;
+    }
+
+    function animateMarkerTo(marker, latlng, duration = 1500) {
       const start = marker.getLatLng();
       const startTime = performance.now();
       const dLat = latlng[0] - start.lat;
@@ -709,6 +738,17 @@
         if (p < 1) requestAnimationFrame(step);
       }
       requestAnimationFrame(step);
+    }
+
+    function metersBetween(aLat, aLng, bLat, bLng) {
+      const R = 6371000;
+      const dLat = toRad(bLat - aLat);
+      const dLng = toRad(bLng - aLng);
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(dLng / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
     }
 
     async function fetchRoutePoints(from, to) {
@@ -728,50 +768,121 @@
       }
     }
 
+    function getActiveDriverBooking() {
+      if (currentProfile?.role !== "driver") return null;
+      const driverTrips = allBookings
+        .filter(b =>
+          b.assignedDriverUid === currentUser.uid &&
+          b.status !== "completed" &&
+          b.status !== "cancelled"
+        )
+        .sort((a, b) => {
+          const aDT = new Date(`${a.tripDate || ""}T${a.tripTime || "00:00"}`).getTime() || 0;
+          const bDT = new Date(`${b.tripDate || ""}T${b.tripTime || "00:00"}`).getTime() || 0;
+          return aDT - bDT;
+        });
+      return driverTrips[0] || null;
+    }
+
+    function getDriverStageLabel(booking) {
+      if (!booking) return "--";
+      if (booking.status === "completed") return "Completed";
+      if (booking.status === "cancelled") return "Cancelled";
+      if (booking.driverLat && booking.driverLng) return booking.driverStage || "Live";
+      return booking.driverStage || booking.status || "Assigned";
+    }
+
     async function updateMapForBooking(map, state, booking, liveKey) {
       clearMapState(map, state, liveKey);
       if (!booking?.pickup || !booking?.destination) return null;
-      const from = await geocodeAddress(booking.pickup);
-      const to = await geocodeAddress(booking.destination);
-      if (!from || !to) return null;
 
-      const pickupMarker = L.marker([from.lat, from.lon]).addTo(map).bindPopup("Pickup");
-      const destinationMarker = L.marker([to.lat, to.lon]).addTo(map).bindPopup("Destination");
+      const pickupPoint = booking.pickupCoords || await geocodeAddress(booking.pickup);
+      const destinationPoint = booking.destinationCoords || await geocodeAddress(booking.destination);
+      if (!pickupPoint || !destinationPoint) return null;
+
+      const pickupMarker = L.marker([pickupPoint.lat, pickupPoint.lon], { icon: pickupIcon() }).addTo(map).bindPopup("Pickup");
+      const destinationMarker = L.marker([destinationPoint.lat, destinationPoint.lon], { icon: destinationIcon() }).addTo(map).bindPopup("Destination");
       state.markers.push(pickupMarker, destinationMarker);
 
-      const route = await fetchRoutePoints(from, to);
-      if (route?.coords?.length) {
-        state.line = L.polyline(route.coords).addTo(map);
+      let boundsPoints = [
+        [pickupPoint.lat, pickupPoint.lon],
+        [destinationPoint.lat, destinationPoint.lon]
+      ];
+
+      let tripRoute = await fetchRoutePoints(pickupPoint, destinationPoint);
+      if (tripRoute?.coords?.length) {
+        const tripLine = L.polyline(tripRoute.coords, { weight: 5, opacity: 0.9 }).addTo(map);
+        state.lines.push(tripLine);
+        boundsPoints = boundsPoints.concat(tripRoute.coords);
       } else {
-        state.line = L.polyline([[from.lat, from.lon], [to.lat, to.lon]]).addTo(map);
+        const fallbackLine = L.polyline([[pickupPoint.lat, pickupPoint.lon], [destinationPoint.lat, destinationPoint.lon]], {
+          weight: 4, dashArray: "8,8", opacity: 0.8
+        }).addTo(map);
+        state.lines.push(fallbackLine);
       }
 
-      if (booking.driverLat && booking.driverLng && liveKey) {
-        const liveMarker = ensureLiveMarker(map, liveKey, "driver", [booking.driverLat, booking.driverLng], "Driver live");
-        animateMarkerTo(liveMarker, [booking.driverLat, booking.driverLng], 2000);
+      let driverToPickup = null;
+      if (booking.driverLat && booking.driverLng) {
+        const driverPos = { lat: booking.driverLat, lon: booking.driverLng };
+        driverToPickup = await fetchRoutePoints(driverPos, pickupPoint);
+
+        const liveMarker = ensureLiveMarker(
+          map,
+          state,
+          [booking.driverLat, booking.driverLng],
+          booking.assignedDriverName ? `${booking.assignedDriverName} live` : "Driver live"
+        );
+        animateMarkerTo(liveMarker, [booking.driverLat, booking.driverLng], 1200);
+
+        if (driverToPickup?.coords?.length) {
+          const approachLine = L.polyline(driverToPickup.coords, {
+            weight: 4, dashArray: "10,8", opacity: 0.95
+          }).addTo(map);
+          state.lines.push(approachLine);
+          boundsPoints = boundsPoints.concat(driverToPickup.coords);
+        } else {
+          const fallbackApproach = L.polyline([[booking.driverLat, booking.driverLng], [pickupPoint.lat, pickupPoint.lon]], {
+            weight: 4, dashArray: "10,8", opacity: 0.8
+          }).addTo(map);
+          state.lines.push(fallbackApproach);
+          boundsPoints.push([booking.driverLat, booking.driverLng]);
+        }
       }
 
-      map.fitBounds(state.line.getBounds(), { padding: [30, 30] });
+      if (boundsPoints.length >= 2) {
+        map.fitBounds(boundsPoints, { padding: [35, 35] });
+      }
+
       return {
-        bookingKm: route?.km ?? Number(booking.distanceKm || 0),
-        bookingEta: route?.minutes ?? null,
-        from, to
+        pickupPoint,
+        destinationPoint,
+        tripKm: tripRoute?.km ?? Number(booking.distanceKm || 0),
+        tripMinutes: tripRoute?.minutes ?? null,
+        approachKm: driverToPickup?.km ?? null,
+        approachMinutes: driverToPickup?.minutes ?? null
       };
     }
 
     async function fetchDriverToDestinationMetrics(booking) {
       if (!booking?.driverLat || !booking?.driverLng || !booking?.destination) return null;
-      const to = await geocodeAddress(booking.destination);
-      if (!to) return null;
-      return await fetchRoutePoints({ lat: booking.driverLat, lon: booking.driverLng }, to);
+      const destinationPoint = booking.destinationCoords || await geocodeAddress(booking.destination);
+      if (!destinationPoint) return null;
+      return await fetchRoutePoints({ lat: booking.driverLat, lon: booking.driverLng }, destinationPoint);
     }
 
     async function geocodeAddress(address) {
+      if (!address) return null;
+      const key = address.trim().toLowerCase();
+      if (geocodeCache.has(key)) return geocodeCache.get(key);
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`);
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`, {
+          headers: { "Accept": "application/json" }
+        });
         const data = await res.json();
         if (!data?.length) return null;
-        return { lat: Number(data[0].lat), lon: Number(data[0].lon) };
+        const result = { lat: Number(data[0].lat), lon: Number(data[0].lon) };
+        geocodeCache.set(key, result);
+        return result;
       } catch {
         return null;
       }
@@ -835,6 +946,11 @@
         return alert("Please fill all required booking fields.");
       }
 
+      const pickupCoords = await geocodeAddress(pickup);
+      const destinationCoords = await geocodeAddress(destination);
+      if (!pickupCoords || !destinationCoords) {
+        return alert("Could not estimate route distance. Try a more specific address.");
+      }
       const km = await estimateDistanceKm(pickup, destination);
       if (!km) return alert("Could not estimate route distance. Try a more specific address.");
       const fare = calculateFare(km, rideType);
@@ -846,6 +962,8 @@
         rideType,
         pickup,
         destination,
+        pickupCoords,
+        destinationCoords,
         tripDate,
         tripTime,
         notes,
@@ -970,6 +1088,8 @@
     $("adminMapBookingSelect")?.addEventListener("change", (e) => { selectedAdminMapBookingId = e.target.value; updateMapsFromLatest(); });
     $("startTrackingBtn")?.addEventListener("click", startDriverTracking);
     $("stopTrackingBtn")?.addEventListener("click", stopDriverTracking);
+    $("driverRecenterBtn")?.addEventListener("click", recenterDriverMap);
+    $("driverFitRouteBtn")?.addEventListener("click", fitDriverRoute);
     $("passengerCancelBtn")?.addEventListener("click", passengerCancelLatestTrip);
 
     function renderAdminBookings() {
@@ -1137,21 +1257,29 @@
       if (latestAdmin) {
         const summary = await updateMapForBooking(adminMap, adminMapState, latestAdmin, "admin");
         const live = await fetchDriverToDestinationMetrics(latestAdmin);
-        $("adminRouteKm").textContent = summary?.bookingKm ? `${summary.bookingKm.toFixed(1)} km` : `${Number(latestAdmin.distanceKm || 0).toFixed(1)} km`;
+        $("adminRouteKm").textContent = summary?.tripKm ? `${summary.tripKm.toFixed(1)} km` : `${Number(latestAdmin.distanceKm || 0).toFixed(1)} km`;
         $("adminRouteEta").textContent = live ? `${Math.max(1, Math.round(live.minutes))} min` : getEtaLabel(latestAdmin);
-        $("adminDriverLive").innerHTML = latestAdmin.driverLat ? `<span class="live-badge"><span class="pulse-dot"></span>Live • ${escapeHtml(latestAdmin.driverStage || "tracking")}</span>` : "Not sharing";
+        $("adminDriverLive").innerHTML = latestAdmin.driverLat ? `<span class="live-badge"><span class="pulse-dot"></span>Live • ${escapeHtml(getDriverStageLabel(latestAdmin))}</span>` : "Not sharing";
         $("adminNavigatorLabel").textContent = latestAdmin.assignedDriverName || "No driver";
       }
 
-      const latestDriver = currentProfile?.role === "driver"
-        ? allBookings.find(b => b.assignedDriverUid === currentUser.uid && b.status !== "completed" && b.status !== "cancelled")
-        : null;
+      const latestDriver = getActiveDriverBooking();
       if (latestDriver) {
-        await updateMapForBooking(driverMap, driverMapState, latestDriver, "driver");
+        const summary = await updateMapForBooking(driverMap, driverMapState, latestDriver, "driver");
         const live = await fetchDriverToDestinationMetrics(latestDriver);
-        $("driverLiveEta").textContent = live ? `${Math.max(1, Math.round(live.minutes))} min` : getEtaLabel(latestDriver);
-        $("driverRemainingKm").textContent = live ? `${live.km.toFixed(1)} km` : `${Number(latestDriver.distanceKm || 0).toFixed(1)} km`;
+        $("driverLiveEta").textContent = summary?.approachMinutes
+          ? `${Math.max(1, Math.round(summary.approachMinutes))} min to pickup`
+          : (live ? `${Math.max(1, Math.round(live.minutes))} min` : getEtaLabel(latestDriver));
+        $("driverRemainingKm").textContent = summary?.approachKm
+          ? `${summary.approachKm.toFixed(1)} km to pickup`
+          : (live ? `${live.km.toFixed(1)} km` : `${Number(latestDriver.distanceKm || 0).toFixed(1)} km`);
         $("driverSpeedLabel").textContent = latestDriver.driverSpeedKmh ? `${Number(latestDriver.driverSpeedKmh).toFixed(0)} km/h` : "--";
+        $("driverRouteMode").textContent = latestDriver.driverLat ? "Driver → Pickup → Destination" : "Pickup → Destination";
+      } else {
+        $("driverLiveEta").textContent = "--";
+        $("driverRemainingKm").textContent = "--";
+        $("driverSpeedLabel").textContent = "--";
+        $("driverRouteMode").textContent = "No active trip";
       }
     }
 
@@ -1204,31 +1332,53 @@
 
     async function startDriverTracking() {
       if (currentProfile?.role !== "driver") return;
-      const active = allBookings.find(b => b.assignedDriverUid === currentUser.uid && b.status !== "completed" && b.status !== "cancelled");
+      const active = getActiveDriverBooking();
       if (!active) return alert("No active assigned trip to track.");
       if (!navigator.geolocation) return alert("Geolocation is not available in this browser.");
+
       stopDriverTracking();
       $("driverTrackingState").textContent = "Tracking: on";
       $("driverTrackingState").classList.remove("tracking-off");
       $("driverTrackingState").classList.add("tracking-on");
 
+      lastDriverWrite = { lat: null, lng: null, at: 0 };
+
       driverWatchId = navigator.geolocation.watchPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const now = Date.now();
         const speedKmh = pos.coords.speed != null ? pos.coords.speed * 3.6 : null;
+
+        const movedEnough =
+          lastDriverWrite.lat == null ||
+          metersBetween(lastDriverWrite.lat, lastDriverWrite.lng, lat, lng) >= 20;
+
+        const waitedEnough = now - lastDriverWrite.at >= 6000;
+
+        const localMarker = ensureLiveMarker(driverMap, driverMapState, [lat, lng], "Driver live");
+        animateMarkerTo(localMarker, [lat, lng], 900);
+        $("driverSpeedLabel").textContent = speedKmh ? `${Number(speedKmh).toFixed(0)} km/h` : "--";
+
+        if (!movedEnough && !waitedEnough) return;
+
         const stage = speedKmh && speedKmh > 8 ? "in_progress" : "routing";
+
         await updateDoc(doc(db, "bookings", active.id), {
-          driverLat: pos.coords.latitude,
-          driverLng: pos.coords.longitude,
+          driverLat: lat,
+          driverLng: lng,
           driverAccuracy: pos.coords.accuracy,
           driverSpeedKmh: speedKmh,
           driverLastSeenAt: new Date().toISOString(),
           driverStage: stage,
           updatedAt: serverTimestamp()
         });
+
+        lastDriverWrite = { lat, lng, at: now };
       }, (err) => {
         alert("Live tracking failed: " + err.message);
       }, {
         enableHighAccuracy: true,
-        maximumAge: 5000,
+        maximumAge: 3000,
         timeout: 15000
       });
     }
@@ -1241,6 +1391,27 @@
         $("driverTrackingState").classList.remove("tracking-on");
         $("driverTrackingState").classList.add("tracking-off");
       }
+    }
+
+    function recenterDriverMap() {
+      const active = getActiveDriverBooking();
+      if (active?.driverLat && active?.driverLng) {
+        driverMap.setView([active.driverLat, active.driverLng], 15);
+        return;
+      }
+      if (!navigator.geolocation) return alert("Geolocation is not available in this browser.");
+      navigator.geolocation.getCurrentPosition((pos) => {
+        driverMap.setView([pos.coords.latitude, pos.coords.longitude], 15);
+      }, (err) => alert("Could not get current location: " + err.message), {
+        enableHighAccuracy: true,
+        timeout: 10000
+      });
+    }
+
+    async function fitDriverRoute() {
+      const active = getActiveDriverBooking();
+      if (!active) return alert("No active trip.");
+      await updateMapForBooking(driverMap, driverMapState, active, "driver");
     }
 
     function toggleEdit(bookingId) {
@@ -1257,11 +1428,14 @@
       const tripTime = document.getElementById(`edit-tripTime-${bookingId}`)?.value || "";
       const notes = document.getElementById(`edit-notes-${bookingId}`)?.value?.trim() || "";
       if (!pickup || !destination || !tripDate || !tripTime) return alert("Please complete the edit fields.");
+      const pickupCoords = await geocodeAddress(pickup);
+      const destinationCoords = await geocodeAddress(destination);
+      if (!pickupCoords || !destinationCoords) return alert("Could not recalculate route. Use a clearer pickup and destination.");
       const km = await estimateDistanceKm(pickup, destination);
       if (!km) return alert("Could not recalculate route. Use a clearer pickup and destination.");
       const fare = calculateFare(km, rideType);
       await updateDoc(doc(db, "bookings", bookingId), {
-        passengerName, rideType, pickup, destination, tripDate, tripTime, notes,
+        passengerName, rideType, pickup, destination, pickupCoords, destinationCoords, tripDate, tripTime, notes,
         distanceKm: Number(km.toFixed(1)),
         fare: Number(fare.toFixed(2)),
         paymentMethod: rideType === "ndis" ? "Invoice / Referral" : "Card / Direct",
