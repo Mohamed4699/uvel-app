@@ -530,7 +530,9 @@
 
     // Stripe publishable key: replace with your real pk_test or pk_live key
     const STRIPE_PUBLISHABLE_KEY = "pk_test_REPLACE_WITH_YOUR_PUBLISHABLE_KEY";
-    const stripe = window.Stripe ? Stripe(STRIPE_PUBLISHABLE_KEY) : null;
+    const stripe = window.Stripe && STRIPE_PUBLISHABLE_KEY && !STRIPE_PUBLISHABLE_KEY.includes("REPLACE_WITH_YOUR_PUBLISHABLE_KEY")
+      ? Stripe(STRIPE_PUBLISHABLE_KEY)
+      : null;
 
     const PAYMENT_SUCCESS_POLL_MS = 2500;
     const PAYMENT_SUCCESS_POLL_MAX = 12;
@@ -609,18 +611,54 @@
       return false;
     }
 
+    async function readJsonSafely(res) {
+      const raw = await res.text();
+      const contentType = (res.headers.get("content-type") || "").toLowerCase();
+      const looksJson = contentType.includes("application/json") || /^[\s\r\n]*[\[{]/.test(raw);
+      if (!looksJson) {
+        throw new Error(raw || `Request failed with status ${res.status}`);
+      }
+      try {
+        return JSON.parse(raw);
+      } catch (err) {
+        throw new Error(raw || "Invalid JSON response");
+      }
+    }
+
+    async function verifyCheckoutSession(sessionId, bookingId) {
+      const res = await fetch("/api/verify-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, bookingId })
+      });
+      const data = await readJsonSafely(res);
+      if (!res.ok) throw new Error(data.error || "Could not verify payment");
+      return data;
+    }
+
     async function handlePaymentReturn() {
       const params = new URLSearchParams(window.location.search);
       const paymentState = params.get("payment");
-      const pendingBookingId = sessionStorage.getItem("uvel_pending_payment_booking_id");
+      const sessionId = params.get("session_id");
+      const bookingIdFromUrl = params.get("bookingId");
+      const pendingBookingId = bookingIdFromUrl || sessionStorage.getItem("uvel_pending_payment_booking_id");
 
-      if (paymentState === "success" && pendingBookingId) {
-        const ok = await waitForWebhookPaymentConfirmation(pendingBookingId);
-        if (ok) {
-          alert("Payment verified by Stripe webhook");
-          sessionStorage.removeItem("uvel_pending_payment_booking_id");
-        } else {
-          alert("Payment submitted. Waiting for webhook confirmation.");
+      if (paymentState === "success" && sessionId && pendingBookingId) {
+        try {
+          const verification = await verifyCheckoutSession(sessionId, pendingBookingId);
+          if (verification.paid) {
+            const alreadyPaid = allBookings.find(b => b.id === pendingBookingId)?.paymentStatus === "paid";
+            if (!alreadyPaid) {
+              await markBookingPaidById(pendingBookingId);
+            }
+            alert("Payment verified successfully");
+            sessionStorage.removeItem("uvel_pending_payment_booking_id");
+          } else {
+            alert("Payment is not marked as paid yet.");
+          }
+        } catch (err) {
+          console.error("Payment verification error:", err);
+          alert(err.message || "Could not verify payment");
         }
         window.history.replaceState({}, "", window.location.pathname);
       } else if (paymentState === "cancelled") {
@@ -659,7 +697,7 @@
         return;
       }
       if (!stripe) {
-        alert("Stripe is not configured yet. Add your publishable key first.");
+        alert("Stripe is not configured yet. Add your real publishable key first.");
         return;
       }
 
@@ -680,14 +718,19 @@
             pickup: booking.pickup,
             destination: booking.destination,
             fare: booking.fare,
-            passengerEmail: booking.passengerEmail || "",
+            passengerEmail: booking.passengerEmail || currentProfile?.email || "",
+            passengerName: booking.passengerName || currentProfile?.name || "Passenger",
             rideType: booking.rideType || "normal"
           })
         });
 
-        const data = await res.json();
-        if (!res.ok || !data.id) {
+        const data = await readJsonSafely(res);
+        if (!res.ok) {
           throw new Error(data.error || "Could not start payment");
+        }
+
+        if (!data.id) {
+          throw new Error("Stripe session ID was not returned by /api/create-checkout-session");
         }
 
         const result = await stripe.redirectToCheckout({ sessionId: data.id });
