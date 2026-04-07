@@ -532,6 +532,10 @@
     const STRIPE_PUBLISHABLE_KEY = "pk_test_REPLACE_WITH_YOUR_PUBLISHABLE_KEY";
     const stripe = window.Stripe ? Stripe(STRIPE_PUBLISHABLE_KEY) : null;
 
+    const PAYMENT_SUCCESS_POLL_MS = 2500;
+    const PAYMENT_SUCCESS_POLL_MAX = 12;
+
+
     let revenueChartInstance = null;
     let paymentChartInstance = null;
 
@@ -593,15 +597,30 @@
       }
     }
 
+
+    async function waitForWebhookPaymentConfirmation(bookingId) {
+      if (!bookingId) return false;
+
+      for (let i = 0; i < PAYMENT_SUCCESS_POLL_MAX; i++) {
+        const found = allBookings.find(b => b.id === bookingId);
+        if (found?.paymentStatus === "paid") return true;
+        await new Promise(resolve => setTimeout(resolve, PAYMENT_SUCCESS_POLL_MS));
+      }
+      return false;
+    }
+
     async function handlePaymentReturn() {
       const params = new URLSearchParams(window.location.search);
       const paymentState = params.get("payment");
       const pendingBookingId = sessionStorage.getItem("uvel_pending_payment_booking_id");
 
       if (paymentState === "success" && pendingBookingId) {
-        const ok = await markBookingPaidById(pendingBookingId);
+        const ok = await waitForWebhookPaymentConfirmation(pendingBookingId);
         if (ok) {
-          alert("Payment successful");
+          alert("Payment verified by Stripe webhook");
+          sessionStorage.removeItem("uvel_pending_payment_booking_id");
+        } else {
+          alert("Payment submitted. Waiting for webhook confirmation.");
         }
         window.history.replaceState({}, "", window.location.pathname);
       } else if (paymentState === "cancelled") {
@@ -609,8 +628,6 @@
         window.history.replaceState({}, "", window.location.pathname);
       }
     }
-
-
 
     function getLatestPassengerBooking() {
       const trips = getPassengerBookings().slice().sort((a, b) => {
@@ -1476,7 +1493,7 @@ if (!user) {
           <div class="item"><div class="tiny">Date / Time</div><div>${escapeHtml(b.tripDate || "--")} ${escapeHtml(b.tripTime || "")}</div></div>
           <div class="item"><div class="tiny">Driver</div><div>${escapeHtml(b.assignedDriverName || "Unassigned")}</div></div>
           <div class="item"><div class="tiny">Fare</div><div>$${Number(b.fare || 0).toFixed(2)}</div></div>
-          <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}<br/><span class="badge ${b.paymentStatus === "paid" ? "completed" : "pending"}">${escapeHtml(b.paymentStatus || "unpaid")}</span></div></div>
+          <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}<br/><span class="badge ${b.paymentStatus === "paid" ? "completed" : "pending"}">${escapeHtml(b.paymentStatus || "unpaid")}</span>${b.stripeVerifiedAt ? `<div class="footer-note">Webhook verified</div>` : ""}</div></div>
         </div>
         ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}${b.assignedDriverUid ? `<div class="footer-note">Driver earnings: $${getDriverEarningsAmount(b).toFixed(2)}</div>` : ""}${b.driverStage ? `<div class="footer-note">Driver stage: ${escapeHtml(b.driverStage)}</div>` : ""}${b.driverLat ? `<div class="footer-note">Live tracking: on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}${b.driverLastSeenAt ? ` • updated ${new Date(b.driverLastSeenAt).toLocaleTimeString()}` : ""}</div>` : ""}${b.cancellationReason ? `<div class="footer-note">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
       `;
