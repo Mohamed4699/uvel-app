@@ -6,9 +6,60 @@
   <title>UVEL Firebase All-in-One</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://js.stripe.com/v3/"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+async function markLatestBookingPaid() {
+  const bookings = getPassengerBookings();
+  const latest = bookings[0];
+  if (!latest) return;
+
+  try {
+    await updateDoc(doc(db, "bookings", latest.id), {
+      paymentStatus: "paid",
+      paymentCompletedAt: new Date().toISOString()
+    });
+    alert("Payment successful");
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+async function markLatestBookingPaid() {
+  const bookings = getPassengerBookings();
+  const latest = bookings[0];
+  if (!latest) return;
+
+  try {
+    await updateDoc(doc(db, "bookings", latest.id), {
+      paymentStatus: "paid",
+      paymentCompletedAt: new Date().toISOString()
+    });
+    alert("Payment successful");
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+</script>
+  <script src="https://js.stripe.com/v3/">
+async function markLatestBookingPaid() {
+  const bookings = getPassengerBookings();
+  const latest = bookings[0];
+  if (!latest) return;
+
+  try {
+    await updateDoc(doc(db, "bookings", latest.id), {
+      paymentStatus: "paid",
+      paymentCompletedAt: new Date().toISOString()
+    });
+    alert("Payment successful");
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+</script>
 
   <style>
     :root{
@@ -686,6 +737,11 @@
     $("seedDriversBtn").onclick = seedDemoDrivers;
 
     onAuthStateChanged(auth, async (user) => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("payment") === "success") {
+    await markLatestBookingPaid();
+  }
+
       if (!user) {
         currentUser = null;
         currentProfile = null;
@@ -1056,6 +1112,7 @@
       const fare = calculateFare(km, rideType);
 
       await addDoc(collection(db, "bookings"), {
+      paymentStatus: "unpaid",
         passengerUid: currentUser.uid,
         passengerName,
         passengerEmail: currentProfile.email,
@@ -1716,6 +1773,23 @@
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
     }
-  </script>
+  
+async function markLatestBookingPaid() {
+  const bookings = getPassengerBookings();
+  const latest = bookings[0];
+  if (!latest) return;
+
+  try {
+    await updateDoc(doc(db, "bookings", latest.id), {
+      paymentStatus: "paid",
+      paymentCompletedAt: new Date().toISOString()
+    });
+    alert("Payment successful");
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+</script>
 </body>
 </html>
