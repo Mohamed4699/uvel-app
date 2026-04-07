@@ -423,6 +423,12 @@
           <div class="card section">
             <div class="section-title">Assigned trips</div>
             <div class="section-sub">Driver sees only trips assigned to them.</div>
+            <div class="eta-box">
+              <div class="item"><div class="tiny">Total earnings</div><div id="driverTotalEarnings">$0.00</div></div>
+              <div class="item"><div class="tiny">Today earnings</div><div id="driverTodayEarnings">$0.00</div></div>
+              <div class="item"><div class="tiny">Paid trips</div><div id="driverPaidTrips">0</div></div>
+              <div class="item"><div class="tiny">Completed trips</div><div id="driverCompletedTrips">0</div></div>
+            </div>
             <div id="driverTrips" class="booking-list"></div>
           </div>
           <div class="card section">
@@ -513,6 +519,36 @@
       return bookings
         .filter(b => b.paymentStatus === "paid")
         .reduce((sum, b) => sum + Number(b.fare || 0), 0);
+    }
+
+    function getDriverEarningsAmount(booking) {
+      if (!booking || booking.paymentStatus !== "paid" || !booking.assignedDriverUid) return 0;
+      const fare = Number(booking.fare || 0);
+      const share = booking.rideType === "ndis" ? 0.75 : 0.70;
+      return Math.round(fare * share * 100) / 100;
+    }
+
+    function calculateDriverRevenue(driverUid, bookings = allBookings) {
+      return bookings
+        .filter(b => b.assignedDriverUid === driverUid && b.paymentStatus === "paid")
+        .reduce((sum, b) => sum + getDriverEarningsAmount(b), 0);
+    }
+
+    function renderDriverEarningsSummary() {
+      if (currentProfile?.role !== "driver") return;
+      const driverBookings = allBookings.filter(b => b.assignedDriverUid === currentUser.uid);
+      const paidTrips = driverBookings.filter(b => b.paymentStatus === "paid");
+      const completedTrips = driverBookings.filter(b => b.status === "completed");
+      const totalEarnings = calculateDriverRevenue(currentUser.uid, allBookings);
+      const today = getTodayDateString();
+      const todayEarnings = driverBookings
+        .filter(b => b.paymentStatus === "paid" && ((b.paymentCompletedAt || b.tripDate || "").slice(0, 10) === today))
+        .reduce((sum, b) => sum + getDriverEarningsAmount(b), 0);
+
+      if ($("driverTotalEarnings")) $("driverTotalEarnings").textContent = `$${totalEarnings.toFixed(2)}`;
+      if ($("driverTodayEarnings")) $("driverTodayEarnings").textContent = `$${todayEarnings.toFixed(2)}`;
+      if ($("driverPaidTrips")) $("driverPaidTrips").textContent = String(paidTrips.length);
+      if ($("driverCompletedTrips")) $("driverCompletedTrips").textContent = String(completedTrips.length);
     }
 
     async function markBookingPaidById(bookingId) {
@@ -1175,6 +1211,7 @@ if (!user) {
       renderDriverTrips();
       renderPassengerManagement();
       renderDriverManagement();
+      renderDriverEarningsSummary();
       updateMapsFromLatest();
     }
 
@@ -1329,7 +1366,7 @@ if (!user) {
             <div class="item"><div class="tiny">Stage</div><div>${escapeHtml(b.driverStage || "assigned")}</div></div>
             <div class="item"><div class="tiny">ETA</div><div>${escapeHtml(getEtaLabel(b))}</div></div>
             <div class="item"><div class="tiny">Distance</div><div>${Number(b.distanceKm || 0).toFixed(1)} km</div></div>
-            <div class="item"><div class="tiny">Navigator</div><div>${escapeHtml(b.pickup || "")}</div></div>
+            <div class="item"><div class="tiny">Driver earnings</div><div>$${getDriverEarningsAmount(b).toFixed(2)}</div></div>
           </div>
         </div>
       `).join("");
@@ -1350,7 +1387,7 @@ if (!user) {
           <div class="item"><div class="tiny">Fare</div><div>$${Number(b.fare || 0).toFixed(2)}</div></div>
           <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}<br/><span class="badge ${b.paymentStatus === "paid" ? "completed" : "pending"}">${escapeHtml(b.paymentStatus || "unpaid")}</span></div></div>
         </div>
-        ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}${b.driverStage ? `<div class="footer-note">Driver stage: ${escapeHtml(b.driverStage)}</div>` : ""}${b.driverLat ? `<div class="footer-note">Live tracking: on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}${b.driverLastSeenAt ? ` • updated ${new Date(b.driverLastSeenAt).toLocaleTimeString()}` : ""}</div>` : ""}${b.cancellationReason ? `<div class="footer-note">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
+        ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}${b.assignedDriverUid ? `<div class="footer-note">Driver earnings: $${getDriverEarningsAmount(b).toFixed(2)}</div>` : ""}${b.driverStage ? `<div class="footer-note">Driver stage: ${escapeHtml(b.driverStage)}</div>` : ""}${b.driverLat ? `<div class="footer-note">Live tracking: on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}${b.driverLastSeenAt ? ` • updated ${new Date(b.driverLastSeenAt).toLocaleTimeString()}` : ""}</div>` : ""}${b.cancellationReason ? `<div class="footer-note">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
       `;
     }
 
@@ -1388,6 +1425,7 @@ if (!user) {
               <div class="badge assigned">${escapeHtml(d.availability || "online")}</div>
             </div>
             <div class="footer-note">Active load: ${counts[d.uid] || 0}</div>
+            <div class="footer-note">Driver earnings: $${calculateDriverRevenue(d.uid, allBookings).toFixed(2)} • Paid trips: ${allBookings.filter(b => b.assignedDriverUid === d.uid && b.paymentStatus === "paid").length}</div>
           </div>
         `).join("");
     }
