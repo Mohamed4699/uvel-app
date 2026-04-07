@@ -312,7 +312,7 @@
               </div>
               <div class="right-actions top-gap">
                 <button class="btn" id="estimateFareBtn" type="button">Estimate fare</button>
-                <button class="btn brand" type="submit">Request ride</button>
+                <button class="btn brand" id="requestRideBtn" type="submit">Request ride</button>
               </div>
               <div class="line"></div>
               <div id="farePreview" class="muted">Estimated fare: -- • Distance: -- • Payment: --</div>
@@ -479,6 +479,7 @@
     let passengerMap, adminMap, driverMap;
     let driverWatchId = null;
     let selectedAdminMapBookingId = null;
+    let isEstimateAction = false;
     let mapLiveState = {
       passenger: { markers: {} },
       admin: { markers: {} },
@@ -912,32 +913,43 @@
       return Math.round(total * 100) / 100;
     }
 
-    $("estimateFareBtn").onclick = async () => {
-      const pickup = $("pickup").value.trim();
-      const destination = $("destination").value.trim();
-      const rideType = $("rideType").value;
-      if (!pickup || !destination) return alert("Enter pickup and destination first.");
-
-      $("farePreview").textContent = "Calculating fare...";
-
-      const payment = rideType === "ndis" ? "Invoice / Referral" : "Card / Direct";
-      let km = await estimateDistanceKm(pickup, destination);
-
-      if (!km) {
-        km = rideType === "ndis" ? 18 : 15;
+    $("estimateFareBtn").onclick = async (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
       }
 
-      const fare = calculateFare(km, rideType);
-      $("farePreview").textContent = `Estimated fare: $${fare.toFixed(2)} • Distance: ${km.toFixed(1)} km • Payment: ${payment}`;
+      isEstimateAction = true;
+      try {
+        const pickup = $("pickup").value.trim();
+        const destination = $("destination").value.trim();
+        const rideType = $("rideType").value;
+        if (!pickup || !destination) return alert("Enter pickup and destination first.");
 
-      const tempBooking = { pickup, destination, status: "draft" };
-      updateMapForBooking(passengerMap, passengerMapState, tempBooking, "passenger");
-      $("passengerRouteLabel").textContent = `${pickup} → ${destination}`;
-      $("passengerStatusLabel").textContent = "draft";
+        $("farePreview").textContent = "Calculating fare...";
+
+        const payment = rideType === "ndis" ? "Invoice / Referral" : "Card / Direct";
+        let km = await estimateDistanceKm(pickup, destination);
+
+        if (!km) {
+          km = rideType === "ndis" ? 18 : 15;
+        }
+
+        const fare = calculateFare(km, rideType);
+        $("farePreview").textContent = `Estimated fare: $${fare.toFixed(2)} • Distance: ${km.toFixed(1)} km • Payment: ${payment}`;
+
+        const tempBooking = { pickup, destination, status: "draft" };
+        updateMapForBooking(passengerMap, passengerMapState, tempBooking, "passenger");
+        $("passengerRouteLabel").textContent = `${pickup} → ${destination}`;
+        $("passengerStatusLabel").textContent = "draft";
+      } finally {
+        setTimeout(() => { isEstimateAction = false; }, 0);
+      }
     };
 
     $("bookingForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      if (isEstimateAction) return;
       const pickup = $("pickup").value.trim();
       const destination = $("destination").value.trim();
       const passengerName = $("passengerName").value.trim();
