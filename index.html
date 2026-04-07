@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
 
   <style>
     :root{
@@ -313,6 +314,7 @@
               <div class="right-actions top-gap">
                 <button class="btn" id="estimateFareBtn" type="button">Estimate fare</button>
                 <button class="btn brand" id="requestRideBtn" type="submit">Request ride</button>
+                <button class="btn" id="payNowBtn" type="button" style="display:none">💳 Pay now</button>
               </div>
               <div class="line"></div>
               <div id="farePreview" class="muted">Estimated fare: -- • Distance: -- • Payment: --</div>
@@ -494,6 +496,84 @@
 
     const $ = (id) => document.getElementById(id);
 
+    // Stripe publishable key: replace with your real pk_test or pk_live key
+    const STRIPE_PUBLISHABLE_KEY = "pk_test_REPLACE_WITH_YOUR_PUBLISHABLE_KEY";
+    const stripe = window.Stripe ? Stripe(STRIPE_PUBLISHABLE_KEY) : null;
+
+
+    function getLatestPassengerBooking() {
+      const trips = getPassengerBookings().slice().sort((a, b) => {
+        const aTime = (a.createdAt && a.createdAt.seconds) ? a.createdAt.seconds : 0;
+        const bTime = (b.createdAt && b.createdAt.seconds) ? b.createdAt.seconds : 0;
+        return bTime - aTime;
+      });
+      return trips[0] || null;
+    }
+
+    function updatePaymentButton() {
+      const btn = $("payNowBtn");
+      const rideType = $("rideType")?.value || "normal";
+      if (!btn) return;
+      btn.style.display = rideType === "normal" ? "inline-block" : "none";
+    }
+
+    async function startStripeCheckout(booking) {
+      if (!booking) {
+        alert("Create a booking first.");
+        return;
+      }
+      if (booking.rideType !== "normal") {
+        alert("NDIS bookings use invoice / referral, not card payment.");
+        return;
+      }
+      if (!booking.fare || Number(booking.fare) <= 0) {
+        alert("Estimate fare first.");
+        return;
+      }
+      if (!stripe) {
+        alert("Stripe is not configured yet. Add your publishable key first.");
+        return;
+      }
+
+      const payBtn = $("payNowBtn");
+      const originalText = payBtn ? payBtn.textContent : "";
+      try {
+        if (payBtn) {
+          payBtn.disabled = true;
+          payBtn.textContent = "Starting payment...";
+        }
+
+        const res = await fetch("/api/create-checkout-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            bookingId: booking.id,
+            pickup: booking.pickup,
+            destination: booking.destination,
+            fare: booking.fare,
+            passengerEmail: booking.passengerEmail || "",
+            rideType: booking.rideType || "normal"
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.id) {
+          throw new Error(data.error || "Could not start payment");
+        }
+
+        const result = await stripe.redirectToCheckout({ sessionId: data.id });
+        if (result?.error) throw new Error(result.error.message);
+      } catch (err) {
+        console.error("Stripe checkout error:", err);
+        alert(err.message || "Payment error");
+      } finally {
+        if (payBtn) {
+          payBtn.disabled = false;
+          payBtn.textContent = originalText || "💳 Pay now";
+        }
+      }
+    }
+
     function showMsg(msg, isError = false) {
       $("authMsg").textContent = msg;
       $("authMsg").style.color = isError ? "#ff9f9f" : "#9ec3da";
@@ -641,6 +721,7 @@
       $("appScreen").classList.remove("hidden");
       $("whoAmI").innerHTML = `Signed in as <strong style="color:#fff">${escapeHtml(currentProfile.name || currentProfile.email)}</strong> • ${escapeHtml(currentProfile.role)}`;
       $("passengerName").value = currentProfile.name || "";
+      updatePaymentButton();
 
       initMaps();
       subscribeUsers();
@@ -1004,6 +1085,7 @@
       $("passengerStageLabel").textContent = "waiting";
       $("passengerEtaLabel").textContent = "--";
       $("passengerKmLabel").textContent = `${Number(km).toFixed(1)} km`;
+      updatePaymentButton();
       alert("Ride request sent. Admin can now see it in another browser.");
     });
 
@@ -1110,6 +1192,11 @@
     $("driverRecenterBtn")?.addEventListener("click", recenterDriverMap);
     $("driverFitRouteBtn")?.addEventListener("click", fitDriverRoute);
     $("passengerCancelBtn")?.addEventListener("click", passengerCancelLatestTrip);
+    $("rideType")?.addEventListener("change", updatePaymentButton);
+    $("payNowBtn")?.addEventListener("click", async () => {
+      const latest = getLatestPassengerBooking();
+      await startStripeCheckout(latest);
+    });
 
     function renderAdminBookings() {
       if (currentProfile?.role !== "admin") return;
