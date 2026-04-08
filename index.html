@@ -189,6 +189,13 @@
     .proof-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .mini-input{padding:10px 12px;border-radius:12px}
 
+
+    .level10-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .command-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .metric-mini,.incident-item,.loyalty-item,.reliability-item,.payout-item,.family-item,.escort-item,.shift-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .risk-low{color:#87ebb0}.risk-mid{color:#ffd76f}.risk-high{color:#ff9f9f}
+    .stack-list{display:grid;gap:10px}
+
   </style>
 </head>
 <body>
@@ -199,7 +206,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 9 stable auth build</div>
+            <div class="subtitle">Firebase Level 10 stable auth build</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -281,7 +288,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 9 • stable auth • OTP ride security • finance queue • kanban dispatch • proof of completion</div>
+            <div class="subtitle">Full Level 10 • stable auth • command center • SLA risk • loyalty • incident hub • payout approvals</div>
           </div>
         </div>
         <div class="userbox">
@@ -676,6 +683,24 @@
             <div id="passengerTrustPanel" class="notice-list"></div>
           </div>
         </div>
+
+        <div class="level10-grid top-gap">
+          <div class="card section">
+            <div class="section-title">Level 10 command center</div>
+            <div class="section-sub">High-level operations snapshot, demand pressure, and dispatch health.</div>
+            <div id="commandCenterPanel" class="command-grid"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Incident hub</div>
+            <div class="section-sub">Trips with cancellation, OTP mismatch, or urgent timing risk.</div>
+            <div id="incidentHub" class="stack-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Payout approvals</div>
+            <div class="section-sub">Driver payout readiness from paid and completed trips.</div>
+            <div id="payoutApprovals" class="stack-list"></div>
+          </div>
+        </div>
       </div>
 
       <div id="driverView" class="hidden">
@@ -746,6 +771,19 @@
             <div class="section-title">Proof of completion</div>
             <div class="section-sub">Save end-of-trip note or image link without changing login flow.</div>
             <div id="driverProofPanel" class="notice-list"></div>
+          </div>
+        </div>
+
+        <div class="grid-2 top-gap">
+          <div class="card section">
+            <div class="section-title">Shift handover</div>
+            <div class="section-sub">Driver notes for next shift or admin follow-up.</div>
+            <div id="driverShiftHandover" class="stack-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Route reliability</div>
+            <div class="section-sub">Trip completion trend, acceptance, and route confidence.</div>
+            <div id="driverRouteReliability" class="stack-list"></div>
           </div>
         </div>
 
@@ -1721,6 +1759,13 @@ function renderAdminCharts() {
       renderPassengerTrustPanel();
       renderDriverOtpPanel();
       renderDriverProofPanel();
+      renderCommandCenterPanel();
+      renderIncidentHub();
+      renderPayoutApprovals();
+      renderFamilyVisibilityPanel();
+      renderPassengerLoyaltyPanel();
+      renderDriverShiftHandover();
+      renderDriverRouteReliability();
       syncDriverControls();
       if (currentProfile?.role === "passenger") {
         await renderSavedPlaces();
@@ -2874,6 +2919,99 @@ function renderAdminCharts() {
       }
 
       docPdf.save(`uvel-invoice-${booking.passengerName.replace(/\s+/g, "-").toLowerCase()}.pdf`);
+    }
+
+    function renderCommandCenterPanel() {
+      if (currentProfile?.role !== "admin") return;
+      const wrap = $("commandCenterPanel");
+      if (!wrap) return;
+      const active = allBookings.filter(b => !["completed","cancelled"].includes(b.status)).length;
+      const urgent = allBookings.filter(b => (b.priority || "") === "urgent").length;
+      const onlineDrivers = allDrivers.filter(d => (d.availability || "online") === "online").length;
+      const unassigned = allBookings.filter(b => !b.assignedDriverUid && b.status !== "cancelled").length;
+      const highRisk = allBookings.filter(b => getRiskLevel(b) === "high").length;
+      const paidReady = allBookings.filter(b => b.paymentStatus === "paid" && b.status === "completed").length;
+      wrap.innerHTML = [
+        ["Active jobs", active], ["Urgent trips", urgent], ["Online drivers", onlineDrivers],
+        ["Unassigned", unassigned], ["High risk", highRisk], ["Payout ready", paidReady]
+      ].map(([label,val]) => `<div class="metric-mini"><div class="tiny">${label}</div><div style="font-size:26px;font-weight:900;margin-top:6px">${val}</div></div>`).join("");
+    }
+
+    function getRiskLevel(b) {
+      if (!b) return "low";
+      if (b.status === "cancelled") return "high";
+      if ((b.priority || "") === "urgent" && !b.assignedDriverUid) return "high";
+      if ((b.acceptanceStatus || "") === "declined") return "high";
+      if (b.paymentStatus !== "paid" && b.status === "completed") return "mid";
+      if (!b.assignedDriverUid || (b.priority || "") === "high") return "mid";
+      return "low";
+    }
+
+    function renderIncidentHub() {
+      if (currentProfile?.role !== "admin") return;
+      const wrap = $("incidentHub");
+      if (!wrap) return;
+      const items = allBookings.filter(b => getRiskLevel(b) !== "low").slice(0, 8);
+      wrap.innerHTML = items.length ? items.map(b => `<div class="incident-item"><div style="font-weight:800">${escapeHtml(b.passengerName || "Passenger")}</div><div class="tiny">${escapeHtml(b.pickup || "")} → ${escapeHtml(b.destination || "")}</div><div class="top-gap risk-${getRiskLevel(b)}">Risk: ${escapeHtml(getRiskLevel(b))}</div></div>`).join("") : `<div class="empty">No incidents right now.</div>`;
+    }
+
+    function renderPayoutApprovals() {
+      if (currentProfile?.role !== "admin") return;
+      const wrap = $("payoutApprovals");
+      if (!wrap) return;
+      const ready = allBookings.filter(b => b.status === "completed" && b.paymentStatus === "paid" && b.assignedDriverUid).slice(0, 8);
+      wrap.innerHTML = ready.length ? ready.map(b => `<div class="payout-item"><div style="font-weight:800">${escapeHtml(b.assignedDriverName || "Driver")}</div><div class="tiny">${escapeHtml(b.passengerName || "Passenger")} • ${escapeHtml(b.tripDate || "")}</div><div class="top-gap">Driver payout: $${getDriverEarningsAmount(b).toFixed(2)}</div></div>`).join("") : `<div class="empty">No payout approvals yet.</div>`;
+    }
+
+    function renderFamilyVisibilityPanel() {
+      if (currentProfile?.role !== "passenger") return;
+      const wrap = $("familyVisibilityPanel");
+      if (!wrap) return;
+      const latest = getLatestPassengerBooking();
+      if (!latest) { wrap.innerHTML = `<div class="empty">No trip yet.</div>`; return; }
+      wrap.innerHTML = `
+        <div class="family-item"><div class="tiny">Latest trip status</div><div style="font-weight:800;margin-top:6px">${escapeHtml(latest.status || "pending")}</div></div>
+        <div class="family-item"><div class="tiny">Escort / companion</div><div style="font-weight:800;margin-top:6px">${escapeHtml(latest.companionRequired || "no")}</div></div>
+        <div class="family-item"><div class="tiny">Emergency contact</div><div style="font-weight:800;margin-top:6px">${escapeHtml(latest.emergencyContact || "Not added")}</div></div>
+        <div class="family-item"><div class="tiny">Driver share status</div><div style="font-weight:800;margin-top:6px">${latest.driverLat ? "Live sharing" : "Waiting for live share"}</div></div>`;
+    }
+
+    function renderPassengerLoyaltyPanel() {
+      if (currentProfile?.role !== "passenger") return;
+      const wrap = $("passengerLoyaltyPanel");
+      if (!wrap) return;
+      const mine = getPassengerBookings();
+      const completed = mine.filter(b => b.status === "completed").length;
+      const repeat = mine.filter(b => ["weekly","fortnightly","monthly"].includes(b.recurringPattern)).length;
+      const preferred = mine.map(b => b.assignedDriverName).filter(Boolean).reduce((acc, n) => (acc[n]=(acc[n]||0)+1, acc), {});
+      const top = Object.entries(preferred).sort((a,b)=>b[1]-a[1])[0];
+      wrap.innerHTML = `
+        <div class="loyalty-item"><div class="tiny">Completed rides</div><div style="font-weight:900;font-size:24px;margin-top:6px">${completed}</div></div>
+        <div class="loyalty-item"><div class="tiny">Recurring rides</div><div style="font-weight:900;font-size:24px;margin-top:6px">${repeat}</div></div>
+        <div class="loyalty-item"><div class="tiny">Preferred driver match</div><div style="font-weight:800;margin-top:6px">${escapeHtml(top ? top[0] : "Not enough history")}</div></div>
+        <div class="loyalty-item"><div class="tiny">Care tier</div><div style="font-weight:800;margin-top:6px">${completed >= 10 ? "Priority care" : completed >= 4 ? "Repeat rider" : "New rider"}</div></div>`;
+    }
+
+    function renderDriverShiftHandover() {
+      if (currentProfile?.role !== "driver") return;
+      const wrap = $("driverShiftHandover");
+      if (!wrap) return;
+      const trips = allBookings.filter(b => b.assignedDriverUid === currentUser.uid).slice(0,5);
+      wrap.innerHTML = trips.length ? trips.map(b => `<div class="shift-item"><div style="font-weight:800">${escapeHtml(b.passengerName || "Passenger")}</div><div class="tiny">${escapeHtml(b.driverStage || b.status || "assigned")}</div><div class="top-gap">${escapeHtml(b.notes || "No special note")}</div></div>`).join("") : `<div class="empty">No shift handover items.</div>`;
+    }
+
+    function renderDriverRouteReliability() {
+      if (currentProfile?.role !== "driver") return;
+      const wrap = $("driverRouteReliability");
+      if (!wrap) return;
+      const trips = allBookings.filter(b => b.assignedDriverUid === currentUser.uid);
+      const completed = trips.filter(b => b.status === "completed").length;
+      const accepted = trips.filter(b => b.acceptanceStatus === "accepted").length;
+      const rate = trips.length ? Math.round((completed / trips.length) * 100) : 0;
+      wrap.innerHTML = `
+        <div class="reliability-item"><div class="tiny">Trip completion rate</div><div style="font-weight:900;font-size:24px;margin-top:6px">${rate}%</div></div>
+        <div class="reliability-item"><div class="tiny">Accepted jobs</div><div style="font-weight:900;font-size:24px;margin-top:6px">${accepted}</div></div>
+        <div class="reliability-item"><div class="tiny">Route confidence</div><div style="font-weight:800;margin-top:6px">${rate >= 80 ? "High" : rate >= 50 ? "Medium" : "Needs attention"}</div></div>`;
     }
 
     async function seedDemoDrivers() {
