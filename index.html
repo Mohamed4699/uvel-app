@@ -155,6 +155,10 @@
 .pulse-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#57d08b;box-shadow:0 0 0 rgba(87,208,139,.7);animation:pulse 1.8s infinite}
 .live-badge{display:inline-flex;align-items:center;gap:8px}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(87,208,139,.7)}70%{box-shadow:0 0 0 12px rgba(87,208,139,0)}100%{box-shadow:0 0 0 0 rgba(87,208,139,0)}}
+
+    body.operations-pulse .card{box-shadow:0 18px 50px rgba(0,0,0,.30),0 0 0 1px rgba(73,196,213,.08) inset;}
+    body.operations-pulse .header{box-shadow:0 18px 50px rgba(0,0,0,.34),0 0 0 1px rgba(73,196,213,.10) inset;}
+    body.operations-pulse .stat .k, body.operations-pulse .big{letter-spacing:.2px}
     @media (max-width: 1100px){ .eta-box,.edit-grid{grid-template-columns:1fr} }
     @media (max-width: 1100px){
       .grid-2,.split,.login-wrap,.grid-4,.grid-3,.stats,.toolbar,.row,.meta{grid-template-columns:1fr}
@@ -231,7 +235,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 13 orchestration build</div>
+            <div class="subtitle">Firebase Level 14 orchestration intelligence build</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -313,7 +317,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 13 • orchestration studio • compact mode • executive focus • demo spotlight</div>
+            <div class="subtitle">Full Level 14 • orchestration intelligence • compact mode • executive focus • spotlight maps • operations pulse</div>
           </div>
         </div>
         <div class="userbox">
@@ -338,12 +342,13 @@
         <label class="toggle-chip"><input type="checkbox" id="compactModeToggle" /> Compact mode</label>
         <label class="toggle-chip"><input type="checkbox" id="executiveFocusToggle" checked /> Executive focus</label>
         <label class="toggle-chip"><input type="checkbox" id="spotlightMapsToggle" checked /> Spotlight maps</label>
-        <span class="lvl13-tag">Level 13 Ultimate</span>
+        <label class="toggle-chip"><input type="checkbox" id="operationsPulseToggle" checked /> Operations pulse</label>
+        <span class="lvl13-tag">Level 14 Infinity</span>
       </div>
 
       <div class="hero-strip" id="lvl13HeroStrip">
         <div class="hero-metric"><div class="tiny">System mode</div><div class="big">Live Operations</div><div class="note">Built on your existing Firebase, Firestore, auth, and dispatch workflow.</div></div>
-        <div class="hero-metric"><div class="tiny">Demo focus</div><div class="big">Funding Ready</div><div class="note">Use Executive focus to hide heavy panels and keep the core flow visible.</div></div>
+        <div class="hero-metric"><div class="tiny">Demo focus</div><div class="big">Funding Ready</div><div class="note">Use Executive focus for demos, Spotlight maps for live route emphasis, and Operations pulse for a stronger command-centre feel.</div></div>
         <div class="hero-metric"><div class="tiny">Primary flow</div><div class="big">Book → Dispatch → Complete</div><div class="note">Passenger, admin, and driver roles stay connected in one all-in-one file.</div></div>
       </div>
 
