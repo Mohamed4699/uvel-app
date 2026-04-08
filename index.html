@@ -205,15 +205,34 @@
     .level12-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
     .level12-item,.timeline-item,.circle-item,.score-item,.excellence-item,.orchestration-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
 
-  
-    .overview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
-    .overview-card{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03)}
-    .overview-card .label{font-size:12px;color:var(--muted)}
-    .overview-card .value{font-size:24px;font-weight:900;margin-top:6px}
-    .overview-card .sub{font-size:12px;color:var(--muted);margin-top:4px}
-    .queue-list{display:grid;gap:10px}
-    .queue-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
-    .health-ok{color:#87ebb0}.health-warn{color:#ffd76f}.health-bad{color:#ff9f9f}
+
+    body.compact-mode .map{height:250px}
+    body.compact-mode .section{padding:18px}
+    body.compact-mode .stats{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+    body.compact-mode .eta-box{grid-template-columns:repeat(2,1fr)}
+    body.compact-mode .section-sub{margin-bottom:12px}
+    body.compact-mode .book-card, body.compact-mode .list-card{padding:14px}
+    body.compact-mode .trip-head{gap:10px}
+    body.compact-mode .route{font-size:18px}
+    body.compact-mode .footer-note{font-size:12px}
+    body.compact-mode .header{padding:16px 20px}
+    body.compact-mode .stats .stat:nth-child(6),
+    body.compact-mode .stats .stat:nth-child(7),
+    body.compact-mode .stats .stat:nth-child(8){display:none}
+    body.compact-mode #passengerView > .card.section.top-gap,
+    body.compact-mode #adminView > .card.section.top-gap + .grid-3.top-gap,
+    body.compact-mode #adminView > .card.section.top-gap + .grid-3.top-gap + .level7-grid,
+    body.compact-mode #adminView > .card.section.top-gap + .grid-3.top-gap + .level7-grid + .grid-2.top-gap,
+    body.compact-mode #adminView > .card.section.top-gap + .grid-3.top-gap + .level7-grid + .grid-2.top-gap + .level8-grid,
+    body.compact-mode #adminView > .card.section.top-gap + .grid-3.top-gap + .level7-grid + .grid-2.top-gap + .level8-grid + .level10-grid,
+    body.compact-mode #adminView > .card.section.top-gap + .grid-3.top-gap + .level7-grid + .grid-2.top-gap + .level8-grid + .level10-grid + .level11-grid,
+    body.compact-mode #adminView > .card.section.top-gap + .grid-3.top-gap + .level7-grid + .grid-2.top-gap + .level8-grid + .level10-grid + .level11-grid + .level12-grid,
+    body.compact-mode #driverView > .card.section.top-gap,
+    body.compact-mode #driverView > .card.section.top-gap + .grid-2.top-gap,
+    body.compact-mode #driverView > .card.section.top-gap + .grid-2.top-gap + .grid-2.top-gap,
+    body.compact-mode #driverView > .card.section.top-gap + .grid-2.top-gap + .grid-2.top-gap + .level11-grid,
+    body.compact-mode #driverView > .card.section.top-gap + .grid-2.top-gap + .grid-2.top-gap + .level11-grid + .level12-grid,
+    body.compact-mode #passengerView .level12-grid{display:none !important}
 
   </style>
 </head>
@@ -329,12 +348,6 @@
       </div>
 
       <div id="passengerView" class="hidden">
-        <div class="overview-grid" id="passengerOverviewGrid">
-          <div class="overview-card"><div class="label">My total trips</div><div class="value" id="pvTrips">0</div><div class="sub">All bookings linked to this passenger</div></div>
-          <div class="overview-card"><div class="label">Open trips</div><div class="value" id="pvOpen">0</div><div class="sub">Pending, assigned, or in progress</div></div>
-          <div class="overview-card"><div class="label">Latest fare</div><div class="value" id="pvFare">$0.00</div><div class="sub">From your most recent booking</div></div>
-          <div class="overview-card"><div class="label">Readiness score</div><div class="value" id="pvReady">0%</div><div class="sub">Referral + contact + driver readiness</div></div>
-        </div>
         <div class="grid-2">
           <div class="card section">
             <div class="section-title">Passenger booking</div>
@@ -605,24 +618,6 @@
       </div>
 
       <div id="adminView" class="hidden">
-        <div class="overview-grid" id="adminOverviewGrid">
-          <div class="overview-card"><div class="label">Live queue</div><div class="value" id="avLiveQueue">0</div><div class="sub">Pending and assigned jobs requiring action</div></div>
-          <div class="overview-card"><div class="label">Urgent / high priority</div><div class="value" id="avUrgent">0</div><div class="sub">Bookings tagged urgent or high</div></div>
-          <div class="overview-card"><div class="label">Team capacity</div><div class="value" id="avDrivers">0</div><div class="sub">Drivers available in the system</div></div>
-          <div class="overview-card"><div class="label">Sync status</div><div class="value health-ok" id="avSync">Live</div><div class="sub" id="avSyncSub">Firestore listener connected</div></div>
-        </div>
-        <div class="grid-2 top-gap">
-          <div class="card section">
-            <div class="section-title">Live operations queue</div>
-            <div class="section-sub">Newest requests, priority jobs, and bookings needing admin action.</div>
-            <div id="adminLiveQueue" class="queue-list"></div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Data sync status</div>
-            <div class="section-sub">Quick health check for why admin may not see new bookings.</div>
-            <div id="adminSyncStatus" class="queue-list"></div>
-          </div>
-        </div>
         <div class="split">
           <div class="card section">
             <div class="trip-head">
@@ -839,12 +834,6 @@
       </div>
 
       <div id="driverView" class="hidden">
-        <div class="overview-grid" id="driverOverviewGrid">
-          <div class="overview-card"><div class="label">Assigned today</div><div class="value" id="dvAssigned">0</div><div class="sub">Trips assigned to this driver</div></div>
-          <div class="overview-card"><div class="label">Open work</div><div class="value" id="dvOpen">0</div><div class="sub">Assigned and in-progress trips</div></div>
-          <div class="overview-card"><div class="label">Completion rate</div><div class="value" id="dvRate">0%</div><div class="sub">Completed versus accepted trips</div></div>
-          <div class="overview-card"><div class="label">Route confidence</div><div class="value" id="dvConfidence">0%</div><div class="sub">Live tracking + ETA + completion quality</div></div>
-        </div>
         <div class="grid-2">
           <div class="card section">
             <div class="section-title">Assigned trips</div>
@@ -1771,74 +1760,69 @@ if (!user) {
 
       const fare = computeLevel8FareAdjustments(calculateFare(km, rideType));
 
-      try {
-        const bookingRef = await addDoc(collection(db, "bookings"), {
-          paymentStatus: "unpaid",
-          passengerUid: currentUser.uid,
-          passengerName,
-          passengerEmail: currentProfile.email,
-          rideType,
-          pickup,
-          destination,
-          pickupCoords,
-          destinationCoords,
-          tripDate,
-          tripTime,
-          notes,
-          distanceKm: Number(km.toFixed(1)),
-          fare: Number(fare.toFixed(2)),
-          paymentMethod: rideType === "ndis" ? "Invoice / Referral" : "Card / Direct",
-          priority,
-          wheelchairRequired,
-          companionRequired,
-          returnTrip,
-          returnTime,
-          referralSource,
-          recurringPattern,
-          referralEmail,
-          pickupWindow,
-          serviceType,
-          emergencyContact,
-          extraStop,
-          waitMinutes,
-          pickupOtp: generateOtpCode(),
-          dropoffOtp: generateOtpCode(),
-          pickupOtpVerified: false,
-          dropoffOtpVerified: false,
-          completionProofNote: "",
-          completionProofLink: "",
-          acceptanceStatus: "pending_driver",
-          bookingCode: bookingCode(),
-          status: "pending",
-          driverStage: "waiting",
-          assignedDriverUid: null,
-          assignedDriverName: null,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
+      await addDoc(collection(db, "bookings"), {
+      paymentStatus: "unpaid",
+        passengerUid: currentUser.uid,
+        passengerName,
+        passengerEmail: currentProfile.email,
+        rideType,
+        pickup,
+        destination,
+        pickupCoords,
+        destinationCoords,
+        tripDate,
+        tripTime,
+        notes,
+        distanceKm: Number(km.toFixed(1)),
+        fare: Number(fare.toFixed(2)),
+        paymentMethod: rideType === "ndis" ? "Invoice / Referral" : "Card / Direct",
+        priority,
+        wheelchairRequired,
+        companionRequired,
+        returnTrip,
+        returnTime,
+        referralSource,
+        recurringPattern,
+        referralEmail,
+        pickupWindow,
+        serviceType,
+        emergencyContact,
+        extraStop,
+        waitMinutes,
+        pickupOtp: generateOtpCode(),
+        dropoffOtp: generateOtpCode(),
+        pickupOtpVerified: false,
+        dropoffOtpVerified: false,
+        completionProofNote: "",
+        completionProofLink: "",
+        acceptanceStatus: "pending_driver",
+        bookingCode: bookingCode(),
+        status: "pending",
+        driverStage: "waiting",
+        assignedDriverUid: null,
+        assignedDriverName: null,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
 
-        $("bookingForm").reset();
-        $("passengerName").value = currentProfile.name || "";
-        if ($("bookingPriority")) $("bookingPriority").value = "standard";
-        if ($("wheelchairRequired")) $("wheelchairRequired").value = "no";
-        if ($("companionRequired")) $("companionRequired").value = "no";
-        if ($("returnTrip")) $("returnTrip").value = "no";
-        if ($("returnTime")) $("returnTime").value = "";
-        if ($("referralSource")) $("referralSource").value = "self";
-        if ($("recurringPattern")) $("recurringPattern").value = "once";
-        if ($("referralEmail")) $("referralEmail").value = "";
-        if ($("pickupWindow")) $("pickupWindow").value = "exact";
-        $("farePreview").textContent = "Estimated fare: -- • Distance: -- • Payment: --";
-        $("passengerStatusLabel").textContent = "pending";
-        $("passengerStageLabel").textContent = "waiting";
-        $("passengerEtaLabel").textContent = "--";
-        $("passengerKmLabel").textContent = `${Number(km).toFixed(1)} km`;
-        updatePaymentButton();
-        alert(`Ride request sent successfully. Booking ID: ${bookingRef.id}`);
-      } catch (err) {
-        console.error("Booking creation failed:", err);
-        alert(`Ride request failed: ${err.message || "Unknown Firestore error"}`);
-      }
+      $("bookingForm").reset();
+      $("passengerName").value = currentProfile.name || "";
+      if ($("bookingPriority")) $("bookingPriority").value = "standard";
+      if ($("wheelchairRequired")) $("wheelchairRequired").value = "no";
+      if ($("companionRequired")) $("companionRequired").value = "no";
+      if ($("returnTrip")) $("returnTrip").value = "no";
+      if ($("returnTime")) $("returnTime").value = "";
+      if ($("referralSource")) $("referralSource").value = "self";
+      if ($("recurringPattern")) $("recurringPattern").value = "once";
+      if ($("referralEmail")) $("referralEmail").value = "";
+      if ($("pickupWindow")) $("pickupWindow").value = "exact";
+      $("farePreview").textContent = "Estimated fare: -- • Distance: -- • Payment: --";
+      $("passengerStatusLabel").textContent = "pending";
+      $("passengerStageLabel").textContent = "waiting";
+      $("passengerEtaLabel").textContent = "--";
+      $("passengerKmLabel").textContent = `${Number(km).toFixed(1)} km`;
+      updatePaymentButton();
+      alert("Ride request sent. Admin can now see it in another browser.");
     });
 
     function subscribeUsers() {
@@ -1854,24 +1838,11 @@ if (!user) {
 
     function subscribeBookings() {
       if (unsubBookings) unsubBookings();
-      unsubBookings = onSnapshot(
-        query(collection(db, "bookings"), orderBy("tripDate", "desc")),
-        (snap) => {
-          allBookings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          if ($("avSync")) $("avSync").textContent = "Live";
-          if ($("avSyncSub")) $("avSyncSub").textContent = `${allBookings.length} bookings loaded from Firestore`;
-          renderAdminMapBookingSelect();
-          renderEverything();
-        },
-        (err) => {
-          console.error("Booking subscription error:", err);
-          if ($("avSync")) {
-            $("avSync").textContent = "Blocked";
-            $("avSync").className = "value health-bad";
-          }
-          if ($("avSyncSub")) $("avSyncSub").textContent = err.message || "Firestore rules or query error";
-        }
-      );
+      unsubBookings = onSnapshot(query(collection(db, "bookings"), orderBy("tripDate", "desc")), (snap) => {
+        allBookings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAdminMapBookingSelect();
+        renderEverything();
+      });
     }
 
     function startMetricsRefreshLoop() {
@@ -1958,13 +1929,8 @@ function renderAdminCharts() {
 
     async function renderEverything() {
       renderStats();
-      renderPassengerOverview();
-      renderAdminOverview();
-      renderDriverOverview();
       renderPassengerTrips();
       renderAdminBookings();
-      renderAdminLiveQueue();
-      renderAdminSyncStatus();
       renderDriverTrips();
       renderPassengerManagement();
       renderDriverManagement();
@@ -1997,87 +1963,6 @@ function renderAdminCharts() {
         await renderRideTemplates();
       }
       updateMapsFromLatest();
-    }
-
-
-    function latestByCreated(bookings) {
-      return bookings.slice().sort((a,b) => {
-        const as = a?.createdAt?.seconds || 0;
-        const bs = b?.createdAt?.seconds || 0;
-        return bs - as;
-      })[0] || null;
-    }
-
-    function computePassengerReadinessScore(booking) {
-      if (!booking) return 0;
-      let score = 25;
-      if (booking.referralSource && booking.referralSource !== "self") score += 15;
-      if (booking.emergencyContact) score += 15;
-      if (booking.pickupWindow) score += 10;
-      if (booking.assignedDriverUid) score += 20;
-      if (booking.driverStage && booking.driverStage !== "waiting") score += 15;
-      return Math.min(100, score);
-    }
-
-    function renderPassengerOverview() {
-      if (currentProfile?.role !== "passenger") return;
-      const trips = getPassengerBookings();
-      const latest = latestByCreated(trips);
-      const open = trips.filter(b => !["completed","cancelled"].includes(b.status)).length;
-      if ($("pvTrips")) $("pvTrips").textContent = String(trips.length);
-      if ($("pvOpen")) $("pvOpen").textContent = String(open);
-      if ($("pvFare")) $("pvFare").textContent = `$${Number(latest?.fare || 0).toFixed(2)}`;
-      if ($("pvReady")) $("pvReady").textContent = `${computePassengerReadinessScore(latest)}%`;
-    }
-
-    function renderAdminOverview() {
-      if (currentProfile?.role !== "admin") return;
-      const live = allBookings.filter(b => ["pending","assigned","in_progress"].includes(b.status));
-      const urgent = allBookings.filter(b => ["urgent","high"].includes(String(b.priority || "").toLowerCase())).length;
-      if ($("avLiveQueue")) $("avLiveQueue").textContent = String(live.length);
-      if ($("avUrgent")) $("avUrgent").textContent = String(urgent);
-      if ($("avDrivers")) $("avDrivers").textContent = String(allDrivers.length);
-      if ($("avSync") && !$("avSync").textContent.trim()) $("avSync").textContent = "Live";
-    }
-
-    function renderDriverOverview() {
-      if (currentProfile?.role !== "driver") return;
-      const trips = allBookings.filter(b => b.assignedDriverUid === currentUser.uid);
-      const open = trips.filter(b => ["assigned","in_progress","pending"].includes(b.status)).length;
-      const completed = trips.filter(b => b.status === "completed").length;
-      const accepted = trips.filter(b => b.acceptanceStatus === "accepted" || b.status !== "pending").length;
-      const rate = accepted ? Math.round((completed / accepted) * 100) : 0;
-      const confidence = Math.min(100, Math.round(((completed * 25) + (trips.filter(b => b.driverStage && b.driverStage !== "waiting").length * 15) + (trips.filter(b => b.paymentStatus === "paid").length * 10)) / Math.max(1, trips.length)));
-      if ($("dvAssigned")) $("dvAssigned").textContent = String(trips.length);
-      if ($("dvOpen")) $("dvOpen").textContent = String(open);
-      if ($("dvRate")) $("dvRate").textContent = `${rate}%`;
-      if ($("dvConfidence")) $("dvConfidence").textContent = `${confidence}%`;
-    }
-
-    function renderAdminLiveQueue() {
-      const box = $("adminLiveQueue");
-      if (!box || currentProfile?.role !== "admin") return;
-      const items = allBookings.slice().sort((a,b)=> (b?.createdAt?.seconds||0)-(a?.createdAt?.seconds||0)).slice(0,8);
-      if (!items.length) {
-        box.innerHTML = `<div class="empty">No live bookings yet. Create a ride from a passenger account and it will appear here instantly.</div>`;
-        return;
-      }
-      box.innerHTML = items.map(b => {
-        const pr = escapeHtml((b.priority || "standard").toUpperCase());
-        const cls = b.priority === "urgent" ? "health-bad" : (b.priority === "high" ? "health-warn" : "health-ok");
-        return `<div class="queue-item"><div class="trip-head"><div><strong>${escapeHtml(b.passengerName || "Passenger")}</strong><div class="tiny">${escapeHtml(b.pickup || "")} → ${escapeHtml(b.destination || "")}</div></div><div class="${cls}">${pr}</div></div><div class="chip-row"><span class="chip">${escapeHtml(b.status || "pending")}</span><span class="chip">${escapeHtml(b.tripDate || "--")} ${escapeHtml(b.tripTime || "")}</span><span class="chip">${escapeHtml(b.rideType || "normal")}</span><span class="chip">${escapeHtml(b.paymentStatus || "unpaid")}</span></div></div>`;
-      }).join("");
-    }
-
-    function renderAdminSyncStatus() {
-      const box = $("adminSyncStatus");
-      if (!box || currentProfile?.role !== "admin") return;
-      const latest = latestByCreated(allBookings);
-      const hasBookings = allBookings.length > 0;
-      box.innerHTML = `
-        <div class="queue-item"><strong>Firestore listener</strong><div class="tiny ${hasBookings ? 'health-ok' : 'health-warn'}">${hasBookings ? 'Connected and receiving booking documents.' : 'Connected, but there are no booking documents yet.'}</div></div>
-        <div class="queue-item"><strong>Latest booking</strong><div class="tiny">${latest ? `${escapeHtml(latest.passengerName || 'Passenger')} • ${escapeHtml(latest.pickup || '')} → ${escapeHtml(latest.destination || '')}` : 'No booking received yet from passenger side.'}</div></div>
-        <div class="queue-item"><strong>Likely issue if admin sees nothing</strong><div class="tiny">Create a booking from a passenger account, then check Firestore bookings collection and Firestore rules.</div></div>`;
     }
 
     function renderAdminMapBookingSelect() {
