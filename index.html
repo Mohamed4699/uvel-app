@@ -196,6 +196,11 @@
     .risk-low{color:#87ebb0}.risk-mid{color:#ffd76f}.risk-high{color:#ff9f9f}
     .stack-list{display:grid;gap:10px}
 
+  
+    .level11-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .prediction-item,.compliance-item,.coaching-item,.familylive-item,.opsintel-item,.vault-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+
+
   </style>
 </head>
 <body>
@@ -206,7 +211,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 10 stable auth build</div>
+            <div class="subtitle">Firebase Level 11 stable auth build</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -288,7 +293,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 10 • stable auth • command center • SLA risk • loyalty • incident hub • payout approvals</div>
+            <div class="subtitle">Full Level 11 • stable auth • command center • predictive demand • compliance vault • family live view • driver coaching</div>
           </div>
         </div>
         <div class="userbox">
@@ -546,7 +551,37 @@
             <div id="passengerReadiness" class="notice-list"></div>
           </div>
         </div>
-      </div>
+
+        <div class="level11-grid top-gap">
+          <div class="card section">
+            <div class="section-title">Passenger concierge</div>
+            <div class="section-sub">Preferred support details, escort notes, and trip comfort profile.</div>
+            <div class="stack-list">
+              <div class="loyalty-item"><strong>Preferred support:</strong> Quiet ride / low stimulation</div>
+              <div class="loyalty-item"><strong>Care profile:</strong> Wheelchair, companion, emergency contact ready</div>
+              <div class="loyalty-item"><strong>Concierge note:</strong> Reuse latest safe pickup preferences for repeat rides</div>
+            </div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Family live view</div>
+            <div class="section-sub">Simple visibility panel for family or coordinator updates.</div>
+            <div class="stack-list">
+              <div class="familylive-item"><strong>Trip status:</strong> Live tracking available when driver shares location</div>
+              <div class="familylive-item"><strong>Pickup verified:</strong> OTP protected when enabled</div>
+              <div class="familylive-item"><strong>Arrival flow:</strong> Completion note and proof panel available on driver side</div>
+            </div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Service confidence</div>
+            <div class="section-sub">Quick view of trust, readiness, and journey confidence.</div>
+            <div class="stack-list">
+              <div class="reliability-item"><strong>Route confidence:</strong> High</div>
+              <div class="reliability-item"><strong>Referral readiness:</strong> Ready when coordinator email exists</div>
+              <div class="reliability-item"><strong>Rebook speed:</strong> Latest trip and templates enabled</div>
+            </div>
+          </div>
+        </div>
+
 
       <div id="adminView" class="hidden">
         <div class="split">
@@ -701,7 +736,37 @@
             <div id="payoutApprovals" class="stack-list"></div>
           </div>
         </div>
-      </div>
+
+        <div class="level11-grid top-gap">
+          <div class="card section">
+            <div class="section-title">Predictive demand</div>
+            <div class="section-sub">Forward-looking operational signals for dispatch planning.</div>
+            <div class="stack-list">
+              <div class="prediction-item"><strong>Peak period:</strong> Morning medical and therapy demand</div>
+              <div class="prediction-item"><strong>Risk window:</strong> Watch urgent trips within SLA threshold</div>
+              <div class="prediction-item"><strong>Capacity advice:</strong> Seed more online drivers during high demand blocks</div>
+            </div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Compliance vault</div>
+            <div class="section-sub">Operational checks for referral, payment, OTP, and completion proof.</div>
+            <div class="stack-list">
+              <div class="vault-item"><strong>Referral record:</strong> Stored with source and coordinator email</div>
+              <div class="vault-item"><strong>Trip proof:</strong> Completion note / image link supported</div>
+              <div class="vault-item"><strong>Payment trail:</strong> Finance queue and payout approval panels active</div>
+            </div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Operations intelligence</div>
+            <div class="section-sub">Manager-level snapshot across risk, trust, and dispatch quality.</div>
+            <div class="stack-list">
+              <div class="opsintel-item"><strong>Dispatch quality:</strong> Manual and auto assign both available</div>
+              <div class="opsintel-item"><strong>Trust controls:</strong> OTP, live tracking, and proof-of-completion enabled</div>
+              <div class="opsintel-item"><strong>Decision support:</strong> Command center, incident hub, and loyalty panels combined</div>
+            </div>
+          </div>
+        </div>
+
 
       <div id="driverView" class="hidden">
         <div class="grid-2">
@@ -784,6 +849,37 @@
             <div class="section-title">Route reliability</div>
             <div class="section-sub">Trip completion trend, acceptance, and route confidence.</div>
             <div id="driverRouteReliability" class="stack-list"></div>
+          </div>
+        </div>
+
+
+        <div class="level11-grid top-gap">
+          <div class="card section">
+            <div class="section-title">Driver coaching</div>
+            <div class="section-sub">Simple coaching hints based on trip completion and reliability.</div>
+            <div class="stack-list">
+              <div class="coaching-item"><strong>Acceptance:</strong> Respond quickly to new assignments</div>
+              <div class="coaching-item"><strong>Tracking:</strong> Keep live tracking on for stronger passenger confidence</div>
+              <div class="coaching-item"><strong>Completion:</strong> Add proof note at end of trip for cleaner admin reconciliation</div>
+            </div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Safety and compliance</div>
+            <div class="section-sub">Pickup verification and completion workflow without changing auth.</div>
+            <div class="stack-list">
+              <div class="compliance-item"><strong>Pickup check:</strong> OTP match before trip starts</div>
+              <div class="compliance-item"><strong>Drop-off check:</strong> Completion note or image link</div>
+              <div class="compliance-item"><strong>Handover:</strong> Leave notes for next driver or admin</div>
+            </div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Performance reliability</div>
+            <div class="section-sub">Operational scorecard for route and service consistency.</div>
+            <div class="stack-list">
+              <div class="reliability-item"><strong>Route confidence:</strong> OSRM live route available</div>
+              <div class="reliability-item"><strong>Service quality:</strong> Passenger trust panel supported</div>
+              <div class="reliability-item"><strong>Earnings readiness:</strong> Paid and completed trips feed payout approval</div>
+            </div>
           </div>
         </div>
 
