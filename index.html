@@ -189,6 +189,11 @@
     .proof-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .mini-input{padding:10px 12px;border-radius:12px}
 
+    .level9-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .forecast-item,.incident-item,.payout-item,.score-item,.handover-item,.concierge-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .risk-low{color:#87ebb0}.risk-medium{color:#ffd76f}.risk-high{color:#ff9f9f}
+    .score-big{font-size:28px;font-weight:900}
+
   </style>
 </head>
 <body>
@@ -199,7 +204,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 8 operations platform</div>
+            <div class="subtitle">Firebase Level 9 operations platform</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -281,7 +286,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 8 • OTP ride security • finance queue • kanban dispatch • proof of completion</div>
+            <div class="subtitle">Full Level 9 • command center • payout approvals • incident tracking • concierge tools</div>
           </div>
         </div>
         <div class="userbox">
@@ -538,7 +543,24 @@
             <div class="section-sub">Referral and service readiness for your next trip.</div>
             <div id="passengerReadiness" class="notice-list"></div>
           </div>
+        <div class="level9-grid top-gap">
+          <div class="card section">
+            <div class="section-title">Passenger concierge</div>
+            <div class="section-sub">Comfort and communication preferences for future trips.</div>
+            <div id="passengerConciergePanel" class="notice-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Preferred driver match</div>
+            <div class="section-sub">Admin can use this as a soft preference, not a hard rule.</div>
+            <div id="preferredDriverPanel" class="notice-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Family visibility</div>
+            <div class="section-sub">Simple sharing readiness for carers and family contacts.</div>
+            <div id="familyVisibilityPanel" class="notice-list"></div>
+          </div>
         </div>
+
       </div>
 
       <div id="adminView" class="hidden">
@@ -675,7 +697,24 @@
             <div class="section-sub">Security and service readiness checks.</div>
             <div id="passengerTrustPanel" class="notice-list"></div>
           </div>
+        <div class="level9-grid top-gap">
+          <div class="card section">
+            <div class="section-title">Capacity forecast</div>
+            <div class="section-sub">Quick planning view for pending demand and driver supply.</div>
+            <div id="capacityForecast" class="notice-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Incident center</div>
+            <div class="section-sub">Trips needing escalation, follow-up, or attention.</div>
+            <div id="incidentCenter" class="notice-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Payout approvals</div>
+            <div class="section-sub">Driver payout review based on paid completed trips.</div>
+            <div id="payoutApprovals" class="notice-list"></div>
+          </div>
         </div>
+
       </div>
 
       <div id="driverView" class="hidden">
@@ -746,6 +785,24 @@
             <div class="section-title">Proof of completion</div>
             <div class="section-sub">Save end-of-trip note or image link without changing login flow.</div>
             <div id="driverProofPanel" class="notice-list"></div>
+          </div>
+        </div>
+
+        <div class="level9-grid top-gap">
+          <div class="card section">
+            <div class="section-title">Driver performance scorecard</div>
+            <div class="section-sub">Live completion and acceptance quality summary.</div>
+            <div id="driverScorecard" class="notice-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Shift handover</div>
+            <div class="section-sub">Quick summary for the next driver or admin dispatcher.</div>
+            <div id="driverHandover" class="notice-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Route reliability</div>
+            <div class="section-sub">Trip mix and service reliability overview.</div>
+            <div id="routeReliability" class="notice-list"></div>
           </div>
         </div>
 
@@ -1698,7 +1755,133 @@ function renderAdminCharts() {
       });
     }
 
-    async function renderEverything() {
+    async 
+    function renderPassengerConciergePanel() {
+      const box = $("passengerConciergePanel");
+      if (!box) return;
+      const myTrips = getPassengerBookings();
+      const nextTrip = myTrips.find(b => b.status !== "completed" && b.status !== "cancelled") || myTrips[0];
+      const contactMode = nextTrip?.referralEmail ? "Email updates ready" : "App-only updates";
+      const mobility = nextTrip?.wheelchairRequired === "yes" ? "Wheelchair support requested" : "Standard mobility support";
+      const companion = nextTrip?.companionRequired === "yes" ? "Companion travelling" : "Solo passenger";
+      box.innerHTML = [
+        `<div class="concierge-item"><strong>Update channel</strong><div class="tiny">${contactMode}</div></div>`,
+        `<div class="concierge-item"><strong>Comfort profile</strong><div class="tiny">${mobility} • ${companion}</div></div>`,
+        `<div class="concierge-item"><strong>Next trip focus</strong><div class="tiny">${escapeHtml(nextTrip?.serviceType || "General transport")} • priority ${escapeHtml(nextTrip?.priority || "standard")}</div></div>`
+      ].join("");
+    }
+
+    function renderPreferredDriverPanel() {
+      const box = $("preferredDriverPanel");
+      if (!box) return;
+      const myTrips = getPassengerBookings();
+      const assigned = myTrips.filter(b => b.assignedDriverName);
+      const counts = {};
+      assigned.forEach(b => counts[b.assignedDriverName] = (counts[b.assignedDriverName] || 0) + 1);
+      const best = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+      box.innerHTML = best
+        ? `<div class="concierge-item"><strong>Suggested preferred driver</strong><div class="tiny">${escapeHtml(best[0])} • matched ${best[1]} trip(s)</div></div>`
+        : `<div class="concierge-item"><strong>No preferred driver yet</strong><div class="tiny">After more trips, UVEL can suggest a preferred match.</div></div>`;
+    }
+
+    function renderFamilyVisibilityPanel() {
+      const box = $("familyVisibilityPanel");
+      if (!box) return;
+      const myTrips = getPassengerBookings();
+      const latest = myTrips[0];
+      const visibility = latest?.emergencyContact ? "Family contact available" : "No family contact set";
+      const liveShare = latest?.driverLat ? "Live share possible now" : "Live share when driver tracking starts";
+      box.innerHTML = `
+        <div class="concierge-item"><strong>${visibility}</strong><div class="tiny">${latest?.emergencyContact ? escapeHtml(latest.emergencyContact) : "Add emergency contact in booking form."}</div></div>
+        <div class="concierge-item"><strong>Visibility status</strong><div class="tiny">${liveShare}</div></div>
+      `;
+    }
+
+    function renderCapacityForecast() {
+      const box = $("capacityForecast");
+      if (!box) return;
+      const pending = allBookings.filter(b => b.status === "pending").length;
+      const assigned = allBookings.filter(b => b.status === "assigned").length;
+      const onlineDrivers = allDrivers.filter(d => (d.availability || "online") === "online").length;
+      const busyDrivers = allDrivers.filter(d => (d.availability || "") === "busy").length;
+      const ratio = onlineDrivers ? (pending / onlineDrivers) : pending;
+      const riskClass = ratio > 2 ? "risk-high" : ratio > 1 ? "risk-medium" : "risk-low";
+      box.innerHTML = `
+        <div class="forecast-item"><strong>Pending demand</strong><div class="score-big">${pending}</div><div class="tiny">Open bookings waiting for action</div></div>
+        <div class="forecast-item"><strong>Online drivers</strong><div class="score-big">${onlineDrivers}</div><div class="tiny">Busy now: ${busyDrivers}</div></div>
+        <div class="forecast-item"><strong>Capacity signal</strong><div class="tiny ${riskClass}">${ratio > 2 ? "High dispatch pressure" : ratio > 1 ? "Watch driver load" : "Capacity looks healthy"}</div></div>
+      `;
+    }
+
+    function renderIncidentCenter() {
+      const box = $("incidentCenter");
+      if (!box) return;
+      const incidents = allBookings.filter(b =>
+        b.status === "cancelled" ||
+        b.priority === "urgent" ||
+        (b.paymentStatus !== "paid" && b.status === "completed")
+      ).slice(0, 5);
+      box.innerHTML = incidents.length ? incidents.map(b => `
+        <div class="incident-item">
+          <strong>${escapeHtml(b.passengerName || "Passenger")}</strong>
+          <div class="tiny">${escapeHtml(b.pickup || "")} → ${escapeHtml(b.destination || "")}</div>
+          <div class="tiny">${b.status === "cancelled" ? "Cancelled trip" : b.priority === "urgent" ? "Urgent priority" : "Completed but unpaid"}</div>
+        </div>
+      `).join("") : `<div class="incident-item"><strong>No active incidents</strong><div class="tiny">Operations look stable right now.</div></div>`;
+    }
+
+    function renderPayoutApprovals() {
+      const box = $("payoutApprovals");
+      if (!box) return;
+      const payouts = allDrivers.map(d => {
+        const completedPaid = allBookings.filter(b => b.assignedDriverUid === d.uid && b.status === "completed" && b.paymentStatus === "paid");
+        const total = completedPaid.reduce((sum, b) => sum + getDriverEarningsAmount(b), 0);
+        return { name: d.name || d.email || "Driver", trips: completedPaid.length, total };
+      }).filter(p => p.total > 0).sort((a,b)=>b.total-a.total).slice(0,5);
+      box.innerHTML = payouts.length ? payouts.map(p => `
+        <div class="payout-item"><strong>${escapeHtml(p.name)}</strong><div class="tiny">${p.trips} paid completed trip(s)</div><div class="tiny">Suggested payout: $${p.total.toFixed(2)}</div></div>
+      `).join("") : `<div class="payout-item"><strong>No payout approvals yet</strong><div class="tiny">Complete paid trips to populate this queue.</div></div>`;
+    }
+
+    function renderDriverScorecard() {
+      const box = $("driverScorecard");
+      if (!box || currentProfile?.role !== "driver") return;
+      const trips = allBookings.filter(b => b.assignedDriverUid === currentUser.uid);
+      const completed = trips.filter(b => b.status === "completed").length;
+      const accepted = trips.filter(b => (b.driverAcceptance || "accepted") !== "declined").length;
+      const completionRate = trips.length ? Math.round((completed / trips.length) * 100) : 0;
+      const acceptanceRate = trips.length ? Math.round((accepted / trips.length) * 100) : 0;
+      box.innerHTML = `
+        <div class="score-item"><strong>Completion rate</strong><div class="score-big">${completionRate}%</div><div class="tiny">${completed} of ${trips.length} assigned trips completed</div></div>
+        <div class="score-item"><strong>Acceptance rate</strong><div class="score-big">${acceptanceRate}%</div><div class="tiny">${accepted} accepted / active trip(s)</div></div>
+      `;
+    }
+
+    function renderDriverHandover() {
+      const box = $("driverHandover");
+      if (!box || currentProfile?.role !== "driver") return;
+      const active = getActiveDriverBooking();
+      const todayCompleted = allBookings.filter(b => b.assignedDriverUid === currentUser.uid && b.status === "completed" && (b.tripDate || "") === getTodayDateString());
+      box.innerHTML = `
+        <div class="handover-item"><strong>Current active trip</strong><div class="tiny">${active ? escapeHtml((active.pickup || "") + " → " + (active.destination || "")) : "No active trip right now"}</div></div>
+        <div class="handover-item"><strong>Today's completed trips</strong><div class="tiny">${todayCompleted.length} completed today</div></div>
+      `;
+    }
+
+    function renderRouteReliability() {
+      const box = $("routeReliability");
+      if (!box || currentProfile?.role !== "driver") return;
+      const trips = allBookings.filter(b => b.assignedDriverUid === currentUser.uid);
+      const medical = trips.filter(b => b.serviceType === "medical").length;
+      const therapy = trips.filter(b => b.serviceType === "therapy").length;
+      const urgent = trips.filter(b => b.priority === "urgent").length;
+      box.innerHTML = `
+        <div class="score-item"><strong>Service mix</strong><div class="tiny">Medical ${medical} • Therapy ${therapy} • Urgent ${urgent}</div></div>
+        <div class="score-item"><strong>Reliability note</strong><div class="tiny">${urgent > 0 ? "Keep buffer time for urgent work." : "Current route mix looks stable."}</div></div>
+      `;
+    }
+
+function renderEverything() {
       renderStats();
       renderPassengerTrips();
       renderAdminBookings();
@@ -1721,6 +1904,15 @@ function renderAdminCharts() {
       renderPassengerTrustPanel();
       renderDriverOtpPanel();
       renderDriverProofPanel();
+      renderPassengerConciergePanel();
+      renderPreferredDriverPanel();
+      renderFamilyVisibilityPanel();
+      renderCapacityForecast();
+      renderIncidentCenter();
+      renderPayoutApprovals();
+      renderDriverScorecard();
+      renderDriverHandover();
+      renderRouteReliability();
       syncDriverControls();
       if (currentProfile?.role === "passenger") {
         await renderSavedPlaces();
