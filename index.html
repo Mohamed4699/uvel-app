@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UVEL Firebase All-in-One</title>
+  <title>UVEL Level 11 All-in-One</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -206,31 +206,19 @@
     .level12-item,.timeline-item,.circle-item,.score-item,.excellence-item,.orchestration-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
 
   
+    .ui-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 0}
+    .surface-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+    .surface-tab{padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);cursor:pointer;font-weight:700;color:var(--text)}
+    .surface-tab.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#082030;border:none}
+    .section.compact{padding:18px}
+    .soft-hide{display:none!important}
+    .inline-note{font-size:13px;color:var(--muted);margin-top:8px}
+    .passenger-advanced-wrap{display:none}
+    .passenger-advanced-wrap.open{display:block}
+    .role-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .level11-shell .stats{margin-top:2px}
 
-/* ===== Level 10 upgrade layer ===== */
-.level10-upgrade-banner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
-.level10-chip{padding:8px 12px;border-radius:999px;background:rgba(73,196,213,.14);border:1px solid var(--line);font-size:12px;font-weight:800;color:#dff9ff}
-.level10-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 18px}
-.level10-tab{padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-weight:800;cursor:pointer}
-.level10-tab.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#082030;border:none}
-.level10-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-.level10-hero-copy{max-width:720px}
-.level10-compact{display:grid;gap:14px}
-.level10-hidden{display:none !important}
-.level10-inline-note{font-size:12px;color:var(--muted)}
-.level10-section-tag{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;padding:8px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);margin-bottom:10px}
-.level10-dual{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.level10-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.level10-summary .list-card{min-height:86px}
-.level10-stage-card{padding:14px;border:1px solid var(--line);border-radius:18px;background:#061826;display:grid;gap:12px}
-.level10-stage-title{font-weight:900;font-size:16px}
-.level10-steps{display:flex;gap:10px;flex-wrap:wrap}
-.level10-step{padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px;font-weight:700}
-.level10-accent{color:#7ee7f1}
-.level10-cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-@media (max-width: 1100px){.level10-dual,.level10-summary{grid-template-columns:1fr}}
-
-</style>
+  </style>
 </head>
 <body>
   <div class="container">
@@ -240,7 +228,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 10 upgraded build</div>
+            <div class="subtitle">Firebase Level 11 premium all-in-one</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -248,7 +236,6 @@
           This version uses Firebase Authentication + Firestore, so bookings created by a passenger
           appear for admin and driver across different browsers and devices.
         </p>
-        <div class="level10-upgrade-banner"><span class="level10-chip">Level 10 upgraded</span><span class="level10-chip">Cleaner dispatch flow</span><span class="level10-chip">Demo-ready UI</span></div>
         <div class="grid-3 top-gap">
           <div class="list-card">
             <div class="section-title">Live bookings</div>
@@ -317,13 +304,13 @@
       </div>
     </div>
 
-    <div id="appScreen" class="hidden">
+    <div id="appScreen" class="hidden level11-shell">
       <div class="card header">
         <div class="brand">
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 10 • cleaner dispatch • simplified rider flow • staged driver actions • stronger demo readiness</div>
+            <div class="subtitle">Level 11 • cleaner dispatch • premium role views • real-time bookings • OTP + proof flow</div>
           </div>
         </div>
         <div class="userbox">
@@ -387,6 +374,11 @@
                 <label>Notes</label>
                 <textarea id="notes" placeholder="Mobility needs, pickup instructions, support notes"></textarea>
               </div>
+              <div class="ui-toolbar">
+                <button class="btn small" id="togglePassengerAdvancedBtn" type="button">Advanced options</button>
+                <span class="inline-note">Keep the main booking flow simple. Open advanced options only when needed.</span>
+              </div>
+              <div id="passengerAdvancedFields" class="passenger-advanced-wrap">
               <div class="row top-gap">
                 <div>
                   <label>Priority</label>
@@ -483,6 +475,7 @@
                   <input type="number" id="waitMinutes" min="0" step="5" value="0" />
                 </div>
               </div>
+              </div>
               <div class="right-actions top-gap">
                 <button class="btn" id="estimateFareBtn" type="button">Estimate fare</button>
                 <button class="btn brand" id="requestRideBtn" type="submit">Request ride</button>
@@ -522,7 +515,13 @@
           </div>
         </div>
 
-        <div class="card section top-gap">
+        <div class="surface-tabs" id="passengerSurfaceTabs">
+          <button class="surface-tab active" type="button" data-passenger-tab="current">Current trip</button>
+          <button class="surface-tab" type="button" data-passenger-tab="history">Past trips</button>
+          <button class="surface-tab" type="button" data-passenger-tab="tools">Saved places</button>
+        </div>
+
+        <div class="card section top-gap" id="passengerHistoryCard">
           <div class="trip-head">
             <div>
               <div class="trip-head"><div><div class="section-title">My trips</div>
@@ -532,7 +531,7 @@
           <div id="passengerTrips" class="booking-list"></div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap" id="passengerToolsGrid">
           <div class="card section">
             <div class="section-title">Saved places</div>
             <div class="section-sub">Quickly save common pickup and destination addresses.</div>
@@ -554,7 +553,7 @@
           </div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap soft-hide" id="passengerExtraGrid">
           <div class="card section">
             <div class="section-title">Repeat ride templates</div>
             <div class="section-sub">Save a recurring ride setup for fast rebooking.</div>
@@ -582,7 +581,7 @@
           </div>
         </div>
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap soft-hide" id="passengerInsightsGrid">
           <div class="card section">
             <div class="section-title">Care circles</div>
             <div class="section-sub">A simple view of who supports the passenger journey.</div>
@@ -642,6 +641,14 @@
               <select id="driverFilter"></select>
               <button class="btn brand" id="applyFiltersBtn">Apply</button>
             </div>
+            <div class="surface-tabs" id="adminQuickTabs">
+              <button class="surface-tab active" type="button" data-status="">All</button>
+              <button class="surface-tab" type="button" data-status="pending">Pending</button>
+              <button class="surface-tab" type="button" data-status="assigned">Assigned</button>
+              <button class="surface-tab" type="button" data-status="completed">Completed</button>
+              <button class="surface-tab" type="button" data-status="cancelled">Cancelled</button>
+              <button class="surface-tab" type="button" id="toggleAdminAdvancedBtn">Advanced panels</button>
+            </div>
             <div id="adminBookings" class="booking-list"></div>
           </div>
 
@@ -653,7 +660,7 @@
           </div>
         </div>
 
-        <div class="card section top-gap">
+        <div class="card section top-gap" id="adminAnalyticsCard">
           <div class="trip-head">
             <div>
               <div class="section-title">Admin analytics</div>
@@ -670,7 +677,7 @@
           </div>
         </div>
 
-        <div class="grid-3 top-gap">
+        <div class="grid-3 top-gap" id="adminOpsGrid">
           <div class="card section">
             <div class="section-title">Dispatch board</div>
             <div class="section-sub">Priority queue, unpaid jobs, and service commitments.</div>
@@ -688,7 +695,7 @@
           </div>
         </div>
 
-        <div class="level7-grid top-gap">
+        <div class="level7-grid top-gap soft-hide" id="adminAdvancedGrid1">
           <div class="card section">
             <div class="section-title">Referral inbox</div>
             <div class="section-sub">NDIS and partner bookings awaiting action.</div>
@@ -719,7 +726,7 @@
           </div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap soft-hide" id="adminAdvancedGrid2">
           <div class="card section">
             <div class="section-title">Driver management</div>
             <div class="section-sub">Least busy driver is recommended first.</div>
@@ -732,7 +739,7 @@
           </div>
         </div>
 
-        <div class="level8-grid top-gap">
+        <div class="level8-grid top-gap soft-hide" id="adminAdvancedGrid3">
           <div class="card section">
             <div class="section-title">Kanban dispatch</div>
             <div class="section-sub">Fast view of pending, assigned, and completed jobs.</div>
@@ -750,7 +757,7 @@
           </div>
         </div>
 
-        <div class="level10-grid top-gap">
+        <div class="level10-grid top-gap soft-hide" id="adminAdvancedGrid4">
           <div class="card section">
             <div class="section-title">Level 10 command center</div>
             <div class="section-sub">High-level operations snapshot, demand pressure, and dispatch health.</div>
@@ -768,7 +775,7 @@
           </div>
         </div>
 
-        <div class="level11-grid top-gap">
+        <div class="level11-grid top-gap soft-hide" id="adminAdvancedGrid5">
           <div class="card section">
             <div class="section-title">Passenger concierge</div>
             <div class="section-sub">Helpful travel readiness view without changing your auth flow.</div>
@@ -798,7 +805,7 @@
           </div>
         </div>
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap soft-hide" id="adminAdvancedGrid6">
           <div class="card section">
             <div class="section-title">Orchestration hub</div>
             <div class="section-sub">High-level coordination layer built on the existing dispatch flow.</div>
@@ -831,7 +838,12 @@
       </div>
 
       <div id="driverView" class="hidden">
-        <div class="grid-2">
+        <div class="surface-tabs" id="driverSurfaceTabs">
+          <button class="surface-tab active" type="button" data-driver-tab="active">Active trip</button>
+          <button class="surface-tab" type="button" data-driver-tab="history">History</button>
+          <button class="surface-tab" type="button" data-driver-tab="profile">Profile</button>
+        </div>
+        <div class="grid-2" id="driverActiveGrid">
           <div class="card section">
             <div class="section-title">Assigned trips</div>
             <div class="section-sub">Driver sees only trips assigned to them.</div>
@@ -852,7 +864,7 @@
         </div>
 
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap soft-hide" id="driverProfileGrid">
           <div class="card section">
             <div class="section-title">Driver controls</div>
             <div class="section-sub">Update availability and vehicle notes without changing login flow.</div>
@@ -882,13 +894,13 @@
           </div>
         </div>
 
-        <div class="card section top-gap">
+        <div class="card section top-gap" id="driverAcceptanceCard">
           <div class="section-title">Driver acceptance board</div>
           <div class="section-sub">Accept or decline newly assigned work.</div>
           <div id="driverAcceptanceBoard" class="notice-list"></div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap" id="driverActionGrid">
           <div class="card section">
             <div class="section-title">OTP trip security</div>
             <div class="section-sub">Use one-time codes to verify pickup and drop-off.</div>
@@ -901,7 +913,7 @@
           </div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap soft-hide" id="driverHistoryGrid1">
           <div class="card section">
             <div class="section-title">Shift handover</div>
             <div class="section-sub">Driver notes for next shift or admin follow-up.</div>
@@ -914,7 +926,7 @@
           </div>
         </div>
 
-        <div class="level11-grid top-gap">
+        <div class="level11-grid top-gap soft-hide" id="driverHistoryGrid2">
           <div class="card section">
             <div class="section-title">Driver coaching</div>
             <div class="section-sub">Simple coaching view using existing trip outcomes.</div>
@@ -945,7 +957,7 @@
         </div>
 
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap soft-hide" id="driverHistoryGrid3">
           <div class="card section">
             <div class="section-title">Driver excellence</div>
             <div class="section-sub">Simple quality layer using existing trip outcomes.</div>
@@ -3230,141 +3242,5 @@ function renderAdminCharts() {
   
 
 </script>
-
-<script>
-(function(){
-  function qs(sel,root){return (root||document).querySelector(sel)}
-  function qsa(sel,root){return Array.from((root||document).querySelectorAll(sel))}
-
-  function makePassengerUpgrade(){
-    const view = qs('#passengerView');
-    if(!view || qs('#level10PassengerToggle')) return;
-    const form = qs('#bookingForm', view);
-    if(!form) return;
-    const rows = qsa(':scope > .row, :scope > .top-gap, :scope > .right-actions, :scope > .line, :scope > #farePreview', form);
-    const notesBlock = rows.find(el => el.querySelector && el.querySelector('#notes'));
-    if(!notesBlock) return;
-    let found = false;
-    const advanced = document.createElement('div');
-    advanced.id='level10PassengerAdvanced';
-    advanced.className='level10-hidden';
-    const toggleWrap = document.createElement('div');
-    toggleWrap.className='level10-cta-row';
-    toggleWrap.innerHTML = '<button type="button" class="btn" id="level10PassengerToggle">Advanced options</button><span class="level10-inline-note">Wheelchair, companion, referral, recurring, emergency, and extra stop fields.</span>';
-    notesBlock.insertAdjacentElement('afterend', toggleWrap);
-    let node = toggleWrap.nextElementSibling;
-    while(node){
-      const next = node.nextElementSibling;
-      if(node.classList.contains('right-actions') || node.id==='farePreview' || node.classList.contains('line')) break;
-      advanced.appendChild(node);
-      node = next;
-      found = true;
-    }
-    if(found) toggleWrap.insertAdjacentElement('afterend', advanced);
-    qs('#level10PassengerToggle').addEventListener('click',()=>advanced.classList.toggle('level10-hidden'));
-
-    const hideTitles = ['Trip updates','Trip readiness','Care circles','Readiness scoring','Journey confidence'];
-    qsa('.card.section', view).forEach(card=>{
-      const title = qs('.section-title', card)?.textContent?.trim();
-      if(hideTitles.includes(title)) card.classList.add('level10-hidden');
-    });
-  }
-
-  function makeAdminUpgrade(){
-    const view = qs('#adminView');
-    if(!view || qs('#level10AdminTabs')) return;
-    const leftPanel = qs('.split .card.section', view);
-    if(!leftPanel) return;
-    const toolbar = qs('.toolbar', leftPanel);
-    if(!toolbar) return;
-    const tabs = document.createElement('div');
-    tabs.className='level10-tabs';
-    tabs.id='level10AdminTabs';
-    tabs.innerHTML = [
-      ['','All'],['pending','Pending'],['assigned','Assigned'],['completed','Completed'],['cancelled','Cancelled']
-    ].map(([v,l],i)=>`<button type="button" class="level10-tab ${v==='pending'?'active':''}" data-status="${v}">${l}</button>`).join('');
-    toolbar.insertAdjacentElement('beforebegin', tabs);
-    const statusFilter = qs('#statusFilter');
-    if(statusFilter){
-      statusFilter.value='pending';
-      statusFilter.dispatchEvent(new Event('change',{bubbles:true}));
-    }
-    tabs.addEventListener('click',e=>{
-      const btn = e.target.closest('.level10-tab');
-      if(!btn) return;
-      qsa('.level10-tab', tabs).forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      if(statusFilter){statusFilter.value=btn.dataset.status; statusFilter.dispatchEvent(new Event('change',{bubbles:true}));}
-    });
-
-    const keepTitles = new Set(['Dispatch board','Fleet health','Incident hub','Active route map','Operations control','Admin analytics']);
-    qsa('#adminView > .card.section, #adminView > .grid-3.top-gap > .card.section, #adminView > .level7-grid.top-gap > .card.section, #adminView > .grid-2.top-gap > .card.section, #adminView > .level8-grid.top-gap > .card.section, #adminView > .level10-grid.top-gap > .card.section, #adminView > .level11-grid.top-gap > .card.section, #adminView > .level12-grid.top-gap > .card.section').forEach(card=>{
-      const title = qs('.section-title', card)?.textContent?.trim();
-      if(title && !keepTitles.has(title)) card.classList.add('level10-hidden');
-    });
-    const analytics = qsa('#adminView > .card.section.top-gap', view)[0];
-    if(analytics){
-      const title = qs('.section-title', analytics)?.textContent?.trim();
-      if(title !== 'Admin analytics') analytics.classList.add('level10-hidden');
-    }
-  }
-
-  function makeDriverUpgrade(){
-    const view = qs('#driverView');
-    if(!view || qs('#level10DriverTabs')) return;
-    const sections = qsa(':scope > .grid-2, :scope > .card.section.top-gap, :scope > .level11-grid.top-gap, :scope > .level12-grid.top-gap', view);
-    const firstGrid = sections[0];
-    if(!firstGrid) return;
-    const tabs = document.createElement('div');
-    tabs.id='level10DriverTabs';
-    tabs.className='level10-tabs';
-    tabs.innerHTML='<button type="button" class="level10-tab active" data-tab="active">Active trip</button><button type="button" class="level10-tab" data-tab="history">History</button><button type="button" class="level10-tab" data-tab="profile">Profile</button>';
-    firstGrid.insertAdjacentElement('beforebegin', tabs);
-
-    const controlsCard = qsa('.card.section', view).find(c=>qs('.section-title', c)?.textContent?.trim()==='Driver controls');
-    const notificationsCard = qsa('.card.section', view).find(c=>qs('.section-title', c)?.textContent?.trim()==='Driver notifications');
-    const acceptanceCard = qsa('.card.section', view).find(c=>qs('.section-title', c)?.textContent?.trim()==='Driver acceptance board');
-    const otpCard = qsa('.card.section', view).find(c=>qs('.section-title', c)?.textContent?.trim()==='OTP trip security');
-    const proofCard = qsa('.card.section', view).find(c=>qs('.section-title', c)?.textContent?.trim()==='Proof of completion');
-    const shiftCard = qsa('.card.section', view).find(c=>qs('.section-title', c)?.textContent?.trim()==='Shift handover');
-    const reliabilityCard = qsa('.card.section', view).find(c=>qs('.section-title', c)?.textContent?.trim()==='Route reliability');
-
-    function show(tab){
-      const showActive = [acceptanceCard, otpCard, proofCard, notificationsCard, reliabilityCard];
-      const showHistory = [shiftCard, reliabilityCard];
-      const showProfile = [controlsCard, notificationsCard];
-      [controlsCard, notificationsCard, acceptanceCard, otpCard, proofCard, shiftCard, reliabilityCard].forEach(c=>c && c.classList.add('level10-hidden'));
-      (tab==='active'?showActive:tab==='history'?showHistory:showProfile).forEach(c=>c && c.classList.remove('level10-hidden'));
-      qsa('.level10-tab', tabs).forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
-    }
-    tabs.addEventListener('click',e=>{ const btn=e.target.closest('.level10-tab'); if(btn) show(btn.dataset.tab); });
-    show('active');
-
-    const heavyTitles = ['Driver coaching','Family live view','Operations intelligence','Driver excellence','Shift readiness','Journey confidence'];
-    qsa('.card.section', view).forEach(card=>{const t=qs('.section-title', card)?.textContent?.trim(); if(heavyTitles.includes(t)) card.classList.add('level10-hidden');});
-  }
-
-  function renameTitles(){
-    const map = new Map([
-      ['Passenger booking','Book a ride'],
-      ['Live route map','Current trip map'],
-      ['My trips','Trip history'],
-      ['Operations control','Dispatch center'],
-      ['Assigned trips','Active trip'],
-      ['Driver map','Navigation']
-    ]);
-    qsa('.section-title').forEach(el=>{const t=el.textContent.trim(); if(map.has(t)) el.textContent=map.get(t);});
-  }
-
-  function init(){
-    renameTitles();
-    makePassengerUpgrade();
-    makeAdminUpgrade();
-    makeDriverUpgrade();
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
-})();
-</script>
-
 </body>
 </html>
