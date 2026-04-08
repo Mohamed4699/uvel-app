@@ -132,7 +132,7 @@
     .meta .item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
     .tiny{font-size:12px;color:var(--muted)}
     .toolbar{display:grid;grid-template-columns:1.2fr .7fr .7fr .6fr;gap:12px;margin:14px 0}
-    .map{height:260px;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
+    .map{height:340px;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
     .split{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}
     .line{height:1px;background:var(--line);margin:14px 0}
     .right-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
@@ -204,8 +204,6 @@
 
     .level12-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
     .level12-item,.timeline-item,.circle-item,.score-item,.excellence-item,.orchestration-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
-
-    .compact-hidden{display:none !important}
 
   </style>
 </head>
@@ -558,7 +556,7 @@
           </div>
         </div>
 
-        <div class="level12-grid top-gap compact-hidden">
+        <div class="level12-grid top-gap">
           <div class="card section">
             <div class="section-title">Care circles</div>
             <div class="section-sub">A simple view of who supports the passenger journey.</div>
@@ -744,7 +742,7 @@
           </div>
         </div>
 
-        <div class="level11-grid top-gap compact-hidden">
+        <div class="level11-grid top-gap">
           <div class="card section">
             <div class="section-title">Passenger concierge</div>
             <div class="section-sub">Helpful travel readiness view without changing your auth flow.</div>
@@ -774,7 +772,7 @@
           </div>
         </div>
 
-        <div class="level12-grid top-gap compact-hidden">
+        <div class="level12-grid top-gap">
           <div class="card section">
             <div class="section-title">Orchestration hub</div>
             <div class="section-sub">High-level coordination layer built on the existing dispatch flow.</div>
@@ -890,7 +888,7 @@
           </div>
         </div>
 
-        <div class="level11-grid top-gap compact-hidden">
+        <div class="level11-grid top-gap">
           <div class="card section">
             <div class="section-title">Driver coaching</div>
             <div class="section-sub">Simple coaching view using existing trip outcomes.</div>
@@ -921,7 +919,7 @@
         </div>
 
 
-        <div class="level12-grid top-gap compact-hidden">
+        <div class="level12-grid top-gap">
           <div class="card section">
             <div class="section-title">Driver excellence</div>
             <div class="section-sub">Simple quality layer using existing trip outcomes.</div>
@@ -1696,120 +1694,106 @@ if (!user) {
     $("bookingForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       if (isEstimateAction) return;
+      const pickup = $("pickup").value.trim();
+      const destination = $("destination").value.trim();
+      const passengerName = $("passengerName").value.trim();
+      const rideType = $("rideType").value;
+      const tripDate = $("tripDate").value;
+      const tripTime = $("tripTime").value;
+      const notes = $("notes").value.trim();
+      const priority = $("bookingPriority")?.value || "standard";
+      const wheelchairRequired = $("wheelchairRequired")?.value || "no";
+      const companionRequired = $("companionRequired")?.value || "no";
+      const returnTrip = $("returnTrip")?.value || "no";
+      const returnTime = $("returnTime")?.value || "";
+      const referralSource = $("referralSource")?.value || "self";
+      const recurringPattern = $("recurringPattern")?.value || "once";
+      const referralEmail = $("referralEmail")?.value.trim() || "";
+      const pickupWindow = $("pickupWindow")?.value || "exact";
+      const serviceType = $("serviceType")?.value || "medical";
+      const emergencyContact = $("emergencyContact")?.value.trim() || "";
+      const extraStop = $("extraStop")?.value.trim() || "";
+      const waitMinutes = Number($("waitMinutes")?.value || 0);
 
-      try {
-        const pickup = $("pickup").value.trim();
-        const destination = $("destination").value.trim();
-        const passengerName = $("passengerName").value.trim();
-        const rideType = $("rideType").value;
-        const tripDate = $("tripDate").value;
-        const tripTime = $("tripTime").value;
-        const notes = $("notes").value.trim();
-        const priority = $("bookingPriority")?.value || "standard";
-        const wheelchairRequired = $("wheelchairRequired")?.value || "no";
-        const companionRequired = $("companionRequired")?.value || "no";
-        const returnTrip = $("returnTrip")?.value || "no";
-        const returnTime = $("returnTime")?.value || "";
-        const referralSource = $("referralSource")?.value || "self";
-        const recurringPattern = $("recurringPattern")?.value || "once";
-        const referralEmail = $("referralEmail")?.value.trim() || "";
-        const pickupWindow = $("pickupWindow")?.value || "exact";
-        const serviceType = $("serviceType")?.value || "medical";
-        const emergencyContact = $("emergencyContact")?.value.trim() || "";
-        const extraStop = $("extraStop")?.value.trim() || "";
-        const waitMinutes = Number($("waitMinutes")?.value || 0);
-        const safePassengerEmail = String(currentProfile?.email || currentUser?.email || "").trim();
-
-        if (!pickup || !destination || !tripDate || !tripTime || !passengerName) {
-          return alert("Please fill all required booking fields.");
-        }
-
-        if (!safePassengerEmail) {
-          return alert("Your profile email is missing. Please sign out and sign in again.");
-        }
-
-        let pickupCoords = await geocodeAddress(pickup);
-        let destinationCoords = await geocodeAddress(destination);
-        if (!pickupCoords) pickupCoords = { lat: -33.9200, lon: 150.9300 };
-        if (!destinationCoords) destinationCoords = { lat: -33.8688, lon: 151.2093 };
-
-        let km = await estimateDistanceKm(pickup, destination);
-        if (!km) {
-          km = rideType === "ndis" ? 18 : 15;
-        }
-
-        const fare = computeLevel8FareAdjustments(calculateFare(km, rideType));
-
-        const bookingRef = await addDoc(collection(db, "bookings"), {
-          paymentStatus: "unpaid",
-          passengerUid: currentUser.uid,
-          passengerName,
-          passengerEmail: safePassengerEmail,
-          rideType,
-          pickup,
-          destination,
-          pickupCoords,
-          destinationCoords,
-          tripDate,
-          tripTime,
-          notes,
-          distanceKm: Number(km.toFixed(1)),
-          fare: Number(fare.toFixed(2)),
-          paymentMethod: rideType === "ndis" ? "Invoice / Referral" : "Card / Direct",
-          priority,
-          wheelchairRequired,
-          companionRequired,
-          returnTrip,
-          returnTime,
-          referralSource,
-          recurringPattern,
-          referralEmail,
-          pickupWindow,
-          serviceType,
-          emergencyContact,
-          extraStop,
-          waitMinutes,
-          pickupOtp: generateOtpCode(),
-          dropoffOtp: generateOtpCode(),
-          pickupOtpVerified: false,
-          dropoffOtpVerified: false,
-          completionProofNote: "",
-          completionProofLink: "",
-          acceptanceStatus: "pending_driver",
-          bookingCode: bookingCode(),
-          status: "pending",
-          driverStage: "waiting",
-          assignedDriverUid: null,
-          assignedDriverName: null,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-
-        console.log("Booking created:", bookingRef.id);
-
-        $("bookingForm").reset();
-        $("passengerName").value = currentProfile?.name || "";
-        if ($("bookingPriority")) $("bookingPriority").value = "standard";
-        if ($("wheelchairRequired")) $("wheelchairRequired").value = "no";
-        if ($("companionRequired")) $("companionRequired").value = "no";
-        if ($("returnTrip")) $("returnTrip").value = "no";
-        if ($("returnTime")) $("returnTime").value = "";
-        if ($("referralSource")) $("referralSource").value = "self";
-        if ($("recurringPattern")) $("recurringPattern").value = "once";
-        if ($("referralEmail")) $("referralEmail").value = "";
-        if ($("pickupWindow")) $("pickupWindow").value = "exact";
-        $("farePreview").textContent = "Estimated fare: -- • Distance: -- • Payment: --";
-        $("passengerStatusLabel").textContent = "pending";
-        $("passengerStageLabel").textContent = "waiting";
-        $("passengerEtaLabel").textContent = "--";
-        $("passengerKmLabel").textContent = `${Number(km).toFixed(1)} km`;
-        updatePaymentButton();
-        alert("Ride request sent. Admin can now see it in another browser.");
-      } catch (err) {
-        console.error("Booking create failed:", err);
-        const msg = err?.code || err?.message || "Unknown error";
-        alert("Booking failed: " + msg);
+      if (!pickup || !destination || !tripDate || !tripTime) {
+        return alert("Please fill all required booking fields.");
       }
+
+      let pickupCoords = await geocodeAddress(pickup);
+      let destinationCoords = await geocodeAddress(destination);
+      if (!pickupCoords) pickupCoords = { lat: -33.9200, lon: 150.9300 };
+      if (!destinationCoords) destinationCoords = { lat: -33.8688, lon: 151.2093 };
+
+      let km = await estimateDistanceKm(pickup, destination);
+      if (!km) {
+        km = rideType === "ndis" ? 18 : 15;
+      }
+
+      const fare = computeLevel8FareAdjustments(calculateFare(km, rideType));
+
+      await addDoc(collection(db, "bookings"), {
+      paymentStatus: "unpaid",
+        passengerUid: currentUser.uid,
+        passengerName,
+        passengerEmail: currentProfile.email,
+        rideType,
+        pickup,
+        destination,
+        pickupCoords,
+        destinationCoords,
+        tripDate,
+        tripTime,
+        notes,
+        distanceKm: Number(km.toFixed(1)),
+        fare: Number(fare.toFixed(2)),
+        paymentMethod: rideType === "ndis" ? "Invoice / Referral" : "Card / Direct",
+        priority,
+        wheelchairRequired,
+        companionRequired,
+        returnTrip,
+        returnTime,
+        referralSource,
+        recurringPattern,
+        referralEmail,
+        pickupWindow,
+        serviceType,
+        emergencyContact,
+        extraStop,
+        waitMinutes,
+        pickupOtp: generateOtpCode(),
+        dropoffOtp: generateOtpCode(),
+        pickupOtpVerified: false,
+        dropoffOtpVerified: false,
+        completionProofNote: "",
+        completionProofLink: "",
+        acceptanceStatus: "pending_driver",
+        bookingCode: bookingCode(),
+        status: "pending",
+        driverStage: "waiting",
+        assignedDriverUid: null,
+        assignedDriverName: null,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      $("bookingForm").reset();
+      $("passengerName").value = currentProfile.name || "";
+      if ($("bookingPriority")) $("bookingPriority").value = "standard";
+      if ($("wheelchairRequired")) $("wheelchairRequired").value = "no";
+      if ($("companionRequired")) $("companionRequired").value = "no";
+      if ($("returnTrip")) $("returnTrip").value = "no";
+      if ($("returnTime")) $("returnTime").value = "";
+      if ($("referralSource")) $("referralSource").value = "self";
+      if ($("recurringPattern")) $("recurringPattern").value = "once";
+      if ($("referralEmail")) $("referralEmail").value = "";
+      if ($("pickupWindow")) $("pickupWindow").value = "exact";
+      $("farePreview").textContent = "Estimated fare: -- • Distance: -- • Payment: --";
+      $("passengerStatusLabel").textContent = "pending";
+      $("passengerStageLabel").textContent = "waiting";
+      $("passengerEtaLabel").textContent = "--";
+      $("passengerKmLabel").textContent = `${Number(km).toFixed(1)} km`;
+      updatePaymentButton();
+      alert("Ride request sent. Admin can now see it in another browser.");
     });
 
     function subscribeUsers() {
@@ -3220,5 +3204,253 @@ function renderAdminCharts() {
   
 
 </script>
+
+<style>
+  body.level9 .subtitle{max-width:720px}
+  body.level9 .stats{margin-bottom:20px}
+  body.level9 .l9-hidden{display:none !important}
+  body.level9 .l9-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  body.level9 .l9-tab{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);padding:10px 14px;border-radius:14px;font-weight:700;cursor:pointer}
+  body.level9 .l9-tab.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#082030;border:none}
+  body.level9 .l9-header-note{color:var(--muted);font-size:13px;margin-top:6px}
+  body.level9 .l9-advanced-toggle{margin-top:14px}
+  body.level9 .l9-advanced-wrap{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  body.level9 .l9-passenger-current{margin-top:18px}
+  body.level9 .l9-passenger-current .section-title,
+  body.level9 .l9-driver-active .section-title,
+  body.level9 .l9-admin-dispatch .section-title{font-size:22px}
+  body.level9 .l9-side-note{font-size:12px;color:var(--muted)}
+  body.level9 .l9-admin-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+  body.level9 .l9-driver-tabs-wrap,.l9-admin-tabs-wrap{margin-bottom:16px}
+  body.level9 .l9-history-list{display:grid;gap:12px}
+  body.level9 .l9-slim-card{padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03)}
+  body.level9 .l9-slim-card .tiny{margin-bottom:6px}
+  body.level9 .l9-driver-history, body.level9 .l9-driver-profile, body.level9 .l9-driver-active,
+  body.level9 .l9-admin-main, body.level9 .l9-admin-ops{display:none}
+  body.level9 .l9-show{display:block}
+  body.level9 .l9-driver-profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  body.level9 .l9-inline-actions{display:flex;gap:8px;flex-wrap:wrap}
+  body.level9 .l9-badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  body.level9 .l9-admin-secondary{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+  body.level9 .l9-booking-focus{margin-top:18px}
+  body.level9 .l9-collapsed{display:none !important}
+  body.level9 .l9-driver-map-card .map{height:420px}
+  @media (max-width: 1100px){
+    body.level9 .l9-admin-grid, body.level9 .l9-driver-profile-grid, body.level9 .l9-admin-secondary{grid-template-columns:1fr}
+  }
+</style>
+<script>
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  function qs(sel,root=document){ return root.querySelector(sel); }
+  function qsa(sel,root=document){ return Array.from(root.querySelectorAll(sel)); }
+  function role(){
+    const txt = byId('whoAmI')?.textContent?.toLowerCase() || '';
+    if (txt.includes('admin')) return 'admin';
+    if (txt.includes('driver')) return 'driver';
+    if (txt.includes('passenger')) return 'passenger';
+    return '';
+  }
+  function ensureLevel9Branding(){
+    document.body.classList.add('level9');
+    qsa('.subtitle').forEach(el=>{
+      if(el.textContent.includes('Level 12')) el.textContent = 'Level 9 • clean dispatch • simple passenger flow • focused driver workflow';
+    });
+    const hero = qs('#authScreen .hero p');
+    if(hero) hero.textContent = 'Clean Level 9 all-in-one build using Firebase Authentication + Firestore with a simpler dispatch-first experience.';
+  }
+  function wrapPassengerAdvanced(){
+    const form = byId('bookingForm');
+    if(!form || byId('l9PassengerAdvancedWrap')) return;
+    const ids = ['bookingPriority','returnTrip','wheelchairRequired','companionRequired','returnTime','referralSource','recurringPattern','referralEmail','pickupWindow','serviceType','emergencyContact','extraStop','waitMinutes'];
+    const sections=[];
+    ids.forEach(id=>{
+      const el = byId(id);
+      if(!el) return;
+      let box = el.closest('.row') || el.closest('.top-gap') || el.parentElement;
+      if(box && !sections.includes(box)) sections.push(box);
+    });
+    if(!sections.length) return;
+    const line = qs('#bookingForm .line');
+    const wrap = document.createElement('div');
+    wrap.id='l9PassengerAdvancedWrap';
+    wrap.className='l9-advanced-wrap l9-collapsed';
+    sections.forEach(s=> wrap.appendChild(s));
+    const btn = document.createElement('button');
+    btn.type='button';
+    btn.className='btn l9-advanced-toggle';
+    btn.textContent='Advanced options';
+    btn.onclick=()=>{
+      wrap.classList.toggle('l9-collapsed');
+      btn.textContent = wrap.classList.contains('l9-collapsed') ? 'Advanced options' : 'Hide advanced options';
+    };
+    line?.before(btn);
+    line?.before(wrap);
+  }
+  function simplifyPassenger(){
+    if(role()!=='passenger') return;
+    wrapPassengerAdvanced();
+    const hide = [
+      '#passengerView > .grid-2.top-gap:nth-of-type(3)',
+      '#passengerView > .grid-2.top-gap:nth-of-type(4)',
+      '#passengerView > .level12-grid'
+    ];
+    hide.forEach(sel=> qsa(sel).forEach(el=> el.classList.add('l9-hidden')));
+    const cards = qsa('#passengerTrips .book-card');
+    if(cards.length>1){ cards.slice(1).forEach(c=> c.classList.add('l9-hidden')); }
+    const tripSection = byId('passengerTrips')?.closest('.card.section');
+    if(tripSection){
+      const title = qs('.section-title', tripSection); if(title) title.textContent='Current trip';
+      const sub = qs('.section-sub', tripSection); if(sub) sub.textContent='Track your live booking and manage one active ride.';
+      const seg = qs('.seg', tripSection); if(seg){
+        const rebook = byId('rebookLatestBtn');
+        if(rebook) rebook.textContent='Past trips';
+        rebook && (rebook.onclick = ()=>{
+          const past = qsa('#passengerTrips .book-card');
+          past.forEach((c,i)=>{ if(i>0) c.classList.toggle('l9-hidden'); });
+        });
+      }
+    }
+    const savedPlacesCard = byId('savedPlacesList')?.closest('.card.section');
+    savedPlacesCard?.classList.add('l9-hidden');
+    const tripUpdatesCard = byId('passengerNotifications')?.closest('.card.section');
+    tripUpdatesCard?.classList.add('l9-hidden');
+    const templatesCard = byId('rideTemplatesList')?.closest('.card.section');
+    templatesCard?.classList.add('l9-hidden');
+    const readinessCard = byId('passengerReadiness')?.closest('.card.section');
+    readinessCard?.classList.add('l9-hidden');
+  }
+  function createAdminTabs(){
+    const ops = byId('adminBookings')?.closest('.card.section');
+    if(!ops || byId('l9AdminTabs')) return;
+    const wrap=document.createElement('div');
+    wrap.id='l9AdminTabs'; wrap.className='l9-tabs l9-admin-tabs-wrap';
+    const statuses=[['pending','Pending'],['assigned','Assigned'],['completed','Completed'],['cancelled','Cancelled']];
+    statuses.forEach(([value,label],idx)=>{
+      const b=document.createElement('button');
+      b.type='button'; b.className='l9-tab'+(idx===0?' active':''); b.textContent=label;
+      b.onclick=()=>{
+        qsa('#l9AdminTabs .l9-tab').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+        const s=byId('statusFilter'); if(s){ s.value=value; s.dispatchEvent(new Event('change',{bubbles:true})); }
+        const apply=byId('applyFiltersBtn'); apply && apply.click();
+      };
+      wrap.appendChild(b);
+    });
+    const sub=qs('.section-sub', ops); sub?.after(wrap);
+    const status=byId('statusFilter'); if(status && !status.value){ status.value='pending'; status.dispatchEvent(new Event('change',{bubbles:true})); }
+  }
+  function simplifyAdmin(){
+    if(role()!=='admin') return;
+    createAdminTabs();
+    const keepIds = new Set(['adminBookings','adminMap','dispatchBoard','fleetHealth','incidentHub']);
+    const hideById=[
+      'revenueChart','paymentChart','serviceAlerts','auditLog','referralInbox','slaSummary','driverManagement',
+      'passengerManagement','kanbanDispatch','financeQueue','passengerTrustPanel','commandCenterPanel',
+      'payoutApprovals','serviceWindowMinsInput','urgentThresholdMinsInput'
+    ];
+    hideById.forEach(id=> byId(id)?.closest('.card.section, .grid-2, .grid-3, .level7-grid, .level8-grid, .level10-grid, .level11-grid, .level12-grid')?.classList.add('l9-hidden'));
+    qsa('#adminView .level11-grid, #adminView .level12-grid').forEach(el=>el.classList.add('l9-hidden'));
+    // keep fleet health + incident hub + dispatch board by unhiding exact cards
+    [byId('dispatchBoard'), byId('fleetHealth'), byId('incidentHub')].forEach(el=>{
+      const card=el?.closest('.card.section'); card && card.classList.remove('l9-hidden');
+    });
+    // rebuild visible secondary row
+    let sec = byId('l9AdminSecondary');
+    if(!sec){
+      sec=document.createElement('div'); sec.id='l9AdminSecondary'; sec.className='l9-admin-secondary';
+      byId('adminView').appendChild(sec);
+    }
+    sec.innerHTML='';
+    [byId('dispatchBoard'), byId('fleetHealth'), byId('incidentHub')].forEach(el=>{
+      const card=el?.closest('.card.section'); if(card) sec.appendChild(card);
+    });
+    const ops = byId('adminBookings')?.closest('.card.section');
+    if(ops){
+      const t=qs('.section-title',ops); if(t) t.textContent='Dispatch board';
+      const s=qs('.section-sub',ops); if(s) s.textContent='Focus on one booking state at a time and assign drivers fast.';
+    }
+  }
+  function buildDriverTabs(){
+    const view=byId('driverView');
+    if(!view || byId('l9DriverTabs')) return;
+    const tabs=document.createElement('div');
+    tabs.id='l9DriverTabs'; tabs.className='l9-tabs l9-driver-tabs-wrap';
+    const names=[['active','Active trip'],['history','History'],['profile','Profile']];
+    names.forEach(([key,label],idx)=>{
+      const b=document.createElement('button');
+      b.type='button'; b.className='l9-tab'+(idx===0?' active':''); b.textContent=label;
+      b.onclick=()=>setDriverTab(key,b);
+      tabs.appendChild(b);
+    });
+    view.prepend(tabs);
+  }
+  function setDriverTab(key,btn){
+    qsa('#l9DriverTabs .l9-tab').forEach(x=>x.classList.remove('active')); btn?.classList.add('active');
+    ['l9DriverActiveWrap','l9DriverHistoryWrap','l9DriverProfileWrap'].forEach(id=> byId(id)?.classList.remove('l9-show'));
+    const map={active:'l9DriverActiveWrap',history:'l9DriverHistoryWrap',profile:'l9DriverProfileWrap'};
+    byId(map[key])?.classList.add('l9-show');
+  }
+  function simplifyDriver(){
+    if(role()!=='driver') return;
+    buildDriverTabs();
+    const view=byId('driverView');
+    const firstGrid = qsa('#driverView > .grid-2')[0];
+    const controlsGrid = qsa('#driverView > .grid-2.top-gap')[0];
+    if(firstGrid && !byId('l9DriverActiveWrap')){
+      const wrap=document.createElement('div'); wrap.id='l9DriverActiveWrap'; wrap.className='l9-driver-active l9-show';
+      firstGrid.parentNode.insertBefore(wrap, firstGrid); wrap.appendChild(firstGrid);
+    }
+    if(controlsGrid && !byId('l9DriverProfileWrap')){
+      const wrap=document.createElement('div'); wrap.id='l9DriverProfileWrap'; wrap.className='l9-driver-profile';
+      controlsGrid.parentNode.insertBefore(wrap, controlsGrid); wrap.appendChild(controlsGrid);
+    }
+    if(!byId('l9DriverHistoryWrap')){
+      const wrap=document.createElement('div'); wrap.id='l9DriverHistoryWrap'; wrap.className='l9-driver-history';
+      view.appendChild(wrap);
+    }
+    // hide heavy sections
+    qsa('#driverView > .card.section.top-gap, #driverView > .grid-2.top-gap, #driverView > .level11-grid.top-gap, #driverView > .level12-grid.top-gap').forEach(el=>{
+      if(!el.closest('#l9DriverProfileWrap')) el.classList.add('l9-hidden');
+    });
+    qsa('#driverView .level11-grid, #driverView .level12-grid').forEach(el=>el.classList.add('l9-hidden'));
+    // active trip cards: keep only non-completed
+    const tripsWrap=byId('driverTrips');
+    const historyWrap=byId('l9DriverHistoryWrap');
+    if(tripsWrap && historyWrap){
+      const cards=qsa('.book-card', tripsWrap);
+      historyWrap.innerHTML='<div class="card section"><div class="section-title">Trip history</div><div class="section-sub">Completed jobs and past records.</div><div id="l9DriverHistoryList" class="l9-history-list"></div></div>';
+      const list=byId('l9DriverHistoryList');
+      cards.forEach(card=>{
+        const badge=qs('.badge', card)?.textContent?.trim().toLowerCase() || '';
+        const actions=qs('.status-row', card);
+        if(actions){
+          const texts=qsa('button,a', actions).map(x=>x.textContent.trim());
+          qsa('button,a', actions).forEach(el=> el.classList.add('l9-hidden'));
+          const show = t=> qsa('button,a', actions).find(x=>x.textContent.trim()===t)?.classList.remove('l9-hidden');
+          if(texts.includes('Accept') || card.textContent.includes('pending_driver')) { show('Accept'); show('Decline'); }
+          else if((card.textContent||'').toLowerCase().includes('routing')) { show('Navigator'); show('In progress'); }
+          else if((card.textContent||'').toLowerCase().includes('in_progress')) { show('Navigator'); show('Mark completed'); }
+          else { show('Start'); show('Navigator'); }
+        }
+        const proof=qs('.proof-grid', card); if(proof) proof.classList.add('l9-collapsed');
+        if(badge==='completed') list.appendChild(card.cloneNode(true));
+      });
+      cards.forEach(card=>{
+        const badge=qs('.badge', card)?.textContent?.trim().toLowerCase() || '';
+        card.classList.toggle('l9-hidden', badge==='completed');
+      });
+    }
+    const notify=byId('driverNotifications')?.closest('.card.section'); notify?.classList.add('l9-hidden');
+    const acceptance=byId('driverAcceptanceBoard')?.closest('.card.section'); acceptance?.classList.add('l9-hidden');
+    const otp=byId('driverOtpPanel')?.closest('.card.section'); otp?.classList.add('l9-hidden');
+    const proof=byId('driverProofPanel')?.closest('.card.section'); proof?.classList.add('l9-hidden');
+    const handover=byId('driverShiftHandover')?.closest('.card.section'); handover?.classList.add('l9-hidden');
+    const reliability=byId('driverRouteReliability')?.closest('.card.section'); reliability?.classList.add('l9-hidden');
+  }
+  function apply(){ ensureLevel9Branding(); simplifyPassenger(); simplifyAdmin(); simplifyDriver(); }
+  document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(apply, 400); setInterval(apply, 1500); });
+})();
+</script>
+
 </body>
 </html>
