@@ -205,7 +205,23 @@
     .level12-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
     .level12-item,.timeline-item,.circle-item,.score-item,.excellence-item,.orchestration-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
 
-  </style>
+  
+/* Week 3 Level 9 simplification patch */
+.week3-hide{display:none !important}
+.week3-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+.week3-tab-btn{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);border-radius:14px;padding:10px 14px;font-weight:800;cursor:pointer}
+.week3-tab-btn.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#082030;border:none}
+.week3-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px;color:var(--muted)}
+.week3-section-note{margin:0 0 16px;padding:12px 14px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted);font-size:13px;line-height:1.5}
+.week3-advanced{margin-top:18px;padding:14px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.03)}
+.week3-advanced summary{cursor:pointer;font-weight:800;color:var(--text);margin-bottom:10px}
+.week3-kpi-compact .card.stat:nth-child(n+6){display:none}
+.week3-driver-layout{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}
+.week3-driver-stage{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03)}
+.week3-current-trip{margin-top:18px}
+@media (max-width:1100px){.week3-driver-layout{grid-template-columns:1fr}}
+
+</style>
 </head>
 <body>
   <div class="container">
@@ -3203,254 +3219,202 @@ function renderAdminCharts() {
     }
   
 
-</script>
 
-<style>
-  body.level9 .subtitle{max-width:720px}
-  body.level9 .stats{margin-bottom:20px}
-  body.level9 .l9-hidden{display:none !important}
-  body.level9 .l9-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
-  body.level9 .l9-tab{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);padding:10px 14px;border-radius:14px;font-weight:700;cursor:pointer}
-  body.level9 .l9-tab.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#082030;border:none}
-  body.level9 .l9-header-note{color:var(--muted);font-size:13px;margin-top:6px}
-  body.level9 .l9-advanced-toggle{margin-top:14px}
-  body.level9 .l9-advanced-wrap{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
-  body.level9 .l9-passenger-current{margin-top:18px}
-  body.level9 .l9-passenger-current .section-title,
-  body.level9 .l9-driver-active .section-title,
-  body.level9 .l9-admin-dispatch .section-title{font-size:22px}
-  body.level9 .l9-side-note{font-size:12px;color:var(--muted)}
-  body.level9 .l9-admin-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
-  body.level9 .l9-driver-tabs-wrap,.l9-admin-tabs-wrap{margin-bottom:16px}
-  body.level9 .l9-history-list{display:grid;gap:12px}
-  body.level9 .l9-slim-card{padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03)}
-  body.level9 .l9-slim-card .tiny{margin-bottom:6px}
-  body.level9 .l9-driver-history, body.level9 .l9-driver-profile, body.level9 .l9-driver-active,
-  body.level9 .l9-admin-main, body.level9 .l9-admin-ops{display:none}
-  body.level9 .l9-show{display:block}
-  body.level9 .l9-driver-profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  body.level9 .l9-inline-actions{display:flex;gap:8px;flex-wrap:wrap}
-  body.level9 .l9-badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  body.level9 .l9-admin-secondary{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
-  body.level9 .l9-booking-focus{margin-top:18px}
-  body.level9 .l9-collapsed{display:none !important}
-  body.level9 .l9-driver-map-card .map{height:420px}
-  @media (max-width: 1100px){
-    body.level9 .l9-admin-grid, body.level9 .l9-driver-profile-grid, body.level9 .l9-admin-secondary{grid-template-columns:1fr}
-  }
-</style>
-<script>
-(function(){
-  function byId(id){ return document.getElementById(id); }
-  function qs(sel,root=document){ return root.querySelector(sel); }
-  function qsa(sel,root=document){ return Array.from(root.querySelectorAll(sel)); }
-  function role(){
-    const txt = byId('whoAmI')?.textContent?.toLowerCase() || '';
-    if (txt.includes('admin')) return 'admin';
-    if (txt.includes('driver')) return 'driver';
-    if (txt.includes('passenger')) return 'passenger';
-    return '';
-  }
-  function ensureLevel9Branding(){
-    document.body.classList.add('level9');
-    qsa('.subtitle').forEach(el=>{
-      if(el.textContent.includes('Level 12')) el.textContent = 'Level 9 • clean dispatch • simple passenger flow • focused driver workflow';
-    });
-    const hero = qs('#authScreen .hero p');
-    if(hero) hero.textContent = 'Clean Level 9 all-in-one build using Firebase Authentication + Firestore with a simpler dispatch-first experience.';
-  }
-  function wrapPassengerAdvanced(){
-    const form = byId('bookingForm');
-    if(!form || byId('l9PassengerAdvancedWrap')) return;
-    const ids = ['bookingPriority','returnTrip','wheelchairRequired','companionRequired','returnTime','referralSource','recurringPattern','referralEmail','pickupWindow','serviceType','emergencyContact','extraStop','waitMinutes'];
-    const sections=[];
-    ids.forEach(id=>{
-      const el = byId(id);
-      if(!el) return;
-      let box = el.closest('.row') || el.closest('.top-gap') || el.parentElement;
-      if(box && !sections.includes(box)) sections.push(box);
-    });
-    if(!sections.length) return;
-    const line = qs('#bookingForm .line');
-    const wrap = document.createElement('div');
-    wrap.id='l9PassengerAdvancedWrap';
-    wrap.className='l9-advanced-wrap l9-collapsed';
-    sections.forEach(s=> wrap.appendChild(s));
-    const btn = document.createElement('button');
-    btn.type='button';
-    btn.className='btn l9-advanced-toggle';
-    btn.textContent='Advanced options';
-    btn.onclick=()=>{
-      wrap.classList.toggle('l9-collapsed');
-      btn.textContent = wrap.classList.contains('l9-collapsed') ? 'Advanced options' : 'Hide advanced options';
-    };
-    line?.before(btn);
-    line?.before(wrap);
-  }
-  function simplifyPassenger(){
-    if(role()!=='passenger') return;
-    wrapPassengerAdvanced();
-    const hide = [
-      '#passengerView > .grid-2.top-gap:nth-of-type(3)',
-      '#passengerView > .grid-2.top-gap:nth-of-type(4)',
-      '#passengerView > .level12-grid'
-    ];
-    hide.forEach(sel=> qsa(sel).forEach(el=> el.classList.add('l9-hidden')));
-    const cards = qsa('#passengerTrips .book-card');
-    if(cards.length>1){ cards.slice(1).forEach(c=> c.classList.add('l9-hidden')); }
-    const tripSection = byId('passengerTrips')?.closest('.card.section');
-    if(tripSection){
-      const title = qs('.section-title', tripSection); if(title) title.textContent='Current trip';
-      const sub = qs('.section-sub', tripSection); if(sub) sub.textContent='Track your live booking and manage one active ride.';
-      const seg = qs('.seg', tripSection); if(seg){
-        const rebook = byId('rebookLatestBtn');
-        if(rebook) rebook.textContent='Past trips';
-        rebook && (rebook.onclick = ()=>{
-          const past = qsa('#passengerTrips .book-card');
-          past.forEach((c,i)=>{ if(i>0) c.classList.toggle('l9-hidden'); });
+  </script>
+  <script>
+    (function(){
+      const ready = () => {
+        const $ = (id) => document.getElementById(id);
+        const qsa = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+        // Branding cleanup
+        qsa('.subtitle').forEach(el => {
+          const t = el.textContent || '';
+          if (t.includes('Level 12')) {
+            el.textContent = 'Week 3 • Level 9 dispatch-ready build';
+          }
         });
-      }
-    }
-    const savedPlacesCard = byId('savedPlacesList')?.closest('.card.section');
-    savedPlacesCard?.classList.add('l9-hidden');
-    const tripUpdatesCard = byId('passengerNotifications')?.closest('.card.section');
-    tripUpdatesCard?.classList.add('l9-hidden');
-    const templatesCard = byId('rideTemplatesList')?.closest('.card.section');
-    templatesCard?.classList.add('l9-hidden');
-    const readinessCard = byId('passengerReadiness')?.closest('.card.section');
-    readinessCard?.classList.add('l9-hidden');
-  }
-  function createAdminTabs(){
-    const ops = byId('adminBookings')?.closest('.card.section');
-    if(!ops || byId('l9AdminTabs')) return;
-    const wrap=document.createElement('div');
-    wrap.id='l9AdminTabs'; wrap.className='l9-tabs l9-admin-tabs-wrap';
-    const statuses=[['pending','Pending'],['assigned','Assigned'],['completed','Completed'],['cancelled','Cancelled']];
-    statuses.forEach(([value,label],idx)=>{
-      const b=document.createElement('button');
-      b.type='button'; b.className='l9-tab'+(idx===0?' active':''); b.textContent=label;
-      b.onclick=()=>{
-        qsa('#l9AdminTabs .l9-tab').forEach(x=>x.classList.remove('active')); b.classList.add('active');
-        const s=byId('statusFilter'); if(s){ s.value=value; s.dispatchEvent(new Event('change',{bubbles:true})); }
-        const apply=byId('applyFiltersBtn'); apply && apply.click();
-      };
-      wrap.appendChild(b);
-    });
-    const sub=qs('.section-sub', ops); sub?.after(wrap);
-    const status=byId('statusFilter'); if(status && !status.value){ status.value='pending'; status.dispatchEvent(new Event('change',{bubbles:true})); }
-  }
-  function simplifyAdmin(){
-    if(role()!=='admin') return;
-    createAdminTabs();
-    const keepIds = new Set(['adminBookings','adminMap','dispatchBoard','fleetHealth','incidentHub']);
-    const hideById=[
-      'revenueChart','paymentChart','serviceAlerts','auditLog','referralInbox','slaSummary','driverManagement',
-      'passengerManagement','kanbanDispatch','financeQueue','passengerTrustPanel','commandCenterPanel',
-      'payoutApprovals','serviceWindowMinsInput','urgentThresholdMinsInput'
-    ];
-    hideById.forEach(id=> byId(id)?.closest('.card.section, .grid-2, .grid-3, .level7-grid, .level8-grid, .level10-grid, .level11-grid, .level12-grid')?.classList.add('l9-hidden'));
-    qsa('#adminView .level11-grid, #adminView .level12-grid').forEach(el=>el.classList.add('l9-hidden'));
-    // keep fleet health + incident hub + dispatch board by unhiding exact cards
-    [byId('dispatchBoard'), byId('fleetHealth'), byId('incidentHub')].forEach(el=>{
-      const card=el?.closest('.card.section'); card && card.classList.remove('l9-hidden');
-    });
-    // rebuild visible secondary row
-    let sec = byId('l9AdminSecondary');
-    if(!sec){
-      sec=document.createElement('div'); sec.id='l9AdminSecondary'; sec.className='l9-admin-secondary';
-      byId('adminView').appendChild(sec);
-    }
-    sec.innerHTML='';
-    [byId('dispatchBoard'), byId('fleetHealth'), byId('incidentHub')].forEach(el=>{
-      const card=el?.closest('.card.section'); if(card) sec.appendChild(card);
-    });
-    const ops = byId('adminBookings')?.closest('.card.section');
-    if(ops){
-      const t=qs('.section-title',ops); if(t) t.textContent='Dispatch board';
-      const s=qs('.section-sub',ops); if(s) s.textContent='Focus on one booking state at a time and assign drivers fast.';
-    }
-  }
-  function buildDriverTabs(){
-    const view=byId('driverView');
-    if(!view || byId('l9DriverTabs')) return;
-    const tabs=document.createElement('div');
-    tabs.id='l9DriverTabs'; tabs.className='l9-tabs l9-driver-tabs-wrap';
-    const names=[['active','Active trip'],['history','History'],['profile','Profile']];
-    names.forEach(([key,label],idx)=>{
-      const b=document.createElement('button');
-      b.type='button'; b.className='l9-tab'+(idx===0?' active':''); b.textContent=label;
-      b.onclick=()=>setDriverTab(key,b);
-      tabs.appendChild(b);
-    });
-    view.prepend(tabs);
-  }
-  function setDriverTab(key,btn){
-    qsa('#l9DriverTabs .l9-tab').forEach(x=>x.classList.remove('active')); btn?.classList.add('active');
-    ['l9DriverActiveWrap','l9DriverHistoryWrap','l9DriverProfileWrap'].forEach(id=> byId(id)?.classList.remove('l9-show'));
-    const map={active:'l9DriverActiveWrap',history:'l9DriverHistoryWrap',profile:'l9DriverProfileWrap'};
-    byId(map[key])?.classList.add('l9-show');
-  }
-  function simplifyDriver(){
-    if(role()!=='driver') return;
-    buildDriverTabs();
-    const view=byId('driverView');
-    const firstGrid = qsa('#driverView > .grid-2')[0];
-    const controlsGrid = qsa('#driverView > .grid-2.top-gap')[0];
-    if(firstGrid && !byId('l9DriverActiveWrap')){
-      const wrap=document.createElement('div'); wrap.id='l9DriverActiveWrap'; wrap.className='l9-driver-active l9-show';
-      firstGrid.parentNode.insertBefore(wrap, firstGrid); wrap.appendChild(firstGrid);
-    }
-    if(controlsGrid && !byId('l9DriverProfileWrap')){
-      const wrap=document.createElement('div'); wrap.id='l9DriverProfileWrap'; wrap.className='l9-driver-profile';
-      controlsGrid.parentNode.insertBefore(wrap, controlsGrid); wrap.appendChild(controlsGrid);
-    }
-    if(!byId('l9DriverHistoryWrap')){
-      const wrap=document.createElement('div'); wrap.id='l9DriverHistoryWrap'; wrap.className='l9-driver-history';
-      view.appendChild(wrap);
-    }
-    // hide heavy sections
-    qsa('#driverView > .card.section.top-gap, #driverView > .grid-2.top-gap, #driverView > .level11-grid.top-gap, #driverView > .level12-grid.top-gap').forEach(el=>{
-      if(!el.closest('#l9DriverProfileWrap')) el.classList.add('l9-hidden');
-    });
-    qsa('#driverView .level11-grid, #driverView .level12-grid').forEach(el=>el.classList.add('l9-hidden'));
-    // active trip cards: keep only non-completed
-    const tripsWrap=byId('driverTrips');
-    const historyWrap=byId('l9DriverHistoryWrap');
-    if(tripsWrap && historyWrap){
-      const cards=qsa('.book-card', tripsWrap);
-      historyWrap.innerHTML='<div class="card section"><div class="section-title">Trip history</div><div class="section-sub">Completed jobs and past records.</div><div id="l9DriverHistoryList" class="l9-history-list"></div></div>';
-      const list=byId('l9DriverHistoryList');
-      cards.forEach(card=>{
-        const badge=qs('.badge', card)?.textContent?.trim().toLowerCase() || '';
-        const actions=qs('.status-row', card);
-        if(actions){
-          const texts=qsa('button,a', actions).map(x=>x.textContent.trim());
-          qsa('button,a', actions).forEach(el=> el.classList.add('l9-hidden'));
-          const show = t=> qsa('button,a', actions).find(x=>x.textContent.trim()===t)?.classList.remove('l9-hidden');
-          if(texts.includes('Accept') || card.textContent.includes('pending_driver')) { show('Accept'); show('Decline'); }
-          else if((card.textContent||'').toLowerCase().includes('routing')) { show('Navigator'); show('In progress'); }
-          else if((card.textContent||'').toLowerCase().includes('in_progress')) { show('Navigator'); show('Mark completed'); }
-          else { show('Start'); show('Navigator'); }
-        }
-        const proof=qs('.proof-grid', card); if(proof) proof.classList.add('l9-collapsed');
-        if(badge==='completed') list.appendChild(card.cloneNode(true));
-      });
-      cards.forEach(card=>{
-        const badge=qs('.badge', card)?.textContent?.trim().toLowerCase() || '';
-        card.classList.toggle('l9-hidden', badge==='completed');
-      });
-    }
-    const notify=byId('driverNotifications')?.closest('.card.section'); notify?.classList.add('l9-hidden');
-    const acceptance=byId('driverAcceptanceBoard')?.closest('.card.section'); acceptance?.classList.add('l9-hidden');
-    const otp=byId('driverOtpPanel')?.closest('.card.section'); otp?.classList.add('l9-hidden');
-    const proof=byId('driverProofPanel')?.closest('.card.section'); proof?.classList.add('l9-hidden');
-    const handover=byId('driverShiftHandover')?.closest('.card.section'); handover?.classList.add('l9-hidden');
-    const reliability=byId('driverRouteReliability')?.closest('.card.section'); reliability?.classList.add('l9-hidden');
-  }
-  function apply(){ ensureLevel9Branding(); simplifyPassenger(); simplifyAdmin(); simplifyDriver(); }
-  document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(apply, 400); setInterval(apply, 1500); });
-})();
-</script>
 
+        // Keep auth flow unchanged but simplify visible product language
+        const heroSubtitle = qsa('.subtitle').find(el => (el.textContent||'').includes('Week 3'));
+        if (heroSubtitle) heroSubtitle.textContent = 'Week 3 • Level 9 dispatch-ready build';
+
+        // Compact stats bar
+        const statsBar = $('statsBar');
+        if (statsBar) statsBar.classList.add('week3-kpi-compact');
+
+        // Hide heavy sections by title text
+        const hideTitles = new Set([
+          'Trip updates','Trip readiness','Care circles','Readiness scoring','Journey confidence',
+          'Referral inbox','SLA controls','Driver management','Passenger management','Finance reconciliation',
+          'Passenger trust panel','Level 10 command center','Payout approvals','Passenger concierge',
+          'Predictive demand','Compliance vault','Orchestration hub','Compliance timeline',
+          'Driver notifications','Shift handover','Route reliability','Driver coaching','Family live view',
+          'Operations intelligence','Driver excellence','Shift readiness'
+        ]);
+
+        qsa('.card.section').forEach(card => {
+          const title = card.querySelector('.section-title');
+          if (title && hideTitles.has((title.textContent||'').trim())) {
+            card.classList.add('week3-hide');
+          }
+        });
+
+        // Passenger advanced options collapse
+        const bookingForm = $('bookingForm');
+        if (bookingForm && !bookingForm.dataset.week3Patched) {
+          bookingForm.dataset.week3Patched = '1';
+          const children = Array.from(bookingForm.children);
+          const notes = bookingForm.querySelector('#notes')?.closest('.top-gap') || bookingForm.querySelector('#notes')?.parentElement;
+          const rightActions = bookingForm.querySelector('.right-actions');
+          if (notes && rightActions) {
+            let collect = false;
+            const advancedWrap = document.createElement('details');
+            advancedWrap.className = 'week3-advanced';
+            advancedWrap.open = false;
+            advancedWrap.innerHTML = '<summary>Advanced options</summary><div class="week3-advanced-body"></div>';
+            const advancedBody = advancedWrap.querySelector('.week3-advanced-body');
+
+            children.forEach(node => {
+              if (node === notes.nextElementSibling) collect = true;
+            });
+
+            let cursor = notes.nextElementSibling;
+            const toMove = [];
+            while (cursor && cursor !== rightActions) {
+              const next = cursor.nextElementSibling;
+              toMove.push(cursor);
+              cursor = next;
+            }
+            toMove.forEach(node => advancedBody.appendChild(node));
+            bookingForm.insertBefore(advancedWrap, rightActions);
+          }
+        }
+
+        // Passenger current trip note
+        const passengerTripsCard = $('passengerTrips')?.closest('.card.section');
+        if (passengerTripsCard && !$('week3PassengerNote')) {
+          const note = document.createElement('div');
+          note.id = 'week3PassengerNote';
+          note.className = 'week3-section-note';
+          note.textContent = 'Week 3 focus: one active trip, one clear booking flow, and a simpler rider experience.';
+          passengerTripsCard.insertBefore(note, passengerTripsCard.querySelector('#passengerTrips'));
+        }
+
+        // Admin tabs and filtering
+        const adminBookings = $('adminBookings');
+        const adminControl = adminBookings?.closest('.card.section');
+        if (adminBookings && adminControl && !$('week3AdminTabs')) {
+          const tabs = document.createElement('div');
+          tabs.id = 'week3AdminTabs';
+          tabs.className = 'week3-tabs';
+          tabs.innerHTML = `
+            <button class="week3-tab-btn active" data-status="pending">Pending</button>
+            <button class="week3-tab-btn" data-status="assigned">Assigned</button>
+            <button class="week3-tab-btn" data-status="completed">Completed</button>
+            <button class="week3-tab-btn" data-status="cancelled">Cancelled</button>
+          `;
+          const note = document.createElement('div');
+          note.className = 'week3-section-note';
+          note.textContent = 'Dispatch-first view: the main board now defaults to pending work so new requests are easier to act on.';
+          adminControl.insertBefore(note, adminControl.querySelector('.toolbar'));
+          adminControl.insertBefore(tabs, adminControl.querySelector('.toolbar'));
+          adminControl.dataset.week3Status = 'pending';
+
+          tabs.addEventListener('click', e => {
+            const btn = e.target.closest('.week3-tab-btn');
+            if (!btn) return;
+            adminControl.dataset.week3Status = btn.dataset.status;
+            qsa('.week3-tab-btn', tabs).forEach(b => b.classList.toggle('active', b === btn));
+            applyAdminCardFilter();
+          });
+
+          const observer = new MutationObserver(() => applyAdminCardFilter());
+          observer.observe(adminBookings, {childList:true, subtree:false});
+        }
+
+        function detectStatus(text) {
+          const t = (text || '').toLowerCase();
+          if (t.includes('cancelled')) return 'cancelled';
+          if (t.includes('completed')) return 'completed';
+          if (t.includes('in_progress') || t.includes('in progress')) return 'assigned';
+          if (t.includes('assigned')) return 'assigned';
+          return 'pending';
+        }
+
+        function applyAdminCardFilter() {
+          if (!adminBookings || !adminControl) return;
+          const wanted = adminControl.dataset.week3Status || 'pending';
+          Array.from(adminBookings.children).forEach(card => {
+            const status = detectStatus(card.textContent);
+            card.style.display = status === wanted ? '' : 'none';
+          });
+        }
+        applyAdminCardFilter();
+
+        // Driver tabs
+        const driverView = $('driverView');
+        if (driverView && !$('week3DriverTabs')) {
+          const topCards = qsa(':scope > .grid-2, :scope > .card.section, :scope > .grid-2.top-gap, :scope > .level11-grid.top-gap, :scope > .level12-grid.top-gap', driverView);
+          const tabs = document.createElement('div');
+          tabs.id = 'week3DriverTabs';
+          tabs.className = 'week3-tabs';
+          tabs.innerHTML = `
+            <button class="week3-tab-btn active" data-tab="active">Active Trip</button>
+            <button class="week3-tab-btn" data-tab="history">History</button>
+            <button class="week3-tab-btn" data-tab="profile">Profile</button>
+          `;
+          driverView.insertBefore(tabs, driverView.firstChild);
+
+          const groups = {active: [], history: [], profile: []};
+          // classify sections
+          qsa(':scope > *', driverView).forEach(node => {
+            if (node.id === 'week3DriverTabs') return;
+            const title = node.querySelector?.('.section-title')?.textContent?.trim() || '';
+            if (!title && node.classList.contains('grid-2')) {
+              const titles = qsa('.section-title', node).map(n => n.textContent.trim());
+              if (titles.includes('Assigned trips') || titles.includes('Driver map') || titles.includes('OTP trip security') || titles.includes('Proof of completion')) groups.active.push(node);
+              else if (titles.includes('Driver controls')) groups.profile.push(node);
+              else groups.history.push(node);
+            } else if (['Driver acceptance board'].includes(title)) groups.active.push(node);
+            else if (['Driver controls'].includes(title)) groups.profile.push(node);
+            else groups.history.push(node);
+          });
+
+          const note = document.createElement('div');
+          note.className = 'week3-section-note';
+          note.textContent = 'Driver screen now focuses on one active trip at a time. Use the tabs for history and profile.';
+          driverView.insertBefore(note, tabs.nextSibling);
+
+          tabs.addEventListener('click', e => {
+            const btn = e.target.closest('.week3-tab-btn');
+            if (!btn) return;
+            qsa('.week3-tab-btn', tabs).forEach(b => b.classList.toggle('active', b === btn));
+            const tab = btn.dataset.tab;
+            Object.entries(groups).forEach(([key, nodes]) => {
+              nodes.forEach(n => n.style.display = key === tab ? '' : 'none');
+            });
+          });
+          // default active
+          Object.entries(groups).forEach(([key,nodes]) => nodes.forEach(n => n.style.display = key === 'active' ? '' : 'none'));
+        }
+
+        // Add driver stage helper note
+        const driverTrips = $('driverTrips');
+        if (driverTrips && !$('week3DriverStageNote')) {
+          const container = driverTrips.parentElement;
+          const stage = document.createElement('div');
+          stage.id = 'week3DriverStageNote';
+          stage.className = 'week3-driver-stage';
+          stage.innerHTML = '<strong>Recommended driver flow</strong><div class="tiny" style="margin-top:8px">Accept job → Navigate to pickup → Verify pickup OTP → Start trip → Verify drop-off OTP → Complete trip.</div>';
+          container.insertBefore(stage, driverTrips);
+        }
+      };
+
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
+      else ready();
+    })();
+  </script>
 </body>
+
 </html>
