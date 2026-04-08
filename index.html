@@ -132,7 +132,7 @@
     .meta .item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
     .tiny{font-size:12px;color:var(--muted)}
     .toolbar{display:grid;grid-template-columns:1.2fr .7fr .7fr .6fr;gap:12px;margin:14px 0}
-    .map{height:340px;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
+    .map{height:260px;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
     .split{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}
     .line{height:1px;background:var(--line);margin:14px 0}
     .right-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
@@ -205,34 +205,7 @@
     .level12-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
     .level12-item,.timeline-item,.circle-item,.score-item,.excellence-item,.orchestration-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
 
-
-    body.compact-mode .map{height:250px}
-    body.compact-mode .section{padding:18px}
-    body.compact-mode .stats{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-    body.compact-mode .eta-box{grid-template-columns:repeat(2,1fr)}
-    body.compact-mode .section-sub{margin-bottom:12px}
-    body.compact-mode .book-card, body.compact-mode .list-card{padding:14px}
-    body.compact-mode .trip-head{gap:10px}
-    body.compact-mode .route{font-size:18px}
-    body.compact-mode .footer-note{font-size:12px}
-    body.compact-mode .header{padding:16px 20px}
-    body.compact-mode .stats .stat:nth-child(6),
-    body.compact-mode .stats .stat:nth-child(7),
-    body.compact-mode .stats .stat:nth-child(8){display:none}
-    body.compact-mode #passengerView > .card.section.top-gap,
-    body.compact-mode #adminView > .card.section.top-gap + .grid-3.top-gap,
-    body.compact-mode #adminView > .card.section.top-gap + .grid-3.top-gap + .level7-grid,
-    body.compact-mode #adminView > .card.section.top-gap + .grid-3.top-gap + .level7-grid + .grid-2.top-gap,
-    body.compact-mode #adminView > .card.section.top-gap + .grid-3.top-gap + .level7-grid + .grid-2.top-gap + .level8-grid,
-    body.compact-mode #adminView > .card.section.top-gap + .grid-3.top-gap + .level7-grid + .grid-2.top-gap + .level8-grid + .level10-grid,
-    body.compact-mode #adminView > .card.section.top-gap + .grid-3.top-gap + .level7-grid + .grid-2.top-gap + .level8-grid + .level10-grid + .level11-grid,
-    body.compact-mode #adminView > .card.section.top-gap + .grid-3.top-gap + .level7-grid + .grid-2.top-gap + .level8-grid + .level10-grid + .level11-grid + .level12-grid,
-    body.compact-mode #driverView > .card.section.top-gap,
-    body.compact-mode #driverView > .card.section.top-gap + .grid-2.top-gap,
-    body.compact-mode #driverView > .card.section.top-gap + .grid-2.top-gap + .grid-2.top-gap,
-    body.compact-mode #driverView > .card.section.top-gap + .grid-2.top-gap + .grid-2.top-gap + .level11-grid,
-    body.compact-mode #driverView > .card.section.top-gap + .grid-2.top-gap + .grid-2.top-gap + .level11-grid + .level12-grid,
-    body.compact-mode #passengerView .level12-grid{display:none !important}
+    .compact-hidden{display:none !important}
 
   </style>
 </head>
@@ -585,7 +558,7 @@
           </div>
         </div>
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap compact-hidden">
           <div class="card section">
             <div class="section-title">Care circles</div>
             <div class="section-sub">A simple view of who supports the passenger journey.</div>
@@ -771,7 +744,7 @@
           </div>
         </div>
 
-        <div class="level11-grid top-gap">
+        <div class="level11-grid top-gap compact-hidden">
           <div class="card section">
             <div class="section-title">Passenger concierge</div>
             <div class="section-sub">Helpful travel readiness view without changing your auth flow.</div>
@@ -801,7 +774,7 @@
           </div>
         </div>
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap compact-hidden">
           <div class="card section">
             <div class="section-title">Orchestration hub</div>
             <div class="section-sub">High-level coordination layer built on the existing dispatch flow.</div>
@@ -917,7 +890,7 @@
           </div>
         </div>
 
-        <div class="level11-grid top-gap">
+        <div class="level11-grid top-gap compact-hidden">
           <div class="card section">
             <div class="section-title">Driver coaching</div>
             <div class="section-sub">Simple coaching view using existing trip outcomes.</div>
@@ -948,7 +921,7 @@
         </div>
 
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap compact-hidden">
           <div class="card section">
             <div class="section-title">Driver excellence</div>
             <div class="section-sub">Simple quality layer using existing trip outcomes.</div>
@@ -1723,106 +1696,120 @@ if (!user) {
     $("bookingForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       if (isEstimateAction) return;
-      const pickup = $("pickup").value.trim();
-      const destination = $("destination").value.trim();
-      const passengerName = $("passengerName").value.trim();
-      const rideType = $("rideType").value;
-      const tripDate = $("tripDate").value;
-      const tripTime = $("tripTime").value;
-      const notes = $("notes").value.trim();
-      const priority = $("bookingPriority")?.value || "standard";
-      const wheelchairRequired = $("wheelchairRequired")?.value || "no";
-      const companionRequired = $("companionRequired")?.value || "no";
-      const returnTrip = $("returnTrip")?.value || "no";
-      const returnTime = $("returnTime")?.value || "";
-      const referralSource = $("referralSource")?.value || "self";
-      const recurringPattern = $("recurringPattern")?.value || "once";
-      const referralEmail = $("referralEmail")?.value.trim() || "";
-      const pickupWindow = $("pickupWindow")?.value || "exact";
-      const serviceType = $("serviceType")?.value || "medical";
-      const emergencyContact = $("emergencyContact")?.value.trim() || "";
-      const extraStop = $("extraStop")?.value.trim() || "";
-      const waitMinutes = Number($("waitMinutes")?.value || 0);
 
-      if (!pickup || !destination || !tripDate || !tripTime) {
-        return alert("Please fill all required booking fields.");
+      try {
+        const pickup = $("pickup").value.trim();
+        const destination = $("destination").value.trim();
+        const passengerName = $("passengerName").value.trim();
+        const rideType = $("rideType").value;
+        const tripDate = $("tripDate").value;
+        const tripTime = $("tripTime").value;
+        const notes = $("notes").value.trim();
+        const priority = $("bookingPriority")?.value || "standard";
+        const wheelchairRequired = $("wheelchairRequired")?.value || "no";
+        const companionRequired = $("companionRequired")?.value || "no";
+        const returnTrip = $("returnTrip")?.value || "no";
+        const returnTime = $("returnTime")?.value || "";
+        const referralSource = $("referralSource")?.value || "self";
+        const recurringPattern = $("recurringPattern")?.value || "once";
+        const referralEmail = $("referralEmail")?.value.trim() || "";
+        const pickupWindow = $("pickupWindow")?.value || "exact";
+        const serviceType = $("serviceType")?.value || "medical";
+        const emergencyContact = $("emergencyContact")?.value.trim() || "";
+        const extraStop = $("extraStop")?.value.trim() || "";
+        const waitMinutes = Number($("waitMinutes")?.value || 0);
+        const safePassengerEmail = String(currentProfile?.email || currentUser?.email || "").trim();
+
+        if (!pickup || !destination || !tripDate || !tripTime || !passengerName) {
+          return alert("Please fill all required booking fields.");
+        }
+
+        if (!safePassengerEmail) {
+          return alert("Your profile email is missing. Please sign out and sign in again.");
+        }
+
+        let pickupCoords = await geocodeAddress(pickup);
+        let destinationCoords = await geocodeAddress(destination);
+        if (!pickupCoords) pickupCoords = { lat: -33.9200, lon: 150.9300 };
+        if (!destinationCoords) destinationCoords = { lat: -33.8688, lon: 151.2093 };
+
+        let km = await estimateDistanceKm(pickup, destination);
+        if (!km) {
+          km = rideType === "ndis" ? 18 : 15;
+        }
+
+        const fare = computeLevel8FareAdjustments(calculateFare(km, rideType));
+
+        const bookingRef = await addDoc(collection(db, "bookings"), {
+          paymentStatus: "unpaid",
+          passengerUid: currentUser.uid,
+          passengerName,
+          passengerEmail: safePassengerEmail,
+          rideType,
+          pickup,
+          destination,
+          pickupCoords,
+          destinationCoords,
+          tripDate,
+          tripTime,
+          notes,
+          distanceKm: Number(km.toFixed(1)),
+          fare: Number(fare.toFixed(2)),
+          paymentMethod: rideType === "ndis" ? "Invoice / Referral" : "Card / Direct",
+          priority,
+          wheelchairRequired,
+          companionRequired,
+          returnTrip,
+          returnTime,
+          referralSource,
+          recurringPattern,
+          referralEmail,
+          pickupWindow,
+          serviceType,
+          emergencyContact,
+          extraStop,
+          waitMinutes,
+          pickupOtp: generateOtpCode(),
+          dropoffOtp: generateOtpCode(),
+          pickupOtpVerified: false,
+          dropoffOtpVerified: false,
+          completionProofNote: "",
+          completionProofLink: "",
+          acceptanceStatus: "pending_driver",
+          bookingCode: bookingCode(),
+          status: "pending",
+          driverStage: "waiting",
+          assignedDriverUid: null,
+          assignedDriverName: null,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        console.log("Booking created:", bookingRef.id);
+
+        $("bookingForm").reset();
+        $("passengerName").value = currentProfile?.name || "";
+        if ($("bookingPriority")) $("bookingPriority").value = "standard";
+        if ($("wheelchairRequired")) $("wheelchairRequired").value = "no";
+        if ($("companionRequired")) $("companionRequired").value = "no";
+        if ($("returnTrip")) $("returnTrip").value = "no";
+        if ($("returnTime")) $("returnTime").value = "";
+        if ($("referralSource")) $("referralSource").value = "self";
+        if ($("recurringPattern")) $("recurringPattern").value = "once";
+        if ($("referralEmail")) $("referralEmail").value = "";
+        if ($("pickupWindow")) $("pickupWindow").value = "exact";
+        $("farePreview").textContent = "Estimated fare: -- • Distance: -- • Payment: --";
+        $("passengerStatusLabel").textContent = "pending";
+        $("passengerStageLabel").textContent = "waiting";
+        $("passengerEtaLabel").textContent = "--";
+        $("passengerKmLabel").textContent = `${Number(km).toFixed(1)} km`;
+        updatePaymentButton();
+        alert("Ride request sent. Admin can now see it in another browser.");
+      } catch (err) {
+        console.error("Booking create failed:", err);
+        const msg = err?.code || err?.message || "Unknown error";
+        alert("Booking failed: " + msg);
       }
-
-      let pickupCoords = await geocodeAddress(pickup);
-      let destinationCoords = await geocodeAddress(destination);
-      if (!pickupCoords) pickupCoords = { lat: -33.9200, lon: 150.9300 };
-      if (!destinationCoords) destinationCoords = { lat: -33.8688, lon: 151.2093 };
-
-      let km = await estimateDistanceKm(pickup, destination);
-      if (!km) {
-        km = rideType === "ndis" ? 18 : 15;
-      }
-
-      const fare = computeLevel8FareAdjustments(calculateFare(km, rideType));
-
-      await addDoc(collection(db, "bookings"), {
-      paymentStatus: "unpaid",
-        passengerUid: currentUser.uid,
-        passengerName,
-        passengerEmail: currentProfile.email,
-        rideType,
-        pickup,
-        destination,
-        pickupCoords,
-        destinationCoords,
-        tripDate,
-        tripTime,
-        notes,
-        distanceKm: Number(km.toFixed(1)),
-        fare: Number(fare.toFixed(2)),
-        paymentMethod: rideType === "ndis" ? "Invoice / Referral" : "Card / Direct",
-        priority,
-        wheelchairRequired,
-        companionRequired,
-        returnTrip,
-        returnTime,
-        referralSource,
-        recurringPattern,
-        referralEmail,
-        pickupWindow,
-        serviceType,
-        emergencyContact,
-        extraStop,
-        waitMinutes,
-        pickupOtp: generateOtpCode(),
-        dropoffOtp: generateOtpCode(),
-        pickupOtpVerified: false,
-        dropoffOtpVerified: false,
-        completionProofNote: "",
-        completionProofLink: "",
-        acceptanceStatus: "pending_driver",
-        bookingCode: bookingCode(),
-        status: "pending",
-        driverStage: "waiting",
-        assignedDriverUid: null,
-        assignedDriverName: null,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-
-      $("bookingForm").reset();
-      $("passengerName").value = currentProfile.name || "";
-      if ($("bookingPriority")) $("bookingPriority").value = "standard";
-      if ($("wheelchairRequired")) $("wheelchairRequired").value = "no";
-      if ($("companionRequired")) $("companionRequired").value = "no";
-      if ($("returnTrip")) $("returnTrip").value = "no";
-      if ($("returnTime")) $("returnTime").value = "";
-      if ($("referralSource")) $("referralSource").value = "self";
-      if ($("recurringPattern")) $("recurringPattern").value = "once";
-      if ($("referralEmail")) $("referralEmail").value = "";
-      if ($("pickupWindow")) $("pickupWindow").value = "exact";
-      $("farePreview").textContent = "Estimated fare: -- • Distance: -- • Payment: --";
-      $("passengerStatusLabel").textContent = "pending";
-      $("passengerStageLabel").textContent = "waiting";
-      $("passengerEtaLabel").textContent = "--";
-      $("passengerKmLabel").textContent = `${Number(km).toFixed(1)} km`;
-      updatePaymentButton();
-      alert("Ride request sent. Admin can now see it in another browser.");
     });
 
     function subscribeUsers() {
