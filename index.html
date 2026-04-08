@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UVEL Level 11 All-in-One</title>
+  <title>UVEL Firebase All-in-One</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -206,17 +206,23 @@
     .level12-item,.timeline-item,.circle-item,.score-item,.excellence-item,.orchestration-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
 
   
-    .ui-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 0}
-    .surface-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
-    .surface-tab{padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);cursor:pointer;font-weight:700;color:var(--text)}
-    .surface-tab.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#082030;border:none}
-    .section.compact{padding:18px}
-    .soft-hide{display:none!important}
-    .inline-note{font-size:13px;color:var(--muted);margin-top:8px}
-    .passenger-advanced-wrap{display:none}
-    .passenger-advanced-wrap.open{display:block}
-    .role-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:12px;color:var(--muted)}
-    .level11-shell .stats{margin-top:2px}
+    /* Level 12 upgraded UI helpers */
+    .uvel-upgrade-bar{
+      display:flex;gap:10px;align-items:center;justify-content:space-between;
+      margin-bottom:18px;padding:14px 16px;border:1px solid var(--line);
+      border-radius:18px;background:rgba(255,255,255,.04)
+    }
+    .uvel-upgrade-left,.uvel-upgrade-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .uvel-chip{
+      padding:8px 12px;border-radius:999px;border:1px solid var(--line);
+      background:rgba(255,255,255,.04);font-size:12px;font-weight:700;color:var(--muted)
+    }
+    .uvel-kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+    .compact-mode .section{padding:18px}
+    .compact-mode .section-sub,.compact-mode .note,.compact-mode .tiny,.compact-mode .footer-note{font-size:12px}
+    .compact-mode .grid-2,.compact-mode .grid-3,.compact-mode .grid-4,.compact-mode .split{gap:12px}
+    .compact-hidden{display:none !important}
+    .focus-ring{box-shadow:0 0 0 2px rgba(73,196,213,.35), var(--shadow)}
 
   </style>
 </head>
@@ -228,7 +234,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 11 premium all-in-one</div>
+            <div class="subtitle">Firebase Level 12 stable auth build</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -304,19 +310,33 @@
       </div>
     </div>
 
-    <div id="appScreen" class="hidden level11-shell">
+    <div id="appScreen" class="hidden">
       <div class="card header">
         <div class="brand">
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Level 11 • cleaner dispatch • premium role views • real-time bookings • OTP + proof flow</div>
+            <div class="subtitle">Level 12 Ultimate • stable auth • orchestration hub • care circles • readiness scoring • compliance timeline • driver excellence</div>
           </div>
         </div>
         <div class="userbox">
           <div class="pill" id="whoAmI">Signed in</div>
           <button id="seedDriversBtn" class="btn">Seed demo drivers</button>
           <button id="logoutBtn" class="btn brand">Logout</button>
+        </div>
+      </div>
+
+
+      <div class="uvel-upgrade-bar card">
+        <div class="uvel-upgrade-left">
+          <div class="uvel-chip">Level 12 Ultimate Build</div>
+          <div class="uvel-chip">Role-based workflow</div>
+          <div class="uvel-chip">Real-time Firebase</div>
+          <div class="uvel-chip">OTP + proof + routing</div>
+        </div>
+        <div class="uvel-upgrade-right">
+          <button id="toggleCompactBtn" class="btn small" type="button">Compact mode</button>
+          <button id="toggleAdvancedBtn" class="btn small brand" type="button">Hide extra panels</button>
         </div>
       </div>
 
@@ -374,11 +394,6 @@
                 <label>Notes</label>
                 <textarea id="notes" placeholder="Mobility needs, pickup instructions, support notes"></textarea>
               </div>
-              <div class="ui-toolbar">
-                <button class="btn small" id="togglePassengerAdvancedBtn" type="button">Advanced options</button>
-                <span class="inline-note">Keep the main booking flow simple. Open advanced options only when needed.</span>
-              </div>
-              <div id="passengerAdvancedFields" class="passenger-advanced-wrap">
               <div class="row top-gap">
                 <div>
                   <label>Priority</label>
@@ -475,7 +490,6 @@
                   <input type="number" id="waitMinutes" min="0" step="5" value="0" />
                 </div>
               </div>
-              </div>
               <div class="right-actions top-gap">
                 <button class="btn" id="estimateFareBtn" type="button">Estimate fare</button>
                 <button class="btn brand" id="requestRideBtn" type="submit">Request ride</button>
@@ -515,13 +529,7 @@
           </div>
         </div>
 
-        <div class="surface-tabs" id="passengerSurfaceTabs">
-          <button class="surface-tab active" type="button" data-passenger-tab="current">Current trip</button>
-          <button class="surface-tab" type="button" data-passenger-tab="history">Past trips</button>
-          <button class="surface-tab" type="button" data-passenger-tab="tools">Saved places</button>
-        </div>
-
-        <div class="card section top-gap" id="passengerHistoryCard">
+        <div class="card section top-gap">
           <div class="trip-head">
             <div>
               <div class="trip-head"><div><div class="section-title">My trips</div>
@@ -531,7 +539,7 @@
           <div id="passengerTrips" class="booking-list"></div>
         </div>
 
-        <div class="grid-2 top-gap" id="passengerToolsGrid">
+        <div class="grid-2 top-gap">
           <div class="card section">
             <div class="section-title">Saved places</div>
             <div class="section-sub">Quickly save common pickup and destination addresses.</div>
@@ -553,7 +561,7 @@
           </div>
         </div>
 
-        <div class="grid-2 top-gap soft-hide" id="passengerExtraGrid">
+        <div class="grid-2 top-gap">
           <div class="card section">
             <div class="section-title">Repeat ride templates</div>
             <div class="section-sub">Save a recurring ride setup for fast rebooking.</div>
@@ -581,7 +589,7 @@
           </div>
         </div>
 
-        <div class="level12-grid top-gap soft-hide" id="passengerInsightsGrid">
+        <div class="level12-grid top-gap">
           <div class="card section">
             <div class="section-title">Care circles</div>
             <div class="section-sub">A simple view of who supports the passenger journey.</div>
@@ -641,14 +649,6 @@
               <select id="driverFilter"></select>
               <button class="btn brand" id="applyFiltersBtn">Apply</button>
             </div>
-            <div class="surface-tabs" id="adminQuickTabs">
-              <button class="surface-tab active" type="button" data-status="">All</button>
-              <button class="surface-tab" type="button" data-status="pending">Pending</button>
-              <button class="surface-tab" type="button" data-status="assigned">Assigned</button>
-              <button class="surface-tab" type="button" data-status="completed">Completed</button>
-              <button class="surface-tab" type="button" data-status="cancelled">Cancelled</button>
-              <button class="surface-tab" type="button" id="toggleAdminAdvancedBtn">Advanced panels</button>
-            </div>
             <div id="adminBookings" class="booking-list"></div>
           </div>
 
@@ -660,7 +660,7 @@
           </div>
         </div>
 
-        <div class="card section top-gap" id="adminAnalyticsCard">
+        <div class="card section top-gap">
           <div class="trip-head">
             <div>
               <div class="section-title">Admin analytics</div>
@@ -677,7 +677,7 @@
           </div>
         </div>
 
-        <div class="grid-3 top-gap" id="adminOpsGrid">
+        <div class="grid-3 top-gap">
           <div class="card section">
             <div class="section-title">Dispatch board</div>
             <div class="section-sub">Priority queue, unpaid jobs, and service commitments.</div>
@@ -695,7 +695,7 @@
           </div>
         </div>
 
-        <div class="level7-grid top-gap soft-hide" id="adminAdvancedGrid1">
+        <div class="level7-grid top-gap">
           <div class="card section">
             <div class="section-title">Referral inbox</div>
             <div class="section-sub">NDIS and partner bookings awaiting action.</div>
@@ -726,7 +726,7 @@
           </div>
         </div>
 
-        <div class="grid-2 top-gap soft-hide" id="adminAdvancedGrid2">
+        <div class="grid-2 top-gap">
           <div class="card section">
             <div class="section-title">Driver management</div>
             <div class="section-sub">Least busy driver is recommended first.</div>
@@ -739,7 +739,7 @@
           </div>
         </div>
 
-        <div class="level8-grid top-gap soft-hide" id="adminAdvancedGrid3">
+        <div class="level8-grid top-gap">
           <div class="card section">
             <div class="section-title">Kanban dispatch</div>
             <div class="section-sub">Fast view of pending, assigned, and completed jobs.</div>
@@ -757,7 +757,7 @@
           </div>
         </div>
 
-        <div class="level10-grid top-gap soft-hide" id="adminAdvancedGrid4">
+        <div class="level10-grid top-gap">
           <div class="card section">
             <div class="section-title">Level 10 command center</div>
             <div class="section-sub">High-level operations snapshot, demand pressure, and dispatch health.</div>
@@ -775,7 +775,7 @@
           </div>
         </div>
 
-        <div class="level11-grid top-gap soft-hide" id="adminAdvancedGrid5">
+        <div class="level11-grid top-gap">
           <div class="card section">
             <div class="section-title">Passenger concierge</div>
             <div class="section-sub">Helpful travel readiness view without changing your auth flow.</div>
@@ -805,7 +805,7 @@
           </div>
         </div>
 
-        <div class="level12-grid top-gap soft-hide" id="adminAdvancedGrid6">
+        <div class="level12-grid top-gap">
           <div class="card section">
             <div class="section-title">Orchestration hub</div>
             <div class="section-sub">High-level coordination layer built on the existing dispatch flow.</div>
@@ -838,12 +838,7 @@
       </div>
 
       <div id="driverView" class="hidden">
-        <div class="surface-tabs" id="driverSurfaceTabs">
-          <button class="surface-tab active" type="button" data-driver-tab="active">Active trip</button>
-          <button class="surface-tab" type="button" data-driver-tab="history">History</button>
-          <button class="surface-tab" type="button" data-driver-tab="profile">Profile</button>
-        </div>
-        <div class="grid-2" id="driverActiveGrid">
+        <div class="grid-2">
           <div class="card section">
             <div class="section-title">Assigned trips</div>
             <div class="section-sub">Driver sees only trips assigned to them.</div>
@@ -864,7 +859,7 @@
         </div>
 
 
-        <div class="grid-2 top-gap soft-hide" id="driverProfileGrid">
+        <div class="grid-2 top-gap">
           <div class="card section">
             <div class="section-title">Driver controls</div>
             <div class="section-sub">Update availability and vehicle notes without changing login flow.</div>
@@ -894,13 +889,13 @@
           </div>
         </div>
 
-        <div class="card section top-gap" id="driverAcceptanceCard">
+        <div class="card section top-gap">
           <div class="section-title">Driver acceptance board</div>
           <div class="section-sub">Accept or decline newly assigned work.</div>
           <div id="driverAcceptanceBoard" class="notice-list"></div>
         </div>
 
-        <div class="grid-2 top-gap" id="driverActionGrid">
+        <div class="grid-2 top-gap">
           <div class="card section">
             <div class="section-title">OTP trip security</div>
             <div class="section-sub">Use one-time codes to verify pickup and drop-off.</div>
@@ -913,7 +908,7 @@
           </div>
         </div>
 
-        <div class="grid-2 top-gap soft-hide" id="driverHistoryGrid1">
+        <div class="grid-2 top-gap">
           <div class="card section">
             <div class="section-title">Shift handover</div>
             <div class="section-sub">Driver notes for next shift or admin follow-up.</div>
@@ -926,7 +921,7 @@
           </div>
         </div>
 
-        <div class="level11-grid top-gap soft-hide" id="driverHistoryGrid2">
+        <div class="level11-grid top-gap">
           <div class="card section">
             <div class="section-title">Driver coaching</div>
             <div class="section-sub">Simple coaching view using existing trip outcomes.</div>
@@ -957,7 +952,7 @@
         </div>
 
 
-        <div class="level12-grid top-gap soft-hide" id="driverHistoryGrid3">
+        <div class="level12-grid top-gap">
           <div class="card section">
             <div class="section-title">Driver excellence</div>
             <div class="section-sub">Simple quality layer using existing trip outcomes.</div>
