@@ -202,6 +202,12 @@
       padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826
     }
 
+
+    .level12-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .level12-item,.orchestration-item,.timeline-item,.circle-item,.excellence-item,.readiness-item{
+      padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826
+    }
+
   </style>
 </head>
 <body>
@@ -212,7 +218,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 11 stable auth build</div>
+            <div class="subtitle">Firebase Level 12 stable auth build</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -294,7 +300,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 11 • stable auth • command center • predictive demand • compliance vault • family live view • driver coaching</div>
+            <div class="subtitle">Full Level 12 • stable auth • orchestration hub • care circles • readiness scoring • compliance timeline • driver excellence</div>
           </div>
         </div>
         <div class="userbox">
@@ -551,6 +557,36 @@
             <div class="section-sub">Referral and service readiness for your next trip.</div>
             <div id="passengerReadiness" class="notice-list"></div>
           </div>
+
+
+        <div class="level12-grid top-gap">
+          <div class="card section">
+            <div class="section-title">Readiness scoring</div>
+            <div class="section-sub">Simple Level 12 care readiness view using your existing trip details.</div>
+            <div class="stack-list">
+              <div class="readiness-item"><strong>Trip clarity</strong><div class="tiny">Pickup window, extra stop, wait time, and notes help improve dispatch accuracy.</div></div>
+              <div class="readiness-item"><strong>Support readiness</strong><div class="tiny">Wheelchair, companion, referral, and emergency contact details help reduce service risk.</div></div>
+              <div class="readiness-item"><strong>Continuity score</strong><div class="tiny">Saved places, templates, and recurring patterns support reliable repeat transport.</div></div>
+            </div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Care circles</div>
+            <div class="section-sub">Visibility for participant, family, and support contacts.</div>
+            <div class="stack-list">
+              <div class="circle-item"><strong>Participant view</strong><div class="tiny">Track route, ETA, notifications, and trip status in one place.</div></div>
+              <div class="circle-item"><strong>Family view</strong><div class="tiny">Emergency contact and live trip context support peace of mind and follow-up.</div></div>
+              <div class="circle-item"><strong>Coordinator view</strong><div class="tiny">Referral details and trip completion history support plan-manager visibility.</div></div>
+            </div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Journey confidence</div>
+            <div class="section-sub">A simple passenger-facing quality summary.</div>
+            <div class="stack-list">
+              <div class="level12-item"><strong>Before departure</strong><div class="tiny">Confirm passenger details, pickup location, and service notes before travel.</div></div>
+              <div class="level12-item"><strong>During travel</strong><div class="tiny">Live route, ETA, and driver status build transparency during the journey.</div></div>
+              <div class="level12-item"><strong>After arrival</strong><div class="tiny">Completion proof and status history support confidence for future rides.</div></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -736,7 +772,37 @@
               <div class="vault-item"><strong>Family and emergency details</strong><div class="tiny">Emergency contact fields support care continuity and incident follow-up.</div></div>
             </div>
           </div>
-        </div>
+
+
+        <div class="level12-grid top-gap">
+          <div class="card section">
+            <div class="section-title">Orchestration hub</div>
+            <div class="section-sub">Cross-check dispatch, finance, compliance, and family visibility in one place.</div>
+            <div class="stack-list">
+              <div class="orchestration-item"><strong>Dispatch readiness</strong><div class="tiny">Review pending demand, active driver load, and pickup windows before assigning new trips.</div></div>
+              <div class="orchestration-item"><strong>Service continuity</strong><div class="tiny">Use recurring rides, handover notes, and referral details together for smoother daily operations.</div></div>
+              <div class="orchestration-item"><strong>Care escalation</strong><div class="tiny">Emergency contact, OTP events, cancellations, and proof records can be reviewed side by side.</div></div>
+            </div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Compliance timeline</div>
+            <div class="section-sub">Audit-friendly sequence of important trip checkpoints.</div>
+            <div class="stack-list">
+              <div class="timeline-item"><strong>Before trip</strong><div class="tiny">Booking details, referral source, pickup window, and readiness notes support pre-dispatch review.</div></div>
+              <div class="timeline-item"><strong>During trip</strong><div class="tiny">Live tracking, ETA updates, and OTP verification help document service delivery.</div></div>
+              <div class="timeline-item"><strong>After trip</strong><div class="tiny">Proof of completion, invoice status, payout approvals, and handover notes complete the record.</div></div>
+            </div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Care circles</div>
+            <div class="section-sub">Participant, family, coordinator, and driver visibility without changing auth.</div>
+            <div class="stack-list">
+              <div class="circle-item"><strong>Participant circle</strong><div class="tiny">Trip readiness, saved places, and repeat ride tools support ongoing service continuity.</div></div>
+              <div class="circle-item"><strong>Support circle</strong><div class="tiny">Referral email, emergency contact, and family live-view context support coordinated care.</div></div>
+              <div class="circle-item"><strong>Operations circle</strong><div class="tiny">Admin keeps one view across dispatch, compliance, finance, and driver quality signals.</div></div>
+            </div>
+          </div>
+        </div>        </div>
       </div>
 
       <div id="driverView" class="hidden">
@@ -851,7 +917,37 @@
               <div class="opsintel-item"><strong>Dispatch confidence</strong><div class="tiny">Best used with active load, availability, and route confidence.</div></div>
             </div>
           </div>
-        </div>
+
+
+        <div class="level12-grid top-gap">
+          <div class="card section">
+            <div class="section-title">Driver excellence</div>
+            <div class="section-sub">A practical quality view built on your current Level 11 features.</div>
+            <div class="stack-list">
+              <div class="excellence-item"><strong>Journey discipline</strong><div class="tiny">Live tracking, OTP checks, and route reliability support safe and consistent service.</div></div>
+              <div class="excellence-item"><strong>Care delivery</strong><div class="tiny">Completion proof, notes, and handover details improve service quality for vulnerable riders.</div></div>
+              <div class="excellence-item"><strong>Professional readiness</strong><div class="tiny">Availability, vehicle details, acceptance history, and coaching signals support driver growth.</div></div>
+            </div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Shift readiness</div>
+            <div class="section-sub">Driver-facing operational checklist without changing login logic.</div>
+            <div class="stack-list">
+              <div class="readiness-item"><strong>Before shift</strong><div class="tiny">Check availability, vehicle, assigned jobs, and any prior handover notes.</div></div>
+              <div class="readiness-item"><strong>During shift</strong><div class="tiny">Use map, OTP security, notifications, and acceptance board for clean trip execution.</div></div>
+              <div class="readiness-item"><strong>After shift</strong><div class="tiny">Complete proof, update notes, and record handover details for the next driver or admin.</div></div>
+            </div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Care circles</div>
+            <div class="section-sub">How the driver fits into the wider support network.</div>
+            <div class="stack-list">
+              <div class="circle-item"><strong>Participant circle</strong><div class="tiny">The driver supports safe pickup, live ETA updates, and calm arrival communication.</div></div>
+              <div class="circle-item"><strong>Family circle</strong><div class="tiny">Family live-view context and emergency details help drivers respond more confidently.</div></div>
+              <div class="circle-item"><strong>Operations circle</strong><div class="tiny">Driver actions flow back into admin analytics, compliance records, and payout readiness.</div></div>
+            </div>
+          </div>
+        </div>        </div>
 
       </div>
     </div>
