@@ -132,7 +132,7 @@
     .meta .item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
     .tiny{font-size:12px;color:var(--muted)}
     .toolbar{display:grid;grid-template-columns:1.2fr .7fr .7fr .6fr;gap:12px;margin:14px 0}
-    .map{height:340px;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
+    .map{height:260px;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
     .split{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}
     .line{height:1px;background:var(--line);margin:14px 0}
     .right-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
@@ -204,6 +204,8 @@
 
     .level12-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
     .level12-item,.timeline-item,.circle-item,.score-item,.excellence-item,.orchestration-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+
+    .compact-hidden{display:none !important}
 
   </style>
 </head>
@@ -556,7 +558,7 @@
           </div>
         </div>
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap compact-hidden">
           <div class="card section">
             <div class="section-title">Care circles</div>
             <div class="section-sub">A simple view of who supports the passenger journey.</div>
@@ -742,7 +744,7 @@
           </div>
         </div>
 
-        <div class="level11-grid top-gap">
+        <div class="level11-grid top-gap compact-hidden">
           <div class="card section">
             <div class="section-title">Passenger concierge</div>
             <div class="section-sub">Helpful travel readiness view without changing your auth flow.</div>
@@ -772,7 +774,7 @@
           </div>
         </div>
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap compact-hidden">
           <div class="card section">
             <div class="section-title">Orchestration hub</div>
             <div class="section-sub">High-level coordination layer built on the existing dispatch flow.</div>
@@ -888,7 +890,7 @@
           </div>
         </div>
 
-        <div class="level11-grid top-gap">
+        <div class="level11-grid top-gap compact-hidden">
           <div class="card section">
             <div class="section-title">Driver coaching</div>
             <div class="section-sub">Simple coaching view using existing trip outcomes.</div>
@@ -919,7 +921,7 @@
         </div>
 
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap compact-hidden">
           <div class="card section">
             <div class="section-title">Driver excellence</div>
             <div class="section-sub">Simple quality layer using existing trip outcomes.</div>
@@ -1716,9 +1718,14 @@ if (!user) {
         const emergencyContact = $("emergencyContact")?.value.trim() || "";
         const extraStop = $("extraStop")?.value.trim() || "";
         const waitMinutes = Number($("waitMinutes")?.value || 0);
+        const safePassengerEmail = String(currentProfile?.email || currentUser?.email || "").trim();
 
         if (!pickup || !destination || !tripDate || !tripTime || !passengerName) {
           return alert("Please fill all required booking fields.");
+        }
+
+        if (!safePassengerEmail) {
+          return alert("Your profile email is missing. Please sign out and sign in again.");
         }
 
         let pickupCoords = await geocodeAddress(pickup);
@@ -1735,9 +1742,9 @@ if (!user) {
 
         const bookingRef = await addDoc(collection(db, "bookings"), {
           paymentStatus: "unpaid",
-          passengerUid: currentUser?.uid || "",
+          passengerUid: currentUser.uid,
           passengerName,
-          passengerEmail: currentProfile?.email || currentUser?.email || "",
+          passengerEmail: safePassengerEmail,
           rideType,
           pickup,
           destination,
@@ -1800,46 +1807,29 @@ if (!user) {
         alert("Ride request sent. Admin can now see it in another browser.");
       } catch (err) {
         console.error("Booking create failed:", err);
-        alert("Booking failed: " + (err.code || err.message || "Unknown error"));
+        const msg = err?.code || err?.message || "Unknown error";
+        alert("Booking failed: " + msg);
       }
     });
 
     function subscribeUsers() {
       if (unsubUsers) unsubUsers();
-      unsubUsers = onSnapshot(
-        collection(db, "users"),
-        (snap) => {
-          allUsers = snap.docs.map(d => ({ uid: d.id, ...d.data(), role: String(d.data().role || "").toLowerCase().trim() }));
-          allDrivers = allUsers.filter(u => u.role === "driver");
-          console.log("Users loaded:", allUsers.length, allUsers);
-          renderDriverFilter();
-          renderDriverManagement();
-          renderPassengerManagement();
-        },
-        (err) => {
-          console.error("Users subscription failed:", err);
-          alert("Cannot read users: " + (err.message || err.code || "Unknown error"));
-        }
-      );
+      unsubUsers = onSnapshot(collection(db, "users"), (snap) => {
+        allUsers = snap.docs.map(d => ({ uid: d.id, ...d.data(), role: String(d.data().role || "").toLowerCase().trim() }));
+        allDrivers = allUsers.filter(u => u.role === "driver");
+        renderDriverFilter();
+        renderDriverManagement();
+        renderPassengerManagement();
+      });
     }
 
     function subscribeBookings() {
       if (unsubBookings) unsubBookings();
-      unsubBookings = onSnapshot(
-        collection(db, "bookings"),
-        (snap) => {
-          allBookings = snap.docs
-            .map(d => ({ id: d.id, ...d.data() }))
-            .sort((a, b) => String(b.tripDate || "").localeCompare(String(a.tripDate || "")));
-          console.log("Admin bookings loaded:", allBookings.length, allBookings);
-          renderAdminMapBookingSelect();
-          renderEverything();
-        },
-        (err) => {
-          console.error("Admin bookings subscription failed:", err);
-          alert("Admin cannot read bookings: " + (err.message || err.code || "Unknown error"));
-        }
-      );
+      unsubBookings = onSnapshot(query(collection(db, "bookings"), orderBy("tripDate", "desc")), (snap) => {
+        allBookings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAdminMapBookingSelect();
+        renderEverything();
+      });
     }
 
     function startMetricsRefreshLoop() {
