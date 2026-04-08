@@ -206,23 +206,20 @@
     .level12-item,.timeline-item,.circle-item,.score-item,.excellence-item,.orchestration-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
 
   
-    /* Level 12 upgraded UI helpers */
-    .uvel-upgrade-bar{
-      display:flex;gap:10px;align-items:center;justify-content:space-between;
-      margin-bottom:18px;padding:14px 16px;border:1px solid var(--line);
-      border-radius:18px;background:rgba(255,255,255,.04)
-    }
-    .uvel-upgrade-left,.uvel-upgrade-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .uvel-chip{
-      padding:8px 12px;border-radius:999px;border:1px solid var(--line);
-      background:rgba(255,255,255,.04);font-size:12px;font-weight:700;color:var(--muted)
-    }
-    .uvel-kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
-    .compact-mode .section{padding:18px}
-    .compact-mode .section-sub,.compact-mode .note,.compact-mode .tiny,.compact-mode .footer-note{font-size:12px}
-    .compact-mode .grid-2,.compact-mode .grid-3,.compact-mode .grid-4,.compact-mode .split{gap:12px}
-    .compact-hidden{display:none !important}
-    .focus-ring{box-shadow:0 0 0 2px rgba(73,196,213,.35), var(--shadow)}
+
+    .lvl13bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+    .toggle-chip{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);cursor:pointer;font-size:13px}
+    .toggle-chip input{width:auto;margin:0}
+    .hero-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+    .hero-metric{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03)}
+    .hero-metric .big{font-size:24px;font-weight:900;margin-top:4px}
+    .compact-mode .section{padding:16px}
+    .compact-mode .card{border-radius:16px}
+    .compact-mode .section-sub,.compact-mode .footer-note,.compact-mode .note,.compact-mode .tiny{font-size:12px}
+    .compact-mode .section-title{font-size:16px}
+    .focus-hide{display:none !important}
+    .lvl13-tag{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px}
+    @media (max-width:1100px){.hero-strip{grid-template-columns:1fr}}
 
   </style>
 </head>
@@ -234,7 +231,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 12 stable auth build</div>
+            <div class="subtitle">Firebase Level 13 orchestration build</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -316,27 +313,13 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Level 12 Ultimate • stable auth • orchestration hub • care circles • readiness scoring • compliance timeline • driver excellence</div>
+            <div class="subtitle">Full Level 13 • orchestration studio • compact mode • executive focus • demo spotlight</div>
           </div>
         </div>
         <div class="userbox">
           <div class="pill" id="whoAmI">Signed in</div>
           <button id="seedDriversBtn" class="btn">Seed demo drivers</button>
           <button id="logoutBtn" class="btn brand">Logout</button>
-        </div>
-      </div>
-
-
-      <div class="uvel-upgrade-bar card">
-        <div class="uvel-upgrade-left">
-          <div class="uvel-chip">Level 12 Ultimate Build</div>
-          <div class="uvel-chip">Role-based workflow</div>
-          <div class="uvel-chip">Real-time Firebase</div>
-          <div class="uvel-chip">OTP + proof + routing</div>
-        </div>
-        <div class="uvel-upgrade-right">
-          <button id="toggleCompactBtn" class="btn small" type="button">Compact mode</button>
-          <button id="toggleAdvancedBtn" class="btn small brand" type="button">Hide extra panels</button>
         </div>
       </div>
 
@@ -349,6 +332,19 @@
         <div class="card stat"><div class="k" id="statTodayRevenue">$0.00</div><div class="t">Today revenue</div></div>
         <div class="card stat"><div class="k" id="statPaid">0</div><div class="t">Paid</div></div>
         <div class="card stat"><div class="k" id="statUnpaid">0</div><div class="t">Unpaid</div></div>
+      </div>
+
+      <div class="lvl13bar" id="lvl13Controls">
+        <label class="toggle-chip"><input type="checkbox" id="compactModeToggle" /> Compact mode</label>
+        <label class="toggle-chip"><input type="checkbox" id="executiveFocusToggle" checked /> Executive focus</label>
+        <label class="toggle-chip"><input type="checkbox" id="spotlightMapsToggle" checked /> Spotlight maps</label>
+        <span class="lvl13-tag">Level 13 Ultimate</span>
+      </div>
+
+      <div class="hero-strip" id="lvl13HeroStrip">
+        <div class="hero-metric"><div class="tiny">System mode</div><div class="big">Live Operations</div><div class="note">Built on your existing Firebase, Firestore, auth, and dispatch workflow.</div></div>
+        <div class="hero-metric"><div class="tiny">Demo focus</div><div class="big">Funding Ready</div><div class="note">Use Executive focus to hide heavy panels and keep the core flow visible.</div></div>
+        <div class="hero-metric"><div class="tiny">Primary flow</div><div class="big">Book → Dispatch → Complete</div><div class="note">Passenger, admin, and driver roles stay connected in one all-in-one file.</div></div>
       </div>
 
       <div id="passengerView" class="hidden">
@@ -539,7 +535,7 @@
           <div id="passengerTrips" class="booking-list"></div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Saved places</div>
             <div class="section-sub">Quickly save common pickup and destination addresses.</div>
@@ -561,7 +557,7 @@
           </div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Repeat ride templates</div>
             <div class="section-sub">Save a recurring ride setup for fast rebooking.</div>
@@ -589,7 +585,7 @@
           </div>
         </div>
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Care circles</div>
             <div class="section-sub">A simple view of who supports the passenger journey.</div>
@@ -677,7 +673,7 @@
           </div>
         </div>
 
-        <div class="grid-3 top-gap">
+        <div class="grid-3 top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Dispatch board</div>
             <div class="section-sub">Priority queue, unpaid jobs, and service commitments.</div>
@@ -695,7 +691,7 @@
           </div>
         </div>
 
-        <div class="level7-grid top-gap">
+        <div class="level7-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Referral inbox</div>
             <div class="section-sub">NDIS and partner bookings awaiting action.</div>
@@ -726,7 +722,7 @@
           </div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Driver management</div>
             <div class="section-sub">Least busy driver is recommended first.</div>
@@ -739,7 +735,7 @@
           </div>
         </div>
 
-        <div class="level8-grid top-gap">
+        <div class="level8-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Kanban dispatch</div>
             <div class="section-sub">Fast view of pending, assigned, and completed jobs.</div>
@@ -757,7 +753,7 @@
           </div>
         </div>
 
-        <div class="level10-grid top-gap">
+        <div class="level10-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Level 10 command center</div>
             <div class="section-sub">High-level operations snapshot, demand pressure, and dispatch health.</div>
@@ -775,7 +771,7 @@
           </div>
         </div>
 
-        <div class="level11-grid top-gap">
+        <div class="level11-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Passenger concierge</div>
             <div class="section-sub">Helpful travel readiness view without changing your auth flow.</div>
@@ -805,7 +801,7 @@
           </div>
         </div>
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Orchestration hub</div>
             <div class="section-sub">High-level coordination layer built on the existing dispatch flow.</div>
@@ -859,7 +855,7 @@
         </div>
 
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Driver controls</div>
             <div class="section-sub">Update availability and vehicle notes without changing login flow.</div>
@@ -889,13 +885,13 @@
           </div>
         </div>
 
-        <div class="card section top-gap">
+        <div class="card section top-gap focus-advanced">
           <div class="section-title">Driver acceptance board</div>
           <div class="section-sub">Accept or decline newly assigned work.</div>
           <div id="driverAcceptanceBoard" class="notice-list"></div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">OTP trip security</div>
             <div class="section-sub">Use one-time codes to verify pickup and drop-off.</div>
@@ -908,7 +904,7 @@
           </div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Shift handover</div>
             <div class="section-sub">Driver notes for next shift or admin follow-up.</div>
@@ -921,7 +917,7 @@
           </div>
         </div>
 
-        <div class="level11-grid top-gap">
+        <div class="level11-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Driver coaching</div>
             <div class="section-sub">Simple coaching view using existing trip outcomes.</div>
@@ -952,7 +948,7 @@
         </div>
 
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Driver excellence</div>
             <div class="section-sub">Simple quality layer using existing trip outcomes.</div>
