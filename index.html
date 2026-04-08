@@ -205,6 +205,16 @@
     .level12-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
     .level12-item,.timeline-item,.circle-item,.score-item,.excellence-item,.orchestration-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
 
+  
+    .overview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+    .overview-card{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03)}
+    .overview-card .label{font-size:12px;color:var(--muted)}
+    .overview-card .value{font-size:24px;font-weight:900;margin-top:6px}
+    .overview-card .sub{font-size:12px;color:var(--muted);margin-top:4px}
+    .queue-list{display:grid;gap:10px}
+    .queue-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .health-ok{color:#87ebb0}.health-warn{color:#ffd76f}.health-bad{color:#ff9f9f}
+
   </style>
 </head>
 <body>
@@ -319,11 +329,11 @@
       </div>
 
       <div id="passengerView" class="hidden">
-        <div class="grid-4 top-gap" id="passengerOverviewBar">
-          <div class="card stat"><div class="k" id="pStatTotal">0</div><div class="t">My bookings</div></div>
-          <div class="card stat"><div class="k" id="pStatActive">0</div><div class="t">Active trips</div></div>
-          <div class="card stat"><div class="k" id="pStatUpcoming">--</div><div class="t">Next pickup</div></div>
-          <div class="card stat"><div class="k" id="pStatSpend">$0.00</div><div class="t">Paid spend</div></div>
+        <div class="overview-grid" id="passengerOverviewGrid">
+          <div class="overview-card"><div class="label">My total trips</div><div class="value" id="pvTrips">0</div><div class="sub">All bookings linked to this passenger</div></div>
+          <div class="overview-card"><div class="label">Open trips</div><div class="value" id="pvOpen">0</div><div class="sub">Pending, assigned, or in progress</div></div>
+          <div class="overview-card"><div class="label">Latest fare</div><div class="value" id="pvFare">$0.00</div><div class="sub">From your most recent booking</div></div>
+          <div class="overview-card"><div class="label">Readiness score</div><div class="value" id="pvReady">0%</div><div class="sub">Referral + contact + driver readiness</div></div>
         </div>
         <div class="grid-2">
           <div class="card section">
@@ -595,25 +605,25 @@
       </div>
 
       <div id="adminView" class="hidden">
-        <div class="grid-4 top-gap" id="adminOverviewBar">
-          <div class="card stat"><div class="k" id="aStatLive">0</div><div class="t">Live / open trips</div></div>
-          <div class="card stat"><div class="k" id="aStatUrgent">0</div><div class="t">Urgent / high priority</div></div>
-          <div class="card stat"><div class="k" id="aStatUnassigned">0</div><div class="t">Unassigned</div></div>
-          <div class="card stat"><div class="k" id="aStatNext">--</div><div class="t">Next pickup</div></div>
+        <div class="overview-grid" id="adminOverviewGrid">
+          <div class="overview-card"><div class="label">Live queue</div><div class="value" id="avLiveQueue">0</div><div class="sub">Pending and assigned jobs requiring action</div></div>
+          <div class="overview-card"><div class="label">Urgent / high priority</div><div class="value" id="avUrgent">0</div><div class="sub">Bookings tagged urgent or high</div></div>
+          <div class="overview-card"><div class="label">Team capacity</div><div class="value" id="avDrivers">0</div><div class="sub">Drivers available in the system</div></div>
+          <div class="overview-card"><div class="label">Sync status</div><div class="value health-ok" id="avSync">Live</div><div class="sub" id="avSyncSub">Firestore listener connected</div></div>
         </div>
         <div class="grid-2 top-gap">
           <div class="card section">
             <div class="section-title">Live operations queue</div>
-            <div class="section-sub">Newest requests, assignment gaps, and urgent actions.</div>
-            <div id="adminLiveQueue" class="notice-list"></div>
+            <div class="section-sub">Newest requests, priority jobs, and bookings needing admin action.</div>
+            <div id="adminLiveQueue" class="queue-list"></div>
           </div>
           <div class="card section">
             <div class="section-title">Data sync status</div>
-            <div class="section-sub">Quick health check so admin knows if passenger requests are reaching Firestore.</div>
-            <div id="adminDataSync" class="notice-list"></div>
+            <div class="section-sub">Quick health check for why admin may not see new bookings.</div>
+            <div id="adminSyncStatus" class="queue-list"></div>
           </div>
         </div>
-        <div class="split top-gap">
+        <div class="split">
           <div class="card section">
             <div class="trip-head">
               <div>
@@ -829,11 +839,11 @@
       </div>
 
       <div id="driverView" class="hidden">
-        <div class="grid-4 top-gap" id="driverOverviewBar">
-          <div class="card stat"><div class="k" id="dStatAssigned">0</div><div class="t">Assigned trips</div></div>
-          <div class="card stat"><div class="k" id="dStatActive">0</div><div class="t">Active now</div></div>
-          <div class="card stat"><div class="k" id="dStatNext">--</div><div class="t">Next pickup</div></div>
-          <div class="card stat"><div class="k" id="dStatCompletion">0%</div><div class="t">Completion rate</div></div>
+        <div class="overview-grid" id="driverOverviewGrid">
+          <div class="overview-card"><div class="label">Assigned today</div><div class="value" id="dvAssigned">0</div><div class="sub">Trips assigned to this driver</div></div>
+          <div class="overview-card"><div class="label">Open work</div><div class="value" id="dvOpen">0</div><div class="sub">Assigned and in-progress trips</div></div>
+          <div class="overview-card"><div class="label">Completion rate</div><div class="value" id="dvRate">0%</div><div class="sub">Completed versus accepted trips</div></div>
+          <div class="overview-card"><div class="label">Route confidence</div><div class="value" id="dvConfidence">0%</div><div class="sub">Live tracking + ETA + completion quality</div></div>
         </div>
         <div class="grid-2">
           <div class="card section">
@@ -1762,7 +1772,7 @@ if (!user) {
       const fare = computeLevel8FareAdjustments(calculateFare(km, rideType));
 
       try {
-        const created = await addDoc(collection(db, "bookings"), {
+        const bookingRef = await addDoc(collection(db, "bookings"), {
           paymentStatus: "unpaid",
           passengerUid: currentUser.uid,
           passengerName,
@@ -1806,31 +1816,29 @@ if (!user) {
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
-        console.log("UVEL booking created:", created.id);
-      } catch (err) {
-        console.error("UVEL booking create failed:", err);
-        alert("Booking could not be saved to Firestore. Check rules, collection fields, and users collection roles.");
-        return;
-      }
 
-      $("bookingForm").reset();
-      $("passengerName").value = currentProfile.name || "";
-      if ($("bookingPriority")) $("bookingPriority").value = "standard";
-      if ($("wheelchairRequired")) $("wheelchairRequired").value = "no";
-      if ($("companionRequired")) $("companionRequired").value = "no";
-      if ($("returnTrip")) $("returnTrip").value = "no";
-      if ($("returnTime")) $("returnTime").value = "";
-      if ($("referralSource")) $("referralSource").value = "self";
-      if ($("recurringPattern")) $("recurringPattern").value = "once";
-      if ($("referralEmail")) $("referralEmail").value = "";
-      if ($("pickupWindow")) $("pickupWindow").value = "exact";
-      $("farePreview").textContent = "Estimated fare: -- • Distance: -- • Payment: --";
-      $("passengerStatusLabel").textContent = "pending";
-      $("passengerStageLabel").textContent = "waiting";
-      $("passengerEtaLabel").textContent = "--";
-      $("passengerKmLabel").textContent = `${Number(km).toFixed(1)} km`;
-      updatePaymentButton();
-      alert("Ride request sent. Admin can now see it in another browser.");
+        $("bookingForm").reset();
+        $("passengerName").value = currentProfile.name || "";
+        if ($("bookingPriority")) $("bookingPriority").value = "standard";
+        if ($("wheelchairRequired")) $("wheelchairRequired").value = "no";
+        if ($("companionRequired")) $("companionRequired").value = "no";
+        if ($("returnTrip")) $("returnTrip").value = "no";
+        if ($("returnTime")) $("returnTime").value = "";
+        if ($("referralSource")) $("referralSource").value = "self";
+        if ($("recurringPattern")) $("recurringPattern").value = "once";
+        if ($("referralEmail")) $("referralEmail").value = "";
+        if ($("pickupWindow")) $("pickupWindow").value = "exact";
+        $("farePreview").textContent = "Estimated fare: -- • Distance: -- • Payment: --";
+        $("passengerStatusLabel").textContent = "pending";
+        $("passengerStageLabel").textContent = "waiting";
+        $("passengerEtaLabel").textContent = "--";
+        $("passengerKmLabel").textContent = `${Number(km).toFixed(1)} km`;
+        updatePaymentButton();
+        alert(`Ride request sent successfully. Booking ID: ${bookingRef.id}`);
+      } catch (err) {
+        console.error("Booking creation failed:", err);
+        alert(`Ride request failed: ${err.message || "Unknown Firestore error"}`);
+      }
     });
 
     function subscribeUsers() {
@@ -1846,11 +1854,24 @@ if (!user) {
 
     function subscribeBookings() {
       if (unsubBookings) unsubBookings();
-      unsubBookings = onSnapshot(query(collection(db, "bookings"), orderBy("tripDate", "desc")), (snap) => {
-        allBookings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderAdminMapBookingSelect();
-        renderEverything();
-      });
+      unsubBookings = onSnapshot(
+        query(collection(db, "bookings"), orderBy("tripDate", "desc")),
+        (snap) => {
+          allBookings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          if ($("avSync")) $("avSync").textContent = "Live";
+          if ($("avSyncSub")) $("avSyncSub").textContent = `${allBookings.length} bookings loaded from Firestore`;
+          renderAdminMapBookingSelect();
+          renderEverything();
+        },
+        (err) => {
+          console.error("Booking subscription error:", err);
+          if ($("avSync")) {
+            $("avSync").textContent = "Blocked";
+            $("avSync").className = "value health-bad";
+          }
+          if ($("avSyncSub")) $("avSyncSub").textContent = err.message || "Firestore rules or query error";
+        }
+      );
     }
 
     function startMetricsRefreshLoop() {
@@ -1935,110 +1956,6 @@ function renderAdminCharts() {
       });
     }
 
-
-    function formatPickupLabel(booking) {
-      if (!booking) return "--";
-      const date = booking.tripDate || "";
-      const time = booking.tripTime || "";
-      return [date, time].filter(Boolean).join(" ") || "--";
-    }
-
-    function safeSet(id, value) {
-      const el = $(id);
-      if (el) el.textContent = value;
-    }
-
-    function renderPassengerOverview() {
-      if (currentProfile?.role !== "passenger") return;
-      const trips = getPassengerBookings();
-      const active = trips.filter(b => !["completed", "cancelled"].includes(b.status));
-      const paidSpend = trips.filter(b => b.paymentStatus === "paid").reduce((s,b)=>s+Number(b.fare||0),0);
-      safeSet("pStatTotal", String(trips.length));
-      safeSet("pStatActive", String(active.length));
-      safeSet("pStatUpcoming", formatPickupLabel(active[0] || trips[0]));
-      safeSet("pStatSpend", `$${paidSpend.toFixed(2)}`);
-    }
-
-    function renderAdminOverview() {
-      if (currentProfile?.role !== "admin") return;
-      const openTrips = allBookings.filter(b => !["completed","cancelled"].includes(b.status));
-      const urgent = openTrips.filter(b => ["urgent","high"].includes((b.priority || "").toLowerCase()));
-      const unassigned = openTrips.filter(b => !b.assignedDriverUid);
-      safeSet("aStatLive", String(openTrips.length));
-      safeSet("aStatUrgent", String(urgent.length));
-      safeSet("aStatUnassigned", String(unassigned.length));
-      safeSet("aStatNext", formatPickupLabel(openTrips[0]));
-    }
-
-    function renderDriverOverview() {
-      if (currentProfile?.role !== "driver") return;
-      const trips = allBookings.filter(b => b.assignedDriverUid === currentUser.uid);
-      const active = trips.filter(b => ["assigned","in_progress","pending"].includes(b.status));
-      const completed = trips.filter(b => b.status === "completed").length;
-      const completionRate = trips.length ? Math.round((completed / trips.length) * 100) : 0;
-      safeSet("dStatAssigned", String(trips.length));
-      safeSet("dStatActive", String(active.length));
-      safeSet("dStatNext", formatPickupLabel(active[0] || trips[0]));
-      safeSet("dStatCompletion", `${completionRate}%`);
-    }
-
-    function renderAdminLiveQueue() {
-      if (currentProfile?.role !== "admin") return;
-      const wrap = $("adminLiveQueue");
-      if (!wrap) return;
-      const items = allBookings
-        .slice()
-        .sort((a,b) => {
-          const ap = {"urgent":0,"high":1,"standard":2}[String(a.priority||"standard").toLowerCase()] ?? 2;
-          const bp = {"urgent":0,"high":1,"standard":2}[String(b.priority||"standard").toLowerCase()] ?? 2;
-          if (ap !== bp) return ap - bp;
-          return String(a.tripDate||"").localeCompare(String(b.tripDate||"")) || String(a.tripTime||"").localeCompare(String(b.tripTime||""));
-        })
-        .slice(0,6);
-      if (!items.length) {
-        wrap.innerHTML = `<div class="empty">No requests yet. Create a booking from a passenger account and it should appear here live.</div>`;
-        return;
-      }
-      wrap.innerHTML = items.map(b => `
-        <div class="notice-item">
-          <div class="trip-head">
-            <div>
-              <div style="font-size:16px;font-weight:800">${escapeHtml(b.passengerName || "Passenger")}</div>
-              <div class="tiny">${escapeHtml(b.pickup || "--")} → ${escapeHtml(b.destination || "--")}</div>
-            </div>
-            <div class="seg">
-              <span class="badge ${escapeHtml(b.status || "pending")}">${escapeHtml(b.status || "pending")}</span>
-              <span class="status-chip">${escapeHtml((b.priority || "standard").toUpperCase())}</span>
-            </div>
-          </div>
-          <div class="mini-actions">
-            <span class="tiny">Pickup: ${escapeHtml(formatPickupLabel(b))}</span>
-            <span class="tiny">Driver: ${escapeHtml(b.assignedDriverName || "Unassigned")}</span>
-            <span class="tiny">Payment: ${escapeHtml(b.paymentStatus || "unpaid")}</span>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    function renderAdminDataSync() {
-      if (currentProfile?.role !== "admin") return;
-      const wrap = $("adminDataSync");
-      if (!wrap) return;
-      const hasUsers = allUsers.length > 0;
-      const passengers = allUsers.filter(u => u.role === "passenger").length;
-      const drivers = allUsers.filter(u => u.role === "driver").length;
-      const recent = allBookings.slice().sort((a,b)=>{
-        const at = a.createdAt?.seconds || 0;
-        const bt = b.createdAt?.seconds || 0;
-        return bt - at;
-      })[0];
-      wrap.innerHTML = `
-        <div class="notice-item"><strong>Firestore booking feed</strong><div class="tiny">${allBookings.length ? "Connected - bookings are loading." : "Connected - no booking documents found yet."}</div></div>
-        <div class="notice-item"><strong>User profiles</strong><div class="tiny">${hasUsers ? `${passengers} passenger(s), ${drivers} driver(s), ${allUsers.filter(u=>u.role==="admin").length} admin(s)` : "No user docs loaded. Check users collection."}</div></div>
-        <div class="notice-item"><strong>Latest booking</strong><div class="tiny">${recent ? `${escapeHtml(recent.passengerName || "Passenger")} • ${escapeHtml(recent.pickup || "--")} → ${escapeHtml(recent.destination || "--")}` : "No recent booking yet."}</div></div>
-      `;
-    }
-
     async function renderEverything() {
       renderStats();
       renderPassengerOverview();
@@ -2046,9 +1963,9 @@ function renderAdminCharts() {
       renderDriverOverview();
       renderPassengerTrips();
       renderAdminBookings();
-      renderDriverTrips();
       renderAdminLiveQueue();
-      renderAdminDataSync();
+      renderAdminSyncStatus();
+      renderDriverTrips();
       renderPassengerManagement();
       renderDriverManagement();
       renderDriverEarningsSummary();
@@ -2080,6 +1997,87 @@ function renderAdminCharts() {
         await renderRideTemplates();
       }
       updateMapsFromLatest();
+    }
+
+
+    function latestByCreated(bookings) {
+      return bookings.slice().sort((a,b) => {
+        const as = a?.createdAt?.seconds || 0;
+        const bs = b?.createdAt?.seconds || 0;
+        return bs - as;
+      })[0] || null;
+    }
+
+    function computePassengerReadinessScore(booking) {
+      if (!booking) return 0;
+      let score = 25;
+      if (booking.referralSource && booking.referralSource !== "self") score += 15;
+      if (booking.emergencyContact) score += 15;
+      if (booking.pickupWindow) score += 10;
+      if (booking.assignedDriverUid) score += 20;
+      if (booking.driverStage && booking.driverStage !== "waiting") score += 15;
+      return Math.min(100, score);
+    }
+
+    function renderPassengerOverview() {
+      if (currentProfile?.role !== "passenger") return;
+      const trips = getPassengerBookings();
+      const latest = latestByCreated(trips);
+      const open = trips.filter(b => !["completed","cancelled"].includes(b.status)).length;
+      if ($("pvTrips")) $("pvTrips").textContent = String(trips.length);
+      if ($("pvOpen")) $("pvOpen").textContent = String(open);
+      if ($("pvFare")) $("pvFare").textContent = `$${Number(latest?.fare || 0).toFixed(2)}`;
+      if ($("pvReady")) $("pvReady").textContent = `${computePassengerReadinessScore(latest)}%`;
+    }
+
+    function renderAdminOverview() {
+      if (currentProfile?.role !== "admin") return;
+      const live = allBookings.filter(b => ["pending","assigned","in_progress"].includes(b.status));
+      const urgent = allBookings.filter(b => ["urgent","high"].includes(String(b.priority || "").toLowerCase())).length;
+      if ($("avLiveQueue")) $("avLiveQueue").textContent = String(live.length);
+      if ($("avUrgent")) $("avUrgent").textContent = String(urgent);
+      if ($("avDrivers")) $("avDrivers").textContent = String(allDrivers.length);
+      if ($("avSync") && !$("avSync").textContent.trim()) $("avSync").textContent = "Live";
+    }
+
+    function renderDriverOverview() {
+      if (currentProfile?.role !== "driver") return;
+      const trips = allBookings.filter(b => b.assignedDriverUid === currentUser.uid);
+      const open = trips.filter(b => ["assigned","in_progress","pending"].includes(b.status)).length;
+      const completed = trips.filter(b => b.status === "completed").length;
+      const accepted = trips.filter(b => b.acceptanceStatus === "accepted" || b.status !== "pending").length;
+      const rate = accepted ? Math.round((completed / accepted) * 100) : 0;
+      const confidence = Math.min(100, Math.round(((completed * 25) + (trips.filter(b => b.driverStage && b.driverStage !== "waiting").length * 15) + (trips.filter(b => b.paymentStatus === "paid").length * 10)) / Math.max(1, trips.length)));
+      if ($("dvAssigned")) $("dvAssigned").textContent = String(trips.length);
+      if ($("dvOpen")) $("dvOpen").textContent = String(open);
+      if ($("dvRate")) $("dvRate").textContent = `${rate}%`;
+      if ($("dvConfidence")) $("dvConfidence").textContent = `${confidence}%`;
+    }
+
+    function renderAdminLiveQueue() {
+      const box = $("adminLiveQueue");
+      if (!box || currentProfile?.role !== "admin") return;
+      const items = allBookings.slice().sort((a,b)=> (b?.createdAt?.seconds||0)-(a?.createdAt?.seconds||0)).slice(0,8);
+      if (!items.length) {
+        box.innerHTML = `<div class="empty">No live bookings yet. Create a ride from a passenger account and it will appear here instantly.</div>`;
+        return;
+      }
+      box.innerHTML = items.map(b => {
+        const pr = escapeHtml((b.priority || "standard").toUpperCase());
+        const cls = b.priority === "urgent" ? "health-bad" : (b.priority === "high" ? "health-warn" : "health-ok");
+        return `<div class="queue-item"><div class="trip-head"><div><strong>${escapeHtml(b.passengerName || "Passenger")}</strong><div class="tiny">${escapeHtml(b.pickup || "")} → ${escapeHtml(b.destination || "")}</div></div><div class="${cls}">${pr}</div></div><div class="chip-row"><span class="chip">${escapeHtml(b.status || "pending")}</span><span class="chip">${escapeHtml(b.tripDate || "--")} ${escapeHtml(b.tripTime || "")}</span><span class="chip">${escapeHtml(b.rideType || "normal")}</span><span class="chip">${escapeHtml(b.paymentStatus || "unpaid")}</span></div></div>`;
+      }).join("");
+    }
+
+    function renderAdminSyncStatus() {
+      const box = $("adminSyncStatus");
+      if (!box || currentProfile?.role !== "admin") return;
+      const latest = latestByCreated(allBookings);
+      const hasBookings = allBookings.length > 0;
+      box.innerHTML = `
+        <div class="queue-item"><strong>Firestore listener</strong><div class="tiny ${hasBookings ? 'health-ok' : 'health-warn'}">${hasBookings ? 'Connected and receiving booking documents.' : 'Connected, but there are no booking documents yet.'}</div></div>
+        <div class="queue-item"><strong>Latest booking</strong><div class="tiny">${latest ? `${escapeHtml(latest.passengerName || 'Passenger')} • ${escapeHtml(latest.pickup || '')} → ${escapeHtml(latest.destination || '')}` : 'No booking received yet from passenger side.'}</div></div>
+        <div class="queue-item"><strong>Likely issue if admin sees nothing</strong><div class="tiny">Create a booking from a passenger account, then check Firestore bookings collection and Firestore rules.</div></div>`;
     }
 
     function renderAdminMapBookingSelect() {
@@ -2127,19 +2125,10 @@ function renderAdminCharts() {
       const trips = getPassengerBookings();
       const wrap = $("passengerTrips");
       if (!trips.length) {
-        wrap.innerHTML = `<div class="empty">No bookings yet. Submit a request from this dashboard and it will appear here after Firestore confirms the write.</div>`;
+        wrap.innerHTML = `<div class="empty">No bookings yet.</div>`;
         return;
       }
-      wrap.innerHTML = trips.map(b => `
-        <div class="book-card">
-          <div class="chip-row">
-            <span class="chip">Priority: ${escapeHtml((b.priority || "standard").toUpperCase())}</span>
-            <span class="chip">Payment: ${escapeHtml(b.paymentStatus || "unpaid")}</span>
-            <span class="chip">Pickup: ${escapeHtml(formatPickupLabel(b))}</span>
-          </div>
-          ${bookingCardHTML(b)}
-        </div>
-      `).join("");
+      wrap.innerHTML = trips.map(bookingCardHTML).join("");
       const latest = trips[0];
       $("passengerRouteLabel").textContent = `${latest.pickup} → ${latest.destination}`;
       $("passengerStatusLabel").textContent = latest.status;
@@ -2190,8 +2179,7 @@ function renderAdminCharts() {
       const wrap = $("adminBookings");
       const items = getFilteredAdminBookings();
       if (!items.length) {
-        const hasBookings = allBookings.length > 0;
-        wrap.innerHTML = `<div class="empty">${hasBookings ? "No bookings match these filters." : "No booking requests yet. Sign in as a passenger, submit a ride, and it should appear here live if Firestore write rules allow it."}</div>`;
+        wrap.innerHTML = `<div class="empty">No bookings match these filters.</div>`;
         return;
       }
       wrap.innerHTML = items.map(b => `
@@ -2236,16 +2224,11 @@ function renderAdminCharts() {
       const trips = allBookings.filter(b => b.assignedDriverUid === currentUser.uid);
       const wrap = $("driverTrips");
       if (!trips.length) {
-        wrap.innerHTML = `<div class="empty">No assigned trips yet. Once admin assigns a booking to this driver, it will appear here live.</div>`;
+        wrap.innerHTML = `<div class="empty">No assigned trips yet.</div>`;
         return;
       }
       wrap.innerHTML = trips.map(b => `
         <div class="book-card">
-          <div class="chip-row">
-            <span class="chip">Priority: ${escapeHtml((b.priority || "standard").toUpperCase())}</span>
-            <span class="chip">Payment: ${escapeHtml(b.paymentStatus || "unpaid")}</span>
-            <span class="chip">Pickup: ${escapeHtml(formatPickupLabel(b))}</span>
-          </div>
           ${bookingCardHTML(b)}
           <div class="status-row top-gap">
             ${b.acceptanceStatus !== "accepted" ? `<button class="btn small brand" onclick="window.driverRespondBooking('${b.id}','accepted')">Accept</button>` : ""}
