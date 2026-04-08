@@ -3203,6 +3203,372 @@ function renderAdminCharts() {
     }
   
 
+
+// ===== UVEL Real Level 12 Upgrade Pack =====
+// This block keeps auth/login/signup/reset password unchanged.
+// It upgrades operational logic, dynamic scoring, compliance summaries,
+// orchestration views, driver excellence, and provides stronger invoice/export handling.
+
+function qsa(sel, root=document){ return Array.from(root.querySelectorAll(sel)); }
+function sectionByTitle(title){
+  return qsa('.card.section').find(sec => sec.querySelector('.section-title')?.textContent?.trim() === title) || null;
+}
+function stackOfSection(title){
+  const sec = sectionByTitle(title);
+  return sec ? sec.querySelector('.stack-list, .notice-list, .template-list, .fleet-health-list, .saved-places-list, .kanban-board') : null;
+}
+function setSectionSub(title, text){
+  const sec = sectionByTitle(title);
+  const sub = sec?.querySelector('.section-sub');
+  if (sub) sub.textContent = text;
+}
+function money(n){ return `$${Number(n||0).toFixed(2)}`; }
+function pct(n){ return `${Math.max(0, Math.min(100, Math.round(Number(n||0))))}%`; }
+function bookingSortNewest(a,b){
+  const at = a?.createdAt?.seconds || 0;
+  const bt = b?.createdAt?.seconds || 0;
+  return bt - at;
+}
+function safeDateTime(booking){
+  return new Date(`${booking?.tripDate || ''}T${booking?.tripTime || '00:00'}`);
+}
+function isUpcoming(booking){
+  const dt = safeDateTime(booking).getTime();
+  return Number.isFinite(dt) && dt >= Date.now();
+}
+function hoursUntil(booking){
+  const dt = safeDateTime(booking).getTime();
+  if (!Number.isFinite(dt)) return 9999;
+  return (dt - Date.now()) / 36e5;
+}
+function latestBookingForPassenger(uid){
+  return allBookings.filter(b => b.passengerUid === uid).sort(bookingSortNewest)[0] || null;
+}
+function latestAssignedForDriver(uid){
+  return allBookings.filter(b => b.assignedDriverUid === uid).sort(bookingSortNewest)[0] || null;
+}
+function average(arr){
+  return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+}
+function computeBookingReadiness(booking){
+  if (!booking) return { score: 0, checks: [] };
+  const checks = [
+    ['Pickup', !!booking.pickup],
+    ['Destination', !!booking.destination],
+    ['Date/time', !!booking.tripDate && !!booking.tripTime],
+    ['Contact', !!booking.passengerEmail || !!booking.emergencyContact],
+    ['Referral', booking.rideType !== 'ndis' || !!booking.referralSource],
+    ['Pickup window', !!booking.pickupWindow],
+    ['Support notes', !!booking.notes || !!booking.wheelchairRequired || !!booking.companionRequired],
+    ['Fare', Number(booking.fare || 0) > 0],
+    ['Route', Number(booking.distanceKm || 0) > 0]
+  ];
+  const score = Math.round((checks.filter(v => v[1]).length / checks.length) * 100);
+  return { score, checks };
+}
+function computeJourneyConfidence(booking){
+  if (!booking) return { score: 0, reasons: [] };
+  const parts = [];
+  let score = 20;
+  if (booking.assignedDriverUid) { score += 20; parts.push('Driver assigned'); }
+  if (booking.acceptanceStatus === 'accepted') { score += 10; parts.push('Driver accepted'); }
+  if (booking.driverLat && booking.driverLng) { score += 15; parts.push('Live tracking'); }
+  if (booking.pickupOtpVerified) { score += 10; parts.push('Pickup OTP verified'); }
+  if (booking.dropoffOtpVerified) { score += 10; parts.push('Drop-off OTP verified'); }
+  if (booking.status === 'completed') { score += 10; parts.push('Trip completed'); }
+  if (booking.paymentStatus === 'paid' || booking.rideType === 'ndis') { score += 5; parts.push('Payment path ready'); }
+  if (Number(booking.distanceKm || 0) > 0) { score += 5; parts.push('Distance estimated'); }
+  if (booking.pickup && booking.destination) { score += 5; parts.push('Route endpoints set'); }
+  return { score: Math.min(100, score), reasons: parts };
+}
+function computeCareReadiness(booking){
+  if (!booking) return { score: 0, needs: [] };
+  const needs = [];
+  let score = 35;
+  if (booking.emergencyContact) { score += 10; } else needs.push('Emergency contact');
+  if (booking.wheelchairRequired) { score += 10; }
+  if (booking.companionRequired) { score += 5; }
+  if (booking.returnTrip === 'yes' && booking.returnTime) { score += 10; } else if (booking.returnTrip === 'yes') needs.push('Return time');
+  if (booking.notes) { score += 10; }
+  if (booking.serviceType) { score += 10; }
+  if (booking.referralSource) { score += 10; }
+  return { score: Math.min(100, score), needs };
+}
+function computeDriverExcellence(uid){
+  const trips = allBookings.filter(b => b.assignedDriverUid === uid);
+  if (!trips.length) return { score: 0, accepted: 0, completed: 0, tracking: 0, otp: 0 };
+  const accepted = trips.filter(b => b.acceptanceStatus === 'accepted').length;
+  const completed = trips.filter(b => b.status === 'completed').length;
+  const tracking = trips.filter(b => b.driverLat && b.driverLng).length;
+  const otp = trips.filter(b => b.pickupOtpVerified && b.dropoffOtpVerified).length;
+  const payoutReady = trips.filter(b => b.status === 'completed' && b.paymentStatus === 'paid').length;
+  const score = Math.round(
+    (accepted / trips.length) * 25 +
+    (completed / trips.length) * 35 +
+    (tracking / trips.length) * 15 +
+    (otp / trips.length) * 15 +
+    (payoutReady / trips.length) * 10
+  );
+  return { score, accepted, completed, tracking, otp, total: trips.length, payoutReady };
+}
+function computeDemandForecast(){
+  const upcoming = allBookings.filter(b => b.status !== 'cancelled' && isUpcoming(b));
+  const byHour = {};
+  const byService = {};
+  upcoming.forEach(b => {
+    const dt = safeDateTime(b);
+    const hour = Number.isFinite(dt.getTime()) ? dt.getHours() : 0;
+    byHour[hour] = (byHour[hour] || 0) + 1;
+    byService[b.serviceType || 'general'] = (byService[b.serviceType || 'general'] || 0) + 1;
+  });
+  const peak = Object.entries(byHour).sort((a,b)=>b[1]-a[1])[0];
+  const topService = Object.entries(byService).sort((a,b)=>b[1]-a[1])[0];
+  return {
+    upcoming: upcoming.length,
+    peakHour: peak ? `${String(peak[0]).padStart(2,'0')}:00` : '--',
+    peakLoad: peak ? peak[1] : 0,
+    topService: topService ? topService[0] : '--',
+    topServiceLoad: topService ? topService[1] : 0
+  };
+}
+function computeOperationalHealth(){
+  const active = allBookings.filter(b => !['completed','cancelled'].includes(b.status));
+  const onlineDrivers = allDrivers.filter(d => (d.availability || 'online') === 'online');
+  const load = onlineDrivers.length ? active.length / onlineDrivers.length : active.length;
+  const unpaidCompleted = allBookings.filter(b => b.status === 'completed' && b.paymentStatus !== 'paid').length;
+  const urgentUnassigned = allBookings.filter(b => b.priority === 'urgent' && !b.assignedDriverUid && b.status !== 'cancelled').length;
+  const score = Math.max(0, Math.min(100, Math.round(100 - (load * 12) - (urgentUnassigned * 12) - (unpaidCompleted * 6))));
+  return { active: active.length, onlineDrivers: onlineDrivers.length, load, unpaidCompleted, urgentUnassigned, score };
+}
+function complianceMilestones(booking){
+  if (!booking) return [];
+  return [
+    ['Before trip', !!booking.pickup && !!booking.destination && !!booking.tripDate && !!booking.tripTime && !!booking.emergencyContact],
+    ['Dispatch', !!booking.assignedDriverUid],
+    ['Driver accepted', booking.acceptanceStatus === 'accepted'],
+    ['Live tracking', !!booking.driverLat && !!booking.driverLng],
+    ['Pickup verified', !!booking.pickupOtpVerified],
+    ['Drop-off verified', !!booking.dropoffOtpVerified],
+    ['Completion proof', !!booking.completionProofNote || !!booking.completionProofLink],
+    ['Financial close', booking.paymentStatus === 'paid' || booking.rideType === 'ndis']
+  ];
+}
+function scoreBadge(score){
+  const label = score >= 85 ? 'Excellent' : score >= 70 ? 'Strong' : score >= 50 ? 'Moderate' : 'Needs work';
+  return `${pct(score)} • ${label}`;
+}
+function cardHtml(title, body){
+  return `<div class="level12-item"><strong>${escapeHtml(title)}</strong><div class="tiny" style="margin-top:6px">${body}</div></div>`;
+}
+function renderRealPassengerLevel12(){
+  if (currentProfile?.role !== 'passenger') return;
+  const latest = latestBookingForPassenger(currentUser.uid);
+  const bookingReady = computeBookingReadiness(latest);
+  const journey = computeJourneyConfidence(latest);
+  const care = computeCareReadiness(latest);
+
+  const careWrap = stackOfSection('Care circles');
+  if (careWrap) {
+    careWrap.innerHTML = latest ? [
+      cardHtml('Primary contact', latest.emergencyContact ? escapeHtml(latest.emergencyContact) : 'Missing emergency contact'),
+      cardHtml('Support network', [latest.referralSource, latest.referralEmail].filter(Boolean).map(escapeHtml).join(' • ') || 'Self-managed / not added'),
+      cardHtml('Travel profile', `Wheelchair: ${escapeHtml(latest.wheelchairRequired || 'no')} • Companion: ${escapeHtml(latest.companionRequired || 'no')} • Return trip: ${escapeHtml(latest.returnTrip || 'no')}`)
+    ].join('') : `<div class="empty">Create your first trip to build your care circle.</div>`;
+  }
+
+  const scoreWrap = stackOfSection('Readiness scoring');
+  if (scoreWrap) {
+    scoreWrap.innerHTML = latest ? [
+      cardHtml('Booking readiness', `${scoreBadge(bookingReady.score)}<br>${bookingReady.checks.map(c => `${c[1] ? '✓' : '•'} ${escapeHtml(c[0])}`).join('<br>')}`),
+      cardHtml('Trip confidence', `${scoreBadge(journey.score)}<br>${journey.reasons.length ? journey.reasons.map(escapeHtml).join('<br>') : 'Awaiting driver and live operations data'}`),
+      cardHtml('Care readiness', `${scoreBadge(care.score)}<br>${care.needs.length ? 'Needs: ' + care.needs.map(escapeHtml).join(', ') : 'Support details look ready'}`)
+    ].join('') : `<div class="empty">No booking yet.</div>`;
+  }
+
+  const confidenceWrap = stackOfSection('Journey confidence');
+  if (confidenceWrap) {
+    confidenceWrap.innerHTML = latest ? [
+      cardHtml('On-time preparation', `Trip in ${Math.max(0, Math.round(hoursUntil(latest)*10)/10)} hours • Pickup window: ${escapeHtml(latest.pickupWindow || 'exact')}`),
+      cardHtml('Safe completion', `${latest.pickupOtpVerified ? 'Pickup verified' : 'Pickup not verified'} • ${latest.dropoffOtpVerified ? 'Drop-off verified' : 'Drop-off not verified'} • ${latest.completionProofNote || latest.completionProofLink ? 'Proof captured' : 'Proof pending'}`),
+      cardHtml('Support continuity', `Recurring: ${escapeHtml(latest.recurringPattern || 'once')} • Service: ${escapeHtml(latest.serviceType || 'medical')} • Driver: ${escapeHtml(latest.assignedDriverName || 'Unassigned')}`)
+    ].join('') : `<div class="empty">No journey confidence data yet.</div>`;
+  }
+}
+function renderRealAdminLevel12(){
+  if (currentProfile?.role !== 'admin') return;
+  const health = computeOperationalHealth();
+  const forecast = computeDemandForecast();
+  const latest = allBookings.slice().sort(bookingSortNewest)[0];
+
+  const orchestrationWrap = stackOfSection('Orchestration hub');
+  if (orchestrationWrap) {
+    orchestrationWrap.innerHTML = [
+      cardHtml('Assignment readiness', `${scoreBadge(health.score)}<br>Active jobs: ${health.active}<br>Online drivers: ${health.onlineDrivers}<br>Load per online driver: ${health.load.toFixed(1)}`),
+      cardHtml('Service balance', `Urgent unassigned: ${health.urgentUnassigned}<br>Completed unpaid: ${health.unpaidCompleted}<br>Paid revenue: ${money(calculatePaidRevenue(allBookings))}`),
+      cardHtml('Referral flow', `${allBookings.filter(b=>b.referralSource==='hospital').length} hospital • ${allBookings.filter(b=>b.referralSource==='support_coordinator').length} coordinator • ${allBookings.filter(b=>b.referralSource==='family').length} family`)
+    ].join('');
+  }
+
+  const timelineWrap = stackOfSection('Compliance timeline');
+  if (timelineWrap) {
+    const marks = complianceMilestones(latest);
+    timelineWrap.innerHTML = latest ? marks.map(([label, ok]) =>
+      `<div class="timeline-item"><strong>${escapeHtml(label)}</strong><div class="tiny" style="margin-top:6px">${ok ? '✓ complete' : '• pending'} • ${escapeHtml(latest.passengerName || 'Passenger')} • ${escapeHtml(latest.tripDate || '')} ${escapeHtml(latest.tripTime || '')}</div></div>`
+    ).join('') : `<div class="empty">No booking timeline yet.</div>`;
+  }
+
+  const careWrap = stackOfSection('Care circles');
+  if (careWrap) {
+    const latestSupport = latest ? [latest.referralSource, latest.referralEmail, latest.emergencyContact].filter(Boolean) : [];
+    careWrap.innerHTML = latest ? [
+      cardHtml('Participant', `${escapeHtml(latest.passengerName || 'Passenger')} • ${escapeHtml(latest.serviceType || 'medical')} • ${escapeHtml(latest.priority || 'standard')}`),
+      cardHtml('Support network', latestSupport.length ? latestSupport.map(escapeHtml).join('<br>') : 'No linked support contacts yet'),
+      cardHtml('Service team', `Driver: ${escapeHtml(latest.assignedDriverName || 'Unassigned')}<br>Status: ${escapeHtml(latest.status || 'pending')}<br>Acceptance: ${escapeHtml(latest.acceptanceStatus || 'pending')}`)
+    ].join('') : `<div class="empty">No participant journey yet.</div>`;
+  }
+
+  const predictiveWrap = stackOfSection('Predictive demand');
+  if (predictiveWrap) {
+    predictiveWrap.innerHTML = [
+      cardHtml('Morning medical peak', `Upcoming bookings: ${forecast.upcoming}<br>Peak hour: ${escapeHtml(forecast.peakHour)} • Load: ${forecast.peakLoad}`),
+      cardHtml('Driver capacity watch', `Online drivers: ${health.onlineDrivers}<br>Active jobs: ${health.active}<br>Average load: ${health.load.toFixed(1)}`),
+      cardHtml('Referral load trend', `Top service: ${escapeHtml(forecast.topService)} (${forecast.topServiceLoad})<br>NDIS trips: ${allBookings.filter(b=>b.rideType==='ndis').length}<br>Normal trips: ${allBookings.filter(b=>b.rideType!=='ndis').length}`)
+    ].join('');
+  }
+
+  const vaultWrap = stackOfSection('Compliance vault');
+  if (vaultWrap) {
+    const proofCount = allBookings.filter(b => b.completionProofNote || b.completionProofLink).length;
+    const otpCount = allBookings.filter(b => b.pickupOtpVerified && b.dropoffOtpVerified).length;
+    const riskCount = allBookings.filter(b => getRiskLevel(b) !== 'low').length;
+    vaultWrap.innerHTML = [
+      cardHtml('Service proof', `Trips with proof: ${proofCount}<br>Trips with both OTP checks: ${otpCount}<br>Invoices possible: ${allBookings.length}`),
+      cardHtml('Risk records', `High/mid risk trips: ${riskCount}<br>Cancelled trips: ${allBookings.filter(b=>b.status==='cancelled').length}<br>Declined assignments: ${allBookings.filter(b=>b.acceptanceStatus==='declined').length}`),
+      cardHtml('Family and emergency details', `Trips with emergency contact: ${allBookings.filter(b=>b.emergencyContact).length}<br>Trips with referral email: ${allBookings.filter(b=>b.referralEmail).length}`)
+    ].join('');
+  }
+}
+function renderRealDriverLevel12(){
+  if (currentProfile?.role !== 'driver') return;
+  const latest = latestAssignedForDriver(currentUser.uid);
+  const excellence = computeDriverExcellence(currentUser.uid);
+  const journey = computeJourneyConfidence(latest);
+
+  const excellenceWrap = stackOfSection('Driver excellence');
+  if (excellenceWrap) {
+    excellenceWrap.innerHTML = [
+      cardHtml('Completion discipline', `${scoreBadge(excellence.score)}<br>Accepted: ${excellence.accepted}/${excellence.total}<br>Completed: ${excellence.completed}/${excellence.total}`),
+      cardHtml('Care delivery', `Trips with full OTP: ${excellence.otp}<br>Payout-ready trips: ${excellence.payoutReady}<br>Proof records: ${allBookings.filter(b=>b.assignedDriverUid===currentUser.uid && (b.completionProofNote || b.completionProofLink)).length}`),
+      cardHtml('Route quality', `Tracking sessions: ${excellence.tracking}<br>Latest stage: ${escapeHtml(latest?.driverStage || latest?.status || 'No active trip')}<br>Latest ETA confidence: ${pct(journey.score)}`)
+    ].join('');
+  }
+
+  const shiftWrap = stackOfSection('Shift readiness');
+  if (shiftWrap) {
+    shiftWrap.innerHTML = latest ? [
+      cardHtml('Vehicle readiness', `Vehicle: ${escapeHtml(currentProfile.vehicle || 'Not set')}<br>Availability: ${escapeHtml(currentProfile.availability || 'online')}`),
+      cardHtml('Job readiness', `Passenger: ${escapeHtml(latest.passengerName || 'Passenger')}<br>Route: ${escapeHtml(latest.pickup || '')} → ${escapeHtml(latest.destination || '')}<br>Priority: ${escapeHtml(latest.priority || 'standard')}`),
+      cardHtml('Handover readiness', `Notes: ${escapeHtml(latest.notes || 'No special notes')}<br>Return trip: ${escapeHtml(latest.returnTrip || 'no')}<br>Emergency contact: ${escapeHtml(latest.emergencyContact || 'Not added')}`)
+    ].join('') : `<div class="empty">No assigned trip yet.</div>`;
+  }
+
+  const journeyWrap = stackOfSection('Journey confidence');
+  if (journeyWrap) {
+    journeyWrap.innerHTML = latest ? [
+      cardHtml('Pickup confidence', `Pickup OTP: ${latest.pickupOtpVerified ? 'verified' : 'pending'}<br>Passenger notes: ${escapeHtml(latest.notes || 'None')}<br>Pickup ETA confidence: ${pct(journey.score)}`),
+      cardHtml('Completion confidence', `Drop-off OTP: ${latest.dropoffOtpVerified ? 'verified' : 'pending'}<br>Proof: ${latest.completionProofNote || latest.completionProofLink ? 'captured' : 'pending'}`),
+      cardHtml('Service confidence', `Acceptance: ${escapeHtml(latest.acceptanceStatus || 'pending')}<br>Status: ${escapeHtml(latest.status || 'assigned')}<br>Live tracking: ${latest.driverLat ? 'active' : 'off'}`)
+    ].join('') : `<div class="empty">No journey confidence data yet.</div>`;
+  }
+}
+function renderEnhancedOperationalPanels(){
+  renderRealPassengerLevel12();
+  renderRealAdminLevel12();
+  renderRealDriverLevel12();
+}
+const __origRenderEverything = renderEverything;
+renderEverything = async function(){
+  await __origRenderEverything();
+  renderEnhancedOperationalPanels();
+};
+const __origRenderStats = renderStats;
+renderStats = function(){
+  __origRenderStats();
+  const health = computeOperationalHealth();
+  const paid = calculatePaidRevenue(allBookings);
+  const statRevenue = $('statRevenue');
+  if (statRevenue) statRevenue.title = `Operational health ${health.score}%`;
+  const statToday = $('statTodayRevenue');
+  if (statToday) statToday.title = `Paid revenue total ${money(paid)}`;
+};
+
+const __origExportInvoice = exportInvoice;
+exportInvoice = async function(bookingId){
+  const booking = allBookings.find(b => b.id === bookingId);
+  if (!booking) return alert('Booking not found.');
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  const line = (txt, x=14, step=6) => { pdf.text(String(txt), x, y); y += step; };
+  let y = 16;
+  pdf.setFontSize(19); line('UVEL Transport Invoice', 14, 8);
+  pdf.setFontSize(10);
+  line(PROVIDER.name); line(`ABN: ${PROVIDER.abn}`); line(PROVIDER.address); line(`${PROVIDER.email} • ${PROVIDER.phone}`, 14, 8);
+
+  pdf.setDrawColor(180); pdf.line(14, y, 196, y); y += 8;
+  pdf.setFontSize(12); line(`Invoice date: ${new Date().toISOString().slice(0,10)}`);
+  line(`Booking code: ${booking.bookingCode || booking.id}`);
+  line(`Passenger: ${booking.passengerName || '-'}`);
+  line(`Trip: ${booking.tripDate || '-'} ${booking.tripTime || '-'}`);
+  line(`Route: ${booking.pickup || '-'} -> ${booking.destination || '-'}`, 14, 8);
+  if (booking.extraStop) line(`Extra stop: ${booking.extraStop}`);
+  line(`Service type: ${booking.serviceType || '-'} • Ride type: ${booking.rideType || '-'}`);
+  line(`Assigned driver: ${booking.assignedDriverName || 'Unassigned'}`, 14, 8);
+
+  pdf.setFillColor(10, 35, 55);
+  pdf.rect(14, y, 182, 10, "F");
+  pdf.setTextColor(255,255,255);
+  pdf.text("Line item", 16, y + 7);
+  pdf.text("Qty", 120, y + 7);
+  pdf.text("Unit", 142, y + 7);
+  pdf.text("Amount", 170, y + 7);
+  pdf.setTextColor(0,0,0);
+  y += 16;
+
+  const items = [
+    ['Base transport fare', 1, Number(booking.fare || 0)],
+    ...(booking.extraStop ? [['Extra stop handling', 1, 7.5]] : []),
+    ...(Number(booking.waitMinutes || 0) > 0 ? [['Wait time support', Number(booking.waitMinutes || 0), 0.65]] : [])
+  ];
+  let total = 0;
+  items.forEach(([name, qty, unit]) => {
+    const amount = Math.round(Number(qty) * Number(unit) * 100) / 100;
+    total += amount;
+    pdf.rect(14, y - 4, 182, 12);
+    pdf.text(String(name), 16, y + 3);
+    pdf.text(String(qty), 122, y + 3);
+    pdf.text(money(unit), 142, y + 3);
+    pdf.text(money(amount), 170, y + 3);
+    y += 14;
+  });
+  y += 4;
+  pdf.setFontSize(12); pdf.text(`Total due: ${money(total || booking.fare || 0)}`, 148, y);
+  y += 10;
+  pdf.setFontSize(10);
+  line(`Payment status: ${booking.paymentStatus || 'unpaid'}`);
+  line(`Payment method: ${booking.paymentMethod || '-'}`);
+  line(`Compliance: Pickup OTP ${booking.pickupOtpVerified ? 'yes' : 'no'} • Drop-off OTP ${booking.dropoffOtpVerified ? 'yes' : 'no'}`);
+  if (booking.notes) line(`Support notes: ${booking.notes}`, 14, 8);
+  if (booking.completionProofNote) line(`Completion note: ${booking.completionProofNote}`, 14, 8);
+  pdf.save(`uvel_invoice_${(booking.bookingCode || booking.id).replace(/[^a-z0-9_-]/gi,'_')}.pdf`);
+};
+
+function installSecurityAndDeploymentNotice(){
+  const authHelp = $('authDebug');
+  if (!authHelp || authHelp.dataset.level12UpgradeInstalled) return;
+  authHelp.dataset.level12UpgradeInstalled = '1';
+}
+installSecurityAndDeploymentNotice();
+
 </script>
 </body>
 </html>
