@@ -206,34 +206,29 @@
     .level12-item,.timeline-item,.circle-item,.score-item,.excellence-item,.orchestration-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
 
   
-/* ===== UVEL Week 4 / Level 9 UI upgrade ===== */
-body.week4-upgrade .header .subtitle{content:"";font-size:13px}
-body.week4-upgrade .header .subtitle,
-body.week4-upgrade #authScreen .subtitle{color:#b7d9ea}
-body.week4-upgrade .week4-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
-body.week4-upgrade .week4-tab{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);border-radius:14px;padding:10px 14px;font-weight:700;cursor:pointer}
-body.week4-upgrade .week4-tab.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#082030;border:none}
-body.week4-upgrade .week4-hidden{display:none!important}
-body.week4-upgrade .week4-panel{display:grid;gap:18px}
-body.week4-upgrade .week4-compact .footer-note:nth-child(n+5){display:none}
-body.week4-upgrade .week4-section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
-body.week4-upgrade .week4-toggle{font-size:13px;padding:9px 12px;border-radius:12px}
-body.week4-upgrade .week4-dispatch-shell{display:grid;grid-template-columns:1.12fr .88fr;gap:18px}
-body.week4-upgrade .week4-driver-shell{display:grid;grid-template-columns:1fr;gap:18px}
-body.week4-upgrade .week4-note{font-size:12px;color:var(--muted)}
-body.week4-upgrade .week4-card-grid{display:grid;grid-template-columns:1fr;gap:18px}
-body.week4-upgrade .week4-title{font-size:20px;font-weight:900}
-body.week4-upgrade .week4-sub{font-size:13px;color:var(--muted)}
-body.week4-upgrade .week4-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px}
-body.week4-upgrade .week4-role-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
-body.week4-upgrade .week4-minor .book-card .chip-row,
-body.week4-upgrade .week4-minor .book-card .footer-note:nth-child(n+4){display:none}
-body.week4-upgrade .week4-simple-card{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03)}
-body.week4-upgrade .week4-simple-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
-@media (max-width:1100px){
-  body.week4-upgrade .week4-dispatch-shell{grid-template-columns:1fr}
-}
+
+/* ===== Level 10 upgrade layer ===== */
+.level10-upgrade-banner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.level10-chip{padding:8px 12px;border-radius:999px;background:rgba(73,196,213,.14);border:1px solid var(--line);font-size:12px;font-weight:800;color:#dff9ff}
+.level10-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 18px}
+.level10-tab{padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-weight:800;cursor:pointer}
+.level10-tab.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#082030;border:none}
+.level10-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.level10-hero-copy{max-width:720px}
+.level10-compact{display:grid;gap:14px}
+.level10-hidden{display:none !important}
+.level10-inline-note{font-size:12px;color:var(--muted)}
+.level10-section-tag{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;padding:8px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);margin-bottom:10px}
+.level10-dual{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.level10-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.level10-summary .list-card{min-height:86px}
+.level10-stage-card{padding:14px;border:1px solid var(--line);border-radius:18px;background:#061826;display:grid;gap:12px}
+.level10-stage-title{font-weight:900;font-size:16px}
+.level10-steps{display:flex;gap:10px;flex-wrap:wrap}
+.level10-step{padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px;font-weight:700}
+.level10-accent{color:#7ee7f1}
+.level10-cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+@media (max-width: 1100px){.level10-dual,.level10-summary{grid-template-columns:1fr}}
 
 </style>
 </head>
@@ -245,7 +240,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 12 stable auth build</div>
+            <div class="subtitle">Firebase Level 10 upgraded build</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -253,6 +248,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           This version uses Firebase Authentication + Firestore, so bookings created by a passenger
           appear for admin and driver across different browsers and devices.
         </p>
+        <div class="level10-upgrade-banner"><span class="level10-chip">Level 10 upgraded</span><span class="level10-chip">Cleaner dispatch flow</span><span class="level10-chip">Demo-ready UI</span></div>
         <div class="grid-3 top-gap">
           <div class="list-card">
             <div class="section-title">Live bookings</div>
@@ -327,7 +323,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 12 • stable auth • orchestration hub • care circles • readiness scoring • compliance timeline • driver excellence</div>
+            <div class="subtitle">Full Level 10 • cleaner dispatch • simplified rider flow • staged driver actions • stronger demo readiness</div>
           </div>
         </div>
         <div class="userbox">
@@ -3233,222 +3229,142 @@ function renderAdminCharts() {
     }
   
 
-
-/* ===== UVEL Week 4 / Level 9 UI upgrade ===== */
-(function(){
-  const HIDE_TITLES = {
-    admin: ["Audit log","Referral inbox","SLA controls","Passenger management","Driver management","Finance reconciliation","Passenger trust panel","Level 10 command center","Payout approvals","Passenger concierge","Predictive demand","Compliance vault","Orchestration hub","Compliance timeline","Care circles"],
-    passenger: ["Trip updates","Trip readiness","Care circles","Readiness scoring","Journey confidence"],
-    driver: ["Driver notifications","Driver acceptance board","OTP trip security","Proof of completion","Shift handover","Route reliability","Driver coaching","Family live view","Operations intelligence","Driver excellence","Shift readiness","Journey confidence"]
-  };
-
-  function qsa(sel, root=document){ return Array.from(root.querySelectorAll(sel)); }
-  function titleOf(card){
-    const t = card.querySelector('.section-title');
-    return t ? t.textContent.trim() : '';
-  }
-  function hideCardsByTitles(rootId, titles){
-    const root = document.getElementById(rootId);
-    if(!root) return;
-    qsa('.card.section', root).forEach(card=>{
-      if(titles.includes(titleOf(card))) card.classList.add('week4-hidden');
-    });
-  }
-  function setSubtitleText(){
-    const subs = qsa('.subtitle');
-    subs.forEach(s=>{
-      if(s.textContent.includes('Level 12')) s.textContent = 'Week 4 • Level 9 demo-ready build';
-      if(s.textContent.includes('stable auth build')) s.textContent = 'Week 4 clean role-based build';
-    });
-  }
-
-  function simplifyPassenger(){
-    const root = document.getElementById('passengerView');
-    const form = document.getElementById('bookingForm');
-    if(!root || !form || form.dataset.week4Done) return;
-    form.dataset.week4Done = '1';
-
-    // wrap advanced options from priority row to before action buttons
-    const rows = Array.from(form.children);
-    const actionRow = form.querySelector('.right-actions.top-gap');
-    const advancedStart = rows.find(el => el.querySelector && el.querySelector('#bookingPriority'));
-    if(advancedStart && actionRow){
-      const advWrap = document.createElement('div');
-      advWrap.id = 'week4PassengerAdvanced';
-      advWrap.className = 'week4-hidden';
-      let node = advancedStart;
-      while(node && node !== actionRow){
-        const next = node.nextElementSibling;
-        advWrap.appendChild(node);
-        node = next;
-      }
-      const sectionHead = document.createElement('div');
-      sectionHead.className = 'week4-section-head';
-      sectionHead.innerHTML = '<div><div class="week4-title">Book a ride</div><div class="week4-sub">Simple booking first. Advanced care options are optional.</div></div>';
-      const toggle = document.createElement('button');
-      toggle.type = 'button';
-      toggle.className = 'btn week4-toggle';
-      toggle.textContent = 'Advanced options';
-      toggle.onclick = ()=>{
-        advWrap.classList.toggle('week4-hidden');
-        toggle.textContent = advWrap.classList.contains('week4-hidden') ? 'Advanced options' : 'Hide advanced';
-      };
-      const heroTitle = form.parentElement.querySelector('.section-title');
-      if(heroTitle){
-        form.parentElement.querySelector('.section-title').textContent = 'Passenger booking';
-        const sub = form.parentElement.querySelector('.section-sub');
-        if(sub) sub.textContent = 'Request a ride quickly, then expand advanced care details only when needed.';
-      }
-      actionRow.parentNode.insertBefore(advWrap, actionRow);
-      form.insertBefore(sectionHead, form.firstChild);
-      sectionHead.appendChild(toggle);
-    }
-    hideCardsByTitles('passengerView', HIDE_TITLES.passenger);
-
-    const tripsCard = qsa('.card.section', root).find(c=>titleOf(c)==='My trips');
-    if(tripsCard){
-      const sub = tripsCard.querySelector('.section-sub');
-      if(sub) sub.textContent = 'Current and past trips in one simple list.';
-    }
-  }
-
-  function simplifyAdmin(){
-    const root = document.getElementById('adminView');
-    if(!root || root.dataset.week4Done) return;
-    root.dataset.week4Done = '1';
-    hideCardsByTitles('adminView', HIDE_TITLES.admin);
-
-    const opsCard = qsa('.card.section', root).find(c=>titleOf(c)==='Operations control');
-    if(opsCard){
-      const toolbar = opsCard.querySelector('.toolbar');
-      if(toolbar && !opsCard.querySelector('.week4-tabs')){
-        const tabs = document.createElement('div');
-        tabs.className = 'week4-tabs';
-        tabs.innerHTML = `
-          <button class="week4-tab active" data-status="">All</button>
-          <button class="week4-tab" data-status="pending">Pending</button>
-          <button class="week4-tab" data-status="assigned">Assigned</button>
-          <button class="week4-tab" data-status="completed">Completed</button>
-          <button class="week4-tab" data-status="cancelled">Cancelled</button>
-        `;
-        toolbar.parentNode.insertBefore(tabs, toolbar);
-        tabs.querySelectorAll('.week4-tab').forEach(btn=>{
-          btn.addEventListener('click', ()=>{
-            tabs.querySelectorAll('.week4-tab').forEach(b=>b.classList.remove('active'));
-            btn.classList.add('active');
-            const statusFilter = document.getElementById('statusFilter');
-            if(statusFilter){
-              statusFilter.value = btn.dataset.status;
-              if(typeof renderAdminBookings === 'function') renderAdminBookings();
-            }
-          });
-        });
-      }
-      const sub = opsCard.querySelector('.section-sub');
-      if(sub) sub.textContent = 'Dispatch-first board for bookings that need action.';
-    }
-
-    const analyticsCard = qsa('.card.section', root).find(c=>titleOf(c)==='Admin analytics');
-    if(analyticsCard) analyticsCard.classList.add('week4-hidden');
-
-    const dispatch = qsa('.card.section', root).find(c=>titleOf(c)==='Dispatch board');
-    const fleet = qsa('.card.section', root).find(c=>titleOf(c)==='Fleet health');
-    const incidents = qsa('.card.section', root).find(c=>titleOf(c)==='Incident hub');
-
-    // hide all top-level grids with many extra widgets
-    qsa(':scope > .grid-3, :scope > .grid-2, :scope > .level7-grid, :scope > .level8-grid, :scope > .level10-grid, :scope > .level11-grid, :scope > .level12-grid', root)
-      .forEach(el=>el.classList.add('week4-hidden'));
-
-    if(dispatch || fleet || incidents){
-      const supportRow = document.createElement('div');
-      supportRow.className = 'grid-3 top-gap';
-      [dispatch, fleet, incidents].filter(Boolean).forEach(card=>{
-        card.classList.remove('week4-hidden');
-        supportRow.appendChild(card);
-      });
-      root.appendChild(supportRow);
-    }
-  }
-
-  function simplifyDriver(){
-    const root = document.getElementById('driverView');
-    if(!root || root.dataset.week4Done) return;
-    root.dataset.week4Done = '1';
-    hideCardsByTitles('driverView', HIDE_TITLES.driver);
-
-    const children = Array.from(root.children);
-    const tripGrid = children.find(el => el.classList && el.classList.contains('grid-2'));
-    if(tripGrid && !root.querySelector('.week4-role-tabs')){
-      const tabs = document.createElement('div');
-      tabs.className = 'week4-role-tabs';
-      tabs.innerHTML = `
-        <button class="week4-tab active" data-target="active">Active Trip</button>
-        <button class="week4-tab" data-target="history">History</button>
-        <button class="week4-tab" data-target="profile">Profile</button>
-      `;
-      root.insertBefore(tabs, tripGrid);
-
-      const cards = qsa('.card.section', root);
-      const activeTitles = ['Assigned trips','Driver map'];
-      const historyTitles = ['Shift handover','Route reliability'];
-      const profileTitles = ['Driver controls'];
-
-      function apply(target){
-        tabs.querySelectorAll('.week4-tab').forEach(b=>b.classList.toggle('active', b.dataset.target===target));
-        cards.forEach(card=>card.classList.add('week4-hidden'));
-        cards.forEach(card=>{
-          const t = titleOf(card);
-          if(target==='active' && activeTitles.includes(t)) card.classList.remove('week4-hidden');
-          if(target==='history' && historyTitles.includes(t)) card.classList.remove('week4-hidden');
-          if(target==='profile' && profileTitles.includes(t)) card.classList.remove('week4-hidden');
-        });
-      }
-      tabs.querySelectorAll('.week4-tab').forEach(btn=>btn.addEventListener('click', ()=>apply(btn.dataset.target)));
-      apply('active');
-    }
-  }
-
-  function compactCards(){
-    const adminWrap = document.getElementById('adminBookings');
-    if(adminWrap) adminWrap.classList.add('week4-minor');
-    const passWrap = document.getElementById('passengerTrips');
-    if(passWrap) passWrap.classList.add('week4-minor');
-  }
-
-  function injectCurrentTripHeading(){
-    const passMapCard = qsa('.card.section', document.getElementById('passengerView')).find(c=>titleOf(c)==='Live route map');
-    if(passMapCard){
-      const title = passMapCard.querySelector('.section-title');
-      if(title) title.textContent = 'Current trip';
-      const sub = passMapCard.querySelector('.section-sub');
-      if(sub) sub.textContent = 'Track the latest trip with route, ETA, and driver status.';
-    }
-  }
-
-  function week4Enhance(){
-    document.body.classList.add('week4-upgrade');
-    setSubtitleText();
-    simplifyPassenger();
-    simplifyAdmin();
-    simplifyDriver();
-    compactCards();
-    injectCurrentTripHeading();
-  }
-
-  const originalRenderEverything = window.renderEverything;
-  if(typeof originalRenderEverything === 'function'){
-    window.renderEverything = async function(...args){
-      const out = await originalRenderEverything.apply(this,args);
-      week4Enhance();
-      return out;
-    }
-  }
-  document.addEventListener('DOMContentLoaded', ()=>{
-    setTimeout(week4Enhance, 600);
-    setTimeout(week4Enhance, 1800);
-  });
-})();
-
 </script>
+
+<script>
+(function(){
+  function qs(sel,root){return (root||document).querySelector(sel)}
+  function qsa(sel,root){return Array.from((root||document).querySelectorAll(sel))}
+
+  function makePassengerUpgrade(){
+    const view = qs('#passengerView');
+    if(!view || qs('#level10PassengerToggle')) return;
+    const form = qs('#bookingForm', view);
+    if(!form) return;
+    const rows = qsa(':scope > .row, :scope > .top-gap, :scope > .right-actions, :scope > .line, :scope > #farePreview', form);
+    const notesBlock = rows.find(el => el.querySelector && el.querySelector('#notes'));
+    if(!notesBlock) return;
+    let found = false;
+    const advanced = document.createElement('div');
+    advanced.id='level10PassengerAdvanced';
+    advanced.className='level10-hidden';
+    const toggleWrap = document.createElement('div');
+    toggleWrap.className='level10-cta-row';
+    toggleWrap.innerHTML = '<button type="button" class="btn" id="level10PassengerToggle">Advanced options</button><span class="level10-inline-note">Wheelchair, companion, referral, recurring, emergency, and extra stop fields.</span>';
+    notesBlock.insertAdjacentElement('afterend', toggleWrap);
+    let node = toggleWrap.nextElementSibling;
+    while(node){
+      const next = node.nextElementSibling;
+      if(node.classList.contains('right-actions') || node.id==='farePreview' || node.classList.contains('line')) break;
+      advanced.appendChild(node);
+      node = next;
+      found = true;
+    }
+    if(found) toggleWrap.insertAdjacentElement('afterend', advanced);
+    qs('#level10PassengerToggle').addEventListener('click',()=>advanced.classList.toggle('level10-hidden'));
+
+    const hideTitles = ['Trip updates','Trip readiness','Care circles','Readiness scoring','Journey confidence'];
+    qsa('.card.section', view).forEach(card=>{
+      const title = qs('.section-title', card)?.textContent?.trim();
+      if(hideTitles.includes(title)) card.classList.add('level10-hidden');
+    });
+  }
+
+  function makeAdminUpgrade(){
+    const view = qs('#adminView');
+    if(!view || qs('#level10AdminTabs')) return;
+    const leftPanel = qs('.split .card.section', view);
+    if(!leftPanel) return;
+    const toolbar = qs('.toolbar', leftPanel);
+    if(!toolbar) return;
+    const tabs = document.createElement('div');
+    tabs.className='level10-tabs';
+    tabs.id='level10AdminTabs';
+    tabs.innerHTML = [
+      ['','All'],['pending','Pending'],['assigned','Assigned'],['completed','Completed'],['cancelled','Cancelled']
+    ].map(([v,l],i)=>`<button type="button" class="level10-tab ${v==='pending'?'active':''}" data-status="${v}">${l}</button>`).join('');
+    toolbar.insertAdjacentElement('beforebegin', tabs);
+    const statusFilter = qs('#statusFilter');
+    if(statusFilter){
+      statusFilter.value='pending';
+      statusFilter.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+    tabs.addEventListener('click',e=>{
+      const btn = e.target.closest('.level10-tab');
+      if(!btn) return;
+      qsa('.level10-tab', tabs).forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      if(statusFilter){statusFilter.value=btn.dataset.status; statusFilter.dispatchEvent(new Event('change',{bubbles:true}));}
+    });
+
+    const keepTitles = new Set(['Dispatch board','Fleet health','Incident hub','Active route map','Operations control','Admin analytics']);
+    qsa('#adminView > .card.section, #adminView > .grid-3.top-gap > .card.section, #adminView > .level7-grid.top-gap > .card.section, #adminView > .grid-2.top-gap > .card.section, #adminView > .level8-grid.top-gap > .card.section, #adminView > .level10-grid.top-gap > .card.section, #adminView > .level11-grid.top-gap > .card.section, #adminView > .level12-grid.top-gap > .card.section').forEach(card=>{
+      const title = qs('.section-title', card)?.textContent?.trim();
+      if(title && !keepTitles.has(title)) card.classList.add('level10-hidden');
+    });
+    const analytics = qsa('#adminView > .card.section.top-gap', view)[0];
+    if(analytics){
+      const title = qs('.section-title', analytics)?.textContent?.trim();
+      if(title !== 'Admin analytics') analytics.classList.add('level10-hidden');
+    }
+  }
+
+  function makeDriverUpgrade(){
+    const view = qs('#driverView');
+    if(!view || qs('#level10DriverTabs')) return;
+    const sections = qsa(':scope > .grid-2, :scope > .card.section.top-gap, :scope > .level11-grid.top-gap, :scope > .level12-grid.top-gap', view);
+    const firstGrid = sections[0];
+    if(!firstGrid) return;
+    const tabs = document.createElement('div');
+    tabs.id='level10DriverTabs';
+    tabs.className='level10-tabs';
+    tabs.innerHTML='<button type="button" class="level10-tab active" data-tab="active">Active trip</button><button type="button" class="level10-tab" data-tab="history">History</button><button type="button" class="level10-tab" data-tab="profile">Profile</button>';
+    firstGrid.insertAdjacentElement('beforebegin', tabs);
+
+    const controlsCard = qsa('.card.section', view).find(c=>qs('.section-title', c)?.textContent?.trim()==='Driver controls');
+    const notificationsCard = qsa('.card.section', view).find(c=>qs('.section-title', c)?.textContent?.trim()==='Driver notifications');
+    const acceptanceCard = qsa('.card.section', view).find(c=>qs('.section-title', c)?.textContent?.trim()==='Driver acceptance board');
+    const otpCard = qsa('.card.section', view).find(c=>qs('.section-title', c)?.textContent?.trim()==='OTP trip security');
+    const proofCard = qsa('.card.section', view).find(c=>qs('.section-title', c)?.textContent?.trim()==='Proof of completion');
+    const shiftCard = qsa('.card.section', view).find(c=>qs('.section-title', c)?.textContent?.trim()==='Shift handover');
+    const reliabilityCard = qsa('.card.section', view).find(c=>qs('.section-title', c)?.textContent?.trim()==='Route reliability');
+
+    function show(tab){
+      const showActive = [acceptanceCard, otpCard, proofCard, notificationsCard, reliabilityCard];
+      const showHistory = [shiftCard, reliabilityCard];
+      const showProfile = [controlsCard, notificationsCard];
+      [controlsCard, notificationsCard, acceptanceCard, otpCard, proofCard, shiftCard, reliabilityCard].forEach(c=>c && c.classList.add('level10-hidden'));
+      (tab==='active'?showActive:tab==='history'?showHistory:showProfile).forEach(c=>c && c.classList.remove('level10-hidden'));
+      qsa('.level10-tab', tabs).forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+    }
+    tabs.addEventListener('click',e=>{ const btn=e.target.closest('.level10-tab'); if(btn) show(btn.dataset.tab); });
+    show('active');
+
+    const heavyTitles = ['Driver coaching','Family live view','Operations intelligence','Driver excellence','Shift readiness','Journey confidence'];
+    qsa('.card.section', view).forEach(card=>{const t=qs('.section-title', card)?.textContent?.trim(); if(heavyTitles.includes(t)) card.classList.add('level10-hidden');});
+  }
+
+  function renameTitles(){
+    const map = new Map([
+      ['Passenger booking','Book a ride'],
+      ['Live route map','Current trip map'],
+      ['My trips','Trip history'],
+      ['Operations control','Dispatch center'],
+      ['Assigned trips','Active trip'],
+      ['Driver map','Navigation']
+    ]);
+    qsa('.section-title').forEach(el=>{const t=el.textContent.trim(); if(map.has(t)) el.textContent=map.get(t);});
+  }
+
+  function init(){
+    renameTitles();
+    makePassengerUpgrade();
+    makeAdminUpgrade();
+    makeDriverUpgrade();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+
 </body>
 </html>
