@@ -434,8 +434,8 @@
               </div>
               <div class="row top-gap">
                 <div>
-                  <label>Trip Category</label>
-                  <select id="tripCategory">
+                  <label>Service Type</label>
+                  <select id="serviceType">
                     <option value="medical">Medical</option>
                     <option value="therapy">Therapy</option>
                     <option value="community">Community Access</option>
@@ -1799,7 +1799,7 @@ if (!user) {
       const priority = $("bookingPriority")?.value || "standard";
       const wheelchairRequired = $("wheelchairRequired")?.value || "no";
       const companionRequired = $("companionRequired")?.value || "no";
-      const tripCategory = $("tripCategory")?.value || "medical";
+      const serviceType = $("serviceType")?.value || "medical";
       const supportLevel = $("supportLevel")?.value || "standard";
       const vehicleType = getRecommendedVehicleType();
       const vehiclePreferenceNote = $("vehiclePreferenceNote")?.value.trim() || "";
@@ -1850,7 +1850,7 @@ if (!user) {
         priority,
         wheelchairRequired,
         companionRequired,
-        tripCategory,
+        serviceType,
         supportLevel,
         vehicleType,
         vehiclePreferenceNote,
@@ -1882,7 +1882,7 @@ if (!user) {
       $("bookingForm").reset();
       $("passengerName").value = currentProfile.name || "";
       if ($("bookingPriority")) $("bookingPriority").value = "standard";
-      if ($("tripCategory")) $("tripCategory").value = "medical";
+      if ($("serviceType")) $("serviceType").value = "medical";
       if ($("supportLevel")) $("supportLevel").value = "standard";
       if ($("vehicleType")) $("vehicleType").value = "standard";
       if ($("wheelchairRequired")) $("wheelchairRequired").value = "no";
@@ -1941,7 +1941,7 @@ if (!user) {
       return Math.round((baseFare + stopCharge + waitCharge) * 100) / 100;
     }
 
-    function formatTripCategoryLabel(tripCategory) {
+    function formatServiceTypeLabel(serviceType) {
       const map = {
         medical: "Medical",
         therapy: "Therapy",
@@ -1952,7 +1952,7 @@ if (!user) {
         social: "Social",
         airport: "Airport Transfer"
       };
-      return map[tripCategory] || tripCategory || "-";
+      return map[serviceType] || serviceType || "-";
     }
 
     function formatSupportLevelLabel(supportLevel) {
@@ -2309,7 +2309,7 @@ function renderAdminCharts() {
             <div class="chip-row">
               <span class="chip">${escapeHtml(b.bookingCode || "No code")}</span>
               <span class="chip tag-${escapeHtml(b.priority || "standard")}">${escapeHtml(b.priority || "standard")}</span>
-              <span class="chip">${escapeHtml(formatTripCategoryLabel(b.tripCategory))}</span>
+              <span class="chip">${escapeHtml(formatServiceTypeLabel(b.serviceType || b.tripCategory))}</span>
               <span class="chip">${escapeHtml(formatSupportLevelLabel(b.supportLevel || (b.wheelchairRequired === "yes" ? "wheelchair" : b.companionRequired === "yes" ? "companion" : "standard")))}</span>
               <span class="chip">${escapeHtml(formatVehicleTypeLabel(b.vehicleType || (b.wheelchairRequired === "yes" ? "wav" : "standard")))}</span>
               ${b.wheelchairRequired === "yes" ? `<span class="chip">Wheelchair</span>` : ""}
@@ -2327,7 +2327,7 @@ function renderAdminCharts() {
         </div>
         ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}
         <div class="footer-note">Referral: ${escapeHtml(b.referralSource || "self")} ${b.referralEmail ? `• ${escapeHtml(b.referralEmail)}` : ""} ${b.recurringPattern && b.recurringPattern !== "once" ? `• ${escapeHtml(b.recurringPattern)}` : ""} ${b.pickupWindow ? `• window ${escapeHtml(b.pickupWindow)}` : ""}</div>
-        <div class="footer-note">Category: ${escapeHtml(formatTripCategoryLabel(b.tripCategory))} ${b.extraStop ? `• extra stop ${escapeHtml(b.extraStop)}` : ""} ${Number(b.waitMinutes || 0) > 0 ? `• wait ${escapeHtml(b.waitMinutes)} min` : ""} ${b.emergencyContact ? `• emergency ${escapeHtml(b.emergencyContact)}` : ""}</div>
+        <div class="footer-note">Service: ${escapeHtml(formatServiceTypeLabel(b.serviceType || b.tripCategory))} ${b.extraStop ? `• extra stop ${escapeHtml(b.extraStop)}` : ""} ${Number(b.waitMinutes || 0) > 0 ? `• wait ${escapeHtml(b.waitMinutes)} min` : ""} ${b.emergencyContact ? `• emergency ${escapeHtml(b.emergencyContact)}` : ""}</div>
         <div class="footer-note">OTP pickup: <strong>${escapeHtml(b.pickupOtp || "----")}</strong> ${b.pickupOtpVerified ? "• verified" : ""} | drop-off: <strong>${escapeHtml(b.dropoffOtp || "----")}</strong> ${b.dropoffOtpVerified ? "• verified" : ""}</div>
         ${b.assignedDriverUid ? `<div class="footer-note">Driver earnings: $${getDriverEarningsAmount(b).toFixed(2)}</div>` : ""}
         ${b.driverStage ? `<div class="footer-note">Driver stage: ${escapeHtml(b.driverStage)} • acceptance: ${escapeHtml(b.acceptanceStatus || "pending_driver")}</div>` : ""}
@@ -2760,7 +2760,7 @@ function renderAdminCharts() {
       if ($("bookingPriority")) $("bookingPriority").value = latest.priority || "standard";
       if ($("wheelchairRequired")) $("wheelchairRequired").value = latest.wheelchairRequired || "no";
       if ($("companionRequired")) $("companionRequired").value = latest.companionRequired || "no";
-      if ($("tripCategory")) $("tripCategory").value = latest.tripCategory || "medical";
+      if ($("serviceType")) $("serviceType").value = latest.serviceType || latest.tripCategory || "medical";
       if ($("supportLevel")) $("supportLevel").value = latest.supportLevel || "standard";
       if ($("vehicleType")) $("vehicleType").value = latest.vehicleType || "standard";
       if ($("vehiclePreferenceNote")) $("vehiclePreferenceNote").value = latest.vehiclePreferenceNote || "";
@@ -2955,7 +2955,7 @@ function renderAdminCharts() {
         recurringPattern: frequency,
         referralEmail: latest.referralEmail || $("referralEmail")?.value || "",
         pickupWindow: latest.pickupWindow || $("pickupWindow")?.value || "exact",
-        tripCategory: latest.tripCategory || $("tripCategory")?.value || "medical",
+        serviceType: latest.serviceType || latest.tripCategory || $("serviceType")?.value || "medical",
         supportLevel: latest.supportLevel || $("supportLevel")?.value || "standard",
         vehicleType: latest.vehicleType || $("vehicleType")?.value || "standard",
         vehiclePreferenceNote: latest.vehiclePreferenceNote || $("vehiclePreferenceNote")?.value || "",
@@ -2980,7 +2980,7 @@ function renderAdminCharts() {
       }
       wrap.innerHTML = templates.slice().reverse().map(t => `<div class="template-item">
         <div style="font-weight:800">${escapeHtml(t.label)}</div>
-        <div class="muted">${escapeHtml(t.pickup)} → ${escapeHtml(t.destination)} • ${escapeHtml(formatTripCategoryLabel(t.tripCategory || "medical"))} • ${escapeHtml(t.frequency || "weekly")}</div>
+        <div class="muted">${escapeHtml(t.pickup)} → ${escapeHtml(t.destination)} • ${escapeHtml(formatServiceTypeLabel(t.serviceType || t.tripCategory || "medical"))} • ${escapeHtml(t.frequency || "weekly")}</div>
         <div class="mini-actions"><button class="btn small" onclick="window.applyRideTemplate('${t.id}')">Apply</button></div>
       </div>`).join("");
     }
@@ -3001,7 +3001,7 @@ function renderAdminCharts() {
       if ($("recurringPattern")) $("recurringPattern").value = template.recurringPattern || "weekly";
       if ($("referralEmail")) $("referralEmail").value = template.referralEmail || "";
       if ($("pickupWindow")) $("pickupWindow").value = template.pickupWindow || "exact";
-      if ($("tripCategory")) $("tripCategory").value = template.tripCategory || "medical";
+      if ($("serviceType")) $("serviceType").value = template.serviceType || template.tripCategory || "medical";
       if ($("supportLevel")) $("supportLevel").value = template.supportLevel || "standard";
       if ($("vehicleType")) $("vehicleType").value = template.vehicleType || "standard";
       if ($("vehiclePreferenceNote")) $("vehiclePreferenceNote").value = template.vehiclePreferenceNote || "";
@@ -3213,11 +3213,11 @@ function renderAdminCharts() {
 
     function exportCSV(rows, fileName) {
       if (!rows.length) return alert("No data to export.");
-      const headers = ["Passenger","Email","Pickup","Destination","Trip Category","Support Level","Vehicle Type","Vehicle Note","Extra Stop","Wait Minutes","Date","Time","Ride Type","Distance Km","Fare","Payment","Status","Driver","Notes"];
+      const headers = ["Passenger","Email","Pickup","Destination","Service Type","Support Level","Vehicle Type","Vehicle Note","Extra Stop","Wait Minutes","Date","Time","Ride Type","Distance Km","Fare","Payment","Status","Driver","Notes"];
       const csv = [
         headers.join(","),
         ...rows.map(r => [
-          r.passengerName, r.passengerEmail, r.pickup, r.destination, r.tripCategory || "", r.supportLevel || "", r.vehicleType || "", r.vehiclePreferenceNote || "", r.extraStop || "", r.waitMinutes || 0,
+          r.passengerName, r.passengerEmail, r.pickup, r.destination, r.serviceType || r.tripCategory || "", r.supportLevel || "", r.vehicleType || "", r.vehiclePreferenceNote || "", r.extraStop || "", r.waitMinutes || 0,
           r.tripDate, r.tripTime, r.rideType, r.distanceKm, r.fare, r.paymentMethod, r.status, r.assignedDriverName || "", r.notes || ""
         ].map(csvCell).join(","))
       ].join("\n");
