@@ -432,6 +432,47 @@
                   </select>
                 </div>
               </div>
+              <div class="row top-gap">
+                <div>
+                  <label>Trip Category</label>
+                  <select id="tripCategory">
+                    <option value="medical">Medical</option>
+                    <option value="therapy">Therapy</option>
+                    <option value="community">Community Access</option>
+                    <option value="education">Education</option>
+                    <option value="work">Work</option>
+                    <option value="shopping">Shopping</option>
+                    <option value="social">Social</option>
+                    <option value="airport">Airport Transfer</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Support Level</label>
+                  <select id="supportLevel">
+                    <option value="standard">Standard</option>
+                    <option value="assisted">Assisted</option>
+                    <option value="wheelchair">Wheelchair</option>
+                    <option value="companion">Companion Required</option>
+                    <option value="high_support">High Support</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row top-gap">
+                <div>
+                  <label>Vehicle Type</label>
+                  <select id="vehicleType">
+                    <option value="standard">Standard Car (1–4 passengers)</option>
+                    <option value="suv">SUV (1–6 passengers)</option>
+                    <option value="van">Van (up to 10 passengers)</option>
+                    <option value="wav">Wheelchair Accessible Vehicle (WAV)</option>
+                    <option value="premium">Premium Vehicle</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Vehicle preference note</label>
+                  <input id="vehiclePreferenceNote" placeholder="Optional vehicle note" />
+                </div>
+              </div>
               <div class="top-gap">
                 <label>Return time (optional)</label>
                 <input type="time" id="returnTime" />
@@ -501,7 +542,7 @@
                 <button class="btn" id="payNowBtn" type="button" style="display:none">💳 Pay now</button>
               </div>
               <div class="line"></div>
-              <div id="farePreview" class="muted">Estimated fare: -- • Distance: -- • Payment: --</div>
+              <div id="farePreview" class="muted">Estimated fare: -- • Distance: -- • Vehicle: -- • Payment: --</div>
             </form>
           </div>
 
@@ -881,6 +922,25 @@
               <div>
                 <label>Vehicle</label>
                 <input id="driverVehicleInput" placeholder="Toyota HiAce" />
+              </div>
+            </div>
+            <div class="row top-gap">
+              <div>
+                <label>Vehicle Type</label>
+                <select id="driverVehicleTypeSelect">
+                  <option value="standard">Standard Car</option>
+                  <option value="suv">SUV</option>
+                  <option value="van">Van</option>
+                  <option value="wav">Wheelchair Accessible Vehicle (WAV)</option>
+                  <option value="premium">Premium Vehicle</option>
+                </select>
+              </div>
+              <div>
+                <label>Wheelchair capable</label>
+                <select id="driverWheelchairCapableSelect">
+                  <option value="false">No</option>
+                  <option value="true">Yes</option>
+                </select>
               </div>
             </div>
             <div class="mini-actions">
@@ -1366,6 +1426,8 @@
           activeLoad: 0,
           availability: role === "driver" ? "online" : null,
           vehicle: role === "driver" ? "Toyota HiAce" : null,
+          vehicleType: role === "driver" ? "standard" : null,
+          wheelchairCapable: role === "driver" ? false : null,
           createdAt: serverTimestamp()
         });
         showMsg("Account created.");
@@ -1410,6 +1472,8 @@ if (!user) {
           activeLoad: 0,
           availability: inferredRole === "driver" ? "online" : null,
           vehicle: inferredRole === "driver" ? "Toyota HiAce" : null,
+          vehicleType: inferredRole === "driver" ? "standard" : null,
+          wheelchairCapable: inferredRole === "driver" ? false : null,
           createdAt: serverTimestamp()
         });
         snap = await getDoc(doc(db, "users", user.uid));
@@ -1717,8 +1781,12 @@ if (!user) {
           km = rideType === "ndis" ? 18 : 15;
         }
 
-        const fare = computeLevel8FareAdjustments(calculateFare(km, rideType));
-        $("farePreview").textContent = `Estimated fare: $${fare.toFixed(2)} • Distance: ${km.toFixed(1)} km • Payment: ${payment}`;
+        const vehicleType = getRecommendedVehicleType();
+        if ($("vehicleType")) $("vehicleType").value = vehicleType;
+        let fare = calculateFare(km, rideType);
+        fare = applyVehicleFareAdjustment(fare, vehicleType);
+        fare = computeLevel8FareAdjustments(fare);
+        $("farePreview").textContent = `Estimated fare: $${fare.toFixed(2)} • Distance: ${km.toFixed(1)} km • Vehicle: ${formatVehicleTypeLabel(vehicleType)} • Payment: ${payment}`;
 
         const tempBooking = { pickup, destination, status: "draft" };
         updateMapForBooking(passengerMap, passengerMapState, tempBooking, "passenger");
@@ -1742,6 +1810,10 @@ if (!user) {
       const priority = $("bookingPriority")?.value || "standard";
       const wheelchairRequired = $("wheelchairRequired")?.value || "no";
       const companionRequired = $("companionRequired")?.value || "no";
+      const tripCategory = $("tripCategory")?.value || "medical";
+      const supportLevel = $("supportLevel")?.value || "standard";
+      const vehicleType = getRecommendedVehicleType();
+      const vehiclePreferenceNote = $("vehiclePreferenceNote")?.value.trim() || "";
       const returnTrip = $("returnTrip")?.value || "no";
       const returnTime = $("returnTime")?.value || "";
       const referralSource = $("referralSource")?.value || "self";
@@ -1767,7 +1839,9 @@ if (!user) {
         km = rideType === "ndis" ? 18 : 15;
       }
 
-      const fare = computeLevel8FareAdjustments(calculateFare(km, rideType));
+      let fare = calculateFare(km, rideType);
+      fare = applyVehicleFareAdjustment(fare, vehicleType);
+      fare = computeLevel8FareAdjustments(fare);
 
       await addDoc(collection(db, "bookings"), {
       paymentStatus: "unpaid",
@@ -1788,6 +1862,10 @@ if (!user) {
         priority,
         wheelchairRequired,
         companionRequired,
+        tripCategory,
+        supportLevel,
+        vehicleType,
+        vehiclePreferenceNote,
         returnTrip,
         returnTime,
         referralSource,
@@ -1817,6 +1895,9 @@ if (!user) {
       $("bookingForm").reset();
       $("passengerName").value = currentProfile.name || "";
       if ($("bookingPriority")) $("bookingPriority").value = "standard";
+      if ($("tripCategory")) $("tripCategory").value = "medical";
+      if ($("supportLevel")) $("supportLevel").value = "standard";
+      if ($("vehicleType")) $("vehicleType").value = "standard";
       if ($("wheelchairRequired")) $("wheelchairRequired").value = "no";
       if ($("companionRequired")) $("companionRequired").value = "no";
       if ($("returnTrip")) $("returnTrip").value = "no";
@@ -1871,6 +1952,80 @@ if (!user) {
       const stopCharge = Number($("extraStop")?.value.trim() ? 7.5 : 0);
       const waitCharge = Math.max(0, Number($("waitMinutes")?.value || 0)) * 0.65;
       return Math.round((baseFare + stopCharge + waitCharge) * 100) / 100;
+    }
+
+    function formatTripCategoryLabel(tripCategory) {
+      const map = {
+        medical: "Medical",
+        therapy: "Therapy",
+        community: "Community Access",
+        education: "Education",
+        work: "Work",
+        shopping: "Shopping",
+        social: "Social",
+        airport: "Airport Transfer"
+      };
+      return map[tripCategory] || tripCategory || "-";
+    }
+
+    function formatSupportLevelLabel(supportLevel) {
+      const map = {
+        standard: "Standard",
+        assisted: "Assisted",
+        wheelchair: "Wheelchair",
+        companion: "Companion Required",
+        high_support: "High Support"
+      };
+      return map[supportLevel] || supportLevel || "-";
+    }
+
+    function formatVehicleTypeLabel(vehicleType) {
+      const map = {
+        standard: "Standard Car",
+        suv: "SUV",
+        van: "Van",
+        wav: "Wheelchair Accessible Vehicle",
+        premium: "Premium Vehicle"
+      };
+      return map[vehicleType] || vehicleType || "-";
+    }
+
+    function getRecommendedVehicleType() {
+      const support = $("supportLevel")?.value || "standard";
+      const wheelchair = $("wheelchairRequired")?.value || "no";
+      const companion = $("companionRequired")?.value || "no";
+      const selectedVehicle = $("vehicleType")?.value || "standard";
+
+      if (wheelchair === "yes" || support === "wheelchair") return "wav";
+      if (support === "high_support") return "van";
+      if (companion === "yes" || support === "companion") return "suv";
+      return selectedVehicle;
+    }
+
+    function applyVehicleFareAdjustment(baseFare, vehicleType) {
+      const multipliers = {
+        standard: 1,
+        suv: 1.15,
+        van: 1.3,
+        wav: 1.35,
+        premium: 1.5
+      };
+      return Math.round((baseFare * (multipliers[vehicleType] || 1)) * 100) / 100;
+    }
+
+    function getMatchingDriversForBooking(booking) {
+      return allDrivers.filter(d => {
+        const availability = (d.availability || "online");
+        if (availability === "offline" || availability === "break") return false;
+        const driverVehicleType = d.vehicleType || (/wheelchair|accessible/i.test(String(d.vehicle || "")) ? "wav" : "standard");
+        const wheelchairCapable = d.wheelchairCapable === true || d.wheelchairCapable === "true" || driverVehicleType === "wav";
+
+        if ((booking.wheelchairRequired === "yes" || booking.supportLevel === "wheelchair" || booking.vehicleType === "wav") && !wheelchairCapable) return false;
+        if (booking.vehicleType === "van" && !["van","wav"].includes(driverVehicleType)) return false;
+        if (booking.vehicleType === "suv" && !["suv","van","wav","premium"].includes(driverVehicleType)) return false;
+        if (booking.vehicleType === "premium" && !["premium"].includes(driverVehicleType)) return false;
+        return true;
+      });
     }
 
 function renderAdminCharts() {
@@ -2055,6 +2210,12 @@ function renderAdminCharts() {
     $("driverFitRouteBtn")?.addEventListener("click", fitDriverRoute);
     $("passengerCancelBtn")?.addEventListener("click", passengerCancelLatestTrip);
     $("rideType")?.addEventListener("change", updatePaymentButton);
+    ["supportLevel", "wheelchairRequired", "companionRequired"].forEach(id => {
+      $(id)?.addEventListener("change", () => {
+        const recommended = getRecommendedVehicleType();
+        if ($("vehicleType")) $("vehicleType").value = recommended;
+      });
+    });
     $("payNowBtn")?.addEventListener("click", async () => {
       const latest = getLatestPassengerBooking();
       await startStripeCheckout(latest);
@@ -2082,7 +2243,7 @@ function renderAdminCharts() {
           <div class="right-actions top-gap">
             <select id="driver-select-${b.id}" style="min-width:220px">
               <option value="">Select driver</option>
-              ${allDrivers.map(d => `<option value="${d.uid}" ${b.assignedDriverUid === d.uid ? "selected" : ""}>${escapeHtml(d.name || d.email)} • load ${Number(d.activeLoad || 0)}</option>`).join("")}
+              ${getMatchingDriversForBooking(b).concat(allDrivers.filter(d => !getMatchingDriversForBooking(b).some(m => m.uid === d.uid))).map(d => `<option value="${d.uid}" ${b.assignedDriverUid === d.uid ? "selected" : ""}>${escapeHtml(d.name || d.email)} • ${escapeHtml(formatVehicleTypeLabel(d.vehicleType || "standard"))} • load ${Number(d.activeLoad || 0)}</option>`).join("")}
             </select>
             <button class="btn small" onclick="window.toggleEdit('${b.id}')">Edit</button>
             <button class="btn small" onclick="window.assignDriver('${b.id}')">Assign</button>
@@ -2161,6 +2322,9 @@ function renderAdminCharts() {
             <div class="chip-row">
               <span class="chip">${escapeHtml(b.bookingCode || "No code")}</span>
               <span class="chip tag-${escapeHtml(b.priority || "standard")}">${escapeHtml(b.priority || "standard")}</span>
+              <span class="chip">${escapeHtml(formatTripCategoryLabel(b.tripCategory || b.serviceType))}</span>
+              <span class="chip">${escapeHtml(formatSupportLevelLabel(b.supportLevel || (b.wheelchairRequired === "yes" ? "wheelchair" : b.companionRequired === "yes" ? "companion" : "standard")))}</span>
+              <span class="chip">${escapeHtml(formatVehicleTypeLabel(b.vehicleType || (b.wheelchairRequired === "yes" ? "wav" : "standard")))}</span>
               ${b.wheelchairRequired === "yes" ? `<span class="chip">Wheelchair</span>` : ""}
               ${b.companionRequired === "yes" ? `<span class="chip">Companion</span>` : ""}
               ${b.returnTrip === "yes" ? `<span class="chip">Return ${escapeHtml(b.returnTime || "")}</span>` : ""}
@@ -2293,6 +2457,14 @@ function renderAdminCharts() {
       if (!driverUid) return alert("Select a driver first.");
       const driver = allDrivers.find(d => d.uid === driverUid);
       if (!driver) return alert("Driver not found.");
+      const booking = allBookings.find(b => b.id === bookingId);
+      if (booking) {
+        const allowedDrivers = getMatchingDriversForBooking(booking);
+        if (!allowedDrivers.some(d => d.uid === driver.uid)) {
+          const proceed = confirm("This driver may not match the selected vehicle/support needs. Assign anyway?");
+          if (!proceed) return;
+        }
+      }
       await updateDoc(doc(db, "bookings", bookingId), {
         assignedDriverUid: driver.uid,
         assignedDriverName: driver.name || driver.email,
@@ -2601,6 +2773,10 @@ function renderAdminCharts() {
       if ($("bookingPriority")) $("bookingPriority").value = latest.priority || "standard";
       if ($("wheelchairRequired")) $("wheelchairRequired").value = latest.wheelchairRequired || "no";
       if ($("companionRequired")) $("companionRequired").value = latest.companionRequired || "no";
+      if ($("tripCategory")) $("tripCategory").value = latest.tripCategory || latest.serviceType || "medical";
+      if ($("supportLevel")) $("supportLevel").value = latest.supportLevel || "standard";
+      if ($("vehicleType")) $("vehicleType").value = latest.vehicleType || "standard";
+      if ($("vehiclePreferenceNote")) $("vehiclePreferenceNote").value = latest.vehiclePreferenceNote || "";
       if ($("returnTrip")) $("returnTrip").value = latest.returnTrip || "no";
       if ($("returnTime")) $("returnTime").value = latest.returnTime || "";
       updatePaymentButton();
@@ -2674,9 +2850,13 @@ function renderAdminCharts() {
       if (currentProfile?.role !== "driver" || !currentUser) return;
       const availability = $("driverAvailabilitySelect")?.value || "online";
       const vehicle = $("driverVehicleInput")?.value?.trim() || "Vehicle not set";
+      const vehicleType = $("driverVehicleTypeSelect")?.value || "standard";
+      const wheelchairCapable = ($("driverWheelchairCapableSelect")?.value || "false") === "true";
       await updateDoc(doc(db, "users", currentUser.uid), {
         availability,
         vehicle,
+        vehicleType,
+        wheelchairCapable,
         updatedAt: serverTimestamp()
       });
       alert("Driver profile updated.");
@@ -2686,6 +2866,8 @@ function renderAdminCharts() {
       if (currentProfile?.role === "driver") {
         if ($("driverAvailabilitySelect")) $("driverAvailabilitySelect").value = currentProfile.availability || "online";
         if ($("driverVehicleInput")) $("driverVehicleInput").value = currentProfile.vehicle || "";
+        if ($("driverVehicleTypeSelect")) $("driverVehicleTypeSelect").value = currentProfile.vehicleType || "standard";
+        if ($("driverWheelchairCapableSelect")) $("driverWheelchairCapableSelect").value = String(currentProfile.wheelchairCapable === true);
       }
       if (currentProfile?.role === "admin") {
         const settings = getLevel6Settings();
@@ -3008,12 +3190,7 @@ function renderAdminCharts() {
         if (p !== 0) return p;
         return bookingDateTimeValue(a) - bookingDateTimeValue(b);
       })) {
-        const availableDrivers = allDrivers.filter(d => {
-          const availability = (d.availability || "online");
-          if (availability === "offline" || availability === "break") return false;
-          if (booking.wheelchairRequired === "yes" && !/wheelchair|accessible|van/i.test(String(d.vehicle || ""))) return false;
-          return true;
-        });
+        const availableDrivers = getMatchingDriversForBooking(booking);
         const bestDriver = [...availableDrivers].sort((a, b) => {
           const loadDiff = (activeLoads[a.uid] || 0) - (activeLoads[b.uid] || 0);
           if (loadDiff !== 0) return loadDiff;
@@ -3042,11 +3219,11 @@ function renderAdminCharts() {
 
     function exportCSV(rows, fileName) {
       if (!rows.length) return alert("No data to export.");
-      const headers = ["Passenger","Email","Pickup","Destination","Extra Stop","Wait Minutes","Service Type","Date","Time","Ride Type","Distance Km","Fare","Payment","Status","Driver","Notes"];
+      const headers = ["Passenger","Email","Pickup","Destination","Trip Category","Support Level","Vehicle Type","Vehicle Note","Extra Stop","Wait Minutes","Service Type","Date","Time","Ride Type","Distance Km","Fare","Payment","Status","Driver","Notes"];
       const csv = [
         headers.join(","),
         ...rows.map(r => [
-          r.passengerName, r.passengerEmail, r.pickup, r.destination, r.extraStop || "", r.waitMinutes || 0, r.serviceType || "",
+          r.passengerName, r.passengerEmail, r.pickup, r.destination, r.tripCategory || "", r.supportLevel || "", r.vehicleType || "", r.vehiclePreferenceNote || "", r.extraStop || "", r.waitMinutes || 0, r.serviceType || "",
           r.tripDate, r.tripTime, r.rideType, r.distanceKm, r.fare, r.paymentMethod, r.status, r.assignedDriverName || "", r.notes || ""
         ].map(csvCell).join(","))
       ].join("\n");
@@ -3217,9 +3394,9 @@ function renderAdminCharts() {
     async function seedDemoDrivers() {
       if (!currentProfile || currentProfile.role !== "admin") return alert("Only admin should seed demo drivers.");
       const samples = [
-        { name: "Michael Driver", email: "driver1@uvel.com.au", role: "driver", activeLoad: 0, availability: "online", vehicle: "Toyota HiAce" },
-        { name: "Sarah Driver", email: "driver2@uvel.com.au", role: "driver", activeLoad: 0, availability: "online", vehicle: "Kia Carnival" },
-        { name: "David Driver", email: "driver3@uvel.com.au", role: "driver", activeLoad: 0, availability: "online", vehicle: "Hyundai Staria" }
+        { name: "Michael Driver", email: "driver1@uvel.com.au", role: "driver", activeLoad: 0, availability: "online", vehicle: "Toyota Camry", vehicleType: "standard", wheelchairCapable: false },
+        { name: "Sarah Driver", email: "driver2@uvel.com.au", role: "driver", activeLoad: 0, availability: "online", vehicle: "Kia Carnival", vehicleType: "suv", wheelchairCapable: false },
+        { name: "David Driver", email: "driver3@uvel.com.au", role: "driver", activeLoad: 0, availability: "online", vehicle: "Hyundai Staria Accessible", vehicleType: "wav", wheelchairCapable: true }
       ];
       for (const s of samples) {
         const exists = allUsers.find(u => u.email === s.email);
