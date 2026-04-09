@@ -155,6 +155,10 @@
 .pulse-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#57d08b;box-shadow:0 0 0 rgba(87,208,139,.7);animation:pulse 1.8s infinite}
 .live-badge{display:inline-flex;align-items:center;gap:8px}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(87,208,139,.7)}70%{box-shadow:0 0 0 12px rgba(87,208,139,0)}100%{box-shadow:0 0 0 0 rgba(87,208,139,0)}}
+
+    body.operations-pulse .card{box-shadow:0 18px 50px rgba(0,0,0,.30),0 0 0 1px rgba(73,196,213,.08) inset;}
+    body.operations-pulse .header{box-shadow:0 18px 50px rgba(0,0,0,.34),0 0 0 1px rgba(73,196,213,.10) inset;}
+    body.operations-pulse .stat .k, body.operations-pulse .big{letter-spacing:.2px}
     @media (max-width: 1100px){ .eta-box,.edit-grid{grid-template-columns:1fr} }
     @media (max-width: 1100px){
       .grid-2,.split,.login-wrap,.grid-4,.grid-3,.stats,.toolbar,.row,.meta{grid-template-columns:1fr}
@@ -205,37 +209,26 @@
     .level12-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
     .level12-item,.timeline-item,.circle-item,.score-item,.excellence-item,.orchestration-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
 
-  
-/* ===== UVEL Week 4 / Level 9 UI upgrade ===== */
-body.week4-upgrade .header .subtitle{content:"";font-size:13px}
-body.week4-upgrade .header .subtitle,
-body.week4-upgrade #authScreen .subtitle{color:#b7d9ea}
-body.week4-upgrade .week4-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
-body.week4-upgrade .week4-tab{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);border-radius:14px;padding:10px 14px;font-weight:700;cursor:pointer}
-body.week4-upgrade .week4-tab.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#082030;border:none}
-body.week4-upgrade .week4-hidden{display:none!important}
-body.week4-upgrade .week4-panel{display:grid;gap:18px}
-body.week4-upgrade .week4-compact .footer-note:nth-child(n+5){display:none}
-body.week4-upgrade .week4-section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
-body.week4-upgrade .week4-toggle{font-size:13px;padding:9px 12px;border-radius:12px}
-body.week4-upgrade .week4-dispatch-shell{display:grid;grid-template-columns:1.12fr .88fr;gap:18px}
-body.week4-upgrade .week4-driver-shell{display:grid;grid-template-columns:1fr;gap:18px}
-body.week4-upgrade .week4-note{font-size:12px;color:var(--muted)}
-body.week4-upgrade .week4-card-grid{display:grid;grid-template-columns:1fr;gap:18px}
-body.week4-upgrade .week4-title{font-size:20px;font-weight:900}
-body.week4-upgrade .week4-sub{font-size:13px;color:var(--muted)}
-body.week4-upgrade .week4-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px}
-body.week4-upgrade .week4-role-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
-body.week4-upgrade .week4-minor .book-card .chip-row,
-body.week4-upgrade .week4-minor .book-card .footer-note:nth-child(n+4){display:none}
-body.week4-upgrade .week4-simple-card{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03)}
-body.week4-upgrade .week4-simple-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
-@media (max-width:1100px){
-  body.week4-upgrade .week4-dispatch-shell{grid-template-columns:1fr}
-}
+    .priority-lane .booking-list > * {border-color: rgba(240,194,79,.35) !important; box-shadow: 0 0 0 1px rgba(240,194,79,.08) inset;}
+    .priority-lane #adminView .card.section:first-of-type {box-shadow: 0 22px 60px rgba(0,0,0,.34), 0 0 0 1px rgba(240,194,79,.08) inset;}
 
-</style>
+  
+
+    .lvl13bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+    .toggle-chip{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);cursor:pointer;font-size:13px}
+    .toggle-chip input{width:auto;margin:0}
+    .hero-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+    .hero-metric{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03)}
+    .hero-metric .big{font-size:24px;font-weight:900;margin-top:4px}
+    .compact-mode .section{padding:16px}
+    .compact-mode .card{border-radius:16px}
+    .compact-mode .section-sub,.compact-mode .footer-note,.compact-mode .note,.compact-mode .tiny{font-size:12px}
+    .compact-mode .section-title{font-size:16px}
+    .focus-hide{display:none !important}
+    .lvl13-tag{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px}
+    @media (max-width:1100px){.hero-strip{grid-template-columns:1fr}}
+
+  </style>
 </head>
 <body>
   <div class="container">
@@ -245,7 +238,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 12 stable auth build</div>
+            <div class="subtitle">Firebase Level 15 mission control build</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -327,7 +320,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 12 • stable auth • orchestration hub • care circles • readiness scoring • compliance timeline • driver excellence</div>
+            <div class="subtitle">Full Level 15 • mission control • compact mode • executive focus • spotlight maps • operations pulse • priority lane</div>
           </div>
         </div>
         <div class="userbox">
@@ -346,6 +339,21 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
         <div class="card stat"><div class="k" id="statTodayRevenue">$0.00</div><div class="t">Today revenue</div></div>
         <div class="card stat"><div class="k" id="statPaid">0</div><div class="t">Paid</div></div>
         <div class="card stat"><div class="k" id="statUnpaid">0</div><div class="t">Unpaid</div></div>
+      </div>
+
+      <div class="lvl13bar" id="lvl13Controls">
+        <label class="toggle-chip"><input type="checkbox" id="compactModeToggle" /> Compact mode</label>
+        <label class="toggle-chip"><input type="checkbox" id="executiveFocusToggle" checked /> Executive focus</label>
+        <label class="toggle-chip"><input type="checkbox" id="spotlightMapsToggle" checked /> Spotlight maps</label>
+        <label class="toggle-chip"><input type="checkbox" id="operationsPulseToggle" checked /> Operations pulse</label>
+        <label class="toggle-chip"><input type="checkbox" id="priorityLaneToggle" checked /> Priority lane</label>
+        <span class="lvl13-tag">Level 15 Apex</span>
+      </div>
+
+      <div class="hero-strip" id="lvl13HeroStrip">
+        <div class="hero-metric"><div class="tiny">System mode</div><div class="big">Live Operations</div><div class="note">Built on your existing Firebase, Firestore, auth, and dispatch workflow.</div></div>
+        <div class="hero-metric"><div class="tiny">Demo focus</div><div class="big">Funding Ready</div><div class="note">Use Executive focus for demos, Spotlight maps for live route emphasis, Operations pulse for command-centre feel, and Priority lane for a stronger dispatch-first view.</div></div>
+        <div class="hero-metric"><div class="tiny">Primary flow</div><div class="big">Book → Dispatch → Complete</div><div class="note">Passenger, admin, and driver roles stay connected in one all-in-one file.</div></div>
       </div>
 
       <div id="passengerView" class="hidden">
@@ -536,7 +544,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           <div id="passengerTrips" class="booking-list"></div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Saved places</div>
             <div class="section-sub">Quickly save common pickup and destination addresses.</div>
@@ -558,7 +566,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           </div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Repeat ride templates</div>
             <div class="section-sub">Save a recurring ride setup for fast rebooking.</div>
@@ -586,7 +594,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           </div>
         </div>
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Care circles</div>
             <div class="section-sub">A simple view of who supports the passenger journey.</div>
@@ -674,7 +682,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           </div>
         </div>
 
-        <div class="grid-3 top-gap">
+        <div class="grid-3 top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Dispatch board</div>
             <div class="section-sub">Priority queue, unpaid jobs, and service commitments.</div>
@@ -692,7 +700,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           </div>
         </div>
 
-        <div class="level7-grid top-gap">
+        <div class="level7-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Referral inbox</div>
             <div class="section-sub">NDIS and partner bookings awaiting action.</div>
@@ -723,7 +731,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           </div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Driver management</div>
             <div class="section-sub">Least busy driver is recommended first.</div>
@@ -736,7 +744,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           </div>
         </div>
 
-        <div class="level8-grid top-gap">
+        <div class="level8-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Kanban dispatch</div>
             <div class="section-sub">Fast view of pending, assigned, and completed jobs.</div>
@@ -754,7 +762,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           </div>
         </div>
 
-        <div class="level10-grid top-gap">
+        <div class="level10-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Level 10 command center</div>
             <div class="section-sub">High-level operations snapshot, demand pressure, and dispatch health.</div>
@@ -772,7 +780,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           </div>
         </div>
 
-        <div class="level11-grid top-gap">
+        <div class="level11-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Passenger concierge</div>
             <div class="section-sub">Helpful travel readiness view without changing your auth flow.</div>
@@ -802,7 +810,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           </div>
         </div>
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Orchestration hub</div>
             <div class="section-sub">High-level coordination layer built on the existing dispatch flow.</div>
@@ -856,7 +864,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
         </div>
 
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Driver controls</div>
             <div class="section-sub">Update availability and vehicle notes without changing login flow.</div>
@@ -886,13 +894,13 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           </div>
         </div>
 
-        <div class="card section top-gap">
+        <div class="card section top-gap focus-advanced">
           <div class="section-title">Driver acceptance board</div>
           <div class="section-sub">Accept or decline newly assigned work.</div>
           <div id="driverAcceptanceBoard" class="notice-list"></div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">OTP trip security</div>
             <div class="section-sub">Use one-time codes to verify pickup and drop-off.</div>
@@ -905,7 +913,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           </div>
         </div>
 
-        <div class="grid-2 top-gap">
+        <div class="grid-2 top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Shift handover</div>
             <div class="section-sub">Driver notes for next shift or admin follow-up.</div>
@@ -918,7 +926,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
           </div>
         </div>
 
-        <div class="level11-grid top-gap">
+        <div class="level11-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Driver coaching</div>
             <div class="section-sub">Simple coaching view using existing trip outcomes.</div>
@@ -949,7 +957,7 @@ body.week4-upgrade .week4-driver-active-only .status-row .btn{display:none}
         </div>
 
 
-        <div class="level12-grid top-gap">
+        <div class="level12-grid top-gap focus-advanced">
           <div class="card section">
             <div class="section-title">Driver excellence</div>
             <div class="section-sub">Simple quality layer using existing trip outcomes.</div>
@@ -2280,46 +2288,20 @@ function renderAdminCharts() {
     }
 
     async function assignDriver(bookingId) {
-      try {
-        const sel = document.getElementById(`driver-select-${bookingId}`);
-        const driverUid = sel?.value;
-
-        console.log("[assignDriver] bookingId:", bookingId);
-        console.log("[assignDriver] selected driver UID:", driverUid);
-        console.log("[assignDriver] currentUser:", currentUser);
-        console.log("[assignDriver] currentProfile:", currentProfile);
-        console.log("[assignDriver] allDrivers:", allDrivers);
-
-        if (!driverUid) return alert("Select a driver first.");
-
-        const booking = allBookings.find(b => b.id === bookingId);
-        if (!booking) {
-          console.error("[assignDriver] Booking not found", bookingId, allBookings);
-          return alert("Booking not found.");
-        }
-
-        const driver = allDrivers.find(d => d.uid === driverUid);
-        if (!driver) {
-          console.error("[assignDriver] Driver not found", driverUid, allDrivers);
-          return alert("Driver not found.");
-        }
-
-        await updateDoc(doc(db, "bookings", bookingId), {
-          assignedDriverUid: driver.uid,
-          assignedDriverName: driver.name || driver.email,
-          status: "assigned",
-          acceptanceStatus: "pending_driver",
-          driverStage: "assigned",
-          dispatchAssignedAt: new Date().toISOString(),
-          updatedAt: serverTimestamp()
-        });
-
-        console.log("[assignDriver] Success");
-        alert("Driver assigned successfully");
-      } catch (error) {
-        console.error("[assignDriver] Failed:", error);
-        alert("Assign failed: " + (error?.message || error));
-      }
+      const sel = document.getElementById(`driver-select-${bookingId}`);
+      const driverUid = sel?.value;
+      if (!driverUid) return alert("Select a driver first.");
+      const driver = allDrivers.find(d => d.uid === driverUid);
+      if (!driver) return alert("Driver not found.");
+      await updateDoc(doc(db, "bookings", bookingId), {
+        assignedDriverUid: driver.uid,
+        assignedDriverName: driver.name || driver.email,
+        status: "assigned",
+        acceptanceStatus: "pending_driver",
+        driverStage: "assigned",
+        dispatchAssignedAt: new Date().toISOString(),
+        updatedAt: serverTimestamp()
+      });
     }
 
     async function completeBooking(bookingId) {
@@ -3258,222 +3240,6 @@ function renderAdminCharts() {
         .replace(/'/g, "&#039;");
     }
   
-
-
-/* ===== UVEL Week 4 / Level 9 UI upgrade ===== */
-(function(){
-  const HIDE_TITLES = {
-    admin: ["Audit log","Referral inbox","SLA controls","Passenger management","Driver management","Finance reconciliation","Passenger trust panel","Level 10 command center","Payout approvals","Passenger concierge","Predictive demand","Compliance vault","Orchestration hub","Compliance timeline","Care circles"],
-    passenger: ["Trip updates","Trip readiness","Care circles","Readiness scoring","Journey confidence"],
-    driver: ["Driver notifications","Driver acceptance board","OTP trip security","Proof of completion","Shift handover","Route reliability","Driver coaching","Family live view","Operations intelligence","Driver excellence","Shift readiness","Journey confidence"]
-  };
-
-  function qsa(sel, root=document){ return Array.from(root.querySelectorAll(sel)); }
-  function titleOf(card){
-    const t = card.querySelector('.section-title');
-    return t ? t.textContent.trim() : '';
-  }
-  function hideCardsByTitles(rootId, titles){
-    const root = document.getElementById(rootId);
-    if(!root) return;
-    qsa('.card.section', root).forEach(card=>{
-      if(titles.includes(titleOf(card))) card.classList.add('week4-hidden');
-    });
-  }
-  function setSubtitleText(){
-    const subs = qsa('.subtitle');
-    subs.forEach(s=>{
-      if(s.textContent.includes('Level 12')) s.textContent = 'Week 4 • Level 9 demo-ready build';
-      if(s.textContent.includes('stable auth build')) s.textContent = 'Week 4 clean role-based build';
-    });
-  }
-
-  function simplifyPassenger(){
-    const root = document.getElementById('passengerView');
-    const form = document.getElementById('bookingForm');
-    if(!root || !form || form.dataset.week4Done) return;
-    form.dataset.week4Done = '1';
-
-    // wrap advanced options from priority row to before action buttons
-    const rows = Array.from(form.children);
-    const actionRow = form.querySelector('.right-actions.top-gap');
-    const advancedStart = rows.find(el => el.querySelector && el.querySelector('#bookingPriority'));
-    if(advancedStart && actionRow){
-      const advWrap = document.createElement('div');
-      advWrap.id = 'week4PassengerAdvanced';
-      advWrap.className = 'week4-hidden';
-      let node = advancedStart;
-      while(node && node !== actionRow){
-        const next = node.nextElementSibling;
-        advWrap.appendChild(node);
-        node = next;
-      }
-      const sectionHead = document.createElement('div');
-      sectionHead.className = 'week4-section-head';
-      sectionHead.innerHTML = '<div><div class="week4-title">Book a ride</div><div class="week4-sub">Simple booking first. Advanced care options are optional.</div></div>';
-      const toggle = document.createElement('button');
-      toggle.type = 'button';
-      toggle.className = 'btn week4-toggle';
-      toggle.textContent = 'Advanced options';
-      toggle.onclick = ()=>{
-        advWrap.classList.toggle('week4-hidden');
-        toggle.textContent = advWrap.classList.contains('week4-hidden') ? 'Advanced options' : 'Hide advanced';
-      };
-      const heroTitle = form.parentElement.querySelector('.section-title');
-      if(heroTitle){
-        form.parentElement.querySelector('.section-title').textContent = 'Passenger booking';
-        const sub = form.parentElement.querySelector('.section-sub');
-        if(sub) sub.textContent = 'Request a ride quickly, then expand advanced care details only when needed.';
-      }
-      actionRow.parentNode.insertBefore(advWrap, actionRow);
-      form.insertBefore(sectionHead, form.firstChild);
-      sectionHead.appendChild(toggle);
-    }
-    hideCardsByTitles('passengerView', HIDE_TITLES.passenger);
-
-    const tripsCard = qsa('.card.section', root).find(c=>titleOf(c)==='My trips');
-    if(tripsCard){
-      const sub = tripsCard.querySelector('.section-sub');
-      if(sub) sub.textContent = 'Current and past trips in one simple list.';
-    }
-  }
-
-  function simplifyAdmin(){
-    const root = document.getElementById('adminView');
-    if(!root || root.dataset.week4Done) return;
-    root.dataset.week4Done = '1';
-    hideCardsByTitles('adminView', HIDE_TITLES.admin);
-
-    const opsCard = qsa('.card.section', root).find(c=>titleOf(c)==='Operations control');
-    if(opsCard){
-      const toolbar = opsCard.querySelector('.toolbar');
-      if(toolbar && !opsCard.querySelector('.week4-tabs')){
-        const tabs = document.createElement('div');
-        tabs.className = 'week4-tabs';
-        tabs.innerHTML = `
-          <button class="week4-tab active" data-status="">All</button>
-          <button class="week4-tab" data-status="pending">Pending</button>
-          <button class="week4-tab" data-status="assigned">Assigned</button>
-          <button class="week4-tab" data-status="completed">Completed</button>
-          <button class="week4-tab" data-status="cancelled">Cancelled</button>
-        `;
-        toolbar.parentNode.insertBefore(tabs, toolbar);
-        tabs.querySelectorAll('.week4-tab').forEach(btn=>{
-          btn.addEventListener('click', ()=>{
-            tabs.querySelectorAll('.week4-tab').forEach(b=>b.classList.remove('active'));
-            btn.classList.add('active');
-            const statusFilter = document.getElementById('statusFilter');
-            if(statusFilter){
-              statusFilter.value = btn.dataset.status;
-              if(typeof renderAdminBookings === 'function') renderAdminBookings();
-            }
-          });
-        });
-      }
-      const sub = opsCard.querySelector('.section-sub');
-      if(sub) sub.textContent = 'Dispatch-first board for bookings that need action.';
-    }
-
-    const analyticsCard = qsa('.card.section', root).find(c=>titleOf(c)==='Admin analytics');
-    if(analyticsCard) analyticsCard.classList.add('week4-hidden');
-
-    const dispatch = qsa('.card.section', root).find(c=>titleOf(c)==='Dispatch board');
-    const fleet = qsa('.card.section', root).find(c=>titleOf(c)==='Fleet health');
-    const incidents = qsa('.card.section', root).find(c=>titleOf(c)==='Incident hub');
-
-    // hide all top-level grids with many extra widgets
-    qsa(':scope > .grid-3, :scope > .grid-2, :scope > .level7-grid, :scope > .level8-grid, :scope > .level10-grid, :scope > .level11-grid, :scope > .level12-grid', root)
-      .forEach(el=>el.classList.add('week4-hidden'));
-
-    if(dispatch || fleet || incidents){
-      const supportRow = document.createElement('div');
-      supportRow.className = 'grid-3 top-gap';
-      [dispatch, fleet, incidents].filter(Boolean).forEach(card=>{
-        card.classList.remove('week4-hidden');
-        supportRow.appendChild(card);
-      });
-      root.appendChild(supportRow);
-    }
-  }
-
-  function simplifyDriver(){
-    const root = document.getElementById('driverView');
-    if(!root || root.dataset.week4Done) return;
-    root.dataset.week4Done = '1';
-    hideCardsByTitles('driverView', HIDE_TITLES.driver);
-
-    const children = Array.from(root.children);
-    const tripGrid = children.find(el => el.classList && el.classList.contains('grid-2'));
-    if(tripGrid && !root.querySelector('.week4-role-tabs')){
-      const tabs = document.createElement('div');
-      tabs.className = 'week4-role-tabs';
-      tabs.innerHTML = `
-        <button class="week4-tab active" data-target="active">Active Trip</button>
-        <button class="week4-tab" data-target="history">History</button>
-        <button class="week4-tab" data-target="profile">Profile</button>
-      `;
-      root.insertBefore(tabs, tripGrid);
-
-      const cards = qsa('.card.section', root);
-      const activeTitles = ['Assigned trips','Driver map'];
-      const historyTitles = ['Shift handover','Route reliability'];
-      const profileTitles = ['Driver controls'];
-
-      function apply(target){
-        tabs.querySelectorAll('.week4-tab').forEach(b=>b.classList.toggle('active', b.dataset.target===target));
-        cards.forEach(card=>card.classList.add('week4-hidden'));
-        cards.forEach(card=>{
-          const t = titleOf(card);
-          if(target==='active' && activeTitles.includes(t)) card.classList.remove('week4-hidden');
-          if(target==='history' && historyTitles.includes(t)) card.classList.remove('week4-hidden');
-          if(target==='profile' && profileTitles.includes(t)) card.classList.remove('week4-hidden');
-        });
-      }
-      tabs.querySelectorAll('.week4-tab').forEach(btn=>btn.addEventListener('click', ()=>apply(btn.dataset.target)));
-      apply('active');
-    }
-  }
-
-  function compactCards(){
-    const adminWrap = document.getElementById('adminBookings');
-    if(adminWrap) adminWrap.classList.add('week4-minor');
-    const passWrap = document.getElementById('passengerTrips');
-    if(passWrap) passWrap.classList.add('week4-minor');
-  }
-
-  function injectCurrentTripHeading(){
-    const passMapCard = qsa('.card.section', document.getElementById('passengerView')).find(c=>titleOf(c)==='Live route map');
-    if(passMapCard){
-      const title = passMapCard.querySelector('.section-title');
-      if(title) title.textContent = 'Current trip';
-      const sub = passMapCard.querySelector('.section-sub');
-      if(sub) sub.textContent = 'Track the latest trip with route, ETA, and driver status.';
-    }
-  }
-
-  function week4Enhance(){
-    document.body.classList.add('week4-upgrade');
-    setSubtitleText();
-    simplifyPassenger();
-    simplifyAdmin();
-    simplifyDriver();
-    compactCards();
-    injectCurrentTripHeading();
-  }
-
-  const originalRenderEverything = window.renderEverything;
-  if(typeof originalRenderEverything === 'function'){
-    window.renderEverything = async function(...args){
-      const out = await originalRenderEverything.apply(this,args);
-      week4Enhance();
-      return out;
-    }
-  }
-  document.addEventListener('DOMContentLoaded', ()=>{
-    setTimeout(week4Enhance, 600);
-    setTimeout(week4Enhance, 1800);
-  });
-})();
 
 </script>
 </body>
