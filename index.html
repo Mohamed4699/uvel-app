@@ -2627,30 +2627,30 @@ function renderDriverTrips() {
       if (currentProfile?.role !== "admin") return;
       const counts = {};
       allBookings.forEach(b => {
-        if (b.assignedDriverUid && b.status !== "completed" && b.status !== "cancelled") {
-          counts[b.assignedDriverUid] = (counts[b.assignedDriverUid] || 0) + 1;
-        }
+        if (b.assignedDriverUid && !["completed", "cancelled"].includes(String(b.status || ""))) counts[b.assignedDriverUid] = (counts[b.assignedDriverUid] || 0) + 1;
       });
       const wrap = $("driverManagement");
       if (!allDrivers.length) {
         wrap.innerHTML = `<div class="empty">No drivers found. Click "Seed demo drivers" or sign up a driver account.</div>`;
         return;
       }
-      wrap.innerHTML = allDrivers
-        .sort((a, b) => (counts[a.uid] || 0) - (counts[b.uid] || 0))
-        .map(d => `
-          <div class="list-card">
-            <div class="trip-head">
-              <div>
-                <div style="font-size:20px;font-weight:800">${escapeHtml(d.name || d.email)}</div>
-                <div class="muted">${escapeHtml(d.vehicle || "Vehicle not set")}</div>
-              </div>
-              <div class="badge assigned">${escapeHtml(d.availability || "online")}</div>
-            </div>
-            <div class="footer-note">Active load: ${counts[d.uid] || 0}</div>
-            <div class="footer-note">Driver earnings: $${calculateDriverRevenue(d.uid, allBookings).toFixed(2)} • Paid trips: ${allBookings.filter(b => b.assignedDriverUid === d.uid && b.paymentStatus === "paid").length}</div>
-          </div>
-        `).join("");
+      const online = allDrivers.filter(d => (d.availability || "online") === "online").length;
+      const missingVehicle = allDrivers.filter(d => !d.vehicle || d.vehicle === "Vehicle not set").length;
+      const topDriver = allDrivers.slice().sort((a,b) => (counts[b.uid]||0) - (counts[a.uid]||0))[0];
+      const topList = allDrivers.slice().sort((a,b) => (counts[b.uid]||0) - (counts[a.uid]||0)).slice(0,4);
+      wrap.innerHTML = `
+        <div class="grid-2">
+          <div class="finance-item"><strong>Online drivers</strong><div class="ops-kpi">${online}</div><div class="tiny">Available now</div></div>
+          <div class="finance-item"><strong>Vehicle not set</strong><div class="ops-kpi">${missingVehicle}</div><div class="tiny">Needs profile update</div></div>
+          <div class="finance-item"><strong>Total drivers</strong><div class="ops-kpi">${allDrivers.length}</div><div class="tiny">Driver accounts</div></div>
+          <div class="finance-item"><strong>Highest load</strong><div class="ops-kpi">${escapeHtml(topDriver?.name || topDriver?.email || "--")}</div><div class="tiny">${topDriver ? `${counts[topDriver.uid] || 0} active jobs` : "No active load"}</div></div>
+        </div>
+        <div class="line"></div>
+        ${topList.map(d => `
+          <div class="ops-item">
+            <div class="trip-head"><div><strong>${escapeHtml(d.name || d.email)}</strong><div class="muted">${escapeHtml(d.vehicle || "Vehicle not set")}</div></div><div class="badge assigned">${escapeHtml(d.availability || "online")}</div></div>
+            <div class="footer-note">Active load: ${counts[d.uid] || 0} • Driver earnings: $${calculateDriverRevenue(d.uid, allBookings).toFixed(2)}</div>
+          </div>`).join("")}`;
     }
 
     function renderPassengerManagement() {
@@ -2661,16 +2661,20 @@ function renderDriverTrips() {
         wrap.innerHTML = `<div class="empty">No passengers found yet.</div>`;
         return;
       }
-      wrap.innerHTML = passengers.map(p => {
-        const count = allBookings.filter(b => b.passengerUid === p.uid).length;
-        return `
-          <div class="list-card">
-            <div style="font-size:20px;font-weight:800">${escapeHtml(p.name || p.email)}</div>
-            <div class="muted">${escapeHtml(p.email || "")}</div>
-            <div class="footer-note">Bookings: ${count}</div>
-          </div>
-        `;
-      }).join("");
+      const withCounts = passengers.map(p => ({...p, bookingCount: allBookings.filter(b => b.passengerUid === p.uid).length}));
+      const activePassengers = withCounts.filter(p => p.bookingCount > 0).length;
+      const topPassenger = withCounts.slice().sort((a,b) => b.bookingCount - a.bookingCount)[0];
+      const repeatRiders = withCounts.filter(p => p.bookingCount >= 3).length;
+      wrap.innerHTML = `
+        <div class="grid-2">
+          <div class="finance-item"><strong>Active passengers</strong><div class="ops-kpi">${activePassengers}</div><div class="tiny">With booking history</div></div>
+          <div class="finance-item"><strong>Repeat riders</strong><div class="ops-kpi">${repeatRiders}</div><div class="tiny">3+ bookings</div></div>
+          <div class="finance-item"><strong>Total passengers</strong><div class="ops-kpi">${withCounts.length}</div><div class="tiny">Passenger accounts</div></div>
+          <div class="finance-item"><strong>Top passenger</strong><div class="ops-kpi">${escapeHtml(topPassenger?.name || topPassenger?.email || "--")}</div><div class="tiny">${topPassenger ? `${topPassenger.bookingCount} bookings` : "No bookings"}</div></div>
+        </div>
+        <div class="line"></div>
+        ${withCounts.slice().sort((a,b) => b.bookingCount - a.bookingCount).slice(0,4).map(p => `
+          <div class="ops-item"><strong>${escapeHtml(p.name || p.email)}</strong><div class="tiny">${escapeHtml(p.email || "")}</div><div class="footer-note">Bookings: ${p.bookingCount}</div></div>`).join("")}`;
     }
 
     async function updateMapsFromLatest() {
@@ -3187,16 +3191,25 @@ function renderDriverTrips() {
       if (currentProfile?.role !== "admin") return;
       const wrap = $("dispatchBoard");
       if (!wrap) return;
-      const active = allBookings.filter(b => b.status !== "completed" && b.status !== "cancelled");
-      const sorted = active.slice().sort((a,b) => {
-        const p = bookingPriorityRank(b.priority) - bookingPriorityRank(a.priority);
-        return p !== 0 ? p : bookingDateTimeValue(a) - bookingDateTimeValue(b);
-      }).slice(0,6);
-      if (!sorted.length) {
-        wrap.innerHTML = `<div class="empty">No active dispatch items.</div>`;
-        return;
-      }
-      wrap.innerHTML = sorted.map(b => `
+      const active = allBookings.filter(b => !["completed", "cancelled"].includes(String(b.status || "")));
+      const unassigned = active.filter(b => !b.assignedDriverUid).length;
+      const unpaid = active.filter(b => b.paymentStatus !== "paid").length;
+      const highRisk = active.filter(b => getRiskLevel(b) === "high").length;
+      const liveEta = active.filter(b => b.driverLat).length;
+      const queue = active.slice().sort((a,b) => {
+        const riskDiff = ({high:3, mid:2, low:1}[getRiskLevel(b)]||1) - ({high:3, mid:2, low:1}[getRiskLevel(a)]||1);
+        if (riskDiff !== 0) return riskDiff;
+        if (!!a.assignedDriverUid !== !!b.assignedDriverUid) return a.assignedDriverUid ? 1 : -1;
+        return bookingDateTimeValue(a) - bookingDateTimeValue(b);
+      }).slice(0,5);
+      const summary = `
+        <div class="grid-2">
+          <div class="finance-item"><strong>Trips needing action</strong><div class="ops-kpi">${queue.length}</div><div class="tiny">Top items shown below</div></div>
+          <div class="finance-item"><strong>Unassigned</strong><div class="ops-kpi">${unassigned}</div><div class="tiny">Needs driver assignment</div></div>
+          <div class="finance-item"><strong>High risk</strong><div class="ops-kpi">${highRisk}</div><div class="tiny">Urgent follow-up</div></div>
+          <div class="finance-item"><strong>Live ETA watch</strong><div class="ops-kpi">${liveEta}</div><div class="tiny">Trips currently sharing location</div></div>
+        </div>`;
+      const list = queue.length ? queue.map(b => `
         <div class="ops-item">
           <div class="trip-head">
             <div>
@@ -3205,27 +3218,31 @@ function renderDriverTrips() {
             </div>
             <div class="chip tag-${escapeHtml(b.priority || "standard")}">${escapeHtml(b.priority || "standard")}</div>
           </div>
-          <div class="footer-note">Driver: ${escapeHtml(b.assignedDriverName || "Unassigned")} • Payment: ${escapeHtml(b.paymentStatus || "unpaid")} • ETA: ${escapeHtml(getEtaLabel(b))}</div>
-        </div>
-      `).join("");
+          <div class="footer-note">${b.assignedDriverName ? `Driver: ${escapeHtml(b.assignedDriverName)}` : `Driver: Unassigned`} • Payment: ${escapeHtml(b.paymentStatus || "unpaid")} • ETA: ${escapeHtml(getEtaLabel(b))}</div>
+        </div>`).join("") : `<div class="empty">No active dispatch items.</div>`;
+      wrap.innerHTML = summary + `<div class="line"></div>` + list;
     }
 
     function renderServiceAlerts() {
       if (currentProfile?.role !== "admin") return;
-      const items = allBookings
-        .filter(b => b.status !== "completed" && b.status !== "cancelled")
-        .filter(b => bookingIsUpcoming(b, getLevel6Settings().serviceWindowMins) || (b.priority === "urgent"))
+      const wrap = $("serviceAlerts");
+      if (!wrap) return;
+      const settings = getLevel6Settings();
+      const alerts = allBookings
+        .filter(b => !["completed", "cancelled"].includes(String(b.status || "")))
+        .filter(b => bookingIsUpcoming(b, settings.serviceWindowMins) || b.priority === "urgent")
         .sort((a,b) => bookingDateTimeValue(a) - bookingDateTimeValue(b))
-        .slice(0,6)
-        .map(b => {
-          const dt = bookingDateTimeValue(b);
-          const mins = dt ? Math.round((dt - nowMs()) / 60000) : null;
-          const threshold = getLevel6Settings().urgentThresholdMins;
-          const slaClass = mins == null ? "sla-watch" : mins < 0 || mins <= threshold ? "sla-risk" : "sla-ok";
-          const label = mins == null ? "Schedule not set" : mins < 0 ? "Overdue" : `${mins} min away`;
-          return `<div class="notice-item ${slaClass}"><strong>${escapeHtml(b.passengerName || "Passenger")}</strong> • ${escapeHtml(label)} • ${escapeHtml(b.priority || "standard")} • ${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div>`;
-        });
-      renderSimpleNoticeList("serviceAlerts", items, "No service alerts.");
+        .slice(0,4);
+      if (!alerts.length) {
+        wrap.innerHTML = `<div class="finance-item"><strong>No service alerts</strong><div class="tiny">Everything looks stable right now.</div></div>`;
+        return;
+      }
+      wrap.innerHTML = alerts.map(b => {
+        const dt = bookingDateTimeValue(b);
+        const mins = dt ? Math.round((dt - nowMs()) / 60000) : null;
+        const label = mins == null ? "Schedule not set" : mins < 0 ? "Overdue" : `${mins} min away`;
+        return `<div class="notice-item"><strong>${escapeHtml(b.passengerName || "Passenger")}</strong><div class="tiny">${escapeHtml(label)} • ${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div></div>`;
+      }).join("");
     }
 
     function renderAuditLog() {
@@ -3283,13 +3300,21 @@ function renderDriverTrips() {
 
     function renderReferralInbox() {
       if (currentProfile?.role !== "admin") return;
-      const items = allBookings
-        .filter(b => b.rideType === "ndis" || (b.referralSource && b.referralSource !== "self"))
-        .slice()
-        .sort((a,b) => bookingDateTimeValue(a) - bookingDateTimeValue(b))
-        .slice(0,8)
-        .map(b => `<div class="notice-item"><strong>${escapeHtml(b.bookingCode || "Trip")}</strong> • ${escapeHtml(b.referralSource || "self")} ${b.referralEmail ? `• ${escapeHtml(b.referralEmail)}` : ""} • ${escapeHtml(b.passengerName || "Passenger")} • ${escapeHtml(b.status || "pending")}</div>`);
-      renderSimpleNoticeList("referralInbox", items, "No referral items.");
+      const wrap = $("referralInbox");
+      if (!wrap) return;
+      const referralItems = allBookings.filter(b => b.rideType === "ndis" || (b.referralSource && b.referralSource !== "self"));
+      const selfCount = allBookings.filter(b => (b.referralSource || "self") === "self").length;
+      const invoiceCount = allBookings.filter(b => String(b.paymentMethod || "").includes("Invoice")).length;
+      const latest = referralItems.slice().sort((a,b) => bookingDateTimeValue(b) - bookingDateTimeValue(a)).slice(0,4);
+      wrap.innerHTML = `
+        <div class="grid-2">
+          <div class="finance-item"><strong>Self referrals</strong><div class="ops-kpi">${selfCount}</div><div class="tiny">Direct bookings</div></div>
+          <div class="finance-item"><strong>NDIS / invoice</strong><div class="ops-kpi">${invoiceCount}</div><div class="tiny">Referral workflow</div></div>
+          <div class="finance-item"><strong>Referral jobs</strong><div class="ops-kpi">${referralItems.length}</div><div class="tiny">Needs admin visibility</div></div>
+          <div class="finance-item"><strong>Latest updates</strong><div class="ops-kpi">${latest.length}</div><div class="tiny">Recent referral items</div></div>
+        </div>
+        <div class="line"></div>
+        ${latest.length ? latest.map(b => `<div class="notice-item"><strong>${escapeHtml(b.bookingCode || "Trip")}</strong><div class="tiny">${escapeHtml(b.referralSource || "self")} • ${escapeHtml(b.passengerName || "Passenger")} • ${escapeHtml(b.status || "pending")}</div></div>`).join("") : `<div class="empty">No referral items.</div>`}`;
     }
 
     function renderSlaSummary() {
@@ -3321,18 +3346,20 @@ function renderDriverTrips() {
         return;
       }
       const activeLoads = {};
-      allBookings.forEach(b => {
-        if (b.assignedDriverUid && b.status !== "completed" && b.status !== "cancelled") {
-          activeLoads[b.assignedDriverUid] = (activeLoads[b.assignedDriverUid] || 0) + 1;
-        }
-      });
-      el.innerHTML = allDrivers.map(d => {
-        const wheelchairReady = /wheelchair|accessible|van/i.test(String(d.vehicle || ""));
-        return `<div class="fleet-item">
-          <div class="trip-head"><div><strong>${escapeHtml(d.name || d.email)}</strong><div class="muted">${escapeHtml(d.vehicle || "Vehicle not set")}</div></div><div class="badge assigned">${escapeHtml(d.availability || "online")}</div></div>
-          <div class="footer-note">Active load: ${activeLoads[d.uid] || 0} • Wheelchair ready: ${wheelchairReady ? "Yes" : "No"}</div>
-        </div>`;
-      }).join("");
+      allBookings.forEach(b => { if (b.assignedDriverUid && !["completed", "cancelled"].includes(String(b.status || ""))) activeLoads[b.assignedDriverUid] = (activeLoads[b.assignedDriverUid] || 0) + 1; });
+      const online = allDrivers.filter(d => (d.availability || "online") === "online").length;
+      const wheelchairReady = allDrivers.filter(d => d.wheelchairCapable === true || /wheelchair|accessible|wav/i.test(String(d.vehicleType || d.vehicle || ""))).length;
+      const missingVehicle = allDrivers.filter(d => !d.vehicle || d.vehicle === "Vehicle not set").length;
+      const topDrivers = allDrivers.slice().sort((a,b) => (activeLoads[b.uid]||0) - (activeLoads[a.uid]||0)).slice(0,4);
+      el.innerHTML = `
+        <div class="grid-2">
+          <div class="finance-item"><strong>Online</strong><div class="ops-kpi">${online}</div><div class="tiny">Drivers available now</div></div>
+          <div class="finance-item"><strong>Wheelchair ready</strong><div class="ops-kpi">${wheelchairReady}</div><div class="tiny">Accessible support</div></div>
+          <div class="finance-item"><strong>Missing vehicle info</strong><div class="ops-kpi">${missingVehicle}</div><div class="tiny">Needs update</div></div>
+          <div class="finance-item"><strong>Fleet load</strong><div class="ops-kpi">${Object.values(activeLoads).reduce((a,b)=>a+b,0)}</div><div class="tiny">Active assigned jobs</div></div>
+        </div>
+        <div class="line"></div>
+        ${topDrivers.map(d => `<div class="fleet-item"><div class="trip-head"><div><strong>${escapeHtml(d.name || d.email)}</strong><div class="muted">${escapeHtml(d.vehicle || "Vehicle not set")}</div></div><div class="badge assigned">${escapeHtml(d.availability || "online")}</div></div><div class="footer-note">Active load: ${activeLoads[d.uid] || 0} • Wheelchair ready: ${(d.wheelchairCapable === true || /wheelchair|accessible|wav/i.test(String(d.vehicleType || d.vehicle || ""))) ? "Yes" : "No"}</div></div>`).join("")}`;
     }
 
     function renderPassengerReadiness() {
@@ -3509,12 +3536,14 @@ function renderDriverAcceptanceBoard() {
       const unpaid = allBookings.filter(b => b.paymentStatus !== "paid");
       const referral = allBookings.filter(b => String(b.paymentMethod || "").includes("Invoice"));
       const card = allBookings.filter(b => String(b.paymentMethod || "").includes("Card"));
-      const items = [
-        `<div class="finance-item"><strong>Unpaid jobs</strong><div class="ops-kpi">${unpaid.length}</div><div class="tiny">Needs follow-up or payment</div></div>`,
-        `<div class="finance-item"><strong>Referral jobs</strong><div class="ops-kpi">${referral.length}</div><div class="tiny">NDIS / invoice workflow</div></div>`,
-        `<div class="finance-item"><strong>Card jobs</strong><div class="ops-kpi">${card.length}</div><div class="tiny">Direct payment flow</div></div>`
-      ];
-      renderSimpleNoticeList("financeQueue", items, "No finance items.");
+      const overdue = unpaid.filter(b => ["assigned", "completed"].includes(String(b.status || "")));
+      wrap.innerHTML = `
+        <div class="grid-2">
+          <div class="finance-item"><strong>Unpaid jobs</strong><div class="ops-kpi">${unpaid.length}</div><div class="tiny">Needs follow-up or payment</div></div>
+          <div class="finance-item"><strong>Referral jobs</strong><div class="ops-kpi">${referral.length}</div><div class="tiny">NDIS / invoice workflow</div></div>
+          <div class="finance-item"><strong>Card jobs</strong><div class="ops-kpi">${card.length}</div><div class="tiny">Direct payment flow</div></div>
+          <div class="finance-item"><strong>Follow-up</strong><div class="ops-kpi">${overdue.length}</div><div class="tiny">Assigned or completed unpaid</div></div>
+        </div>`;
     }
 
     function renderPassengerTrustPanel() {
@@ -3792,8 +3821,17 @@ function renderDriverAcceptanceBoard() {
       if (currentProfile?.role !== "admin") return;
       const wrap = $("incidentHub");
       if (!wrap) return;
-      const items = allBookings.filter(b => getRiskLevel(b) !== "low").slice(0, 8);
-      wrap.innerHTML = items.length ? items.map(b => `<div class="incident-item"><div style="font-weight:800">${escapeHtml(b.passengerName || "Passenger")}</div><div class="tiny">${escapeHtml(b.pickup || "")} → ${escapeHtml(b.destination || "")}</div><div class="top-gap risk-${getRiskLevel(b)}">Risk: ${escapeHtml(getRiskLevel(b))}</div></div>`).join("") : `<div class="empty">No incidents right now.</div>`;
+      const risky = allBookings.filter(b => getRiskLevel(b) !== "low");
+      const high = risky.filter(b => getRiskLevel(b) === "high");
+      const mid = risky.filter(b => getRiskLevel(b) === "mid");
+      const list = risky.slice(0,5);
+      wrap.innerHTML = `
+        <div class="grid-2">
+          <div class="finance-item"><strong>High risk</strong><div class="ops-kpi">${high.length}</div><div class="tiny">Urgent attention</div></div>
+          <div class="finance-item"><strong>Mid risk</strong><div class="ops-kpi">${mid.length}</div><div class="tiny">Watch closely</div></div>
+        </div>
+        <div class="line"></div>
+        ${list.length ? list.map(b => `<div class="incident-item"><div style="font-weight:800">${escapeHtml(b.passengerName || "Passenger")}</div><div class="tiny">${escapeHtml(b.pickup || "")} → ${escapeHtml(b.destination || "")}</div><div class="top-gap risk-${getRiskLevel(b)}">Risk: ${escapeHtml(getRiskLevel(b))}</div></div>`).join("") : `<div class="empty">No incidents right now.</div>`}`;
     }
 
     function renderPayoutApprovals() {
