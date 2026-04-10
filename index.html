@@ -247,6 +247,28 @@
     .passenger-mini-card{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03)}
     .passenger-mini-card .section-sub{margin-bottom:12px}
     @media (max-width:1100px){.passenger-trip-grid,.compact-passenger-grid{grid-template-columns:1fr}}
+
+    .driver-focus-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}
+    .driver-current-card,.driver-mini-card{padding:18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03)}
+    .driver-current-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .driver-current-route{font-size:24px;font-weight:900;line-height:1.2;margin-top:6px}
+    .driver-current-summary,.driver-upcoming-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .driver-pill{display:inline-flex;align-items:center;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px}
+    .driver-current-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+    .driver-current-grid .item,.driver-upcoming-card .item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .driver-current-actions,.driver-upcoming-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .driver-upcoming-list{display:grid;gap:12px}
+    .driver-upcoming-card{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03)}
+    .driver-upcoming-title{font-size:17px;font-weight:800}
+    .driver-status-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+    .driver-status-strip .item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .driver-compact-proof{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+    .driver-detail-collapsible{margin-top:18px}
+    .driver-detail-collapsible>summary{list-style:none;cursor:pointer;padding:16px 18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03);font-weight:800}
+    .driver-detail-collapsible>summary::-webkit-details-marker{display:none}
+    .driver-detail-content{margin-top:14px}
+    @media (max-width:1100px){.driver-focus-grid,.driver-current-grid,.driver-status-strip,.driver-compact-proof{grid-template-columns:1fr}}
+
     .booking-scope{display:grid;gap:14px}
     .booking-mode-banner{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03);margin-bottom:14px}
     .booking-mode-banner .mode-copy{font-size:13px;color:var(--muted)}
@@ -918,14 +940,15 @@
 
       </div>
 
+      
       <div id="driverView" class="hidden">
-        <div class="grid-2">
+        <div class="driver-focus-grid">
           <div class="card section">
-            <div class="section-title">Assigned trips</div>
-            <div class="section-sub">Driver sees only trips assigned to them.</div>
-            <div class="eta-box">
-              <div class="item"><div class="tiny">Total earnings</div><div id="driverTotalEarnings">$0.00</div></div>
+            <div class="section-title">Current trip</div>
+            <div class="section-sub">The driver sees the main trip first, with clear actions and less clutter.</div>
+            <div class="driver-status-strip">
               <div class="item"><div class="tiny">Today earnings</div><div id="driverTodayEarnings">$0.00</div></div>
+              <div class="item"><div class="tiny">Total earnings</div><div id="driverTotalEarnings">$0.00</div></div>
               <div class="item"><div class="tiny">Paid trips</div><div id="driverPaidTrips">0</div></div>
               <div class="item"><div class="tiny">Completed trips</div><div id="driverCompletedTrips">0</div></div>
             </div>
@@ -933,17 +956,16 @@
           </div>
           <div class="card section">
             <div class="trip-head"><div><div class="section-title">Driver map</div>
-            <div class="section-sub">Improved live driver map with driver → pickup → destination route.</div></div><div class="seg"><span id="driverTrackingState" class="pill tracking-off">Tracking: off</span><button class="btn small brand" id="startTrackingBtn">Start live tracking</button><button class="btn small" id="stopTrackingBtn">Stop tracking</button><button class="btn small" id="driverRecenterBtn">My location</button><button class="btn small" id="driverFitRouteBtn">Fit route</button></div></div>
+            <div class="section-sub">Live route for the current trip with tracking controls.</div></div><div class="seg"><span id="driverTrackingState" class="pill tracking-off">Tracking: off</span><button class="btn small brand" id="startTrackingBtn">Start live tracking</button><button class="btn small" id="stopTrackingBtn">Stop tracking</button><button class="btn small" id="driverRecenterBtn">My location</button><button class="btn small" id="driverFitRouteBtn">Fit route</button></div></div>
             <div id="driverMap" class="map"></div>
             <div class="eta-box"><div class="item"><div class="tiny">Live ETA</div><div id="driverLiveEta">--</div></div><div class="item"><div class="tiny">Remaining km</div><div id="driverRemainingKm">--</div></div><div class="item"><div class="tiny">Current speed</div><div id="driverSpeedLabel">--</div></div><div class="item"><div class="tiny">Route mode</div><div id="driverRouteMode">OSRM route</div></div></div>
           </div>
         </div>
 
-
-        <div class="grid-2 top-gap focus-advanced">
-          <div class="card section">
-            <div class="section-title">Driver controls</div>
-            <div class="section-sub">Update availability and vehicle notes without changing login flow.</div>
+        <div class="driver-focus-grid top-gap">
+          <div class="driver-mini-card">
+            <div class="section-title">Driver status</div>
+            <div class="section-sub">Keep availability and vehicle details simple.</div>
             <div class="row">
               <div>
                 <label>Availability</label>
@@ -982,106 +1004,112 @@
               <button class="btn brand small" id="saveDriverProfileBtn">Save driver profile</button>
             </div>
           </div>
-          <div class="card section">
-            <div class="section-title">Driver notifications</div>
-            <div class="section-sub">Assignments and completion reminders.</div>
-            <div id="driverNotifications" class="notice-list"></div>
+
+          <div class="driver-mini-card">
+            <div class="section-title">Next jobs</div>
+            <div class="section-sub">Upcoming assigned work and new decisions in one place.</div>
+            <div id="driverAcceptanceBoard" class="driver-upcoming-list"></div>
           </div>
         </div>
 
-        <div class="card section top-gap focus-advanced">
-          <div class="section-title">Driver acceptance board</div>
-          <div class="section-sub">Accept or decline newly assigned work.</div>
-          <div id="driverAcceptanceBoard" class="notice-list"></div>
-        </div>
-
-        <div class="grid-2 top-gap focus-advanced">
-          <div class="card section">
-            <div class="section-title">OTP trip security</div>
-            <div class="section-sub">Use one-time codes to verify pickup and drop-off.</div>
+        <div class="driver-focus-grid top-gap">
+          <div class="driver-mini-card">
+            <div class="section-title">Trip security</div>
+            <div class="section-sub">OTP is shown only for the current trip.</div>
             <div id="driverOtpPanel" class="notice-list"></div>
           </div>
-          <div class="card section">
+          <div class="driver-mini-card">
             <div class="section-title">Proof of completion</div>
-            <div class="section-sub">Save end-of-trip note or image link without changing login flow.</div>
+            <div class="section-sub">Save a completion note or link for the current trip.</div>
             <div id="driverProofPanel" class="notice-list"></div>
           </div>
         </div>
 
-        <div class="grid-2 top-gap focus-advanced">
-          <div class="card section">
-            <div class="section-title">Shift handover</div>
-            <div class="section-sub">Driver notes for next shift or admin follow-up.</div>
-            <div id="driverShiftHandover" class="stack-list"></div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Route reliability</div>
-            <div class="section-sub">Trip completion trend, acceptance, and route confidence.</div>
-            <div id="driverRouteReliability" class="stack-list"></div>
-          </div>
-        </div>
+        <details class="driver-detail-collapsible focus-advanced">
+          <summary>More driver info</summary>
+          <div class="driver-detail-content">
+            <div class="grid-2">
+              <div class="card section">
+                <div class="section-title">Driver notifications</div>
+                <div class="section-sub">Assignments and completion reminders.</div>
+                <div id="driverNotifications" class="notice-list"></div>
+              </div>
+              <div class="card section">
+                <div class="section-title">Shift handover</div>
+                <div class="section-sub">Notes for next shift or admin follow-up.</div>
+                <div id="driverShiftHandover" class="stack-list"></div>
+              </div>
+            </div>
 
-        <div class="level11-grid top-gap focus-advanced">
-          <div class="card section">
-            <div class="section-title">Driver coaching</div>
-            <div class="section-sub">Simple coaching view using existing trip outcomes.</div>
-            <div class="stack-list">
-              <div class="coach-item"><strong>Acceptance quality</strong><div class="tiny">Monitor accepted work, cancellations, and completed trips for coaching.</div></div>
-              <div class="coach-item"><strong>Care quality notes</strong><div class="tiny">Use proof of completion and handover notes to improve support quality.</div></div>
-              <div class="coach-item"><strong>Reliability score</strong><div class="tiny">Route reliability and live tracking support confidence and follow-up.</div></div>
+            <div class="grid-2 top-gap">
+              <div class="card section">
+                <div class="section-title">Route reliability</div>
+                <div class="section-sub">Completion trend, acceptance, and route confidence.</div>
+                <div id="driverRouteReliability" class="stack-list"></div>
+              </div>
+              <div class="card section">
+                <div class="section-title">Driver coaching</div>
+                <div class="section-sub">Simple coaching view using existing trip outcomes.</div>
+                <div class="stack-list">
+                  <div class="coach-item"><strong>Acceptance quality</strong><div class="tiny">Monitor accepted work, cancellations, and completed trips for coaching.</div></div>
+                  <div class="coach-item"><strong>Care quality notes</strong><div class="tiny">Use proof of completion and handover notes to improve support quality.</div></div>
+                  <div class="coach-item"><strong>Reliability score</strong><div class="tiny">Route reliability and live tracking support confidence and follow-up.</div></div>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Family live view</div>
-            <div class="section-sub">Operational summary for care visibility.</div>
-            <div class="stack-list">
-              <div class="family-live-item"><strong>Trip stage</strong><div class="tiny">Pickup, live route, ETA, and destination updates can be shared operationally.</div></div>
-              <div class="family-live-item"><strong>Emergency escalation</strong><div class="tiny">Emergency contact details remain available from the passenger booking form.</div></div>
-              <div class="family-live-item"><strong>Safe completion</strong><div class="tiny">OTP and proof-of-completion features support safe trip closure.</div></div>
-            </div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Operations intelligence</div>
-            <div class="section-sub">Practical dashboard summary without changing login logic.</div>
-            <div class="stack-list">
-              <div class="opsintel-item"><strong>Demand readiness</strong><div class="tiny">Best for recurring hospital and therapy loads.</div></div>
-              <div class="opsintel-item"><strong>Compliance readiness</strong><div class="tiny">Supports review of OTP, proof, cancellations, and shift notes.</div></div>
-              <div class="opsintel-item"><strong>Dispatch confidence</strong><div class="tiny">Best used with active load, availability, and route confidence.</div></div>
-            </div>
-          </div>
-        </div>
 
+            <div class="level11-grid top-gap">
+              <div class="card section">
+                <div class="section-title">Family live view</div>
+                <div class="section-sub">Operational summary for care visibility.</div>
+                <div class="stack-list">
+                  <div class="family-live-item"><strong>Trip stage</strong><div class="tiny">Pickup, live route, ETA, and destination updates can be shared operationally.</div></div>
+                  <div class="family-live-item"><strong>Emergency escalation</strong><div class="tiny">Emergency contact details remain available from the passenger booking form.</div></div>
+                  <div class="family-live-item"><strong>Safe completion</strong><div class="tiny">OTP and proof-of-completion features support safe trip closure.</div></div>
+                </div>
+              </div>
+              <div class="card section">
+                <div class="section-title">Operations intelligence</div>
+                <div class="section-sub">Practical dashboard summary without changing login logic.</div>
+                <div class="stack-list">
+                  <div class="opsintel-item"><strong>Demand readiness</strong><div class="tiny">Best for recurring hospital and therapy loads.</div></div>
+                  <div class="opsintel-item"><strong>Compliance readiness</strong><div class="tiny">Supports review of OTP, proof, cancellations, and shift notes.</div></div>
+                  <div class="opsintel-item"><strong>Dispatch confidence</strong><div class="tiny">Best used with active load, availability, and route confidence.</div></div>
+                </div>
+              </div>
+              <div class="card section">
+                <div class="section-title">Driver excellence</div>
+                <div class="section-sub">Simple quality layer using existing trip outcomes.</div>
+                <div class="stack-list">
+                  <div class="excellence-item"><strong>Completion discipline</strong><div class="tiny">Built from accepted work, completed trips, and cancellations.</div></div>
+                  <div class="excellence-item"><strong>Care delivery</strong><div class="tiny">Improved with proof notes, OTP closure, and steady handover records.</div></div>
+                  <div class="excellence-item"><strong>Route quality</strong><div class="tiny">Strengthened by live tracking, ETA accuracy, and route confidence.</div></div>
+                </div>
+              </div>
+            </div>
 
-        <div class="level12-grid top-gap focus-advanced">
-          <div class="card section">
-            <div class="section-title">Driver excellence</div>
-            <div class="section-sub">Simple quality layer using existing trip outcomes.</div>
-            <div class="stack-list">
-              <div class="excellence-item"><strong>Completion discipline</strong><div class="tiny">Built from accepted work, completed trips, and cancellations.</div></div>
-              <div class="excellence-item"><strong>Care delivery</strong><div class="tiny">Improved with proof notes, OTP closure, and steady handover records.</div></div>
-              <div class="excellence-item"><strong>Route quality</strong><div class="tiny">Strengthened by live tracking, ETA accuracy, and route confidence.</div></div>
+            <div class="grid-2 top-gap">
+              <div class="card section">
+                <div class="section-title">Shift readiness</div>
+                <div class="section-sub">Driver preparation panel without changing login logic.</div>
+                <div class="stack-list">
+                  <div class="shift-item"><strong>Vehicle readiness</strong><div class="tiny">Use vehicle details, availability, and assigned jobs before starting a shift.</div></div>
+                  <div class="shift-item"><strong>Job readiness</strong><div class="tiny">Review pickup order, OTP steps, and proof-of-completion expectations.</div></div>
+                  <div class="shift-item"><strong>Handover readiness</strong><div class="tiny">Carry notes forward for admin or next driver where needed.</div></div>
+                </div>
+              </div>
+              <div class="card section">
+                <div class="section-title">Journey confidence</div>
+                <div class="section-sub">Driver-facing confidence indicators.</div>
+                <div class="stack-list">
+                  <div class="level12-item"><strong>Pickup confidence</strong><div class="tiny">Better when route, ETA, and participant notes are all available.</div></div>
+                  <div class="level12-item"><strong>Completion confidence</strong><div class="tiny">Better when OTP, proof, and live status are updated clearly.</div></div>
+                  <div class="level12-item"><strong>Service confidence</strong><div class="tiny">Best used with availability, route reliability, and safe completion flow.</div></div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="card section">
-            <div class="section-title">Shift readiness</div>
-            <div class="section-sub">Driver preparation panel without changing login logic.</div>
-            <div class="stack-list">
-              <div class="shift-item"><strong>Vehicle readiness</strong><div class="tiny">Use vehicle details, availability, and assigned jobs before starting a shift.</div></div>
-              <div class="shift-item"><strong>Job readiness</strong><div class="tiny">Review pickup order, OTP steps, and proof-of-completion expectations.</div></div>
-              <div class="shift-item"><strong>Handover readiness</strong><div class="tiny">Carry notes forward for admin or next driver where needed.</div></div>
-            </div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Journey confidence</div>
-            <div class="section-sub">Driver-facing confidence indicators.</div>
-            <div class="stack-list">
-              <div class="level12-item"><strong>Pickup confidence</strong><div class="tiny">Better when route, ETA, and participant notes are all available.</div></div>
-              <div class="level12-item"><strong>Completion confidence</strong><div class="tiny">Better when OTP, proof, and live status are updated clearly.</div></div>
-              <div class="level12-item"><strong>Service confidence</strong><div class="tiny">Best used with availability, route reliability, and safe completion flow.</div></div>
-            </div>
-          </div>
-        </div>
-
+        </details>
       </div>
     </div>
   </div>
@@ -2344,43 +2372,56 @@ function renderAdminCharts() {
       `).join("");
     }
 
+    
     function renderDriverTrips() {
       if (currentProfile?.role !== "driver") return;
-      const trips = allBookings.filter(b => b.assignedDriverUid === currentUser.uid);
       const wrap = $("driverTrips");
-      if (!trips.length) {
-        wrap.innerHTML = `<div class="empty">No assigned trips yet.</div>`;
+      if (!wrap) return;
+      const active = getActiveDriverBooking();
+      if (!active) {
+        wrap.innerHTML = `<div class="empty">No active trip right now.</div>`;
         return;
       }
-      wrap.innerHTML = trips.map(b => `
-        <div class="book-card">
-          ${bookingCardHTML(b)}
-          <div class="status-row top-gap">
-            ${b.acceptanceStatus !== "accepted" ? `<button class="btn small brand" onclick="window.driverRespondBooking('${b.id}','accepted')">Accept</button>` : ""}
-            ${b.acceptanceStatus !== "declined" ? `<button class="btn small danger" onclick="window.driverRespondBooking('${b.id}','declined')">Decline</button>` : ""}
-            <button class="btn small" onclick="window.updateDriverStage('${b.id}','started')">Start</button>
-            <button class="btn small" onclick="window.updateDriverStage('${b.id}','routing')">Routing</button>
-            <button class="btn small" onclick="window.updateDriverStage('${b.id}','in_progress')">In progress</button>
-            <a class="btn small nav-link" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(b.destination || '')}&origin=${encodeURIComponent(b.pickup || '')}">Navigator</a>
-            ${b.status !== "completed" ? `<button class="btn small brand" onclick="window.completeBooking('${b.id}')">Mark completed</button>` : ""}
+      const when = [escapeHtml(active.tripDate || "--"), escapeHtml(active.tripTime || "")].join(" ").trim();
+      const passenger = escapeHtml(active.passengerName || "Passenger");
+      const statusLabel = formatStatusLabel(active.driverStage || active.status || "assigned");
+      const paymentLabel = escapeHtml(active.paymentStatus || "unpaid");
+      const rideLabel = escapeHtml(active.rideType === "ndis" ? "NDIS" : "Normal");
+      const fareLabel = `$${Number(active.fare || 0).toFixed(2)}`;
+      wrap.innerHTML = `
+        <div class="driver-current-card">
+          <div class="driver-current-head">
+            <div>
+              <div style="font-size:18px;font-weight:900">${escapeHtml(active.bookingCode || "Current trip")}</div>
+              <div class="driver-current-route">${escapeHtml(active.pickup)} → ${escapeHtml(active.destination)}</div>
+              <div class="driver-current-summary">
+                <span class="driver-pill">${passenger}</span>
+                <span class="driver-pill">${rideLabel}</span>
+                <span class="driver-pill">${escapeHtml(formatServiceTypeLabel(active.serviceType || active.tripCategory || "medical"))}</span>
+                <span class="driver-pill">${escapeHtml(formatVehicleTypeLabel(active.vehicleType || "standard"))}</span>
+              </div>
+            </div>
+            <span class="badge ${escapeHtml(active.status || "pending")}">${escapeHtml(statusLabel)}</span>
           </div>
-          <div class="proof-grid top-gap">
-            <input class="mini-input" id="pickup-otp-input-${b.id}" placeholder="Enter pickup OTP" />
-            <button class="btn small" onclick="window.verifyPickupOtp('${b.id}')">Verify pickup OTP</button>
-            <input class="mini-input" id="dropoff-otp-input-${b.id}" placeholder="Enter drop-off OTP" />
-            <button class="btn small" onclick="window.verifyDropoffOtp('${b.id}')">Verify drop-off OTP</button>
-            <input class="mini-input" id="proof-note-${b.id}" value="${escapeHtml(b.completionProofNote || "")}" placeholder="Completion note" />
-            <input class="mini-input" id="proof-link-${b.id}" value="${escapeHtml(b.completionProofLink || "")}" placeholder="Photo / document link" />
-            <button class="btn small brand" onclick="window.saveCompletionProof('${b.id}')">Save proof</button>
+          <div class="driver-current-grid">
+            <div class="item"><div class="tiny">Date / Time</div><div>${when}</div></div>
+            <div class="item"><div class="tiny">Fare</div><div>${fareLabel}</div></div>
+            <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(active.paymentMethod || "--")}<br/><span class="badge ${active.paymentStatus === "paid" ? "completed" : "pending"}">${paymentLabel}</span></div></div>
+            <div class="item"><div class="tiny">ETA / Distance</div><div>${escapeHtml(getEtaLabel(active))}<br/>${Number(active.distanceKm || 0).toFixed(1)} km</div></div>
           </div>
-          <div class="eta-box">
-            <div class="item"><div class="tiny">Stage</div><div>${escapeHtml(b.driverStage || "assigned")}</div></div>
-            <div class="item"><div class="tiny">ETA</div><div>${escapeHtml(getEtaLabel(b))}</div></div>
-            <div class="item"><div class="tiny">Distance</div><div>${Number(b.distanceKm || 0).toFixed(1)} km</div></div>
-            <div class="item"><div class="tiny">Driver earnings</div><div>$${getDriverEarningsAmount(b).toFixed(2)}</div></div>
+          <div class="driver-current-actions">
+            ${active.acceptanceStatus !== "accepted" ? `<button class="btn small brand" onclick="window.driverRespondBooking('${active.id}','accepted')">Accept job</button>` : ""}
+            ${active.acceptanceStatus !== "declined" && active.acceptanceStatus !== "accepted" ? `<button class="btn small danger" onclick="window.driverRespondBooking('${active.id}','declined')">Decline</button>` : ""}
+            <button class="btn small" onclick="window.updateDriverStage('${active.id}','started')">Start trip</button>
+            <button class="btn small" onclick="window.updateDriverStage('${active.id}','routing')">Navigate</button>
+            <button class="btn small" onclick="window.updateDriverStage('${active.id}','in_progress')">In progress</button>
+            <a class="btn small nav-link" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(active.destination || '')}&origin=${encodeURIComponent(active.pickup || '')}">Open navigator</a>
+            ${active.status !== "completed" ? `<button class="btn small brand" onclick="window.completeBooking('${active.id}')">Complete trip</button>` : ""}
           </div>
+          <div class="footer-note">Driver stage: ${escapeHtml(getDriverStageLabel(active))}${active.driverLat ? ` • Live tracking on` : ` • Live tracking off`}${active.pickupWindow ? ` • Pickup window ${escapeHtml(active.pickupWindow)}` : ""}</div>
+          ${active.notes ? `<div class="footer-note">Notes: ${escapeHtml(active.notes)}</div>` : ""}
         </div>
-      `).join("");
+      `;
     }
 
     function formatStatusLabel(status) {
@@ -3196,16 +3237,38 @@ function renderAdminCharts() {
       await updateDoc(doc(db, "bookings", bookingId), patch);
     }
 
+    
     function renderDriverAcceptanceBoard() {
       if (currentProfile?.role !== "driver") return;
       const wrap = $("driverAcceptanceBoard");
       if (!wrap) return;
+      const active = getActiveDriverBooking();
       const rows = allBookings
         .filter(b => b.assignedDriverUid === currentUser?.uid && b.status !== "completed" && b.status !== "cancelled")
-        .slice()
         .sort((a,b) => bookingDateTimeValue(a) - bookingDateTimeValue(b))
-        .map(b => `<div class="notice-item"><strong>${escapeHtml(b.bookingCode || "Trip")}</strong> • ${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)} • acceptance: ${escapeHtml(b.acceptanceStatus || "pending_driver")}</div>`);
-      renderSimpleNoticeList("driverAcceptanceBoard", rows, "No driver decisions pending.");
+        .filter(b => !active || b.id !== active.id)
+        .map(b => `
+          <div class="driver-upcoming-card">
+            <div class="trip-head">
+              <div>
+                <div class="driver-upcoming-title">${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div>
+                <div class="tiny">${escapeHtml(b.passengerName || "Passenger")} • ${escapeHtml(b.tripDate || "--")} • ${escapeHtml(b.tripTime || "")}</div>
+              </div>
+              <span class="badge ${escapeHtml(b.status || "pending")}">${escapeHtml(formatStatusLabel(b.driverStage || b.status || "assigned"))}</span>
+            </div>
+            <div class="driver-upcoming-pills">
+              <span class="driver-pill">${escapeHtml(b.bookingCode || "Trip")}</span>
+              <span class="driver-pill">${escapeHtml(b.rideType === "ndis" ? "NDIS" : "Normal")}</span>
+              <span class="driver-pill">${escapeHtml(formatVehicleTypeLabel(b.vehicleType || "standard"))}</span>
+            </div>
+            <div class="driver-upcoming-actions">
+              ${b.acceptanceStatus !== "accepted" ? `<button class="btn small brand" onclick="window.driverRespondBooking('${b.id}','accepted')">Accept</button>` : ""}
+              ${b.acceptanceStatus !== "declined" && b.acceptanceStatus !== "accepted" ? `<button class="btn small danger" onclick="window.driverRespondBooking('${b.id}','declined')">Decline</button>` : ""}
+              <button class="btn small" onclick="window.updateDriverStage('${b.id}','started')">Start</button>
+            </div>
+          </div>
+        `);
+      renderSimpleNoticeList("driverAcceptanceBoard", rows, "No upcoming jobs.");
     }
 
 
@@ -3254,21 +3317,55 @@ function renderAdminCharts() {
       renderSimpleNoticeList("passengerTrustPanel", rows, "No passenger trust checks yet.");
     }
 
+    
     function renderDriverOtpPanel() {
       const wrap = $("driverOtpPanel");
       if (!wrap || currentProfile?.role !== "driver") return;
-      const trips = allBookings.filter(b => b.assignedDriverUid === currentUser?.uid && b.status !== "completed").slice(0, 4);
-      const rows = trips.map(b => `<div class="otp-box"><strong>${escapeHtml(b.bookingCode || "Trip")}</strong><div class="tiny">${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div><div class="otp-code">${escapeHtml(b.pickupOtp || "----")} / ${escapeHtml(b.dropoffOtp || "----")}</div><div class="tiny">Pickup ${b.pickupOtpVerified ? "verified" : "pending"} • Drop-off ${b.dropoffOtpVerified ? "verified" : "pending"}</div></div>`);
+      const active = getActiveDriverBooking();
+      if (!active) {
+        renderSimpleNoticeList("driverOtpPanel", [], "No current trip for OTP.");
+        return;
+      }
+      const rows = [`
+        <div class="otp-box">
+          <strong>${escapeHtml(active.bookingCode || "Trip")}</strong>
+          <div class="tiny">${escapeHtml(active.pickup)} → ${escapeHtml(active.destination)}</div>
+          <div class="otp-code">${escapeHtml(active.pickupOtp || "----")} / ${escapeHtml(active.dropoffOtp || "----")}</div>
+          <div class="tiny">Pickup ${active.pickupOtpVerified ? "verified" : "pending"} • Drop-off ${active.dropoffOtpVerified ? "verified" : "pending"}</div>
+          <div class="driver-current-actions">
+            <input class="mini-input" id="pickup-otp-input-${active.id}" placeholder="Enter pickup OTP" />
+            <button class="btn small" onclick="window.verifyPickupOtp('${active.id}')">Verify pickup</button>
+            <input class="mini-input" id="dropoff-otp-input-${active.id}" placeholder="Enter drop-off OTP" />
+            <button class="btn small" onclick="window.verifyDropoffOtp('${active.id}')">Verify drop-off</button>
+          </div>
+        </div>
+      `];
       renderSimpleNoticeList("driverOtpPanel", rows, "No OTP trips assigned.");
     }
 
     function renderDriverProofPanel() {
       const wrap = $("driverProofPanel");
       if (!wrap || currentProfile?.role !== "driver") return;
-      const trips = allBookings.filter(b => b.assignedDriverUid === currentUser?.uid).slice(0, 4);
-      const rows = trips.map(b => `<div class="proof-item"><strong>${escapeHtml(b.bookingCode || "Trip")}</strong><div class="tiny">${escapeHtml(b.completionProofNote || "No proof note saved yet.")}</div>${b.completionProofLink ? `<div class="tiny">${escapeHtml(b.completionProofLink)}</div>` : ""}</div>`);
+      const active = getActiveDriverBooking();
+      if (!active) {
+        renderSimpleNoticeList("driverProofPanel", [], "No current trip for proof.");
+        return;
+      }
+      const rows = [`
+        <div class="proof-item">
+          <strong>${escapeHtml(active.bookingCode || "Trip")}</strong>
+          <div class="tiny">${escapeHtml(active.completionProofNote || "No proof note saved yet.")}</div>
+          ${active.completionProofLink ? `<div class="tiny">${escapeHtml(active.completionProofLink)}</div>` : ""}
+          <div class="driver-current-actions">
+            <input class="mini-input" id="proof-note-${active.id}" value="${escapeHtml(active.completionProofNote || "")}" placeholder="Completion note" />
+            <input class="mini-input" id="proof-link-${active.id}" value="${escapeHtml(active.completionProofLink || "")}" placeholder="Photo / document link" />
+            <button class="btn small brand" onclick="window.saveCompletionProof('${active.id}')">Save proof</button>
+          </div>
+        </div>
+      `];
       renderSimpleNoticeList("driverProofPanel", rows, "No completion proof yet.");
     }
+
 
     async function verifyPickupOtp(bookingId) {
       const booking = allBookings.find(b => b.id === bookingId);
