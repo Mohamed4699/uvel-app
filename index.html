@@ -226,6 +226,27 @@
     .compact-mode .section-title{font-size:16px}
     .focus-hide{display:none !important}
     .lvl13-tag{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px}
+    .passenger-trip-card{padding:18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03)}
+    .passenger-trip-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+    .passenger-trip-route{font-size:24px;font-weight:900;line-height:1.2;margin-top:6px}
+    .passenger-trip-summary{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .passenger-trip-pill{display:inline-flex;align-items:center;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px}
+    .passenger-trip-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+    .passenger-trip-grid .item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .passenger-trip-meta{margin-top:12px;color:var(--muted);font-size:14px}
+    .passenger-trip-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}
+    .trip-details-toggle{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;font-weight:700;list-style:none}
+    .trip-details-toggle::-webkit-details-marker{display:none}
+    .trip-details-panel{margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .trip-details-panel .detail-line{color:var(--muted);font-size:14px;line-height:1.6}
+    .compact-passenger-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+    .collapsible-passenger{margin-top:18px}
+    .collapsible-passenger > summary{list-style:none;cursor:pointer;padding:16px 18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03);font-weight:800}
+    .collapsible-passenger > summary::-webkit-details-marker{display:none}
+    .collapsible-passenger-content{margin-top:14px}
+    .passenger-mini-card{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03)}
+    .passenger-mini-card .section-sub{margin-bottom:12px}
+    @media (max-width:1100px){.passenger-trip-grid,.compact-passenger-grid{grid-template-columns:1fr}}
     .booking-scope{display:grid;gap:14px}
     .booking-mode-banner{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03);margin-bottom:14px}
     .booking-mode-banner .mode-copy{font-size:13px;color:var(--muted)}
@@ -591,16 +612,16 @@
           <div class="trip-head">
             <div>
               <div class="trip-head"><div><div class="section-title">My trips</div>
-              <div class="section-sub">Passenger sees only their own bookings with live driver location when shared.</div></div>              <div class="seg"><button class="btn small" id="rebookLatestBtn">Rebook latest</button><button class="btn small danger" id="passengerCancelBtn">Cancel latest trip</button></div></div>
+              <div class="section-sub">See your trips, status, driver, and payment at a glance.</div></div>              <div class="seg"><button class="btn small" id="rebookLatestBtn">Rebook latest</button><button class="btn small danger" id="passengerCancelBtn">Cancel latest trip</button></div></div>
             </div>
           </div>
           <div id="passengerTrips" class="booking-list"></div>
         </div>
 
-        <div class="grid-2 top-gap focus-advanced">
-          <div class="card section">
+        <div class="compact-passenger-grid top-gap focus-advanced">
+          <div class="passenger-mini-card">
             <div class="section-title">Saved places</div>
-            <div class="section-sub">Quickly save common pickup and destination addresses.</div>
+            <div class="section-sub">Save common addresses for faster booking.</div>
             <div class="row">
               <div><input id="savedPlaceLabel" placeholder="Place label e.g. Home" /></div>
               <div><input id="savedPlaceAddress" placeholder="Full address" /></div>
@@ -612,17 +633,17 @@
             <div id="savedPlacesList" class="saved-places-list top-gap"></div>
           </div>
 
-          <div class="card section">
+          <div class="passenger-mini-card">
             <div class="section-title">Trip updates</div>
-            <div class="section-sub">Recent notifications for your bookings.</div>
+            <div class="section-sub">Latest updates for your trips.</div>
             <div id="passengerNotifications" class="notice-list"></div>
           </div>
         </div>
 
-        <div class="grid-2 top-gap focus-advanced">
-          <div class="card section">
-            <div class="section-title">Repeat ride templates</div>
-            <div class="section-sub">Save a recurring ride setup for fast rebooking.</div>
+        <div class="compact-passenger-grid top-gap focus-advanced">
+          <div class="passenger-mini-card">
+            <div class="section-title">Repeat rides</div>
+            <div class="section-sub">Save a trip setup for quick rebooking.</div>
             <div class="row">
               <div><input id="templateLabel" placeholder="Template name e.g. Weekly therapy" /></div>
               <div>
@@ -640,43 +661,45 @@
             <div id="rideTemplatesList" class="template-list top-gap"></div>
           </div>
 
-          <div class="card section">
+          <div class="passenger-mini-card">
             <div class="section-title">Trip readiness</div>
-            <div class="section-sub">Referral and service readiness for your next trip.</div>
+            <div class="section-sub">Important details for your next trip.</div>
             <div id="passengerReadiness" class="notice-list"></div>
           </div>
         </div>
 
-        <div class="level12-grid top-gap focus-advanced">
-          <div class="card section">
-            <div class="section-title">Care circles</div>
-            <div class="section-sub">A simple view of who supports the passenger journey.</div>
-            <div class="stack-list">
-              <div class="circle-item"><strong>Primary contact</strong><div class="tiny">Uses emergency contact and referral details already saved in the booking form.</div></div>
-              <div class="circle-item"><strong>Travel preferences</strong><div class="tiny">Pickup notes, quiet ride requests, and mobility support stay visible for each trip.</div></div>
-              <div class="circle-item"><strong>Journey continuity</strong><div class="tiny">Recurring templates and saved places help keep repeat transport consistent.</div></div>
+        <details class="collapsible-passenger focus-advanced">
+          <summary>More travel info</summary>
+          <div class="collapsible-passenger-content level12-grid">
+            <div class="card section">
+              <div class="section-title">Support details</div>
+              <div class="section-sub">Saved support information for smoother trips.</div>
+              <div class="stack-list">
+                <div class="circle-item"><strong>Primary contact</strong><div class="tiny">Emergency and referral details are saved with your booking.</div></div>
+                <div class="circle-item"><strong>Travel preferences</strong><div class="tiny">Pickup notes and support needs stay attached to each trip.</div></div>
+                <div class="circle-item"><strong>Trip continuity</strong><div class="tiny">Saved places and repeat rides make rebooking faster.</div></div>
+              </div>
+            </div>
+            <div class="card section">
+              <div class="section-title">Trip status</div>
+              <div class="section-sub">Simple readiness checks for upcoming travel.</div>
+              <div class="stack-list">
+                <div class="score-item"><strong>Booking ready</strong><div class="tiny">Pickup window, contact details, and key trip info are available.</div></div>
+                <div class="score-item"><strong>Trip confidence</strong><div class="tiny">Driver, tracking, and ETA are shown when available.</div></div>
+                <div class="score-item"><strong>Support ready</strong><div class="tiny">Travel support needs are kept with the booking.</div></div>
+              </div>
+            </div>
+            <div class="card section">
+              <div class="section-title">Journey support</div>
+              <div class="section-sub">Helpful trip indicators for the passenger view.</div>
+              <div class="stack-list">
+                <div class="level12-item"><strong>On-time</strong><div class="tiny">Pickup timing and route details stay visible.</div></div>
+                <div class="level12-item"><strong>Safe trip</strong><div class="tiny">Trip security and completion steps support safer travel.</div></div>
+                <div class="level12-item"><strong>Continuity</strong><div class="tiny">Useful for repeat therapy, hospital, and community trips.</div></div>
+              </div>
             </div>
           </div>
-          <div class="card section">
-            <div class="section-title">Readiness scoring</div>
-            <div class="section-sub">Quick operational score without changing auth or bookings logic.</div>
-            <div class="stack-list">
-              <div class="score-item"><strong>Booking readiness</strong><div class="tiny">Improves when pickup window, referral, and contact details are complete.</div></div>
-              <div class="score-item"><strong>Trip confidence</strong><div class="tiny">Improves when a driver is assigned, tracking is active, and route ETA is available.</div></div>
-              <div class="score-item"><strong>Care readiness</strong><div class="tiny">Supports admin review of wheelchair, companion, and return-trip needs.</div></div>
-            </div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Journey confidence</div>
-            <div class="section-sub">Passenger-friendly confidence indicators.</div>
-            <div class="stack-list">
-              <div class="level12-item"><strong>On-time preparation</strong><div class="tiny">Best used with exact pickup windows and recurring schedules.</div></div>
-              <div class="level12-item"><strong>Safe completion</strong><div class="tiny">OTP, proof of completion, and live route status support safer journeys.</div></div>
-              <div class="level12-item"><strong>Support continuity</strong><div class="tiny">Good for repeat therapy, hospital, and community access transport.</div></div>
-            </div>
-          </div>
-        </div>
-
+        </details>
       </div>
 
       <div id="adminView" class="hidden">
@@ -2215,17 +2238,17 @@ function renderAdminCharts() {
 
     function renderPassengerTrips() {
       if (currentProfile?.role !== "passenger") return;
-      const trips = getPassengerBookings();
+      const trips = getPassengerBookings().slice().sort((a,b) => bookingDateTimeValue(b) - bookingDateTimeValue(a));
       const wrap = $("passengerTrips");
       if (!trips.length) {
         wrap.innerHTML = `<div class="empty">No bookings yet.</div>`;
         return;
       }
-      wrap.innerHTML = trips.map(bookingCardHTML).join("");
+      wrap.innerHTML = trips.map(passengerTripCardHTML).join("");
       const latest = trips[0];
       $("passengerRouteLabel").textContent = `${latest.pickup} → ${latest.destination}`;
-      $("passengerStatusLabel").textContent = latest.status;
-      $("passengerStageLabel").textContent = latest.driverStage || latest.status || "--";
+      $("passengerStatusLabel").textContent = formatStatusLabel(latest.status);
+      $("passengerStageLabel").textContent = formatPassengerStageLabel(latest);
       $("passengerEtaLabel").textContent = getEtaLabel(latest);
       $("passengerKmLabel").textContent = `${Number(latest.distanceKm || 0).toFixed(1)} km`;
     }
@@ -2358,6 +2381,63 @@ function renderAdminCharts() {
           </div>
         </div>
       `).join("");
+    }
+
+    function formatStatusLabel(status) {
+      return String(status || "pending").replaceAll("_", " ").split(" ").map(word => word ? word.charAt(0).toUpperCase() + word.slice(1) : word).join(" ");
+    }
+
+    function formatPassengerStageLabel(b) {
+      if (b.driverLat) return "Live tracking on";
+      if (b.status === "completed") return "Completed";
+      if (b.status === "cancelled") return "Cancelled";
+      if (b.assignedDriverName) return "Driver assigned";
+      return "Dispatch pending";
+    }
+
+    function passengerTripCardHTML(b) {
+      const when = [escapeHtml(b.tripDate || "--"), escapeHtml(b.tripTime || "")].join(" ").trim();
+      const summaryDriver = escapeHtml(b.assignedDriverName || b.assignedDriverEmail || "Dispatch pending");
+      const statusLabel = formatStatusLabel(b.status);
+      const serviceLabel = escapeHtml(formatServiceTypeLabel(b.serviceType || b.tripCategory || "medical"));
+      const vehicleLabel = escapeHtml(formatVehicleTypeLabel(b.vehicleType || (b.wheelchairRequired === "yes" ? "wav" : "standard")));
+      const paymentLabel = escapeHtml(b.paymentStatus || "unpaid");
+      const supportLabel = escapeHtml(formatSupportLevelLabel(b.supportLevel || (b.wheelchairRequired === "yes" ? "wheelchair" : b.companionRequired === "yes" ? "companion" : "standard")));
+      return `
+        <div class="passenger-trip-card">
+          <div class="passenger-trip-top">
+            <div>
+              <div style="font-size:18px;font-weight:900">${escapeHtml(b.bookingCode || "Trip")}</div>
+              <div class="passenger-trip-route">${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div>
+              <div class="passenger-trip-summary">
+                <span class="passenger-trip-pill">${escapeHtml(b.rideType === "ndis" ? "NDIS" : "Normal")}</span>
+                <span class="passenger-trip-pill">${serviceLabel}</span>
+                <span class="passenger-trip-pill">${vehicleLabel}</span>
+              </div>
+            </div>
+            <span class="badge ${escapeHtml(b.status || "pending")}">${escapeHtml(statusLabel)}</span>
+          </div>
+          <div class="passenger-trip-grid">
+            <div class="item"><div class="tiny">Date / Time</div><div>${when}</div></div>
+            <div class="item"><div class="tiny">Driver</div><div>${summaryDriver}</div></div>
+            <div class="item"><div class="tiny">Fare</div><div>$${Number(b.fare || 0).toFixed(2)}</div></div>
+            <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}<br/><span class="badge ${b.paymentStatus === "paid" ? "completed" : "pending"}">${paymentLabel}</span></div></div>
+          </div>
+          <div class="passenger-trip-meta">${escapeHtml(formatPassengerStageLabel(b))} • ${escapeHtml(getEtaLabel(b))} • ${Number(b.distanceKm || 0).toFixed(1)} km</div>
+          <details class="top-gap">
+            <summary class="trip-details-toggle">View details</summary>
+            <div class="trip-details-panel">
+              <div class="detail-line">Support: ${supportLabel}${b.returnTrip === "yes" ? ` • Return ${escapeHtml(b.returnTime || "scheduled")}` : ""}${b.pickupWindow ? ` • Window ${escapeHtml(b.pickupWindow)}` : ""}</div>
+              <div class="detail-line">Referral: ${escapeHtml(b.referralSource || "self")}${b.referralEmail ? ` • ${escapeHtml(b.referralEmail)}` : ""}${b.recurringPattern && b.recurringPattern !== "once" ? ` • ${escapeHtml(b.recurringPattern)}` : ""}</div>
+              <div class="detail-line">Trip support:${b.wheelchairRequired === "yes" ? ` Wheelchair` : " None"}${b.companionRequired === "yes" ? ` • Companion` : ""}${b.extraStop ? ` • Extra stop ${escapeHtml(b.extraStop)}` : ""}${Number(b.waitMinutes || 0) > 0 ? ` • Wait ${escapeHtml(String(b.waitMinutes))} min` : ""}</div>
+              ${b.notes ? `<div class="detail-line">Notes: ${escapeHtml(b.notes)}</div>` : ""}
+              ${b.driverLat ? `<div class="detail-line">Live tracking: on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}</div>` : `<div class="detail-line">Live tracking: off</div>`}
+              ${b.pickupOtp || b.dropoffOtp ? `<div class="detail-line">Trip security: pickup ${escapeHtml(b.pickupOtp || "----")} • drop-off ${escapeHtml(b.dropoffOtp || "----")}</div>` : ""}
+              ${b.cancellationReason ? `<div class="detail-line">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
+            </div>
+          </details>
+        </div>
+      `;
     }
 
     function bookingCardHTML(b) {
