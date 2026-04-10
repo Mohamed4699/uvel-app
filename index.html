@@ -2356,9 +2356,60 @@ function renderPassengerTrips() {
 
 
     function adminBookingCardHTML(b) {
+      const when = [escapeHtml(b.tripDate || "--"), escapeHtml(b.tripTime || "")].join(" ").trim();
+      const passenger = escapeHtml(b.passengerName || "Passenger");
+      const rideLabel = escapeHtml(b.rideType === "ndis" ? "NDIS" : "Normal");
+      const serviceLabel = escapeHtml(formatServiceTypeLabel(b.serviceType || b.tripCategory || "medical"));
+      const supportLabel = escapeHtml(formatSupportLevelLabel(b.supportLevel || (b.wheelchairRequired === "yes" ? "wheelchair" : b.companionRequired === "yes" ? "companion" : "standard")));
+      const vehicleLabel = escapeHtml(formatVehicleTypeLabel(b.vehicleType || (b.wheelchairRequired === "yes" ? "wav" : "standard")));
+      const driverLabel = escapeHtml(b.assignedDriverName || "Unassigned");
+      const fareLabel = `$${Number(b.fare || 0).toFixed(2)}`;
+      const paymentLabel = escapeHtml(b.paymentStatus || "unpaid");
+      const pickupOtp = escapeHtml(b.pickupOtp || "----");
+      const dropoffOtp = escapeHtml(b.dropoffOtp || "----");
+      const statusLabel = escapeHtml(formatStatusLabel(b.status || "pending"));
+      const stageLabel = escapeHtml(getDriverStageLabel(b));
+      const acceptanceLabel = escapeHtml(formatStatusLabel(b.acceptanceStatus || "pending_driver"));
+      const driverEarnings = `$${Number(getDriverEarningsAmount(b) || 0).toFixed(2)}`;
+      const liveTracking = b.driverLat ? `Live tracking on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}${b.driverLastSeenAt ? ` • updated ${new Date(b.driverLastSeenAt).toLocaleTimeString()}` : ""}` : "Live tracking off";
       return `
-        <div class="book-card">
-          ${bookingCardHTML(b)}
+        <div class="driver-current-card">
+          <div class="driver-current-head">
+            <div>
+              <div style="font-size:18px;font-weight:900">${escapeHtml(b.bookingCode || "Trip")}</div>
+              <div class="driver-current-route">${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div>
+              <div class="driver-current-summary">
+                <span class="driver-pill">${passenger}</span>
+                <span class="driver-pill">${rideLabel}</span>
+                <span class="driver-pill">${serviceLabel}</span>
+                <span class="driver-pill">${supportLabel}</span>
+                <span class="driver-pill">${vehicleLabel}</span>
+                ${b.wheelchairRequired === "yes" ? `<span class="driver-pill">Wheelchair</span>` : ""}
+                ${b.companionRequired === "yes" ? `<span class="driver-pill">Companion</span>` : ""}
+                ${b.returnTrip === "yes" ? `<span class="driver-pill">Return ${escapeHtml(b.returnTime || "")}</span>` : ""}
+              </div>
+            </div>
+            <span class="badge ${escapeHtml(b.status || "pending")}">${statusLabel}</span>
+          </div>
+          <div class="driver-current-grid">
+            <div class="item"><div class="tiny">Date / Time</div><div>${when}</div></div>
+            <div class="item"><div class="tiny">Driver</div><div>${driverLabel}</div></div>
+            <div class="item"><div class="tiny">Fare</div><div>${fareLabel}</div></div>
+            <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}<br/><span class="badge ${b.paymentStatus === "paid" ? "completed" : "pending"}">${paymentLabel}</span>${b.stripeVerifiedAt ? `<div class="footer-note">Webhook verified</div>` : ""}</div></div>
+          </div>
+          <div class="footer-note">Referral: ${escapeHtml(b.referralSource || "self")}${b.referralEmail ? ` • ${escapeHtml(b.referralEmail)}` : ""}${b.recurringPattern && b.recurringPattern !== "once" ? ` • ${escapeHtml(b.recurringPattern)}` : ""}${b.pickupWindow ? ` • window ${escapeHtml(b.pickupWindow)}` : ""}</div>
+          <div class="footer-note">Service: ${serviceLabel}${b.extraStop ? ` • extra stop ${escapeHtml(b.extraStop)}` : ""}${Number(b.waitMinutes || 0) > 0 ? ` • wait ${escapeHtml(String(b.waitMinutes))} min` : ""}${b.emergencyContact ? ` • emergency ${escapeHtml(b.emergencyContact)}` : ""}</div>
+          <div class="footer-note">OTP pickup: <strong>${pickupOtp}</strong>${b.pickupOtpVerified ? " • verified" : ""} | drop-off: <strong>${dropoffOtp}</strong>${b.dropoffOtpVerified ? " • verified" : ""}</div>
+          <div class="footer-note">Driver earnings: ${driverEarnings}</div>
+          <div class="footer-note">Driver stage: ${stageLabel} • acceptance: ${acceptanceLabel}</div>
+          ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}
+          ${b.cancellationReason ? `<div class="footer-note">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
+          <div class="driver-status-strip top-gap">
+            <div class="item"><div class="tiny">Stage</div><div>${stageLabel}</div></div>
+            <div class="item"><div class="tiny">ETA</div><div>${escapeHtml(getEtaLabel(b))}</div></div>
+            <div class="item"><div class="tiny">Distance</div><div>${Number(b.distanceKm || 0).toFixed(1)} km</div></div>
+            <div class="item"><div class="tiny">Live status</div><div>${escapeHtml(liveTracking)}</div></div>
+          </div>
           <div class="right-actions top-gap">
             <select id="driver-select-${b.id}" style="min-width:220px">
               <option value="">Select driver</option>
@@ -2382,7 +2433,7 @@ function renderPassengerTrips() {
               <input id="edit-tripDate-${b.id}" value="${escapeHtml(b.tripDate || "")}" type="date" />
               <input id="edit-tripTime-${b.id}" value="${escapeHtml(b.tripTime || "")}" type="time" />
               <input id="edit-extraStop-${b.id}" value="${escapeHtml(b.extraStop || "")}" placeholder="Extra stop" />
-              <input id="edit-waitMinutes-${b.id}" value="${escapeHtml(b.waitMinutes || 0)}" type="number" min="0" step="5" placeholder="Wait minutes" />
+              <input id="edit-waitMinutes-${b.id}" value="${escapeHtml(String(b.waitMinutes || 0))}" type="number" min="0" step="5" placeholder="Wait minutes" />
             </div>
             <textarea id="edit-notes-${b.id}" placeholder="Notes">${escapeHtml(b.notes || "")}</textarea>
             <div class="right-actions top-gap">
@@ -2392,6 +2443,7 @@ function renderPassengerTrips() {
         </div>
       `;
     }
+
 
     
 function renderAdminBookings() {
