@@ -729,8 +729,8 @@
           <div class="card section">
             <div class="trip-head">
               <div>
-                <div class="section-title">Operations control</div>
-                <div class="section-sub">Search, assign, export, and manage live bookings.</div>
+                <div class="section-title">Admin operations</div>
+                <div class="section-sub">Live bookings, driver assignment, search, edit, and invoice tools in one place.</div>
               </div>
               <div class="pill">Assignment mode: <strong id="assignModeLabel" style="margin-left:6px;color:#fff">manual</strong></div>
             </div>
@@ -756,9 +756,9 @@
           </div>
 
           <div class="card section">
-            <div class="trip-head"><div><div class="section-title">Active route map</div><div class="section-sub">Shows the selected active booking with live driver marker when available.</div></div><div class="select-booking"><select id="adminMapBookingSelect"></select></div></div>
+            <div class="trip-head"><div><div class="section-title">Active route map</div><div class="section-sub">Selected booking route, live driver status, and quick route visibility.</div></div><div class="select-booking"><select id="adminMapBookingSelect"></select></div></div>
             <div id="adminMap" class="map"></div>
-            <div class="eta-box">              <div class="item"><div class="tiny">Route distance</div><div id="adminRouteKm">--</div></div>              <div class="item"><div class="tiny">ETA to destination</div><div id="adminRouteEta">--</div></div>              <div class="item"><div class="tiny">Driver live status</div><div id="adminDriverLive">--</div></div>              <div class="item"><div class="tiny">Navigator</div><div id="adminNavigatorLabel">Driver app</div></div>            </div>
+            <div class="eta-box"><div class="item"><div class="tiny">Route distance</div><div id="adminRouteKm">--</div></div><div class="item"><div class="tiny">ETA to destination</div><div id="adminRouteEta">--</div></div><div class="item"><div class="tiny">Driver live status</div><div id="adminDriverLive">--</div></div><div class="item"><div class="tiny">Navigator</div><div id="adminNavigatorLabel">Driver app</div></div></div>
             <div class="footer-note">This map updates from shared Firestore booking data and browser GPS when the driver enables live tracking.</div>
           </div>
         </div>
@@ -780,164 +780,138 @@
           </div>
         </div>
 
-        <div class="grid-3 top-gap focus-advanced">
+        <div class="grid-3 top-gap">
           <div class="card section">
-            <div class="section-title">Dispatch board</div>
-            <div class="section-sub">Priority queue, unpaid jobs, and service commitments.</div>
+            <div class="section-title">Dispatch watch</div>
+            <div class="section-sub">Priority queue, service alerts, and urgent incidents.</div>
             <div id="dispatchBoard" class="notice-list"></div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Service alerts</div>
-            <div class="section-sub">Trips needing attention in the next 2 hours.</div>
+            <div class="line"></div>
             <div id="serviceAlerts" class="notice-list"></div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Audit log</div>
-            <div class="section-sub">Admin-friendly activity trail.</div>
-            <div id="auditLog" class="audit-list"></div>
-          </div>
-        </div>
-
-        <div class="level7-grid top-gap focus-advanced">
-          <div class="card section">
-            <div class="section-title">Referral inbox</div>
-            <div class="section-sub">NDIS and partner bookings awaiting action.</div>
-            <div id="referralInbox" class="notice-list"></div>
-          </div>
-          <div class="card section">
-            <div class="section-title">SLA controls</div>
-            <div class="section-sub">Adjust service windows without changing auth flow.</div>
-            <div class="settings-grid">
-              <div>
-                <label>Upcoming alert window (mins)</label>
-                <input type="number" id="serviceWindowMinsInput" min="15" step="15" value="120" />
-              </div>
-              <div>
-                <label>Urgent threshold (mins)</label>
-                <input type="number" id="urgentThresholdMinsInput" min="15" step="5" value="45" />
-              </div>
-            </div>
-            <div class="mini-actions">
-              <button class="btn brand small" id="saveSlaSettingsBtn">Save SLA settings</button>
-            </div>
-            <div id="slaSummary" class="notice-list top-gap"></div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Fleet health</div>
-            <div class="section-sub">Driver availability, load, and wheelchair readiness.</div>
-            <div id="fleetHealth" class="fleet-health-list"></div>
-          </div>
-        </div>
-
-        <div class="grid-2 top-gap focus-advanced">
-          <div class="card section">
-            <div class="section-title">Driver management</div>
-            <div class="section-sub">Least busy driver is recommended first.</div>
-            <div id="driverManagement" class="booking-list"></div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Passenger management</div>
-            <div class="section-sub">Simple admin summary of passengers and booking counts.</div>
-            <div id="passengerManagement" class="booking-list"></div>
-          </div>
-        </div>
-
-        <div class="level8-grid top-gap focus-advanced">
-          <div class="card section">
-            <div class="section-title">Kanban dispatch</div>
-            <div class="section-sub">Fast view of pending, assigned, and completed jobs.</div>
-            <div id="kanbanDispatch" class="kanban-board"></div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Finance reconciliation</div>
-            <div class="section-sub">Track unpaid, referral, and card-booked jobs.</div>
-            <div id="financeQueue" class="notice-list"></div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Passenger trust panel</div>
-            <div class="section-sub">Security and service readiness checks.</div>
-            <div id="passengerTrustPanel" class="notice-list"></div>
-          </div>
-        </div>
-
-        <div class="level10-grid top-gap focus-advanced">
-          <div class="card section">
-            <div class="section-title">Level 10 command center</div>
-            <div class="section-sub">High-level operations snapshot, demand pressure, and dispatch health.</div>
-            <div id="commandCenterPanel" class="command-grid"></div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Incident hub</div>
-            <div class="section-sub">Trips with cancellation, OTP mismatch, or urgent timing risk.</div>
+            <div class="line"></div>
             <div id="incidentHub" class="stack-list"></div>
           </div>
           <div class="card section">
-            <div class="section-title">Payout approvals</div>
-            <div class="section-sub">Driver payout readiness from paid and completed trips.</div>
-            <div id="payoutApprovals" class="stack-list"></div>
+            <div class="section-title">People operations</div>
+            <div class="section-sub">Drivers, passengers, and referral demand in one area.</div>
+            <div id="driverManagement" class="booking-list"></div>
+            <div class="line"></div>
+            <div id="passengerManagement" class="booking-list"></div>
+          </div>
+          <div class="card section">
+            <div class="section-title">Service flow</div>
+            <div class="section-sub">Referrals, fleet health, and finance checks together.</div>
+            <div id="referralInbox" class="notice-list"></div>
+            <div class="line"></div>
+            <div id="fleetHealth" class="fleet-health-list"></div>
+            <div class="line"></div>
+            <div id="financeQueue" class="notice-list"></div>
           </div>
         </div>
 
-        <div class="level11-grid top-gap focus-advanced">
-          <div class="card section">
-            <div class="section-title">Passenger concierge</div>
-            <div class="section-sub">Helpful travel readiness view without changing your auth flow.</div>
-            <div class="stack-list">
-              <div class="level11-item"><strong>Preferred support style</strong><div class="tiny">Quiet ride, assisted entry, or appointment reminder notes can be added in booking notes.</div></div>
-              <div class="level11-item"><strong>Family live view</strong><div class="tiny">Family visibility can be enabled through referral and emergency contact details already stored on trips.</div></div>
-              <div class="level11-item"><strong>Service confidence</strong><div class="tiny">Track readiness based on pickup window, referral details, and assigned driver status.</div></div>
+        <details class="driver-detail-collapsible focus-advanced">
+          <summary>More admin insights</summary>
+          <div class="driver-detail-content">
+            <div class="grid-2">
+              <div class="card section">
+                <div class="section-title">SLA controls</div>
+                <div class="section-sub">Adjust service windows without changing auth flow.</div>
+                <div class="settings-grid">
+                  <div>
+                    <label>Upcoming alert window (mins)</label>
+                    <input type="number" id="serviceWindowMinsInput" min="15" step="15" value="120" />
+                  </div>
+                  <div>
+                    <label>Urgent threshold (mins)</label>
+                    <input type="number" id="urgentThresholdMinsInput" min="15" step="5" value="45" />
+                  </div>
+                </div>
+                <div class="mini-actions">
+                  <button class="btn brand small" id="saveSlaSettingsBtn">Save SLA settings</button>
+                </div>
+                <div id="slaSummary" class="notice-list top-gap"></div>
+              </div>
+              <div class="card section">
+                <div class="section-title">Audit log</div>
+                <div class="section-sub">Admin-friendly activity trail.</div>
+                <div id="auditLog" class="audit-list"></div>
+              </div>
             </div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Predictive demand</div>
-            <div class="section-sub">Admin planning panel for rush periods and service load.</div>
-            <div class="stack-list">
-              <div class="forecast-item"><strong>Morning medical peak</strong><div class="tiny">Use recurring therapy and hospital trips to estimate morning demand pressure.</div></div>
-              <div class="forecast-item"><strong>Driver capacity watch</strong><div class="tiny">Compare assigned jobs, active load, and unpaid trips before dispatching more work.</div></div>
-              <div class="forecast-item"><strong>Referral load trend</strong><div class="tiny">Self, hospital, and coordinator referrals can be reviewed together for planning.</div></div>
-            </div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Compliance vault</div>
-            <div class="section-sub">Simple audit-friendly placeholders for important records.</div>
-            <div class="stack-list">
-              <div class="vault-item"><strong>Service proof</strong><div class="tiny">Invoice PDFs, OTP confirmations, and completion notes support audit trails.</div></div>
-              <div class="vault-item"><strong>Risk records</strong><div class="tiny">Urgent priority, OTP mismatch, cancellations, and handover notes can be reviewed together.</div></div>
-              <div class="vault-item"><strong>Family and emergency details</strong><div class="tiny">Emergency contact fields support care continuity and incident follow-up.</div></div>
-            </div>
-          </div>
-        </div>
 
-        <div class="level12-grid top-gap focus-advanced">
-          <div class="card section">
-            <div class="section-title">Orchestration hub</div>
-            <div class="section-sub">High-level coordination layer built on the existing dispatch flow.</div>
-            <div class="stack-list">
-              <div class="orchestration-item"><strong>Assignment readiness</strong><div class="tiny">Use driver availability, active load, and booking urgency together.</div></div>
-              <div class="orchestration-item"><strong>Service balance</strong><div class="tiny">Review pending, assigned, and unpaid counts before adding new trips.</div></div>
-              <div class="orchestration-item"><strong>Referral flow</strong><div class="tiny">Hospital, self, and coordinator referrals stay visible in one operations layer.</div></div>
+            <div class="grid-3 top-gap">
+              <div class="card section">
+                <div class="section-title">Kanban dispatch</div>
+                <div class="section-sub">Pending, assigned, and completed jobs.</div>
+                <div id="kanbanDispatch" class="kanban-board"></div>
+              </div>
+              <div class="card section">
+                <div class="section-title">Passenger trust panel</div>
+                <div class="section-sub">Security and service readiness checks.</div>
+                <div id="passengerTrustPanel" class="notice-list"></div>
+              </div>
+              <div class="card section">
+                <div class="section-title">Payout approvals</div>
+                <div class="section-sub">Driver payout readiness from paid and completed trips.</div>
+                <div id="payoutApprovals" class="stack-list"></div>
+              </div>
             </div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Compliance timeline</div>
-            <div class="section-sub">Audit-friendly sequence of service checkpoints.</div>
-            <div class="stack-list">
-              <div class="timeline-item"><strong>Before trip</strong><div class="tiny">Booking details, referral source, emergency contact, and readiness checks.</div></div>
-              <div class="timeline-item"><strong>During trip</strong><div class="tiny">Live route, driver stage, ETA, and OTP verification support.</div></div>
-              <div class="timeline-item"><strong>After trip</strong><div class="tiny">Proof of completion, invoice records, and shift handover notes.</div></div>
-            </div>
-          </div>
-          <div class="card section">
-            <div class="section-title">Care circles</div>
-            <div class="section-sub">Operational view of the people around each participant journey.</div>
-            <div class="stack-list">
-              <div class="circle-item"><strong>Participant</strong><div class="tiny">Core journey owner with saved places, repeat rides, and care needs.</div></div>
-              <div class="circle-item"><strong>Support network</strong><div class="tiny">Plan managers, coordinators, family, and emergency contacts stay linked through booking details.</div></div>
-              <div class="circle-item"><strong>Service team</strong><div class="tiny">Admin and drivers coordinate dispatch, live route, and safe closure.</div></div>
-            </div>
-          </div>
-        </div>
 
+            <div class="level10-grid top-gap">
+              <div class="card section">
+                <div class="section-title">Command center</div>
+                <div class="section-sub">High-level operations snapshot, demand pressure, and dispatch health.</div>
+                <div id="commandCenterPanel" class="command-grid"></div>
+              </div>
+              <div class="card section">
+                <div class="section-title">Passenger concierge</div>
+                <div class="section-sub">Helpful travel readiness view without changing your auth flow.</div>
+                <div class="stack-list">
+                  <div class="level11-item"><strong>Preferred support style</strong><div class="tiny">Quiet ride, assisted entry, or appointment reminder notes can be added in booking notes.</div></div>
+                  <div class="level11-item"><strong>Family live view</strong><div class="tiny">Family visibility can be enabled through referral and emergency contact details already stored on trips.</div></div>
+                  <div class="level11-item"><strong>Service confidence</strong><div class="tiny">Track readiness based on pickup window, referral details, and assigned driver status.</div></div>
+                </div>
+              </div>
+              <div class="card section">
+                <div class="section-title">Predictive demand</div>
+                <div class="section-sub">Admin planning panel for rush periods and service load.</div>
+                <div class="stack-list">
+                  <div class="forecast-item"><strong>Morning medical peak</strong><div class="tiny">Use recurring therapy and hospital trips to estimate morning demand pressure.</div></div>
+                  <div class="forecast-item"><strong>Driver capacity watch</strong><div class="tiny">Compare assigned jobs, active load, and unpaid trips before dispatching more work.</div></div>
+                  <div class="forecast-item"><strong>Referral load trend</strong><div class="tiny">Self, hospital, and coordinator referrals can be reviewed together for planning.</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="level12-grid top-gap">
+              <div class="card section">
+                <div class="section-title">Compliance vault</div>
+                <div class="section-sub">Simple audit-friendly placeholders for important records.</div>
+                <div class="stack-list">
+                  <div class="vault-item"><strong>Service proof</strong><div class="tiny">Invoice PDFs, OTP confirmations, and completion notes support audit trails.</div></div>
+                  <div class="vault-item"><strong>Risk records</strong><div class="tiny">Urgent priority, OTP mismatch, cancellations, and handover notes can be reviewed together.</div></div>
+                  <div class="vault-item"><strong>Family and emergency details</strong><div class="tiny">Emergency contact fields support care continuity and incident follow-up.</div></div>
+                </div>
+              </div>
+              <div class="card section">
+                <div class="section-title">Orchestration hub</div>
+                <div class="section-sub">High-level coordination layer built on the existing dispatch flow.</div>
+                <div class="stack-list">
+                  <div class="orchestration-item"><strong>Assignment readiness</strong><div class="tiny">Use driver availability, active load, and booking urgency together.</div></div>
+                  <div class="orchestration-item"><strong>Service balance</strong><div class="tiny">Review pending, assigned, and unpaid counts before adding new trips.</div></div>
+                  <div class="orchestration-item"><strong>Referral flow</strong><div class="tiny">Hospital, self, and coordinator referrals stay visible in one operations layer.</div></div>
+                </div>
+              </div>
+              <div class="card section">
+                <div class="section-title">Compliance timeline</div>
+                <div class="section-sub">Audit-friendly sequence of service checkpoints.</div>
+                <div class="stack-list">
+                  <div class="timeline-item"><strong>Before trip</strong><div class="tiny">Booking details, referral source, emergency contact, and readiness checks.</div></div>
+                  <div class="timeline-item"><strong>During trip</strong><div class="tiny">Live route, driver stage, ETA, and OTP verification support.</div></div>
+                  <div class="timeline-item"><strong>After trip</strong><div class="tiny">Proof of completion, invoice records, and shift handover notes.</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
       </div>
 
       
@@ -3709,4 +3683,3 @@ function renderAdminCharts() {
 </script>
 </body>
 </html>
-
