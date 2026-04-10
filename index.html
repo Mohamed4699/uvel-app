@@ -2388,6 +2388,16 @@ function renderAdminCharts() {
       const paymentLabel = escapeHtml(active.paymentStatus || "unpaid");
       const rideLabel = escapeHtml(active.rideType === "ndis" ? "NDIS" : "Normal");
       const fareLabel = `$${Number(active.fare || 0).toFixed(2)}`;
+      const serviceLabel = escapeHtml(formatServiceTypeLabel(active.serviceType || active.tripCategory || "medical"));
+      const supportLabel = escapeHtml(formatSupportLevelLabel(active.supportLevel || (active.wheelchairRequired === "yes" ? "wheelchair" : active.companionRequired === "yes" ? "companion" : "standard")));
+      const vehicleLabel = escapeHtml(formatVehicleTypeLabel(active.vehicleType || "standard"));
+      const driverLabel = escapeHtml(active.assignedDriverName || active.assignedDriverEmail || currentProfile?.name || currentProfile?.email || currentUser?.email || "--");
+      const referralLabel = escapeHtml(active.referralSource || "self");
+      const windowLabel = escapeHtml(active.pickupWindow || "exact");
+      const driverEarnings = `$${Number(getDriverEarningsAmount(active) || 0).toFixed(2)}`;
+      const pickupOtp = escapeHtml(active.pickupOtp || "----");
+      const dropoffOtp = escapeHtml(active.dropoffOtp || "----");
+      const liveTracking = active.driverLat ? "Live tracking on" : "Live tracking off";
       wrap.innerHTML = `
         <div class="driver-current-card">
           <div class="driver-current-head">
@@ -2397,29 +2407,57 @@ function renderAdminCharts() {
               <div class="driver-current-summary">
                 <span class="driver-pill">${passenger}</span>
                 <span class="driver-pill">${rideLabel}</span>
-                <span class="driver-pill">${escapeHtml(formatServiceTypeLabel(active.serviceType || active.tripCategory || "medical"))}</span>
-                <span class="driver-pill">${escapeHtml(formatVehicleTypeLabel(active.vehicleType || "standard"))}</span>
+                <span class="driver-pill">${serviceLabel}</span>
+                <span class="driver-pill">${supportLabel}</span>
+                <span class="driver-pill">${vehicleLabel}</span>
               </div>
             </div>
             <span class="badge ${escapeHtml(active.status || "pending")}">${escapeHtml(statusLabel)}</span>
           </div>
           <div class="driver-current-grid">
             <div class="item"><div class="tiny">Date / Time</div><div>${when}</div></div>
+            <div class="item"><div class="tiny">Driver</div><div>${driverLabel}</div></div>
             <div class="item"><div class="tiny">Fare</div><div>${fareLabel}</div></div>
             <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(active.paymentMethod || "--")}<br/><span class="badge ${active.paymentStatus === "paid" ? "completed" : "pending"}">${paymentLabel}</span></div></div>
-            <div class="item"><div class="tiny">ETA / Distance</div><div>${escapeHtml(getEtaLabel(active))}<br/>${Number(active.distanceKm || 0).toFixed(1)} km</div></div>
+          </div>
+          <div class="driver-current-details">
+            <div class="detail-line">Referral: ${referralLabel}${active.pickupWindow ? ` • window ${windowLabel}` : ""}${active.returnTrip ? ` • return ${escapeHtml(active.returnTrip)}` : ""}</div>
+            <div class="detail-line">Service: ${serviceLabel}${active.extraStop ? ` • extra stop ${escapeHtml(active.extraStop)}` : ""}${Number(active.waitMinutes || 0) > 0 ? ` • wait ${escapeHtml(String(active.waitMinutes))} min` : ""}</div>
+            <div class="detail-line">OTP pickup: <strong>${pickupOtp}</strong>${active.pickupOtpVerified ? ` • verified` : ``} | drop-off: <strong>${dropoffOtp}</strong>${active.dropoffOtpVerified ? ` • verified` : ``}</div>
+            <div class="detail-line">Driver earnings: ${driverEarnings}</div>
+            <div class="detail-line">Driver stage: ${escapeHtml(getDriverStageLabel(active))} • acceptance: ${escapeHtml(formatStatusLabel(active.acceptanceStatus || "pending_driver"))}</div>
+            ${active.notes ? `<div class="detail-line">Notes: ${escapeHtml(active.notes)}</div>` : ``}
+            ${active.emergencyContact ? `<div class="detail-line">Emergency contact: ${escapeHtml(active.emergencyContact)}</div>` : ``}
           </div>
           <div class="driver-current-actions">
-            ${active.acceptanceStatus !== "accepted" ? `<button class="btn small brand" onclick="window.driverRespondBooking('${active.id}','accepted')">Accept job</button>` : ""}
+            ${active.acceptanceStatus !== "accepted" ? `<button class="btn small brand" onclick="window.driverRespondBooking('${active.id}','accepted')">Accept</button>` : ""}
             ${active.acceptanceStatus !== "declined" && active.acceptanceStatus !== "accepted" ? `<button class="btn small danger" onclick="window.driverRespondBooking('${active.id}','declined')">Decline</button>` : ""}
-            <button class="btn small" onclick="window.updateDriverStage('${active.id}','started')">Start trip</button>
-            <button class="btn small" onclick="window.updateDriverStage('${active.id}','routing')">Navigate</button>
+            <button class="btn small" onclick="window.updateDriverStage('${active.id}','started')">Start</button>
+            <button class="btn small" onclick="window.updateDriverStage('${active.id}','routing')">Routing</button>
             <button class="btn small" onclick="window.updateDriverStage('${active.id}','in_progress')">In progress</button>
-            <a class="btn small nav-link" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(active.destination || '')}&origin=${encodeURIComponent(active.pickup || '')}">Open navigator</a>
-            ${active.status !== "completed" ? `<button class="btn small brand" onclick="window.completeBooking('${active.id}')">Complete trip</button>` : ""}
+            <a class="btn small nav-link" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(active.destination || '')}&origin=${encodeURIComponent(active.pickup || '')}">Navigator</a>
+            ${active.status !== "completed" ? `<button class="btn small brand" onclick="window.completeBooking('${active.id}')">Mark completed</button>` : ""}
           </div>
-          <div class="footer-note">Driver stage: ${escapeHtml(getDriverStageLabel(active))}${active.driverLat ? ` • Live tracking on` : ` • Live tracking off`}${active.pickupWindow ? ` • Pickup window ${escapeHtml(active.pickupWindow)}` : ""}</div>
-          ${active.notes ? `<div class="footer-note">Notes: ${escapeHtml(active.notes)}</div>` : ""}
+          <div class="driver-compact-proof">
+            <input class="mini-input" id="pickup-otp-input-${active.id}" placeholder="Enter pickup OTP" />
+            <button class="btn small" onclick="window.verifyPickupOtp('${active.id}')">Verify pickup OTP</button>
+            <input class="mini-input" id="dropoff-otp-input-${active.id}" placeholder="Enter drop-off OTP" />
+            <button class="btn small" onclick="window.verifyDropoffOtp('${active.id}')">Verify drop-off OTP</button>
+          </div>
+          <div class="driver-compact-proof top-gap">
+            <input class="mini-input" id="proof-note-${active.id}" value="${escapeHtml(active.completionProofNote || "")}" placeholder="Completion note" />
+            <input class="mini-input" id="proof-link-${active.id}" value="${escapeHtml(active.completionProofLink || "")}" placeholder="Photo / document link" />
+          </div>
+          <div class="driver-current-actions">
+            <button class="btn small brand" onclick="window.saveCompletionProof('${active.id}')">Save proof</button>
+          </div>
+          <div class="driver-status-strip">
+            <div class="item"><div class="tiny">Stage</div><div>${escapeHtml(getDriverStageLabel(active))}</div></div>
+            <div class="item"><div class="tiny">ETA</div><div>${escapeHtml(getEtaLabel(active))}</div></div>
+            <div class="item"><div class="tiny">Distance</div><div>${Number(active.distanceKm || 0).toFixed(1)} km</div></div>
+            <div class="item"><div class="tiny">Driver earnings</div><div>${driverEarnings}</div></div>
+          </div>
+          <div class="footer-note">${liveTracking}</div>
         </div>
       `;
     }
