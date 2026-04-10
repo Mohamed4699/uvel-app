@@ -226,6 +226,13 @@
     .compact-mode .section-title{font-size:16px}
     .focus-hide{display:none !important}
     .lvl13-tag{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px}
+    .booking-scope{display:grid;gap:14px}
+    .booking-mode-banner{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03);margin-bottom:14px}
+    .booking-mode-banner .mode-copy{font-size:13px;color:var(--muted)}
+    .mode-badge{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;border:1px solid var(--line);font-size:12px;font-weight:800;background:rgba(255,255,255,.04)}
+    .booking-scope.hidden-scope{display:none !important}
+    body.hide-spotlight-maps #passengerMap, body.hide-spotlight-maps #adminMap, body.hide-spotlight-maps #driverMap{display:none}
+    body.hide-spotlight-maps #passengerMap + .grid-2, body.hide-spotlight-maps #adminMap + .eta-box, body.hide-spotlight-maps #driverMap + .eta-box{margin-top:0}
     @media (max-width:1100px){.hero-strip{grid-template-columns:1fr}}
 
   </style>
@@ -347,7 +354,7 @@
         <label class="toggle-chip"><input type="checkbox" id="spotlightMapsToggle" checked /> Spotlight maps</label>
         <label class="toggle-chip"><input type="checkbox" id="operationsPulseToggle" checked /> Operations pulse</label>
         <label class="toggle-chip"><input type="checkbox" id="priorityLaneToggle" checked /> Priority lane</label>
-        <span class="lvl13-tag">Level 15 Apex</span>
+        <span class="lvl13-tag">Admin controls only</span>
       </div>
 
       <div class="hero-strip" id="lvl13HeroStrip">
@@ -362,6 +369,13 @@
             <div class="section-title">Passenger booking</div>
             <div class="section-sub">Create a trip request that admin can see in another browser instantly.</div>
             <form id="bookingForm">
+              <div class="booking-mode-banner">
+                <div>
+                  <div style="font-weight:800">Smart booking mode</div>
+                  <div class="mode-copy" id="bookingModeCopy">Normal booking shows only normal trip details.</div>
+                </div>
+                <div class="mode-badge" id="bookingModeBadge">Normal booking</div>
+              </div>
               <div class="row">
                 <div>
                   <label>Passenger name</label>
@@ -399,6 +413,7 @@
                 <label>Notes</label>
                 <textarea id="notes" placeholder="Mobility needs, pickup instructions, support notes"></textarea>
               </div>
+              <div class="booking-scope" id="commonBookingFields">
               <div class="row top-gap">
                 <div>
                   <label>Priority</label>
@@ -432,6 +447,9 @@
                   </select>
                 </div>
               </div>
+              </div>
+
+              <div class="booking-scope" id="normalBookingFields">
               <div class="row top-gap">
                 <div>
                   <label>Service Type</label>
@@ -477,6 +495,9 @@
                 <label>Return time (optional)</label>
                 <input type="time" id="returnTime" />
               </div>
+              </div>
+
+              <div class="booking-scope" id="ndisBookingFields">
               <div class="row top-gap">
                 <div>
                   <label>Referral source</label>
@@ -525,6 +546,8 @@
                 <label>Wait time (minutes)</label>
                 <input type="number" id="waitMinutes" min="0" step="5" value="0" />
               </div>
+              </div>
+
               <div class="right-actions top-gap">
                 <button class="btn" id="estimateFareBtn" type="button">Estimate fare</button>
                 <button class="btn brand" id="requestRideBtn" type="submit">Request ride</button>
@@ -1474,6 +1497,7 @@ if (!user) {
       $("whoAmI").innerHTML = `Signed in as <strong style="color:#fff">${escapeHtml(currentProfile.name || currentProfile.email)}</strong> • ${escapeHtml(currentProfile.role)}`;
       $("passengerName").value = currentProfile.name || "";
       updatePaymentButton();
+      updateBookingModeUI();
       await handlePaymentReturn();
       syncDriverControls();
 
@@ -1485,10 +1509,43 @@ if (!user) {
     });
 
     function setRoleView(role) {
-      $("passengerView").classList.toggle("hidden", role !== "passenger");
-      $("adminView").classList.toggle("hidden", role !== "admin");
-      $("driverView").classList.toggle("hidden", role !== "driver");
-      $("statsBar").classList.toggle("hidden", role === "passenger");
+      const isPassenger = role === "passenger";
+      const isAdmin = role === "admin";
+      const isDriver = role === "driver";
+      $("passengerView").classList.toggle("hidden", !isPassenger);
+      $("adminView").classList.toggle("hidden", !isAdmin);
+      $("driverView").classList.toggle("hidden", !isDriver);
+      $("statsBar").classList.toggle("hidden", isPassenger);
+      $("lvl13Controls").classList.toggle("hidden", !isAdmin);
+      $("lvl13HeroStrip").classList.toggle("hidden", !isAdmin);
+      $("seedDriversBtn").classList.toggle("hidden", !isAdmin);
+      applyRoleBasedModes(role);
+    }
+
+    function applyRoleBasedModes(role) {
+      const isAdmin = role === "admin";
+      const compact = isAdmin && !!($("compactModeToggle")?.checked);
+      const executive = isAdmin ? !!($("executiveFocusToggle")?.checked) : true;
+      const spotlight = isAdmin ? !!($("spotlightMapsToggle")?.checked) : true;
+      const pulse = isAdmin && !!($("operationsPulseToggle")?.checked);
+      const priority = isAdmin && !!($("priorityLaneToggle")?.checked);
+      document.body.classList.toggle("compact-mode", compact);
+      document.body.classList.toggle("operations-pulse", pulse);
+      document.body.classList.toggle("priority-lane", priority);
+      document.body.classList.toggle("hide-spotlight-maps", !spotlight);
+      document.querySelectorAll('.focus-advanced').forEach(el => el.classList.toggle('hidden', !executive));
+      [passengerMap, adminMap, driverMap].forEach(map => { try { map && setTimeout(() => map.invalidateSize(), 100); } catch(e){} });
+    }
+
+    function updateBookingModeUI() {
+      const rideType = $("rideType")?.value || "normal";
+      const isNdis = rideType === "ndis";
+      $("normalBookingFields")?.classList.toggle("hidden-scope", isNdis);
+      $("ndisBookingFields")?.classList.toggle("hidden-scope", !isNdis);
+      if ($("bookingModeBadge")) $("bookingModeBadge").textContent = isNdis ? "NDIS booking" : "Normal booking";
+      if ($("bookingModeCopy")) $("bookingModeCopy").textContent = isNdis
+        ? "NDIS booking shows referral, support, and care coordination fields."
+        : "Normal booking shows simple trip and vehicle details only.";
     }
 
     function initMaps() {
@@ -2196,7 +2253,10 @@ function renderAdminCharts() {
     $("driverRecenterBtn")?.addEventListener("click", recenterDriverMap);
     $("driverFitRouteBtn")?.addEventListener("click", fitDriverRoute);
     $("passengerCancelBtn")?.addEventListener("click", passengerCancelLatestTrip);
-    $("rideType")?.addEventListener("change", updatePaymentButton);
+    $("rideType")?.addEventListener("change", () => { updatePaymentButton(); updateBookingModeUI(); });
+    ["compactModeToggle","executiveFocusToggle","spotlightMapsToggle","operationsPulseToggle","priorityLaneToggle"].forEach(id => {
+      $(id)?.addEventListener("change", () => applyRoleBasedModes(currentProfile?.role));
+    });
     ["supportLevel", "wheelchairRequired", "companionRequired"].forEach(id => {
       $(id)?.addEventListener("change", () => {
         const recommended = getRecommendedVehicleType();
@@ -2686,9 +2746,19 @@ function renderAdminCharts() {
         .sort((a,b) => bookingDateTimeValue(b) - bookingDateTimeValue(a))
         .slice(0, 6)
         .map(b => {
-          const live = b.driverLat ? "Driver sharing live location" : "Waiting for driver update";
-          const prefix = b.status === "completed" ? "Completed" : b.status === "cancelled" ? "Cancelled" : "Active";
-          return `${prefix}: ${b.pickup} → ${b.destination} • ${b.driverStage || b.status || "pending"} • ${live}`;
+          const stage = b.driverStage || b.status || "pending";
+          const live = b.driverLat ? "Live tracking on" : "Live tracking off";
+          const who = role === "driver" ? (b.passengerName || "Passenger") : (b.assignedDriverName || "Dispatch pending");
+          const title = b.status === "completed" ? "Trip completed" : b.status === "cancelled" ? "Trip cancelled" : b.status === "assigned" ? "Driver assigned" : "Booking received";
+          const meta = [b.tripDate, b.tripTime, b.rideType === "ndis" ? "NDIS" : "Normal"].filter(Boolean).join(" • ");
+          return {
+            title,
+            route: `${b.pickup} → ${b.destination}`,
+            body: role === "driver"
+              ? `${who} • ${stage} • ${live}`
+              : `${who} • ${stage} • ${live}`,
+            meta
+          };
         });
     }
 
@@ -2699,7 +2769,10 @@ function renderAdminCharts() {
         el.innerHTML = `<div class="empty">${emptyText}</div>`;
         return;
       }
-      el.innerHTML = items.map(item => `<div class="notice-item">${item}</div>`).join("");
+      el.innerHTML = items.map(item => {
+        if (typeof item === "string") return `<div class="notice-item">${item}</div>`;
+        return `<div class="notice-item"><div style="font-weight:800">${escapeHtml(item.title || "Update")}</div><div class="muted" style="margin-top:4px">${escapeHtml(item.route || "")}</div><div style="margin-top:6px">${escapeHtml(item.body || "")}</div><div class="tiny" style="margin-top:6px">${escapeHtml(item.meta || "")}</div></div>`;
+      }).join("");
     }
 
     async function savePlace() {
@@ -2767,6 +2840,7 @@ function renderAdminCharts() {
       if ($("returnTrip")) $("returnTrip").value = latest.returnTrip || "no";
       if ($("returnTime")) $("returnTime").value = latest.returnTime || "";
       updatePaymentButton();
+      updateBookingModeUI();
       alert("Latest trip loaded into booking form.");
     }
 
@@ -2829,8 +2903,12 @@ function renderAdminCharts() {
     }
 
     function renderLevel6Notifications() {
-      renderSimpleNoticeList("passengerNotifications", getNotificationsForRole("passenger").map(v => escapeHtml(v)), "No passenger updates yet.");
-      renderSimpleNoticeList("driverNotifications", getNotificationsForRole("driver").map(v => escapeHtml(v)), "No driver updates yet.");
+      if (currentProfile?.role === "passenger") renderSimpleNoticeList("passengerNotifications", getNotificationsForRole("passenger"), "No passenger updates yet.");
+      if (currentProfile?.role === "driver") renderSimpleNoticeList("driverNotifications", getNotificationsForRole("driver"), "No driver updates yet.");
+      if (currentProfile?.role === "admin") {
+        renderSimpleNoticeList("passengerNotifications", getNotificationsForRole("passenger"), "No passenger updates yet.");
+        renderSimpleNoticeList("driverNotifications", getNotificationsForRole("driver"), "No driver updates yet.");
+      }
     }
 
     async function saveDriverProfileLevel6() {
@@ -2991,6 +3069,7 @@ function renderAdminCharts() {
       $("pickup").value = template.pickup || "";
       $("destination").value = template.destination || "";
       $("rideType").value = template.rideType || "normal";
+      updateBookingModeUI();
       $("notes").value = template.notes || "";
       if ($("bookingPriority")) $("bookingPriority").value = template.priority || "standard";
       if ($("wheelchairRequired")) $("wheelchairRequired").value = template.wheelchairRequired || "no";
