@@ -269,6 +269,13 @@
     .driver-detail-content{margin-top:14px}
     @media (max-width:1100px){.driver-focus-grid,.driver-current-grid,.driver-status-strip,.driver-compact-proof{grid-template-columns:1fr}}
 
+
+    .history-tabs,.history-subtabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 16px}
+    .history-tab-btn{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);border-radius:999px;padding:10px 14px;font-weight:700;cursor:pointer}
+    .history-tab-btn.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#082030;border:none}
+    .history-group{margin-top:14px}
+    .history-group-title{font-size:16px;font-weight:800;margin-bottom:10px}
+
     .booking-scope{display:grid;gap:14px}
     .booking-mode-banner{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03);margin-bottom:14px}
     .booking-mode-banner .mode-copy{font-size:13px;color:var(--muted)}
@@ -637,6 +644,16 @@
               <div class="section-sub">See your trips, status, driver, and payment at a glance.</div></div>              <div class="seg"><button class="btn small" id="rebookLatestBtn">Rebook latest</button><button class="btn small danger" id="passengerCancelBtn">Cancel latest trip</button></div></div>
             </div>
           </div>
+          <div class="history-tabs" id="passengerBookingTabs">
+            <button class="history-tab-btn active" data-role-scope="passenger" data-scope="today">Today</button>
+            <button class="history-tab-btn" data-role-scope="passenger" data-scope="upcoming">Upcoming</button>
+            <button class="history-tab-btn" data-role-scope="passenger" data-scope="history">History</button>
+          </div>
+          <div class="history-subtabs hidden" id="passengerHistoryTabs">
+            <button class="history-tab-btn active" data-role-history="passenger" data-history="day">Day</button>
+            <button class="history-tab-btn" data-role-history="passenger" data-history="month">Month</button>
+            <button class="history-tab-btn" data-role-history="passenger" data-history="year">Year</button>
+          </div>
           <div id="passengerTrips" class="booking-list"></div>
         </div>
 
@@ -751,6 +768,16 @@
               </select>
               <select id="driverFilter"></select>
               <button class="btn brand" id="applyFiltersBtn">Apply</button>
+            </div>
+            <div class="history-tabs" id="adminBookingTabs">
+              <button class="history-tab-btn active" data-role-scope="admin" data-scope="today">Today</button>
+              <button class="history-tab-btn" data-role-scope="admin" data-scope="active">Active</button>
+              <button class="history-tab-btn" data-role-scope="admin" data-scope="history">History</button>
+            </div>
+            <div class="history-subtabs hidden" id="adminHistoryTabs">
+              <button class="history-tab-btn active" data-role-history="admin" data-history="day">Day</button>
+              <button class="history-tab-btn" data-role-history="admin" data-history="month">Month</button>
+              <button class="history-tab-btn" data-role-history="admin" data-history="year">Year</button>
             </div>
             <div id="adminBookings" class="booking-list"></div>
           </div>
@@ -925,6 +952,16 @@
               <div class="item"><div class="tiny">Total earnings</div><div id="driverTotalEarnings">$0.00</div></div>
               <div class="item"><div class="tiny">Paid trips</div><div id="driverPaidTrips">0</div></div>
               <div class="item"><div class="tiny">Completed trips</div><div id="driverCompletedTrips">0</div></div>
+            </div>
+            <div class="history-tabs" id="driverBookingTabs">
+              <button class="history-tab-btn active" data-role-scope="driver" data-scope="today">Today</button>
+              <button class="history-tab-btn" data-role-scope="driver" data-scope="upcoming">Upcoming</button>
+              <button class="history-tab-btn" data-role-scope="driver" data-scope="history">History</button>
+            </div>
+            <div class="history-subtabs hidden" id="driverHistoryTabs">
+              <button class="history-tab-btn active" data-role-history="driver" data-history="day">Day</button>
+              <button class="history-tab-btn" data-role-history="driver" data-history="month">Month</button>
+              <button class="history-tab-btn" data-role-history="driver" data-history="year">Year</button>
             </div>
             <div id="driverTrips" class="booking-list"></div>
           </div>
@@ -1149,6 +1186,11 @@
     let driverMapState = { markers: [], lines: [], liveMarker: null };
     const geocodeCache = new Map();
     let lastDriverWrite = { lat: null, lng: null, at: 0 };
+    const bookingViewState = {
+      passenger: { scope: "today", history: "day" },
+      driver: { scope: "today", history: "day" },
+      admin: { scope: "today", history: "day" }
+    };
 
     const $ = (id) => document.getElementById(id);
 
@@ -2238,22 +2280,32 @@ function renderAdminCharts() {
       return allBookings.filter(b => b.passengerUid === currentUser.uid);
     }
 
-    function renderPassengerTrips() {
-      if (currentProfile?.role !== "passenger") return;
-      const trips = getPassengerBookings().slice().sort((a,b) => bookingDateTimeValue(b) - bookingDateTimeValue(a));
-      const wrap = $("passengerTrips");
-      if (!trips.length) {
-        wrap.innerHTML = `<div class="empty">No bookings yet.</div>`;
-        return;
-      }
+    
+function renderPassengerTrips() {
+  if (currentProfile?.role !== "passenger") return;
+  syncBookingTabButtons("passenger");
+  const trips = getScopedBookingsForRole("passenger");
+  const wrap = $("passengerTrips");
+  if (bookingViewState.passenger.scope === "history") {
+    wrap.innerHTML = renderGroupedBookingsHTML(trips, bookingViewState.passenger.history, passengerTripCardHTML, "No trip history yet.");
+  } else {
+    if (!trips.length) {
+      wrap.innerHTML = `<div class="empty">${bookingViewState.passenger.scope === "today" ? "No trips for today." : "No upcoming trips."}</div>`;
+    } else {
       wrap.innerHTML = trips.map(passengerTripCardHTML).join("");
-      const latest = trips[0];
-      $("passengerRouteLabel").textContent = `${latest.pickup} → ${latest.destination}`;
-      $("passengerStatusLabel").textContent = formatStatusLabel(latest.status);
-      $("passengerStageLabel").textContent = formatPassengerStageLabel(latest);
-      $("passengerEtaLabel").textContent = getEtaLabel(latest);
-      $("passengerKmLabel").textContent = `${Number(latest.distanceKm || 0).toFixed(1)} km`;
     }
+  }
+  const mapTrips = getPassengerBookings().slice().sort((a,b) => bookingDateTimeValue(b) - bookingDateTimeValue(a));
+  const latest = mapTrips[0];
+  if (latest) {
+    $("passengerRouteLabel").textContent = `${latest.pickup} → ${latest.destination}`;
+    $("passengerStatusLabel").textContent = formatStatusLabel(latest.status);
+    $("passengerStageLabel").textContent = formatPassengerStageLabel(latest);
+    $("passengerEtaLabel").textContent = getEtaLabel(latest);
+    $("passengerKmLabel").textContent = `${Number(latest.distanceKm || 0).toFixed(1)} km`;
+  }
+}
+
 
     function getFilteredAdminBookings() {
       const q = $("adminSearch").value.trim().toLowerCase();
@@ -2300,16 +2352,11 @@ function renderAdminCharts() {
       $("pickup").value = place.address;
     });
     $("saveDriverProfileBtn")?.addEventListener("click", saveDriverProfileLevel6);
+    initBookingTabs();
 
-    function renderAdminBookings() {
-      if (currentProfile?.role !== "admin") return;
-      const wrap = $("adminBookings");
-      const items = getFilteredAdminBookings();
-      if (!items.length) {
-        wrap.innerHTML = `<div class="empty">No bookings match these filters.</div>`;
-        return;
-      }
-      wrap.innerHTML = items.map(b => `
+
+    function adminBookingCardHTML(b) {
+      return `
         <div class="book-card">
           ${bookingCardHTML(b)}
           <div class="right-actions top-gap">
@@ -2343,98 +2390,108 @@ function renderAdminCharts() {
             </div>
           </div>
         </div>
-      `).join("");
+      `;
     }
 
     
-    function renderDriverTrips() {
-      if (currentProfile?.role !== "driver") return;
-      const wrap = $("driverTrips");
-      if (!wrap) return;
-      const active = getActiveDriverBooking();
-      if (!active) {
-        wrap.innerHTML = `<div class="empty">No active trip right now.</div>`;
-        return;
-      }
-      const when = [escapeHtml(active.tripDate || "--"), escapeHtml(active.tripTime || "")].join(" ").trim();
-      const passenger = escapeHtml(active.passengerName || "Passenger");
-      const statusLabel = formatStatusLabel(active.driverStage || active.status || "assigned");
-      const paymentLabel = escapeHtml(active.paymentStatus || "unpaid");
-      const rideLabel = escapeHtml(active.rideType === "ndis" ? "NDIS" : "Normal");
-      const fareLabel = `$${Number(active.fare || 0).toFixed(2)}`;
-      const serviceLabel = escapeHtml(formatServiceTypeLabel(active.serviceType || active.tripCategory || "medical"));
-      const supportLabel = escapeHtml(formatSupportLevelLabel(active.supportLevel || (active.wheelchairRequired === "yes" ? "wheelchair" : active.companionRequired === "yes" ? "companion" : "standard")));
-      const vehicleLabel = escapeHtml(formatVehicleTypeLabel(active.vehicleType || "standard"));
-      const driverLabel = escapeHtml(active.assignedDriverName || active.assignedDriverEmail || currentProfile?.name || currentProfile?.email || currentUser?.email || "--");
-      const referralLabel = escapeHtml(active.referralSource || "self");
-      const windowLabel = escapeHtml(active.pickupWindow || "exact");
-      const driverEarnings = `$${Number(getDriverEarningsAmount(active) || 0).toFixed(2)}`;
-      const pickupOtp = escapeHtml(active.pickupOtp || "----");
-      const dropoffOtp = escapeHtml(active.dropoffOtp || "----");
-      const liveTracking = active.driverLat ? "Live tracking on" : "Live tracking off";
-      wrap.innerHTML = `
-        <div class="driver-current-card">
-          <div class="driver-current-head">
-            <div>
-              <div style="font-size:18px;font-weight:900">${escapeHtml(active.bookingCode || "Current trip")}</div>
-              <div class="driver-current-route">${escapeHtml(active.pickup)} → ${escapeHtml(active.destination)}</div>
-              <div class="driver-current-summary">
-                <span class="driver-pill">${passenger}</span>
-                <span class="driver-pill">${rideLabel}</span>
-                <span class="driver-pill">${serviceLabel}</span>
-                <span class="driver-pill">${supportLabel}</span>
-                <span class="driver-pill">${vehicleLabel}</span>
-              </div>
+function renderAdminBookings() {
+  if (currentProfile?.role !== "admin") return;
+  syncBookingTabButtons("admin");
+  const wrap = $("adminBookings");
+  let items = getFilteredAdminBookings();
+  const scopedIds = new Set(getScopedBookingsForRole("admin").map(b => b.id));
+  items = items.filter(b => scopedIds.has(b.id));
+  if (bookingViewState.admin.scope === "history") {
+    wrap.innerHTML = renderGroupedBookingsHTML(items, bookingViewState.admin.history, adminBookingCardHTML, "No admin history matches these filters.");
+    return;
+  }
+  if (!items.length) {
+    wrap.innerHTML = `<div class="empty">${bookingViewState.admin.scope === "today" ? "No bookings for today." : "No active bookings match these filters."}</div>`;
+    return;
+  }
+  wrap.innerHTML = items.map(adminBookingCardHTML).join("");
+}
+
+
+    
+    
+function renderDriverTrips() {
+  if (currentProfile?.role !== "driver") return;
+  syncBookingTabButtons("driver");
+  const wrap = $("driverTrips");
+  if (!wrap) return;
+  const items = getScopedBookingsForRole("driver");
+  const active = getActiveDriverBooking();
+  const renderDriverCard = (b) => {
+    const when = [escapeHtml(b.tripDate || "--"), escapeHtml(b.tripTime || "")].join(" ").trim();
+    const passenger = escapeHtml(b.passengerName || "Passenger");
+    const statusLabel = formatStatusLabel(b.driverStage || b.status || "assigned");
+    const paymentLabel = escapeHtml(b.paymentStatus || "unpaid");
+    const rideLabel = escapeHtml(b.rideType === "ndis" ? "NDIS" : "Normal");
+    const fareLabel = `$${Number(b.fare || 0).toFixed(2)}`;
+    const serviceLabel = escapeHtml(formatServiceTypeLabel(b.serviceType || b.tripCategory || "medical"));
+    const supportLabel = escapeHtml(formatSupportLevelLabel(b.supportLevel || (b.wheelchairRequired === "yes" ? "wheelchair" : b.companionRequired === "yes" ? "companion" : "standard")));
+    const vehicleLabel = escapeHtml(formatVehicleTypeLabel(b.vehicleType || "standard"));
+    const driverLabel = escapeHtml(b.assignedDriverName || b.assignedDriverEmail || currentProfile?.name || currentProfile?.email || currentUser?.email || "--");
+    const referralLabel = escapeHtml(b.referralSource || "self");
+    const windowLabel = escapeHtml(b.pickupWindow || "exact");
+    const driverEarnings = `$${Number(getDriverEarningsAmount(b) || 0).toFixed(2)}`;
+    const pickupOtp = escapeHtml(b.pickupOtp || "----");
+    const dropoffOtp = escapeHtml(b.dropoffOtp || "----");
+    const liveTracking = b.driverLat ? "Live tracking on" : "Live tracking off";
+    return `
+      <div class="driver-current-card">
+        <div class="driver-current-head">
+          <div>
+            <div style="font-size:18px;font-weight:900">${escapeHtml(b.bookingCode || "Trip")}</div>
+            <div class="driver-current-route">${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div>
+            <div class="driver-current-summary">
+              <span class="driver-pill">${passenger}</span>
+              <span class="driver-pill">${rideLabel}</span>
+              <span class="driver-pill">${serviceLabel}</span>
+              <span class="driver-pill">${supportLabel}</span>
+              <span class="driver-pill">${vehicleLabel}</span>
             </div>
-            <span class="badge ${escapeHtml(active.status || "pending")}">${escapeHtml(statusLabel)}</span>
           </div>
-          <div class="driver-current-grid">
-            <div class="item"><div class="tiny">Date / Time</div><div>${when}</div></div>
-            <div class="item"><div class="tiny">Driver</div><div>${driverLabel}</div></div>
-            <div class="item"><div class="tiny">Fare</div><div>${fareLabel}</div></div>
-            <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(active.paymentMethod || "--")}<br/><span class="badge ${active.paymentStatus === "paid" ? "completed" : "pending"}">${paymentLabel}</span></div></div>
-          </div>
-          <div class="driver-current-details">
-            <div class="detail-line">Referral: ${referralLabel}${active.pickupWindow ? ` • window ${windowLabel}` : ""}${active.returnTrip ? ` • return ${escapeHtml(active.returnTrip)}` : ""}</div>
-            <div class="detail-line">Service: ${serviceLabel}${active.extraStop ? ` • extra stop ${escapeHtml(active.extraStop)}` : ""}${Number(active.waitMinutes || 0) > 0 ? ` • wait ${escapeHtml(String(active.waitMinutes))} min` : ""}</div>
-            <div class="detail-line">OTP pickup: <strong>${pickupOtp}</strong>${active.pickupOtpVerified ? ` • verified` : ``} | drop-off: <strong>${dropoffOtp}</strong>${active.dropoffOtpVerified ? ` • verified` : ``}</div>
-            <div class="detail-line">Driver earnings: ${driverEarnings}</div>
-            <div class="detail-line">Driver stage: ${escapeHtml(getDriverStageLabel(active))} • acceptance: ${escapeHtml(formatStatusLabel(active.acceptanceStatus || "pending_driver"))}</div>
-            ${active.notes ? `<div class="detail-line">Notes: ${escapeHtml(active.notes)}</div>` : ``}
-            ${active.emergencyContact ? `<div class="detail-line">Emergency contact: ${escapeHtml(active.emergencyContact)}</div>` : ``}
-          </div>
-          <div class="driver-current-actions">
-            ${active.acceptanceStatus !== "accepted" ? `<button class="btn small brand" onclick="window.driverRespondBooking('${active.id}','accepted')">Accept</button>` : ""}
-            ${active.acceptanceStatus !== "declined" && active.acceptanceStatus !== "accepted" ? `<button class="btn small danger" onclick="window.driverRespondBooking('${active.id}','declined')">Decline</button>` : ""}
-            <button class="btn small" onclick="window.updateDriverStage('${active.id}','started')">Start</button>
-            <button class="btn small" onclick="window.updateDriverStage('${active.id}','routing')">Routing</button>
-            <button class="btn small" onclick="window.updateDriverStage('${active.id}','in_progress')">In progress</button>
-            <a class="btn small nav-link" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(active.destination || '')}&origin=${encodeURIComponent(active.pickup || '')}">Navigator</a>
-            ${active.status !== "completed" ? `<button class="btn small brand" onclick="window.completeBooking('${active.id}')">Mark completed</button>` : ""}
-          </div>
-          <div class="driver-compact-proof">
-            <input class="mini-input" id="pickup-otp-input-${active.id}" placeholder="Enter pickup OTP" />
-            <button class="btn small" onclick="window.verifyPickupOtp('${active.id}')">Verify pickup OTP</button>
-            <input class="mini-input" id="dropoff-otp-input-${active.id}" placeholder="Enter drop-off OTP" />
-            <button class="btn small" onclick="window.verifyDropoffOtp('${active.id}')">Verify drop-off OTP</button>
-          </div>
-          <div class="driver-compact-proof top-gap">
-            <input class="mini-input" id="proof-note-${active.id}" value="${escapeHtml(active.completionProofNote || "")}" placeholder="Completion note" />
-            <input class="mini-input" id="proof-link-${active.id}" value="${escapeHtml(active.completionProofLink || "")}" placeholder="Photo / document link" />
-          </div>
-          <div class="driver-current-actions">
-            <button class="btn small brand" onclick="window.saveCompletionProof('${active.id}')">Save proof</button>
-          </div>
-          <div class="driver-status-strip">
-            <div class="item"><div class="tiny">Stage</div><div>${escapeHtml(getDriverStageLabel(active))}</div></div>
-            <div class="item"><div class="tiny">ETA</div><div>${escapeHtml(getEtaLabel(active))}</div></div>
-            <div class="item"><div class="tiny">Distance</div><div>${Number(active.distanceKm || 0).toFixed(1)} km</div></div>
-            <div class="item"><div class="tiny">Driver earnings</div><div>${driverEarnings}</div></div>
-          </div>
-          <div class="footer-note">${liveTracking}</div>
+          <span class="badge ${escapeHtml(b.status || "pending")}">${escapeHtml(statusLabel)}</span>
         </div>
-      `;
-    }
+        <div class="driver-current-grid">
+          <div class="item"><div class="tiny">Date / Time</div><div>${when}</div></div>
+          <div class="item"><div class="tiny">Driver</div><div>${driverLabel}</div></div>
+          <div class="item"><div class="tiny">Fare</div><div>${fareLabel}</div></div>
+          <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}<br/><span class="badge ${b.paymentStatus === "paid" ? "completed" : "pending"}">${paymentLabel}</span></div></div>
+        </div>
+        <div class="driver-current-details">
+          <div class="detail-line">Referral: ${referralLabel}${b.pickupWindow ? ` • window ${windowLabel}` : ""}${b.returnTrip ? ` • return ${escapeHtml(b.returnTrip)}` : ""}</div>
+          <div class="detail-line">Service: ${serviceLabel}${b.extraStop ? ` • extra stop ${escapeHtml(b.extraStop)}` : ""}${Number(b.waitMinutes || 0) > 0 ? ` • wait ${escapeHtml(String(b.waitMinutes))} min` : ""}</div>
+          <div class="detail-line">OTP pickup: <strong>${pickupOtp}</strong>${b.pickupOtpVerified ? ` • verified` : ``} | drop-off: <strong>${dropoffOtp}</strong>${b.dropoffOtpVerified ? ` • verified` : ``}</div>
+          <div class="detail-line">Driver earnings: ${driverEarnings}</div>
+          <div class="detail-line">Driver stage: ${escapeHtml(getDriverStageLabel(b))} • acceptance: ${escapeHtml(formatStatusLabel(b.acceptanceStatus || "pending_driver"))}</div>
+          ${b.notes ? `<div class="detail-line">Notes: ${escapeHtml(b.notes)}</div>` : ``}
+          ${b.emergencyContact ? `<div class="detail-line">Emergency contact: ${escapeHtml(b.emergencyContact)}</div>` : ``}
+        </div>
+        <div class="driver-status-strip">
+          <div class="item"><div class="tiny">Stage</div><div>${escapeHtml(getDriverStageLabel(b))}</div></div>
+          <div class="item"><div class="tiny">ETA</div><div>${escapeHtml(getEtaLabel(b))}</div></div>
+          <div class="item"><div class="tiny">Distance</div><div>${Number(b.distanceKm || 0).toFixed(1)} km</div></div>
+          <div class="item"><div class="tiny">Driver earnings</div><div>${driverEarnings}</div></div>
+        </div>
+        <div class="footer-note">${liveTracking}</div>
+      </div>
+    `;
+  };
+  if (bookingViewState.driver.scope === "history") {
+    wrap.innerHTML = renderGroupedBookingsHTML(items, bookingViewState.driver.history, renderDriverCard, "No driver history yet.");
+    return;
+  }
+  const renderItems = bookingViewState.driver.scope === "today" && active ? [active, ...items.filter(b => b.id !== active.id)] : items;
+  if (!renderItems.length) {
+    wrap.innerHTML = `<div class="empty">${bookingViewState.driver.scope === "today" ? "No trips for today." : "No upcoming jobs."}</div>`;
+    return;
+  }
+  wrap.innerHTML = renderItems.map(renderDriverCard).join("");
+}
+
 
     function formatStatusLabel(status) {
       return String(status || "pending").replaceAll("_", " ").split(" ").map(word => word ? word.charAt(0).toUpperCase() + word.slice(1) : word).join(" ");
@@ -2853,6 +2910,127 @@ function renderAdminCharts() {
       return Number.isFinite(ms) ? ms : 0;
     }
 
+    function getLocalTodayString() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function getBookingDayKey(booking) {
+      return booking?.tripDate || "No date";
+    }
+
+    function getBookingMonthKey(booking) {
+      const dayKey = getBookingDayKey(booking);
+      return /^\d{4}-\d{2}-\d{2}$/.test(dayKey) ? dayKey.slice(0, 7) : "No month";
+    }
+
+    function getBookingYearKey(booking) {
+      const dayKey = getBookingDayKey(booking);
+      return /^\d{4}-\d{2}-\d{2}$/.test(dayKey) ? dayKey.slice(0, 4) : "No year";
+    }
+
+    function formatDayHeading(dayKey) {
+      const today = getLocalTodayString();
+      const yesterdayMs = new Date(today + "T00:00").getTime() - 86400000;
+      const yesterday = new Date(yesterdayMs);
+      const yDay = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,"0")}-${String(yesterday.getDate()).padStart(2,"0")}`;
+      if (dayKey === today) return `Today (${dayKey})`;
+      if (dayKey === yDay) return `Yesterday (${dayKey})`;
+      return dayKey;
+    }
+
+    function formatMonthHeading(monthKey) {
+      if (!/^\d{4}-\d{2}$/.test(monthKey)) return monthKey;
+      const [y,m] = monthKey.split("-");
+      return new Date(Number(y), Number(m)-1, 1).toLocaleString(undefined, { month: "long", year: "numeric" });
+    }
+
+    function formatYearHeading(yearKey) {
+      return yearKey;
+    }
+
+    function getScopedBookingsForRole(role) {
+      const today = getLocalTodayString();
+      let items = [];
+      if (role === "passenger") items = getPassengerBookings();
+      else if (role === "driver") items = allBookings.filter(b => b.assignedDriverUid === currentUser?.uid);
+      else items = allBookings.slice();
+
+      const scope = bookingViewState[role]?.scope || "today";
+      return items.filter(b => {
+        const dateKey = getBookingDayKey(b);
+        const isToday = dateKey === today;
+        const isFuture = /^\d{4}-\d{2}-\d{2}$/.test(dateKey) ? dateKey > today : false;
+        const isPast = /^\d{4}-\d{2}-\d{2}$/.test(dateKey) ? dateKey < today : false;
+        const isClosed = ["completed","cancelled"].includes(String(b.status || ""));
+        if (role === "admin" && scope === "active") return !isClosed;
+        if (scope === "today") return isToday;
+        if (scope === "upcoming") return !isClosed && isFuture;
+        if (scope === "history") return isPast || isClosed;
+        return true;
+      }).sort((a,b) => bookingDateTimeValue(b) - bookingDateTimeValue(a));
+    }
+
+    function groupBookingsByHistoryView(bookings, historyView) {
+      const groups = new Map();
+      bookings.forEach(b => {
+        const key = historyView === "year" ? getBookingYearKey(b) : historyView === "month" ? getBookingMonthKey(b) : getBookingDayKey(b);
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(b);
+      });
+      const keys = Array.from(groups.keys()).sort().reverse();
+      return keys.map(key => ({ key, items: groups.get(key) }));
+    }
+
+    function setBookingScope(role, scope) {
+      bookingViewState[role].scope = scope;
+      updateHistoryTabVisibility(role);
+      if (role === "passenger") renderPassengerTrips();
+      else if (role === "driver") { renderDriverTrips(); renderDriverAcceptanceBoard(); renderDriverOtpPanel(); renderDriverProofPanel(); }
+      else renderAdminBookings();
+    }
+
+    function setHistoryView(role, history) {
+      bookingViewState[role].history = history;
+      if (role === "passenger") renderPassengerTrips();
+      else if (role === "driver") renderDriverTrips();
+      else renderAdminBookings();
+    }
+
+    function updateHistoryTabVisibility(role) {
+      const sub = document.getElementById(role + "HistoryTabs");
+      if (!sub) return;
+      sub.classList.toggle("hidden", bookingViewState[role].scope !== "history");
+    }
+
+    function syncBookingTabButtons(role) {
+      document.querySelectorAll(`[data-role-scope="${role}"]`).forEach(btn => btn.classList.toggle("active", btn.dataset.scope === bookingViewState[role].scope));
+      document.querySelectorAll(`[data-role-history="${role}"]`).forEach(btn => btn.classList.toggle("active", btn.dataset.history === bookingViewState[role].history));
+      updateHistoryTabVisibility(role);
+    }
+
+    function renderGroupedBookingsHTML(bookings, historyView, cardRenderer, emptyText) {
+      if (!bookings.length) return `<div class="empty">${emptyText}</div>`;
+      const groups = groupBookingsByHistoryView(bookings, historyView);
+      return groups.map(group => {
+        const title = historyView === "year" ? formatYearHeading(group.key) : historyView === "month" ? formatMonthHeading(group.key) : formatDayHeading(group.key);
+        return `<div class="history-group"><div class="history-group-title">${escapeHtml(title)}</div>${group.items.map(cardRenderer).join("")}</div>`;
+      }).join("");
+    }
+
+    function initBookingTabs() {
+      document.querySelectorAll("[data-role-scope]").forEach(btn => {
+        btn.addEventListener("click", () => setBookingScope(btn.dataset.roleScope, btn.dataset.scope));
+      });
+      document.querySelectorAll("[data-role-history]").forEach(btn => {
+        btn.addEventListener("click", () => setHistoryView(btn.dataset.roleHistory, btn.dataset.history));
+      });
+      ["passenger","driver","admin"].forEach(syncBookingTabButtons);
+    }
+
     function bookingPriorityRank(priority) {
       return priority === "urgent" ? 3 : priority === "high" ? 2 : 1;
     }
@@ -3250,38 +3428,34 @@ function renderAdminCharts() {
     }
 
     
-    function renderDriverAcceptanceBoard() {
-      if (currentProfile?.role !== "driver") return;
-      const wrap = $("driverAcceptanceBoard");
-      if (!wrap) return;
-      const active = getActiveDriverBooking();
-      const rows = allBookings
-        .filter(b => b.assignedDriverUid === currentUser?.uid && b.status !== "completed" && b.status !== "cancelled")
-        .sort((a,b) => bookingDateTimeValue(a) - bookingDateTimeValue(b))
-        .filter(b => !active || b.id !== active.id)
-        .map(b => `
-          <div class="driver-upcoming-card">
-            <div class="trip-head">
-              <div>
-                <div class="driver-upcoming-title">${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div>
-                <div class="tiny">${escapeHtml(b.passengerName || "Passenger")} • ${escapeHtml(b.tripDate || "--")} • ${escapeHtml(b.tripTime || "")}</div>
-              </div>
-              <span class="badge ${escapeHtml(b.status || "pending")}">${escapeHtml(formatStatusLabel(b.driverStage || b.status || "assigned"))}</span>
-            </div>
-            <div class="driver-upcoming-pills">
-              <span class="driver-pill">${escapeHtml(b.bookingCode || "Trip")}</span>
-              <span class="driver-pill">${escapeHtml(b.rideType === "ndis" ? "NDIS" : "Normal")}</span>
-              <span class="driver-pill">${escapeHtml(formatVehicleTypeLabel(b.vehicleType || "standard"))}</span>
-            </div>
-            <div class="driver-upcoming-actions">
-              ${b.acceptanceStatus !== "accepted" ? `<button class="btn small brand" onclick="window.driverRespondBooking('${b.id}','accepted')">Accept</button>` : ""}
-              ${b.acceptanceStatus !== "declined" && b.acceptanceStatus !== "accepted" ? `<button class="btn small danger" onclick="window.driverRespondBooking('${b.id}','declined')">Decline</button>` : ""}
-              <button class="btn small" onclick="window.updateDriverStage('${b.id}','started')">Start</button>
-            </div>
-          </div>
-        `);
-      renderSimpleNoticeList("driverAcceptanceBoard", rows, "No upcoming jobs.");
-    }
+    
+function renderDriverAcceptanceBoard() {
+  if (currentProfile?.role !== "driver") return;
+  const wrap = $("driverAcceptanceBoard");
+  if (!wrap) return;
+  const source = bookingViewState.driver.scope === "upcoming" ? getScopedBookingsForRole("driver") : allBookings.filter(b => b.assignedDriverUid === currentUser.uid && !["completed","cancelled"].includes(b.status || ""));
+  const rows = source
+    .filter(b => b.id !== getActiveDriverBooking()?.id)
+    .slice()
+    .sort((a,b) => bookingDateTimeValue(a) - bookingDateTimeValue(b))
+    .slice(0, 8)
+    .map(b => ({
+      title: `${b.bookingCode || "Trip"} • ${b.pickup} → ${b.destination}`,
+      body: `${b.passengerName || "Passenger"} • ${formatStatusLabel(b.acceptanceStatus || "pending_driver")}`,
+      meta: [b.tripDate, b.tripTime, b.rideType === "ndis" ? "NDIS" : "Normal"].filter(Boolean).join(" • "),
+      actions: `
+        ${b.acceptanceStatus !== "accepted" ? `<button class="btn small brand" onclick="window.driverRespondBooking('${b.id}','accepted')">Accept</button>` : ``}
+        ${b.acceptanceStatus !== "declined" && b.acceptanceStatus !== "accepted" ? `<button class="btn small danger" onclick="window.driverRespondBooking('${b.id}','declined')">Decline</button>` : ``}
+        <button class="btn small" onclick="window.updateDriverStage('${b.id}','started')">Start</button>
+      `
+    }));
+  if (!rows.length) {
+    wrap.innerHTML = `<div class="empty">No upcoming jobs.</div>`;
+    return;
+  }
+  wrap.innerHTML = rows.map(r => `<div class="driver-upcoming-card"><div class="driver-upcoming-title">${escapeHtml(r.title)}</div><div class="footer-note">${escapeHtml(r.body)}</div><div class="tiny" style="margin-top:8px">${escapeHtml(r.meta)}</div><div class="driver-upcoming-actions">${r.actions}</div></div>`).join("");
+}
+
 
 
     function renderKanbanDispatch() {
@@ -3333,7 +3507,7 @@ function renderAdminCharts() {
     function renderDriverOtpPanel() {
       const wrap = $("driverOtpPanel");
       if (!wrap || currentProfile?.role !== "driver") return;
-      const active = getActiveDriverBooking();
+      const active = bookingViewState.driver.scope === "history" ? null : getActiveDriverBooking();
       if (!active) {
         renderSimpleNoticeList("driverOtpPanel", [], "No current trip for OTP.");
         return;
@@ -3358,7 +3532,7 @@ function renderAdminCharts() {
     function renderDriverProofPanel() {
       const wrap = $("driverProofPanel");
       if (!wrap || currentProfile?.role !== "driver") return;
-      const active = getActiveDriverBooking();
+      const active = bookingViewState.driver.scope === "history" ? null : getActiveDriverBooking();
       if (!active) {
         renderSimpleNoticeList("driverProofPanel", [], "No current trip for proof.");
         return;
