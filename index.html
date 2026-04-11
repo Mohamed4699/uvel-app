@@ -276,6 +276,9 @@
     .history-group{margin-top:14px}
     .history-group-title{font-size:16px;font-weight:800;margin-bottom:10px}
 
+    .ride-choice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .ride-choice-help{font-size:12px;color:var(--muted);margin-top:6px}
+    .vehicle-helper{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826;color:var(--muted);font-size:13px;line-height:1.55}
     .booking-scope{display:grid;gap:14px}
     .booking-mode-banner{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03);margin-bottom:14px}
     .booking-mode-banner .mode-copy{font-size:13px;color:var(--muted)}
@@ -525,15 +528,35 @@
                   </select>
                 </div>
               </div>
+              <div class="row top-gap ride-choice-grid">
+                <div>
+                  <label>Ride category</label>
+                  <select id="vehicleCategory">
+                    <option value="standard">Standard</option>
+                    <option value="comfort">Comfort</option>
+                    <option value="premium">Premium</option>
+                    <option value="xl">XL / Group</option>
+                    <option value="van">Van</option>
+                    <option value="assisted">Assisted</option>
+                    <option value="wheelchair">Wheelchair Accessible</option>
+                  </select>
+                  <div class="ride-choice-help">Passenger chooses the main ride category first.</div>
+                </div>
+                <div>
+                  <label>Ride option</label>
+                  <select id="vehicleSubtype"></select>
+                  <div class="ride-choice-help">Then choose the exact ride option inside that category.</div>
+                </div>
+              </div>
               <div class="row top-gap">
                 <div>
-                  <label>Vehicle Type</label>
-                  <select id="vehicleType">
-                    <option value="standard">Standard Car (1–4 passengers)</option>
-                    <option value="suv">SUV (1–6 passengers)</option>
-                    <option value="van">Van (up to 10 passengers)</option>
-                    <option value="wav">Wheelchair Accessible Vehicle (WAV)</option>
-                    <option value="premium">Premium Vehicle</option>
+                  <label>Ride preference</label>
+                  <select id="vehiclePreference">
+                    <option value="none">No special preference</option>
+                    <option value="eco">Eco ride (Hybrid / Electric)</option>
+                    <option value="quiet">Quiet ride</option>
+                    <option value="space">Extra space</option>
+                    <option value="newer">Newer vehicle</option>
                   </select>
                 </div>
                 <div>
@@ -541,6 +564,8 @@
                   <input id="vehiclePreferenceNote" placeholder="Optional vehicle note" />
                 </div>
               </div>
+              <input type="hidden" id="vehicleType" value="standard" />
+              <div class="vehicle-helper" id="vehicleSelectionSummary">Standard • Standard Compact • mapped to Standard Car for dispatch.</div>
               <div class="top-gap">
                 <label>Return time (optional)</label>
                 <input type="time" id="returnTime" />
@@ -1864,6 +1889,113 @@ if (!user) {
 
     function toRad(v) { return (v * Math.PI) / 180; }
 
+    const VEHICLE_SUBTYPE_OPTIONS = {
+      standard: [
+        { value: "standard_compact", label: "Standard Compact", help: "Small affordable car for short trips", internalType: "standard" },
+        { value: "standard_sedan", label: "Standard Sedan", help: "Larger sedan with more space", internalType: "standard" },
+        { value: "eco_standard", label: "Eco Ride", help: "Hybrid or electric everyday ride", internalType: "standard" },
+        { value: "newer_standard", label: "Newer Standard", help: "Newer standard vehicle", internalType: "standard" }
+      ],
+      comfort: [
+        { value: "comfort_sedan", label: "Comfort Sedan", help: "Camry-style smooth sedan", internalType: "standard" },
+        { value: "comfort_suv", label: "Comfort SUV", help: "SUV with more room and easier entry", internalType: "suv" },
+        { value: "comfort_hybrid", label: "Hybrid Comfort", help: "Comfort ride with hybrid smoothness", internalType: "suv" }
+      ],
+      premium: [
+        { value: "premium_sedan", label: "Luxury Sedan", help: "Premium sedan ride", internalType: "premium" },
+        { value: "premium_electric", label: "Premium Electric", help: "Tesla-style premium EV ride", internalType: "premium" }
+      ],
+      xl: [
+        { value: "xl_suv", label: "7-Seater SUV", help: "Extra seats for family or group trips", internalType: "suv" },
+        { value: "xl_van", label: "8-Seater Van", help: "Van for larger group trips", internalType: "van" },
+        { value: "xl_large_van", label: "Large Van", help: "10–12 seat van for larger groups", internalType: "van" }
+      ],
+      van: [
+        { value: "van_standard", label: "Standard Van", help: "5–7 seat van", internalType: "van" },
+        { value: "van_large", label: "Large Van", help: "8–12 seat van", internalType: "van" },
+        { value: "van_family", label: "Family Van", help: "Extra luggage and family space", internalType: "van" }
+      ],
+      assisted: [
+        { value: "assisted_easy_entry", label: "Easy Entry Vehicle", help: "Higher seat vehicle for easier entry", internalType: "suv" },
+        { value: "assisted_driver_help", label: "Driver Assistance Included", help: "Driver can assist passenger", internalType: "suv" }
+      ],
+      wheelchair: [
+        { value: "wheelchair_van", label: "Wheelchair Van", help: "Ramp or lift equipped accessible van", internalType: "wav" }
+      ]
+    };
+
+    function getVehicleSubtypeOptions(category) {
+      return VEHICLE_SUBTYPE_OPTIONS[category] || VEHICLE_SUBTYPE_OPTIONS.standard;
+    }
+
+    function populateVehicleSubtypeOptions(selectedValue = "") {
+      const category = $("vehicleCategory")?.value || "standard";
+      const subtypeSelect = $("vehicleSubtype");
+      if (!subtypeSelect) return;
+      const options = getVehicleSubtypeOptions(category);
+      subtypeSelect.innerHTML = options.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join("");
+      const allowed = new Set(options.map(opt => opt.value));
+      subtypeSelect.value = allowed.has(selectedValue) ? selectedValue : options[0].value;
+      updateVehicleSelectionSummary();
+    }
+
+    function getVehicleSubtypeMeta(category, subtype) {
+      const options = getVehicleSubtypeOptions(category);
+      return options.find(opt => opt.value === subtype) || options[0];
+    }
+
+    function mapVehicleSelectionToInternalType(category, subtype, support, wheelchair, companion) {
+      if (wheelchair === "yes" || support === "wheelchair" || category === "wheelchair") return "wav";
+      if (category === "premium") return "premium";
+      if (category === "van") return "van";
+      if (category === "xl") return subtype === "xl_suv" ? "suv" : "van";
+      if (category === "assisted") return "suv";
+      if (support === "high_support") return "van";
+      if (companion === "yes" || support === "companion") return "suv";
+      return getVehicleSubtypeMeta(category, subtype).internalType || "standard";
+    }
+
+    function formatVehicleCategoryLabel(category) {
+      const map = {
+        standard: "Standard",
+        comfort: "Comfort",
+        premium: "Premium",
+        xl: "XL / Group",
+        van: "Van",
+        assisted: "Assisted",
+        wheelchair: "Wheelchair Accessible"
+      };
+      return map[category] || category || "-";
+    }
+
+    function formatVehicleSubtypeLabel(subtype) {
+      const all = Object.values(VEHICLE_SUBTYPE_OPTIONS).flat();
+      const found = all.find(opt => opt.value === subtype);
+      return found?.label || subtype || "-";
+    }
+
+    function updateVehicleSelectionSummary() {
+      const category = $("vehicleCategory")?.value || "standard";
+      const subtype = $("vehicleSubtype")?.value || getVehicleSubtypeOptions(category)[0].value;
+      const preference = $("vehiclePreference")?.value || "none";
+      const support = $("supportLevel")?.value || "standard";
+      const wheelchair = $("wheelchairRequired")?.value || "no";
+      const companion = $("companionRequired")?.value || "no";
+      const internalType = mapVehicleSelectionToInternalType(category, subtype, support, wheelchair, companion);
+      if ($("vehicleType")) $("vehicleType").value = internalType;
+      const prefMap = {
+        none: "No special preference",
+        eco: "Eco ride",
+        quiet: "Quiet ride",
+        space: "Extra space",
+        newer: "Newer vehicle"
+      };
+      const meta = getVehicleSubtypeMeta(category, subtype);
+      if ($("vehicleSelectionSummary")) {
+        $("vehicleSelectionSummary").textContent = `${formatVehicleCategoryLabel(category)} • ${formatVehicleSubtypeLabel(subtype)} • ${prefMap[preference] || "No special preference"} • mapped to ${formatVehicleTypeLabel(internalType)} for dispatch. ${meta?.help || ""}`;
+      }
+    }
+
     function calculateFare(distanceKm, rideType) {
       const base = rideType === "ndis" ? 8.5 : 6.5;
       const perKm = rideType === "ndis" ? 2.4 : 1.95;
@@ -1896,10 +2028,12 @@ if (!user) {
 
         const vehicleType = getRecommendedVehicleType();
         if ($("vehicleType")) $("vehicleType").value = vehicleType;
+        const vehicleCategory = $("vehicleCategory")?.value || "standard";
+        const vehicleSubtype = $("vehicleSubtype")?.value || getVehicleSubtypeOptions(vehicleCategory)[0].value;
         let fare = calculateFare(km, rideType);
         fare = applyVehicleFareAdjustment(fare, vehicleType);
         fare = computeLevel8FareAdjustments(fare);
-        $("farePreview").textContent = `Estimated fare: $${fare.toFixed(2)} • Distance: ${km.toFixed(1)} km • Vehicle: ${formatVehicleTypeLabel(vehicleType)} • Payment: ${payment}`;
+        $("farePreview").textContent = `Estimated fare: $${fare.toFixed(2)} • Distance: ${km.toFixed(1)} km • Ride: ${formatVehicleCategoryLabel(vehicleCategory)} / ${formatVehicleSubtypeLabel(vehicleSubtype)} • Dispatch: ${formatVehicleTypeLabel(vehicleType)} • Payment: ${payment}`;
 
         const tempBooking = { pickup, destination, status: "draft" };
         updateMapForBooking(passengerMap, passengerMapState, tempBooking, "passenger");
@@ -1925,6 +2059,9 @@ if (!user) {
       const companionRequired = $("companionRequired")?.value || "no";
       const serviceType = $("serviceType")?.value || "medical";
       const supportLevel = $("supportLevel")?.value || "standard";
+      const vehicleCategory = $("vehicleCategory")?.value || "standard";
+      const vehicleSubtype = $("vehicleSubtype")?.value || getVehicleSubtypeOptions(vehicleCategory)[0].value;
+      const vehiclePreference = $("vehiclePreference")?.value || "none";
       const vehicleType = getRecommendedVehicleType();
       const vehiclePreferenceNote = $("vehiclePreferenceNote")?.value.trim() || "";
       const returnTrip = $("returnTrip")?.value || "no";
@@ -1976,6 +2113,9 @@ if (!user) {
         companionRequired,
         serviceType,
         supportLevel,
+        vehicleCategory,
+        vehicleSubtype,
+        vehiclePreference,
         vehicleType,
         vehiclePreferenceNote,
         returnTrip,
@@ -2008,7 +2148,11 @@ if (!user) {
       if ($("bookingPriority")) $("bookingPriority").value = "standard";
       if ($("serviceType")) $("serviceType").value = "medical";
       if ($("supportLevel")) $("supportLevel").value = "standard";
+      if ($("vehicleCategory")) $("vehicleCategory").value = "standard";
+      populateVehicleSubtypeOptions("standard_compact");
+      if ($("vehiclePreference")) $("vehiclePreference").value = "none";
       if ($("vehicleType")) $("vehicleType").value = "standard";
+      updateVehicleSelectionSummary();
       if ($("wheelchairRequired")) $("wheelchairRequired").value = "no";
       if ($("companionRequired")) $("companionRequired").value = "no";
       if ($("returnTrip")) $("returnTrip").value = "no";
@@ -2017,7 +2161,7 @@ if (!user) {
       if ($("recurringPattern")) $("recurringPattern").value = "once";
       if ($("referralEmail")) $("referralEmail").value = "";
       if ($("pickupWindow")) $("pickupWindow").value = "exact";
-      $("farePreview").textContent = "Estimated fare: -- • Distance: -- • Payment: --";
+      $("farePreview").textContent = "Estimated fare: -- • Distance: -- • Ride: -- • Dispatch: -- • Payment: --";
       $("passengerStatusLabel").textContent = "pending";
       $("passengerStageLabel").textContent = "waiting";
       $("passengerEtaLabel").textContent = "--";
@@ -2105,12 +2249,9 @@ if (!user) {
       const support = $("supportLevel")?.value || "standard";
       const wheelchair = $("wheelchairRequired")?.value || "no";
       const companion = $("companionRequired")?.value || "no";
-      const selectedVehicle = $("vehicleType")?.value || "standard";
-
-      if (wheelchair === "yes" || support === "wheelchair") return "wav";
-      if (support === "high_support") return "van";
-      if (companion === "yes" || support === "companion") return "suv";
-      return selectedVehicle;
+      const category = $("vehicleCategory")?.value || "standard";
+      const subtype = $("vehicleSubtype")?.value || getVehicleSubtypeOptions(category)[0].value;
+      return mapVehicleSelectionToInternalType(category, subtype, support, wheelchair, companion);
     }
 
     function applyVehicleFareAdjustment(baseFare, vehicleType) {
@@ -2331,6 +2472,9 @@ function renderPassengerTrips() {
     $("driverFitRouteBtn")?.addEventListener("click", fitDriverRoute);
     $("passengerCancelBtn")?.addEventListener("click", passengerCancelLatestTrip);
     $("rideType")?.addEventListener("change", () => { updatePaymentButton(); updateBookingModeUI(); });
+    $("vehicleCategory")?.addEventListener("change", () => populateVehicleSubtypeOptions());
+    $("vehicleSubtype")?.addEventListener("change", updateVehicleSelectionSummary);
+    $("vehiclePreference")?.addEventListener("change", updateVehicleSelectionSummary);
     ["compactModeToggle","executiveFocusToggle","spotlightMapsToggle","operationsPulseToggle","priorityLaneToggle"].forEach(id => {
       $(id)?.addEventListener("change", () => applyRoleBasedModes(currentProfile?.role));
     });
@@ -2338,8 +2482,11 @@ function renderPassengerTrips() {
       $(id)?.addEventListener("change", () => {
         const recommended = getRecommendedVehicleType();
         if ($("vehicleType")) $("vehicleType").value = recommended;
+        updateVehicleSelectionSummary();
       });
     });
+    populateVehicleSubtypeOptions("standard_compact");
+    updateVehicleSelectionSummary();
     $("payNowBtn")?.addEventListener("click", async () => {
       const latest = getLatestPassengerBooking();
       await startStripeCheckout(latest);
@@ -2431,7 +2578,7 @@ function renderDriverTrips() {
     const fareLabel = `$${Number(b.fare || 0).toFixed(2)}`;
     const serviceLabel = escapeHtml(formatServiceTypeLabel(b.serviceType || b.tripCategory || "medical"));
     const supportLabel = escapeHtml(formatSupportLevelLabel(b.supportLevel || (b.wheelchairRequired === "yes" ? "wheelchair" : b.companionRequired === "yes" ? "companion" : "standard")));
-    const vehicleLabel = escapeHtml(formatVehicleTypeLabel(b.vehicleType || "standard"));
+    const vehicleLabel = escapeHtml(`${formatVehicleCategoryLabel(b.vehicleCategory || "standard")} • ${formatVehicleSubtypeLabel(b.vehicleSubtype || "standard_compact")}`);
     const driverLabel = escapeHtml(b.assignedDriverName || b.assignedDriverEmail || currentProfile?.name || currentProfile?.email || currentUser?.email || "--");
     const referralLabel = escapeHtml(b.referralSource || "self");
     const windowLabel = escapeHtml(b.pickupWindow || "exact");
@@ -2490,6 +2637,7 @@ function renderDriverTrips() {
         <div class="driver-current-details">
           <div class="detail-line">Referral: ${referralLabel}${b.pickupWindow ? ` • window ${windowLabel}` : ""}${b.returnTrip ? ` • return ${escapeHtml(b.returnTrip)}` : ""}</div>
           <div class="detail-line">Service: ${serviceLabel}${b.extraStop ? ` • extra stop ${escapeHtml(b.extraStop)}` : ""}${Number(b.waitMinutes || 0) > 0 ? ` • wait ${escapeHtml(String(b.waitMinutes))} min` : ""}</div>
+          <div class="detail-line">Ride choice: ${escapeHtml(formatVehicleCategoryLabel(b.vehicleCategory || "standard"))} • ${escapeHtml(formatVehicleSubtypeLabel(b.vehicleSubtype || "standard_compact"))}${b.vehiclePreference && b.vehiclePreference !== "none" ? ` • ${escapeHtml(b.vehiclePreference)}` : ""}</div>
           <div class="detail-line">OTP pickup: <strong>${pickupOtp}</strong>${b.pickupOtpVerified ? ` • verified` : ``} | drop-off: <strong>${dropoffOtp}</strong>${b.dropoffOtpVerified ? ` • verified` : ``}</div>
           <div class="detail-line">Driver earnings: ${driverEarnings}</div>
           <div class="detail-line">Driver stage: ${escapeHtml(getDriverStageLabel(b))} • acceptance: ${escapeHtml(formatStatusLabel(b.acceptanceStatus || "pending_driver"))}</div>
@@ -2538,7 +2686,7 @@ function renderDriverTrips() {
       const summaryDriver = escapeHtml(b.assignedDriverName || b.assignedDriverEmail || "Dispatch pending");
       const statusLabel = formatStatusLabel(b.status);
       const serviceLabel = escapeHtml(formatServiceTypeLabel(b.serviceType || b.tripCategory || "medical"));
-      const vehicleLabel = escapeHtml(formatVehicleTypeLabel(b.vehicleType || (b.wheelchairRequired === "yes" ? "wav" : "standard")));
+      const vehicleLabel = escapeHtml(`${formatVehicleCategoryLabel(b.vehicleCategory || "standard")} • ${formatVehicleSubtypeLabel(b.vehicleSubtype || "standard_compact")}`);
       const paymentLabel = escapeHtml(b.paymentStatus || "unpaid");
       const supportLabel = escapeHtml(formatSupportLevelLabel(b.supportLevel || (b.wheelchairRequired === "yes" ? "wheelchair" : b.companionRequired === "yes" ? "companion" : "standard")));
       return `
@@ -2566,6 +2714,7 @@ function renderDriverTrips() {
             <summary class="trip-details-toggle">View details</summary>
             <div class="trip-details-panel">
               <div class="detail-line">Support: ${supportLabel}${b.returnTrip === "yes" ? ` • Return ${escapeHtml(b.returnTime || "scheduled")}` : ""}${b.pickupWindow ? ` • Window ${escapeHtml(b.pickupWindow)}` : ""}</div>
+              <div class="detail-line">Ride choice: ${escapeHtml(formatVehicleCategoryLabel(b.vehicleCategory || "standard"))} • ${escapeHtml(formatVehicleSubtypeLabel(b.vehicleSubtype || "standard_compact"))}${b.vehiclePreference && b.vehiclePreference !== "none" ? ` • ${escapeHtml(b.vehiclePreference)}` : ""}</div>
               <div class="detail-line">Referral: ${escapeHtml(b.referralSource || "self")}${b.referralEmail ? ` • ${escapeHtml(b.referralEmail)}` : ""}${b.recurringPattern && b.recurringPattern !== "once" ? ` • ${escapeHtml(b.recurringPattern)}` : ""}</div>
               <div class="detail-line">Trip support:${b.wheelchairRequired === "yes" ? ` Wheelchair` : " None"}${b.companionRequired === "yes" ? ` • Companion` : ""}${b.extraStop ? ` • Extra stop ${escapeHtml(b.extraStop)}` : ""}${Number(b.waitMinutes || 0) > 0 ? ` • Wait ${escapeHtml(String(b.waitMinutes))} min` : ""}</div>
               ${b.notes ? `<div class="detail-line">Notes: ${escapeHtml(b.notes)}</div>` : ""}
@@ -2589,6 +2738,8 @@ function renderDriverTrips() {
               <span class="chip tag-${escapeHtml(b.priority || "standard")}">${escapeHtml(b.priority || "standard")}</span>
               <span class="chip">${escapeHtml(formatServiceTypeLabel(b.serviceType || b.tripCategory))}</span>
               <span class="chip">${escapeHtml(formatSupportLevelLabel(b.supportLevel || (b.wheelchairRequired === "yes" ? "wheelchair" : b.companionRequired === "yes" ? "companion" : "standard")))}</span>
+              <span class="chip">${escapeHtml(formatVehicleCategoryLabel(b.vehicleCategory || "standard"))}</span>
+              <span class="chip">${escapeHtml(formatVehicleSubtypeLabel(b.vehicleSubtype || "standard_compact"))}</span>
               <span class="chip">${escapeHtml(formatVehicleTypeLabel(b.vehicleType || (b.wheelchairRequired === "yes" ? "wav" : "standard")))}</span>
               ${b.wheelchairRequired === "yes" ? `<span class="chip">Wheelchair</span>` : ""}
               ${b.companionRequired === "yes" ? `<span class="chip">Companion</span>` : ""}
@@ -2605,7 +2756,7 @@ function renderDriverTrips() {
         </div>
         ${b.notes ? `<div class="footer-note">Notes: ${escapeHtml(b.notes)}</div>` : ""}
         <div class="footer-note">Referral: ${escapeHtml(b.referralSource || "self")} ${b.referralEmail ? `• ${escapeHtml(b.referralEmail)}` : ""} ${b.recurringPattern && b.recurringPattern !== "once" ? `• ${escapeHtml(b.recurringPattern)}` : ""} ${b.pickupWindow ? `• window ${escapeHtml(b.pickupWindow)}` : ""}</div>
-        <div class="footer-note">Service: ${escapeHtml(formatServiceTypeLabel(b.serviceType || b.tripCategory))} ${b.extraStop ? `• extra stop ${escapeHtml(b.extraStop)}` : ""} ${Number(b.waitMinutes || 0) > 0 ? `• wait ${escapeHtml(b.waitMinutes)} min` : ""} ${b.emergencyContact ? `• emergency ${escapeHtml(b.emergencyContact)}` : ""}</div>
+        <div class="footer-note">Service: ${escapeHtml(formatServiceTypeLabel(b.serviceType || b.tripCategory))} • Ride choice ${escapeHtml(formatVehicleCategoryLabel(b.vehicleCategory || "standard"))} / ${escapeHtml(formatVehicleSubtypeLabel(b.vehicleSubtype || "standard_compact"))}${b.vehiclePreference && b.vehiclePreference !== "none" ? ` • preference ${escapeHtml(b.vehiclePreference)}` : ""} ${b.extraStop ? `• extra stop ${escapeHtml(b.extraStop)}` : ""} ${Number(b.waitMinutes || 0) > 0 ? `• wait ${escapeHtml(b.waitMinutes)} min` : ""} ${b.emergencyContact ? `• emergency ${escapeHtml(b.emergencyContact)}` : ""}</div>
         <div class="footer-note">OTP pickup: <strong>${escapeHtml(b.pickupOtp || "----")}</strong> ${b.pickupOtpVerified ? "• verified" : ""} | drop-off: <strong>${escapeHtml(b.dropoffOtp || "----")}</strong> ${b.dropoffOtpVerified ? "• verified" : ""}</div>
         ${b.assignedDriverUid ? `<div class="footer-note">Driver earnings: $${getDriverEarningsAmount(b).toFixed(2)}</div>` : ""}
         ${b.driverStage ? `<div class="footer-note">Driver stage: ${escapeHtml(b.driverStage)} • acceptance: ${escapeHtml(b.acceptanceStatus || "pending_driver")}</div>` : ""}
@@ -3178,8 +3329,12 @@ function renderDriverTrips() {
       if ($("companionRequired")) $("companionRequired").value = latest.companionRequired || "no";
       if ($("serviceType")) $("serviceType").value = latest.serviceType || latest.tripCategory || "medical";
       if ($("supportLevel")) $("supportLevel").value = latest.supportLevel || "standard";
+      if ($("vehicleCategory")) $("vehicleCategory").value = latest.vehicleCategory || "standard";
+      populateVehicleSubtypeOptions(latest.vehicleSubtype || "standard_compact");
+      if ($("vehiclePreference")) $("vehiclePreference").value = latest.vehiclePreference || "none";
       if ($("vehicleType")) $("vehicleType").value = latest.vehicleType || "standard";
       if ($("vehiclePreferenceNote")) $("vehiclePreferenceNote").value = latest.vehiclePreferenceNote || "";
+      updateVehicleSelectionSummary();
       if ($("returnTrip")) $("returnTrip").value = latest.returnTrip || "no";
       if ($("returnTime")) $("returnTime").value = latest.returnTime || "";
       updatePaymentButton();
@@ -3401,6 +3556,9 @@ function renderDriverTrips() {
         pickupWindow: latest.pickupWindow || $("pickupWindow")?.value || "exact",
         serviceType: latest.serviceType || latest.tripCategory || $("serviceType")?.value || "medical",
         supportLevel: latest.supportLevel || $("supportLevel")?.value || "standard",
+        vehicleCategory: latest.vehicleCategory || $("vehicleCategory")?.value || "standard",
+        vehicleSubtype: latest.vehicleSubtype || $("vehicleSubtype")?.value || "standard_compact",
+        vehiclePreference: latest.vehiclePreference || $("vehiclePreference")?.value || "none",
         vehicleType: latest.vehicleType || $("vehicleType")?.value || "standard",
         vehiclePreferenceNote: latest.vehiclePreferenceNote || $("vehiclePreferenceNote")?.value || "",
         createdAt: serverTimestamp()
@@ -3448,8 +3606,12 @@ function renderDriverTrips() {
       if ($("pickupWindow")) $("pickupWindow").value = template.pickupWindow || "exact";
       if ($("serviceType")) $("serviceType").value = template.serviceType || template.tripCategory || "medical";
       if ($("supportLevel")) $("supportLevel").value = template.supportLevel || "standard";
+      if ($("vehicleCategory")) $("vehicleCategory").value = template.vehicleCategory || "standard";
+      populateVehicleSubtypeOptions(template.vehicleSubtype || "standard_compact");
+      if ($("vehiclePreference")) $("vehiclePreference").value = template.vehiclePreference || "none";
       if ($("vehicleType")) $("vehicleType").value = template.vehicleType || "standard";
       if ($("vehiclePreferenceNote")) $("vehiclePreferenceNote").value = template.vehiclePreferenceNote || "";
+      updateVehicleSelectionSummary();
       if ($("emergencyContact")) $("emergencyContact").value = template.emergencyContact || "";
       if ($("extraStop")) $("extraStop").value = template.extraStop || "";
       if ($("waitMinutes")) $("waitMinutes").value = template.waitMinutes || 0;
@@ -3716,7 +3878,7 @@ function renderDriverAcceptanceBoard() {
       const csv = [
         headers.join(","),
         ...rows.map(r => [
-          r.passengerName, r.passengerEmail, r.pickup, r.destination, r.serviceType || r.tripCategory || "", r.supportLevel || "", r.vehicleType || "", r.vehiclePreferenceNote || "", r.extraStop || "", r.waitMinutes || 0,
+          r.passengerName, r.passengerEmail, r.pickup, r.destination, r.serviceType || r.tripCategory || "", r.supportLevel || "", r.vehicleCategory || "", r.vehicleSubtype || "", r.vehicleType || "", r.vehiclePreference || "", r.vehiclePreferenceNote || "", r.extraStop || "", r.waitMinutes || 0,
           r.tripDate, r.tripTime, r.rideType, r.distanceKm, r.fare, r.paymentMethod, r.status, r.assignedDriverName || "", r.notes || ""
         ].map(csvCell).join(","))
       ].join("\n");
@@ -3773,6 +3935,8 @@ function renderDriverAcceptanceBoard() {
       const rate = Number(booking.fare || 0);
       docPdf.rect(14, y - 4, 182, 12);
       docPdf.text(`${booking.rideType.toUpperCase()} transport service (${booking.distanceKm || 0} km)`, 16, y + 3);
+      y += 7;
+      docPdf.text(`Ride choice: ${formatVehicleCategoryLabel(booking.vehicleCategory || "standard")} / ${formatVehicleSubtypeLabel(booking.vehicleSubtype || "standard_compact")} • Dispatch: ${formatVehicleTypeLabel(booking.vehicleType || "standard")}`, 16, y + 3);
       docPdf.text("1", 127, y + 3);
       docPdf.text(`$${rate.toFixed(2)}`, 145, y + 3);
       docPdf.text(`$${rate.toFixed(2)}`, 172, y + 3);
