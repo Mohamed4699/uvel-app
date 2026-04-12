@@ -290,10 +290,10 @@
     .booking-summary-box,.admin-recommend-box{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#061826}
     .booking-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
     .booking-summary-grid .item,.timeline-step{padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03)}
-    .timeline{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:14px}
-    .timeline-step{font-size:12px;color:var(--muted);text-align:center}
-    .timeline-step.active{border-color:rgba(73,196,213,.65);background:rgba(73,196,213,.10);color:var(--text);font-weight:800}
-    .timeline-step.done{border-color:rgba(87,208,139,.65);background:rgba(87,208,139,.10);color:var(--text);font-weight:800}
+    .timeline{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;align-items:center}
+    .timeline-step{padding:6px 10px;border-radius:999px;background:transparent;font-size:11px;line-height:1.2;color:var(--muted);text-align:center;min-width:auto;white-space:nowrap}
+    .timeline-step.active{border-color:rgba(73,196,213,.7);background:rgba(73,196,213,.14);color:var(--text);font-weight:800}
+    .timeline-step.done{border-color:rgba(87,208,139,.6);background:rgba(87,208,139,.10);color:var(--text);font-weight:700}
     .timeline-step.cancelled{border-color:rgba(239,109,109,.65);background:rgba(239,109,109,.12);color:#ffb1b1;font-weight:800}
     .booking-confirm-note{margin-top:10px;font-size:12px;color:var(--muted)}
     .recommend-chip{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px;margin:6px 6px 0 0}
@@ -2378,7 +2378,7 @@ if (!user) {
     }
 
     function getTimelineHTML(b) {
-      const stages = ['Requested','Assigned','Driver Start','En Route','In Progress','Completed'];
+      const stages = ['Requested','Assigned','Start','En route','Ongoing','Completed'];
       if (b?.status === 'cancelled') {
         return `<div class="timeline">${stages.map((s,i) => `<div class="timeline-step ${i === 0 ? 'done' : ''}">${s}</div>`).join('')}<div class="timeline-step cancelled">Cancelled</div></div>`;
       }
