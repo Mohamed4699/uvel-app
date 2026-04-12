@@ -473,6 +473,25 @@
       .smart-header-pill{padding:10px 12px}
     }
 
+
+    .passenger-simple-form #normalBookingFields .ride-choice-grid,
+    .passenger-simple-form #rideSubtypeCards,
+    .passenger-simple-form #bookingSummaryBox,
+    .passenger-simple-form #normalBookingFields .row.top-gap:has(#vehiclePreference),
+    .passenger-simple-form #vehicleSelectionSummary,
+    .passenger-simple-form #returnTime,
+    .passenger-simple-form label[for="returnTime"]{display:none !important}
+    .passenger-simple-form .simple-passenger-hide{display:none !important}
+    .simple-passenger-note{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826;color:var(--muted);font-size:13px;line-height:1.55}
+    .simple-passenger-summary{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03)}
+    .simple-passenger-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+    .simple-passenger-summary-grid .item{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#061826}
+    .simple-ndis-box{margin-top:16px}
+    .simple-ndis-box > summary{list-style:none;cursor:pointer;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);font-weight:800}
+    .simple-ndis-box > summary::-webkit-details-marker{display:none}
+    .simple-ndis-box .simple-ndis-content{margin-top:12px;display:grid;gap:14px}
+    @media (max-width:1100px){.simple-passenger-summary-grid{grid-template-columns:1fr}}
+
   </style>
 </head>
 <body>
@@ -639,14 +658,15 @@
           <div class="card section">
             <div class="section-title">Passenger booking</div>
             <div class="section-sub">Create a trip request that admin can see in another browser instantly.</div>
-            <form id="bookingForm">
+            <form id="bookingForm" class="passenger-simple-form">
               <div class="booking-mode-banner">
                 <div>
                   <div style="font-weight:800">Smart booking mode</div>
-                  <div class="mode-copy" id="bookingModeCopy">Normal booking shows only normal trip details.</div>
+                  <div class="mode-copy" id="bookingModeCopy">Normal booking keeps things short and simple for passengers.</div>
                 </div>
                 <div class="mode-badge" id="bookingModeBadge">Normal booking</div>
               </div>
+              <div class="simple-passenger-note" id="simplePassengerModeNote">Choose your trip details first, then pick one ride option. NDIS only opens a small extra section when needed.</div>
               <div class="row">
                 <div>
                   <label>Passenger name</label>
@@ -746,7 +766,7 @@
                   </select>
                 </div>
               </div>
-              <div class="row top-gap ride-choice-grid">
+              <div class="row top-gap ride-choice-grid simple-passenger-hide">
                 <div>
                   <label>Ride category</label>
                   <select id="vehicleCategory">
@@ -770,15 +790,20 @@
               <div class="top-gap">
                 <label>Choose your ride</label>
                 <div id="rideCategoryCards" class="ride-card-grid"></div>
-                <div id="rideSubtypeCards" class="ride-card-grid top-gap"></div>
+                <div id="rideSubtypeCards" class="ride-card-grid top-gap simple-passenger-hide"></div>
+              <div id="simplePassengerSummary" class="simple-passenger-summary">
+                <div class="section-title" style="font-size:16px">Quick trip summary</div>
+                <div class="section-sub" style="margin-bottom:10px">A simple preview for passengers before sending the request.</div>
+                <div id="simplePassengerSummaryContent" class="simple-passenger-summary-grid"></div>
               </div>
-              <div id="bookingSummaryBox" class="booking-summary-box">
+              </div>
+              <div id="bookingSummaryBox" class="booking-summary-box simple-passenger-hide">
                 <div class="section-title" style="font-size:16px">Booking summary</div>
                 <div class="section-sub" style="margin-bottom:10px">Review the trip before you send it to dispatch.</div>
                 <div id="bookingSummaryContent" class="booking-summary-grid"></div>
                 <div class="booking-confirm-note">Login, sign up, and reset password stay exactly the same in this Level 20 version.</div>
               </div>
-              <div class="row top-gap">
+              <div class="row top-gap simple-passenger-hide">
                 <div>
                   <label>Ride preference</label>
                   <select id="vehiclePreference">
@@ -795,14 +820,14 @@
                 </div>
               </div>
               <input type="hidden" id="vehicleType" value="standard" />
-              <div class="vehicle-helper" id="vehicleSelectionSummary">Standard • Standard Compact • mapped to Standard Car for dispatch.</div>
-              <div class="top-gap">
+              <div class="vehicle-helper simple-passenger-hide" id="vehicleSelectionSummary">Standard • Standard Compact • mapped to Standard Car for dispatch.</div>
+              <div class="top-gap simple-passenger-hide">
                 <label>Return time (optional)</label>
                 <input type="time" id="returnTime" />
               </div>
               </div>
 
-              <div class="booking-scope" id="ndisBookingFields">
+              <details class="booking-scope simple-ndis-box" id="ndisBookingFields"><summary>NDIS support details</summary><div class="simple-ndis-content">
               <div class="row top-gap">
                 <div>
                   <label>Referral source</label>
@@ -851,7 +876,7 @@
                 <label>Wait time (minutes)</label>
                 <input type="number" id="waitMinutes" min="0" step="5" value="0" />
               </div>
-              </div>
+              </div></details>
 
               <div class="right-actions top-gap">
                 <button class="btn" id="estimateFareBtn" type="button">Estimate fare</button>
@@ -1857,6 +1882,7 @@ if (!user) {
       $("passengerName").value = currentProfile.name || "";
       updatePaymentButton();
       updateBookingModeUI();
+      updateSimplePassengerSummary();
       await handlePaymentReturn();
       syncDriverControls();
 
@@ -1911,10 +1937,14 @@ if (!user) {
       const isNdis = rideType === "ndis";
       $("normalBookingFields")?.classList.toggle("hidden-scope", isNdis);
       $("ndisBookingFields")?.classList.toggle("hidden-scope", !isNdis);
+      if ($("ndisBookingFields")) $("ndisBookingFields").open = isNdis;
       if ($("bookingModeBadge")) $("bookingModeBadge").textContent = isNdis ? "NDIS booking" : "Normal booking";
       if ($("bookingModeCopy")) $("bookingModeCopy").textContent = isNdis
-        ? "NDIS booking shows referral, support, and care coordination fields."
-        : "Normal booking shows simple trip and vehicle details only.";
+        ? "NDIS keeps the same simple trip flow, with a small extra support section."
+        : "Normal booking keeps things short and simple for passengers.";
+      if ($("simplePassengerModeNote")) $("simplePassengerModeNote").textContent = isNdis
+        ? "Fill the trip first, then open NDIS support details only if needed."
+        : "Fill the trip, choose one ride option, and send the request.";
     }
 
     function initMaps() {
@@ -2230,6 +2260,8 @@ if (!user) {
           select.value = btn.dataset.rideCategory;
           populateVehicleSubtypeOptions();
           updateBookingSummaryPanel();
+          updateSimplePassengerSummary();
+          updateSimplePassengerSummary();
         });
       });
     }
@@ -2250,6 +2282,7 @@ if (!user) {
           if ($("vehicleSubtype")) $("vehicleSubtype").value = btn.dataset.rideSubtype;
           updateVehicleSelectionSummary();
           updateBookingSummaryPanel();
+          updateSimplePassengerSummary();
         });
       });
     }
@@ -2291,6 +2324,27 @@ if (!user) {
       reasons.push(`Availability: ${formatStatusLabel(ranked.availability || 'online')}`);
       if (booking.wheelchairRequired === 'yes' || booking.vehicleType === 'wav') reasons.push(ranked.wheelchairCapable === true || ranked.wheelchairCapable === 'true' || ranked.vehicleType === 'wav' ? 'Wheelchair capable' : 'Wheelchair not confirmed');
       return `<div class="admin-recommend-box"><div style="font-weight:800">Recommended driver: ${escapeHtml(ranked.name || ranked.email || 'Driver')}</div><div class="tiny" style="margin-top:6px">Best current match for this booking.</div>${reasons.map(r => `<span class="recommend-chip">${escapeHtml(r)}</span>`).join('')}</div>`;
+    }
+
+    function updateSimplePassengerSummary() {
+      const wrap = $("simplePassengerSummaryContent");
+      if (!wrap) return;
+      const rideType = $("rideType")?.value || "normal";
+      const category = $("vehicleCategory")?.value || "standard";
+      const subtype = $("vehicleSubtype")?.value || getVehicleSubtypeOptions(category)[0].value;
+      const priority = $("bookingPriority")?.value || "standard";
+      const wheelchair = $("wheelchairRequired")?.value || "no";
+      const companion = $("companionRequired")?.value || "no";
+      const returnTrip = $("returnTrip")?.value || "no";
+      wrap.innerHTML = `
+        <div class="item"><div class="tiny">Ride type</div><div>${escapeHtml(rideType === "ndis" ? "NDIS" : "Normal")}</div></div>
+        <div class="item"><div class="tiny">Ride choice</div><div>${escapeHtml(formatVehicleCategoryLabel(category))}</div></div>
+        <div class="item"><div class="tiny">Priority</div><div>${escapeHtml(priority)}</div></div>
+        <div class="item"><div class="tiny">Support</div><div>${wheelchair === "yes" ? "Wheelchair" : "Standard"}${companion === "yes" ? " • Companion" : ""}${returnTrip === "yes" ? " • Return" : ""}</div></div>
+      `;
+      if (rideType !== "ndis" && $("vehicleSubtype")) {
+        $("vehicleSubtype").value = subtype || getVehicleSubtypeOptions(category)[0].value;
+      }
     }
 
     function updateBookingSummaryPanel() {
@@ -2420,7 +2474,7 @@ if (!user) {
         let fare = calculateFare(km, rideType);
         fare = applyVehicleFareAdjustment(fare, vehicleType);
         fare = computeLevel8FareAdjustments(fare);
-        $("farePreview").textContent = `Estimated fare: $${fare.toFixed(2)} • Distance: ${km.toFixed(1)} km • Ride: ${formatVehicleCategoryLabel(vehicleCategory)} / ${formatVehicleSubtypeLabel(vehicleSubtype)} • Dispatch: ${formatVehicleTypeLabel(vehicleType)} • Payment: ${payment}`;
+        $("farePreview").textContent = `Estimated fare: $${fare.toFixed(2)} • Distance: ${km.toFixed(1)} km • Ride: ${formatVehicleCategoryLabel(vehicleCategory)} • Dispatch: ${formatVehicleTypeLabel(vehicleType)} • Payment: ${payment}`;
 
         const tempBooking = { pickup, destination, status: "draft" };
         updateMapForBooking(passengerMap, passengerMapState, tempBooking, "passenger");
@@ -2470,7 +2524,7 @@ if (!user) {
         `Pickup: ${pickup}`,
         `Destination: ${destination}`,
         `Date/Time: ${tripDate} ${tripTime}`,
-        `Ride: ${formatVehicleCategoryLabel(vehicleCategory)} • ${formatVehicleSubtypeLabel(vehicleSubtype)}`,
+        `Ride: ${formatVehicleCategoryLabel(vehicleCategory)}`,
         `Dispatch: ${formatVehicleTypeLabel(vehicleType)}`,
         `Support: ${formatSupportLevelLabel(supportLevel)}`
       ].join("\n");
@@ -2555,6 +2609,8 @@ if (!user) {
       renderRideCategoryCards();
       renderRideSubtypeCards();
       updateBookingSummaryPanel();
+      updateSimplePassengerSummary();
+      updateSimplePassengerSummary();
       if ($("wheelchairRequired")) $("wheelchairRequired").value = "no";
       if ($("companionRequired")) $("companionRequired").value = "no";
       if ($("returnTrip")) $("returnTrip").value = "no";
@@ -3466,11 +3522,11 @@ function renderPassengerTrips() {
     $("passengerCancelBtn")?.addEventListener("click", passengerCancelLatestTrip);
     $("rideType")?.addEventListener("change", () => { updatePaymentButton(); updateBookingModeUI(); });
     $("vehicleCategory")?.addEventListener("change", () => populateVehicleSubtypeOptions());
-    $("vehicleSubtype")?.addEventListener("change", updateVehicleSelectionSummary);
+    $("vehicleSubtype")?.addEventListener("change", () => { updateVehicleSelectionSummary(); updateSimplePassengerSummary(); });
     $("vehiclePreference")?.addEventListener("change", updateVehicleSelectionSummary);
     ["pickup","destination","tripDate","tripTime","rideType","supportLevel","wheelchairRequired","companionRequired"].forEach(id => {
-      $(id)?.addEventListener("input", updateBookingSummaryPanel);
-      $(id)?.addEventListener("change", updateBookingSummaryPanel);
+      $(id)?.addEventListener("input", () => { updateBookingSummaryPanel(); updateSimplePassengerSummary(); });
+      $(id)?.addEventListener("change", () => { updateBookingSummaryPanel(); updateSimplePassengerSummary(); });
     });
     ["compactModeToggle","executiveFocusToggle","spotlightMapsToggle","operationsPulseToggle","priorityLaneToggle"].forEach(id => {
       $(id)?.addEventListener("change", () => applyRoleBasedModes(currentProfile?.role));
@@ -4820,6 +4876,7 @@ function renderDriverAcceptanceBoard() {
     renderRideCategoryCards();
     renderRideSubtypeCards();
     updateBookingSummaryPanel();
+    updateSimplePassengerSummary();
     renderLevel18NotificationBadges();
 
     window.assignDriver = assignDriver;
