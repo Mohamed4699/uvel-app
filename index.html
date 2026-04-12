@@ -904,6 +904,30 @@
       }
     }
 
+
+
+    /* Level 21.6 compact driver today strip */
+    #driverView .driver-today-strip{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      margin-top:8px;
+    }
+    #driverView .driver-today-strip span{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      font-size:11px;
+      font-weight:700;
+    }
+
 </style>
 </head>
 <body class="compact55">
@@ -3633,32 +3657,15 @@ function renderAdminCharts() {
       const stageOrder = {assigned:0,en_route:1,picked_up:2,completed:3};
       const currentIdx = stageOrder[stage] ?? 0;
       wrap.innerHTML = `
-        <div class="level20-kicker"> driver</div>
-        <div class="section-title" style="font-size:20px">Today</div>
-        <div class="section-sub" style="margin:6px 0 0">Today&apos;s quick driver summary.</div>
-        <div class="level20-premium-bar">
-          <div class="item"><div class="tiny">Current rider</div><div>${escapeHtml(active?.passengerName || "No active rider")}</div></div>
-          <div class="item"><div class="tiny">Current route</div><div>${escapeHtml(active ? ((active.pickup || "Pickup") + ' → ' + (active.destination || "Destination")) : "Waiting for assignment")}</div></div>
-          <div class="item"><div class="tiny">Completed</div><div>${completed}</div></div>
-          <div class="item"><div class="tiny">Unread updates</div><div>${unread}</div></div>
-        </div>
-        <div class="level20-driver-steps">
-          ${steps.map(([key,label], idx) => `<div class="level20-driver-step ${idx < currentIdx ? 'done' : idx === currentIdx ? 'active' : ''}"><div class="tiny">Stage</div><div>${label}</div></div>`).join('')}
-        </div>
-        <div class="level201-grid">
-          <div class="level201-card ${active ? "level201-good" : ""}">
-            <div class="section-title" style="font-size:16px">Status</div>
-            <div class="level201-note">${active ? 'You have an active job. Follow the stage controls below and keep passenger updates accurate.' : 'No active job right now. Stay online to receive the next trip.'}</div>
-            <div class="level201-row">
-              <span class="level201-pill">Acceptance ${accepted}</span>
-              <span class="level201-pill">Today earnings $${todayEarnings.toFixed(2)}</span>
-              <span class="level201-pill">Availability ${escapeHtml(currentProfile?.availability || 'online')}</span>
-            </div>
-          </div>
-          <div class="level201-split">
-            <div class="level201-card"><div class="tiny">Today earnings</div><div class="level201-kpi">$${todayEarnings.toFixed(2)}</div></div>
-            <div class="level201-card"><div class="tiny">Accepted jobs</div><div class="level201-kpi">${accepted}</div></div>
-          </div>
+        <div class="level20-kicker">driver</div>
+        <div class="section-title" style="font-size:16px">Today</div>
+        <div class="driver-today-strip">
+          <span>💰 $${todayEarnings.toFixed(2)}</span>
+          <span>📦 Jobs: ${accepted}</span>
+          <span>📍 ${escapeHtml(steps[currentIdx]?.[1] || 'Assigned')}</span>
+          <span>👤 ${escapeHtml(active?.passengerName || 'No rider')}</span>
+          <span>🔔 ${unread}</span>
+          <span>✅ ${completed}</span>
         </div>`;
     }
 
