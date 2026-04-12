@@ -501,6 +501,40 @@
       line-height:1.4;
     }
 
+  
+    .compact-booking-summary{
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:14px;
+    }
+    .compact-summary-sub{
+      margin-bottom:8px;
+      font-size:12px;
+    }
+    .compact-summary-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:8px;
+    }
+    .compact-summary-grid .item{
+      padding:10px 12px;
+      border-radius:12px;
+    }
+    .compact-summary-grid .item > div:last-child{
+      font-size:14px;
+      font-weight:800;
+      line-height:1.25;
+    }
+    @media (max-width:1100px){
+      .compact-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    }
+    @media (max-width:680px){
+      .compact-booking-summary{padding:10px 12px;}
+      .compact-summary-grid{grid-template-columns:1fr 1fr;gap:8px;}
+      .compact-summary-grid .item > div:last-child{font-size:13px;}
+    }
+
+
   </style>
 </head>
 <body>
@@ -804,12 +838,6 @@
                 <div id="rideCategoryCards" class="ride-card-grid"></div>
                 <div id="rideSubtypeCards" class="ride-card-grid top-gap"></div>
               </div>
-              <div id="bookingSummaryBox" class="booking-summary-box">
-                <div class="section-title" style="font-size:16px">Booking summary</div>
-                <div class="section-sub" style="margin-bottom:10px">Quick review before you send the request.</div>
-                <div id="bookingSummaryContent" class="booking-summary-grid"></div>
-                <div class="booking-confirm-note">Login, sign up, and reset password stay exactly the same in this Level 20 version.</div>
-              </div>
               <div class="row top-gap">
                 <div>
                   <label>Ride preference</label>
@@ -883,6 +911,12 @@
                 <label>Wait time (minutes)</label>
                 <input type="number" id="waitMinutes" min="0" step="5" value="0" />
               </div>
+              </div>
+
+              <div id="bookingSummaryBox" class="booking-summary-box compact-booking-summary">
+                <div class="section-title" style="font-size:15px">Booking summary</div>
+                <div class="section-sub compact-summary-sub">Short preview for both Normal and NDIS bookings.</div>
+                <div id="bookingSummaryContent" class="booking-summary-grid compact-summary-grid"></div>
               </div>
 
               <div class="right-actions top-gap">
@@ -2330,18 +2364,13 @@ if (!user) {
       if (!wrap) return;
       const category = $("vehicleCategory")?.value || 'standard';
       const subtype = $("vehicleSubtype")?.value || getVehicleSubtypeOptions(category)[0].value;
-      const support = $("supportLevel")?.value || 'standard';
       const rideType = $("rideType")?.value || 'normal';
-      const payment = rideType === 'ndis' ? 'Invoice / Referral' : 'Card / Direct';
+      const whenText = [$("tripDate")?.value || '--', $("tripTime")?.value || ''].join(' ').trim() || '--';
       const summary = [
         ['Pickup', $("pickup")?.value || '--'],
-        ['Destination', $("destination")?.value || '--'],
-        ['When', [$("tripDate")?.value || '--', $("tripTime")?.value || ''].join(' ').trim()],
+        ['When', whenText],
         ['Ride', `${formatVehicleCategoryLabel(category)} • ${formatVehicleSubtypeLabel(subtype)}`],
-        ['Support', formatSupportLevelLabel(support)],
-        ['Dispatch', formatVehicleTypeLabel(getRecommendedVehicleType())],
-        ['Payment', payment],
-        ['Preference', $("vehiclePreference")?.selectedOptions?.[0]?.textContent || 'No special preference']
+        ['Payment', rideType === 'ndis' ? 'NDIS invoice' : 'Card / Direct']
       ];
       wrap.innerHTML = summary.map(([k,v]) => `<div class="item"><div class="tiny">${escapeHtml(k)}</div><div>${escapeHtml(v || '--')}</div></div>`).join('');
     }
