@@ -387,6 +387,18 @@
     .level20-kicker{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
     @media (max-width:1100px){.level20-premium-bar,.level20-driver-steps,.level20-grid{grid-template-columns:1fr}}
 
+    .smart-role-header{align-items:flex-start}
+    .smart-header-tools{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+    .smart-bell{display:inline-flex;align-items:center;gap:10px;padding:12px 14px}
+    .smart-bell-icon{font-size:16px;line-height:1}
+    .legacy-counter-store{display:none!important}
+    @media (max-width:1100px){
+      .smart-role-header{align-items:stretch}
+      .smart-header-tools{width:100%;justify-content:flex-start}
+      .smart-header-tools #seedDriversBtn{order:3}
+    }
+
+
   </style>
 </head>
 <body>
@@ -474,7 +486,7 @@
     </div>
 
     <div id="appScreen" class="hidden">
-      <div class="card header">
+      <div class="card header smart-role-header">
         <div class="brand">
           <div class="logo">U</div>
           <div>
@@ -482,20 +494,22 @@
             <div class="subtitle">Full Level 20 • mission control • compact mode • executive focus • spotlight maps • operations pulse • priority lane</div>
           </div>
         </div>
-        <div class="userbox">
+        <div class="userbox smart-header-tools">
           <div class="pill" id="whoAmI">Signed in</div>
-          <div class="level18-badge-row">
-            <div class="level18-badge">Passenger updates <span class="level18-dot" id="level18PassengerUnread">0</span></div>
-            <div class="level18-badge">Driver updates <span class="level18-dot" id="level18DriverUnread">0</span></div>
-            <div class="level18-badge">Admin updates <span class="level18-dot" id="level18AdminUnread">0</span></div>
-          </div>
-          <div class="level19-badge-row">
-            <div class="level19-badge">Urgent queue <span class="level19-dot" id="level19UrgentCount">0</span></div>
-            <div class="level19-badge">Online drivers <span class="level19-dot" id="level19OnlineDrivers">0</span></div>
-            <div class="level19-badge">My unread <span class="level19-dot" id="level19RoleUnread">0</span></div>
-          </div>
+          <button id="smartRoleBell" class="btn smart-bell" type="button" title="Open notifications">
+            <span class="smart-bell-icon">🔔</span>
+            <span id="smartRoleLabel">Updates</span>
+            <span class="level19-dot" id="level19RoleUnread">0</span>
+          </button>
           <button id="seedDriversBtn" class="btn">Seed demo drivers</button>
           <button id="logoutBtn" class="btn brand">Logout</button>
+        </div>
+        <div class="legacy-counter-store hidden" aria-hidden="true">
+          <span id="level18PassengerUnread">0</span>
+          <span id="level18DriverUnread">0</span>
+          <span id="level18AdminUnread">0</span>
+          <span id="level19UrgentCount">0</span>
+          <span id="level19OnlineDrivers">0</span>
         </div>
       </div>
 
@@ -4825,6 +4839,46 @@ function renderDriverAcceptanceBoard() {
   
 
 </script>
+
+<script>
+(function(){
+  function updateSmartRoleHeader(){
+    var who=document.getElementById('whoAmI');
+    var label=document.getElementById('smartRoleLabel');
+    var seed=document.getElementById('seedDriversBtn');
+    if(!who||!label) return;
+    var txt=(who.textContent||'').toLowerCase();
+    var role='updates';
+    if(txt.includes('passenger')) role='Passenger updates';
+    else if(txt.includes('driver')) role='Driver updates';
+    else if(txt.includes('admin')) role='Admin updates';
+    label.textContent=role;
+    if(seed) seed.style.display = txt.includes('admin') ? '' : 'none';
+  }
+  function scrollToRoleNotifications(){
+    var who=document.getElementById('whoAmI');
+    if(!who) return;
+    var txt=(who.textContent||'').toLowerCase();
+    var target=null;
+    if(txt.includes('passenger')) target=document.getElementById('passengerNotifications');
+    else if(txt.includes('driver')) target=document.getElementById('driverNotifications');
+    else if(txt.includes('admin')) target=document.getElementById('adminNotifications');
+    if(target && target.scrollIntoView) target.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    updateSmartRoleHeader();
+    var bell=document.getElementById('smartRoleBell');
+    if(bell) bell.addEventListener('click', scrollToRoleNotifications);
+    var who=document.getElementById('whoAmI');
+    if(who && window.MutationObserver){
+      new MutationObserver(updateSmartRoleHeader).observe(who,{childList:true,subtree:true,characterData:true});
+    }
+    setTimeout(updateSmartRoleHeader, 1200);
+    setTimeout(updateSmartRoleHeader, 3000);
+  });
+})();
+</script>
+
 </body>
 </html>${getTimelineHTML(b)}
           
