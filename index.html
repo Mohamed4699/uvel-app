@@ -308,6 +308,32 @@
     body.hide-spotlight-maps #passengerMap + .grid-2, body.hide-spotlight-maps #adminMap + .eta-box, body.hide-spotlight-maps #driverMap + .eta-box{margin-top:0}
     @media (max-width:1100px){.hero-strip{grid-template-columns:1fr}}
 
+    .level17-toast-wrap{position:fixed;right:18px;bottom:18px;display:grid;gap:10px;z-index:9999;max-width:360px}
+    .level17-toast{padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg, rgba(10,35,55,.97), rgba(8,26,40,.99));box-shadow:var(--shadow)}
+    .level17-toast strong{display:block;margin-bottom:4px}
+    .level17-toast.info{border-color:rgba(73,196,213,.45)}
+    .level17-toast.success{border-color:rgba(87,208,139,.45)}
+    .level17-toast.warn{border-color:rgba(240,194,79,.45)}
+    .level17-toast.error{border-color:rgba(239,109,109,.45)}
+    .level17-panel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .level17-panel{padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03)}
+    .notify-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .notify-item + .notify-item{margin-top:10px}
+    .notify-top{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px}
+    .smart-score{font-size:22px;font-weight:900}
+    .quick-mobile-bar{display:none;gap:10px;position:sticky;bottom:12px;z-index:25;margin-top:16px}
+    .quick-mobile-bar .btn{flex:1}
+    @media (max-width: 820px){
+      .quick-mobile-bar{display:flex}
+      .header{padding:14px 16px}
+      .ride-card-grid{grid-template-columns:1fr}
+      .right-actions{justify-content:stretch}
+      .right-actions .btn{flex:1}
+      .booking-summary-box{position:sticky;bottom:8px;z-index:18;background:linear-gradient(180deg, rgba(6,24,38,.98), rgba(6,24,38,.98))}
+      .level17-panel-grid{grid-template-columns:1fr}
+    }
+
+
   </style>
 </head>
 <body>
@@ -318,7 +344,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 16 mission control build</div>
+            <div class="subtitle">Firebase Level 17 mission control build</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -400,7 +426,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 16 • mission control • compact mode • executive focus • spotlight maps • operations pulse • priority lane</div>
+            <div class="subtitle">Full Level 17 • mission control • compact mode • executive focus • spotlight maps • operations pulse • priority lane</div>
           </div>
         </div>
         <div class="userbox">
@@ -578,7 +604,7 @@
                 <div class="section-title" style="font-size:16px">Booking summary</div>
                 <div class="section-sub" style="margin-bottom:10px">Review the trip before you send it to dispatch.</div>
                 <div id="bookingSummaryContent" class="booking-summary-grid"></div>
-                <div class="booking-confirm-note">Login, sign up, and reset password stay exactly the same in this Level 16 version.</div>
+                <div class="booking-confirm-note">Login, sign up, and reset password stay exactly the same in this Level 17 version.</div>
               </div>
               <div class="row top-gap">
                 <div>
@@ -662,6 +688,10 @@
               </div>
               <div class="line"></div>
               <div id="farePreview" class="muted">Estimated fare: -- • Distance: -- • Vehicle: -- • Payment: --</div>
+              <div class="quick-mobile-bar">
+                <button class="btn" type="button" id="mobileEstimateBtn">Estimate</button>
+                <button class="btn brand" type="submit">Confirm request</button>
+              </div>
             </form>
           </div>
 
@@ -814,6 +844,14 @@
               <button class="btn" id="exportActiveBtn">Export active CSV</button>
               <button class="btn" id="exportCompletedBtn">Export completed CSV</button>
             </div>
+            <div id="adminSmartDispatchBox" class="admin-recommend-box">
+              <div class="section-title" style="font-size:16px">Level 17 smart dispatch</div>
+              <div class="section-sub" style="margin-bottom:10px">Best next booking, best driver, and live match reasons.</div>
+              <div id="adminSmartDispatchContent"></div>
+              <div class="mini-actions top-gap">
+                <button class="btn brand small" id="autoAssignTopBtn">Auto assign top match</button>
+              </div>
+            </div>
             <div class="toolbar">
               <input id="adminSearch" placeholder="Search passenger, pickup, destination" />
               <select id="statusFilter">
@@ -869,6 +907,8 @@
             <div class="section-title">Dispatch watch</div>
             <div class="section-sub">Priority queue, service alerts, and urgent incidents.</div>
             <div id="dispatchBoard" class="notice-list"></div>
+            <div class="line"></div>
+            <div id="adminNotifications" class="notice-list"></div>
             <div class="line"></div>
             <div id="serviceAlerts" class="notice-list"></div>
             <div class="line"></div>
@@ -1180,6 +1220,7 @@
         </details>
       </div>
     </div>
+    <div id="level17ToastWrap" class="level17-toast-wrap"></div>
   </div>
 
   <script type="module">
@@ -2295,6 +2336,7 @@ if (!user) {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
+      pushLevel17Notification("passenger", "Booking submitted", `${passengerName} trip request was sent to dispatch.`, "success");
 
       $("bookingForm").reset();
       $("passengerName").value = currentProfile.name || "";
@@ -2325,6 +2367,128 @@ if (!user) {
       updatePaymentButton();
       alert("Ride request sent. Admin can now see it in another browser.");
     });
+
+
+    const level17Notifications = [];
+    const level17BookingSnapshot = new Map();
+
+    function showLevel17Toast(title, message, type = "info") {
+      const wrap = $("level17ToastWrap");
+      if (!wrap) return;
+      const el = document.createElement("div");
+      el.className = `level17-toast ${type}`;
+      el.innerHTML = `<strong>${escapeHtml(title)}</strong><div>${escapeHtml(message)}</div>`;
+      wrap.prepend(el);
+      while (wrap.children.length > 5) wrap.removeChild(wrap.lastChild);
+      setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(6px)";
+        setTimeout(() => el.remove(), 220);
+      }, 3200);
+    }
+
+    function pushLevel17Notification(role, title, message, type = "info") {
+      level17Notifications.unshift({ role, title, message, type, createdAt: new Date().toISOString() });
+      while (level17Notifications.length > 40) level17Notifications.pop();
+      const shouldToast = currentProfile && (role === "all" || role === currentProfile.role);
+      if (shouldToast) showLevel17Toast(title, message, type);
+    }
+
+    function detectLevel17BookingChanges() {
+      allBookings.forEach(b => {
+        const prev = level17BookingSnapshot.get(b.id);
+        if (!prev) {
+          level17BookingSnapshot.set(b.id, { status: b.status, assignedDriverUid: b.assignedDriverUid, acceptanceStatus: b.acceptanceStatus, driverStage: b.driverStage, paymentStatus: b.paymentStatus });
+          return;
+        }
+        if (prev.status !== b.status) {
+          if (b.status === "assigned") pushLevel17Notification("passenger", "Driver assigned", `${b.assignedDriverName || "A driver"} was assigned to ${b.passengerName || "the trip"}.`, "success");
+          if (b.status === "completed") pushLevel17Notification("all", "Trip completed", `${b.passengerName || "Passenger"} trip is marked completed.`, "success");
+          if (b.status === "cancelled") pushLevel17Notification("all", "Trip cancelled", `${b.passengerName || "Passenger"} trip was cancelled.`, "warn");
+        }
+        if (prev.acceptanceStatus !== b.acceptanceStatus) {
+          if (b.acceptanceStatus === "accepted") pushLevel17Notification("admin", "Driver accepted", `${b.assignedDriverName || "Driver"} accepted ${b.passengerName || "the trip"}.`, "success");
+          if (b.acceptanceStatus === "declined") pushLevel17Notification("admin", "Driver declined", `${b.assignedDriverName || "Driver"} declined ${b.passengerName || "the trip"}.`, "warn");
+        }
+        if (prev.driverStage !== b.driverStage) {
+          if (b.driverStage === "routing") pushLevel17Notification("passenger", "Driver en route", `${b.assignedDriverName || "Your driver"} is heading to pickup.`, "info");
+          if (b.driverStage === "in_progress") pushLevel17Notification("passenger", "Trip in progress", `${b.passengerName || "Trip"} is now in progress.`, "info");
+        }
+        if (prev.paymentStatus !== b.paymentStatus && b.paymentStatus === "paid") {
+          pushLevel17Notification("admin", "Payment received", `${b.passengerName || "Passenger"} payment is marked paid.`, "success");
+        }
+        level17BookingSnapshot.set(b.id, { status: b.status, assignedDriverUid: b.assignedDriverUid, acceptanceStatus: b.acceptanceStatus, driverStage: b.driverStage, paymentStatus: b.paymentStatus });
+      });
+    }
+
+    function renderRoleNotifications() {
+      const adminWrap = $("adminNotifications");
+      const passengerWrap = $("passengerNotifications");
+      const driverWrap = $("driverNotifications");
+      const mk = role => level17Notifications.filter(n => n.role === "all" || n.role === role).slice(0, 5)
+        .map(n => `<div class="notify-item"><div class="notify-top"><strong>${escapeHtml(n.title)}</strong><span class="tiny">${escapeHtml((n.createdAt || "").slice(11,16) || "Now")}</span></div><div class="tiny">${escapeHtml(n.message)}</div></div>`).join("") || `<div class="empty">No updates yet.</div>`;
+      if (adminWrap) adminWrap.innerHTML = mk("admin");
+      if (passengerWrap) passengerWrap.innerHTML = mk("passenger");
+      if (driverWrap) driverWrap.innerHTML = mk("driver");
+    }
+
+    function scoreDriverForBooking(booking, driver) {
+      const activeLoad = allBookings.filter(b => b.assignedDriverUid === driver.uid && !["completed","cancelled"].includes(b.status)).length;
+      const driverVehicleType = driver.vehicleType || "standard";
+      const availability = driver.availability || "online";
+      let score = 100;
+      const reasons = [];
+      if (availability === "online") { score += 15; reasons.push("online now"); }
+      if (availability === "busy") { score -= 10; reasons.push("already busy"); }
+      if (availability === "break" || availability === "offline") score -= 1000;
+      score -= activeLoad * 12;
+      reasons.push(activeLoad === 0 ? "no active load" : `${activeLoad} active trip${activeLoad > 1 ? 's' : ''}`);
+      if (booking.vehicleType === driverVehicleType) { score += 28; reasons.push("exact vehicle match"); }
+      else if (["van","wav"].includes(driverVehicleType) && ["standard","suv","van"].includes(booking.vehicleType)) { score += 10; reasons.push("higher-capacity vehicle"); }
+      if ((booking.vehicleType === "wav" || booking.supportLevel === "wheelchair" || booking.wheelchairRequired === "yes") && (driver.wheelchairCapable === true || driver.wheelchairCapable === "true" || driverVehicleType === "wav")) {
+        score += 35; reasons.push("wheelchair capable");
+      }
+      if (booking.priority === "urgent") { score += 8; reasons.push("urgent-ready"); }
+      return { score, reasons };
+    }
+
+    function getTopSmartDispatchMatch() {
+      const pending = allBookings.filter(b => b.status === "pending").sort((a,b) => {
+        const p = bookingPriorityRank(b.priority) - bookingPriorityRank(a.priority);
+        if (p !== 0) return p;
+        return bookingDateTimeValue(a) - bookingDateTimeValue(b);
+      })[0];
+      if (!pending) return null;
+      const candidates = getMatchingDriversForBooking(pending).map(d => ({ driver: d, ...scoreDriverForBooking(pending, d) }))
+        .sort((a,b) => b.score - a.score);
+      return { booking: pending, best: candidates[0] || null, candidates };
+    }
+
+    function renderLevel17SmartDispatch() {
+      const wrap = $("adminSmartDispatchContent");
+      if (!wrap) return;
+      const top = getTopSmartDispatchMatch();
+      if (!top) {
+        wrap.innerHTML = `<div class="empty">No pending bookings waiting for smart dispatch.</div>`;
+        return;
+      }
+      const b = top.booking;
+      const best = top.best;
+      wrap.innerHTML = `
+        <div class="level17-panel-grid">
+          <div class="level17-panel">
+            <div class="tiny">Next priority booking</div>
+            <div style="font-weight:900;font-size:20px;margin-top:6px">${escapeHtml(b.passengerName || "Passenger")}</div>
+            <div class="top-gap">${escapeHtml(b.pickup || "")} → ${escapeHtml(b.destination || "")}</div>
+            <div class="top-gap"><span class="recommend-chip">${escapeHtml(formatVehicleCategoryLabel(b.vehicleCategory || 'standard'))}</span><span class="recommend-chip">${escapeHtml(formatVehicleSubtypeLabel(b.vehicleSubtype || 'standard_compact'))}</span><span class="recommend-chip">${escapeHtml(b.priority || 'standard')}</span></div>
+          </div>
+          <div class="level17-panel">
+            <div class="tiny">Best driver recommendation</div>
+            ${best ? `<div style="font-weight:900;font-size:20px;margin-top:6px">${escapeHtml(best.driver.name || best.driver.email || 'Driver')}</div><div class="smart-score">${best.score}</div><div>${best.reasons.map(r => `<span class="recommend-chip">${escapeHtml(r)}</span>`).join('')}</div>` : `<div class="empty">No suitable driver right now.</div>`}
+          </div>
+        </div>`;
+    }
+
 
     function subscribeUsers() {
       if (unsubUsers) unsubUsers();
@@ -2529,6 +2693,9 @@ function renderAdminCharts() {
       renderPassengerLoyaltyPanel();
       renderDriverShiftHandover();
       renderDriverRouteReliability();
+      detectLevel17BookingChanges();
+      renderRoleNotifications();
+      renderLevel17SmartDispatch();
       syncDriverControls();
       if (currentProfile?.role === "passenger") {
         await renderSavedPlaces();
@@ -4002,40 +4169,51 @@ function renderDriverAcceptanceBoard() {
       const pending = allBookings.filter(b => b.status === "pending");
       if (!pending.length) return alert("No pending bookings.");
       if (!allDrivers.length) return alert("No drivers found.");
-      const activeLoads = {};
-      allBookings.forEach(b => {
-        if (b.assignedDriverUid && b.status !== "completed" && b.status !== "cancelled") {
-          activeLoads[b.assignedDriverUid] = (activeLoads[b.assignedDriverUid] || 0) + 1;
-        }
-      });
+      let assignedCount = 0;
       for (const booking of pending.sort((a,b) => {
         const p = bookingPriorityRank(b.priority) - bookingPriorityRank(a.priority);
         if (p !== 0) return p;
         return bookingDateTimeValue(a) - bookingDateTimeValue(b);
       })) {
-        const availableDrivers = getMatchingDriversForBooking(booking);
-        const bestDriver = [...availableDrivers].sort((a, b) => {
-          const loadDiff = (activeLoads[a.uid] || 0) - (activeLoads[b.uid] || 0);
-          if (loadDiff !== 0) return loadDiff;
-          const aBusy = (a.availability || "online") === "busy" ? 1 : 0;
-          const bBusy = (b.availability || "online") === "busy" ? 1 : 0;
-          if (aBusy !== bBusy) return aBusy - bBusy;
-          return String(a.name || a.email).localeCompare(String(b.name || b.email));
-        })[0];
-        if (!bestDriver) continue;
+        const ranked = getMatchingDriversForBooking(booking).map(d => ({ driver: d, ...scoreDriverForBooking(booking, d) }))
+          .sort((a,b) => b.score - a.score);
+        const best = ranked[0];
+        if (!best) continue;
         await updateDoc(doc(db, "bookings", booking.id), {
-          assignedDriverUid: bestDriver.uid,
-          assignedDriverName: bestDriver.name || bestDriver.email,
+          assignedDriverUid: best.driver.uid,
+          assignedDriverName: best.driver.name || best.driver.email,
           status: "assigned",
           acceptanceStatus: "pending_driver",
           driverStage: "assigned",
           dispatchAssignedAt: new Date().toISOString(),
+          dispatchScore: best.score,
+          dispatchReasons: best.reasons,
           updatedAt: serverTimestamp()
         });
-        activeLoads[bestDriver.uid] = (activeLoads[bestDriver.uid] || 0) + 1;
+        assignedCount += 1;
       }
-      alert("Smart auto assign completed.");
+      pushLevel17Notification("admin", "Smart auto assign complete", `${assignedCount} booking${assignedCount === 1 ? '' : 's'} assigned using Level 17 scoring.`, assignedCount ? "success" : "warn");
+      if (!assignedCount) alert("No suitable driver matches found.");
     };
+
+    $("autoAssignTopBtn").onclick = async () => {
+      const top = getTopSmartDispatchMatch();
+      if (!top || !top.best) return alert("No smart dispatch match available.");
+      await updateDoc(doc(db, "bookings", top.booking.id), {
+        assignedDriverUid: top.best.driver.uid,
+        assignedDriverName: top.best.driver.name || top.best.driver.email,
+        status: "assigned",
+        acceptanceStatus: "pending_driver",
+        driverStage: "assigned",
+        dispatchAssignedAt: new Date().toISOString(),
+        dispatchScore: top.best.score,
+        dispatchReasons: top.best.reasons,
+        updatedAt: serverTimestamp()
+      });
+      pushLevel17Notification("admin", "Top match assigned", `${top.best.driver.name || top.best.driver.email || 'Driver'} was assigned to ${top.booking.passengerName || 'the trip'}.`, "success");
+    };
+
+    $("mobileEstimateBtn").onclick = () => $("estimateFareBtn").click();
 
     $("exportActiveBtn").onclick = () => exportCSV(allBookings.filter(b => b.status !== "completed"), "uvel_active_bookings.csv");
     $("exportCompletedBtn").onclick = () => exportCSV(allBookings.filter(b => b.status === "completed"), "uvel_completed_bookings.csv");
