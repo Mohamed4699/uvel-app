@@ -299,6 +299,23 @@
     .recommend-chip{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px;margin:6px 6px 0 0}
     @media (max-width:1100px){.ride-card-grid,.booking-summary-grid,.timeline{grid-template-columns:1fr}}
 
+
+    .level19-badge-row{display:flex;gap:8px;flex-wrap:wrap}
+    .level19-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);font-size:12px;font-weight:700}
+    .level19-dot{min-width:24px;height:24px;padding:0 8px;border-radius:999px;display:inline-grid;place-items:center;background:rgba(73,196,213,.16);color:var(--text);font-weight:900}
+    .level19-ops-board,.level19-driver-workflow,.level19-passenger-concierge{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#061826}
+    .level19-kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px}
+    .level19-kpi-grid .item{padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03)}
+    .level19-action-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+    .level19-action-btn{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.04);cursor:pointer;text-align:center;font-weight:800}
+    .level19-action-btn:hover{border-color:rgba(73,196,213,.55);background:rgba(255,255,255,.06)}
+    .level19-match-list{display:grid;gap:10px;margin-top:10px}
+    .level19-match-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03)}
+    .level19-flex{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .level19-mini{font-size:12px;color:var(--muted)}
+    .level19-chip{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px;margin:6px 6px 0 0}
+    @media (max-width:1100px){.level19-kpi-grid,.level19-action-grid{grid-template-columns:1fr}}
+
     .booking-scope{display:grid;gap:14px}
     .booking-mode-banner{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03);margin-bottom:14px}
     .booking-mode-banner .mode-copy{font-size:13px;color:var(--muted)}
@@ -360,7 +377,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 18 mission control build</div>
+            <div class="subtitle">Firebase Level 19 mission control build</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -442,7 +459,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 18 • mission control • compact mode • executive focus • spotlight maps • operations pulse • priority lane</div>
+            <div class="subtitle">Full Level 19 • mission control • compact mode • executive focus • spotlight maps • operations pulse • priority lane</div>
           </div>
         </div>
         <div class="userbox">
@@ -451,6 +468,11 @@
             <div class="level18-badge">Passenger updates <span class="level18-dot" id="level18PassengerUnread">0</span></div>
             <div class="level18-badge">Driver updates <span class="level18-dot" id="level18DriverUnread">0</span></div>
             <div class="level18-badge">Admin updates <span class="level18-dot" id="level18AdminUnread">0</span></div>
+          </div>
+          <div class="level19-badge-row">
+            <div class="level19-badge">Urgent queue <span class="level19-dot" id="level19UrgentCount">0</span></div>
+            <div class="level19-badge">Online drivers <span class="level19-dot" id="level19OnlineDrivers">0</span></div>
+            <div class="level19-badge">My unread <span class="level19-dot" id="level19RoleUnread">0</span></div>
           </div>
           <button id="seedDriversBtn" class="btn">Seed demo drivers</button>
           <button id="logoutBtn" class="btn brand">Logout</button>
@@ -485,6 +507,7 @@
 
       <div id="passengerView" class="hidden">
         <div id="level18PassengerSnapshot" class="level18-mobile-snapshot"></div>
+        <div id="level19PassengerConcierge" class="level19-passenger-concierge"></div>
         <div class="grid-2">
           <div class="card section">
             <div class="section-title">Passenger booking</div>
@@ -626,7 +649,7 @@
                 <div class="section-title" style="font-size:16px">Booking summary</div>
                 <div class="section-sub" style="margin-bottom:10px">Review the trip before you send it to dispatch.</div>
                 <div id="bookingSummaryContent" class="booking-summary-grid"></div>
-                <div class="booking-confirm-note">Login, sign up, and reset password stay exactly the same in this Level 18 version.</div>
+                <div class="booking-confirm-note">Login, sign up, and reset password stay exactly the same in this Level 19 version.</div>
               </div>
               <div class="row top-gap">
                 <div>
@@ -868,7 +891,7 @@
               <button class="btn" id="exportCompletedBtn">Export completed CSV</button>
             </div>
             <div id="adminSmartDispatchBox" class="admin-recommend-box">
-              <div class="section-title" style="font-size:16px">Level 18 smart dispatch</div>
+              <div class="section-title" style="font-size:16px">Level 19 smart dispatch</div>
               <div class="section-sub" style="margin-bottom:10px">Best next booking, best driver, and live match reasons.</div>
               <div id="adminSmartDispatchContent"></div>
               <div class="mini-actions top-gap">
@@ -876,7 +899,7 @@
               </div>
             </div>
             <div id="level18AdminAutomation" class="level18-admin-strip">
-              <div class="section-title" style="font-size:16px">Level 18 auto-dispatch</div>
+              <div class="section-title" style="font-size:16px">Level 19 auto-dispatch</div>
               <div class="section-sub" style="margin-bottom:10px">Optionally auto-assign urgent top matches and keep an eye on unread ops updates.</div>
               <div id="level18AdminAutomationSummary"></div>
               <div class="level18-admin-actions">
@@ -1152,6 +1175,8 @@
             <div id="driverAcceptanceBoard" class="driver-upcoming-list"></div>
           </div>
         </div>
+
+        <div id="level19DriverWorkflow" class="level19-driver-workflow"></div>
 
         <div class="driver-focus-grid top-gap">
           <div class="driver-mini-card">
@@ -2424,12 +2449,14 @@ if (!user) {
     function markRoleNotificationsRead(role) {
       level18State.read[role] = getNotificationRoleList(role).length;
       renderLevel18NotificationBadges();
+    renderLevel19HeaderBadges();
     }
 
     function renderLevel18NotificationBadges() {
       if ($("level18PassengerUnread")) $("level18PassengerUnread").textContent = String(getUnreadNotificationCount("passenger"));
       if ($("level18DriverUnread")) $("level18DriverUnread").textContent = String(getUnreadNotificationCount("driver"));
       if ($("level18AdminUnread")) $("level18AdminUnread").textContent = String(getUnreadNotificationCount("admin"));
+      renderLevel19HeaderBadges();
     }
 
     function renderLevel18PassengerSnapshot() {
@@ -2795,6 +2822,82 @@ function renderAdminCharts() {
       });
     }
 
+
+    function renderLevel19HeaderBadges() {
+      const urgent = allBookings.filter(b => b.status === "pending" && (b.priority === "urgent" || b.priority === "high")).length;
+      const onlineDrivers = allDrivers.filter(d => (d.availability || "online") === "online").length;
+      const role = currentProfile?.role || "passenger";
+      if ($("level19UrgentCount")) $("level19UrgentCount").textContent = String(urgent);
+      if ($("level19OnlineDrivers")) $("level19OnlineDrivers").textContent = String(onlineDrivers);
+      if ($("level19RoleUnread")) $("level19RoleUnread").textContent = String(getUnreadNotificationCount(role));
+    }
+
+    function renderLevel19PassengerConcierge() {
+      const wrap = $("level19PassengerConcierge");
+      if (!wrap || currentProfile?.role !== "passenger") return;
+      const nextTrip = getPassengerBookings().filter(b => !["completed","cancelled"].includes(b.status)).sort((a,b) => bookingDateTimeValue(a)-bookingDateTimeValue(b))[0];
+      if (!nextTrip) {
+        wrap.innerHTML = `<div class="section-title" style="font-size:16px">Level 19 trip concierge</div><div class="level19-mini">No upcoming trip yet. Once you book, your next ride, support type, and live readiness will show here.</div>`;
+        return;
+      }
+      const support = formatSupportLevelLabel(nextTrip.supportLevel || (nextTrip.wheelchairRequired === "yes" ? "wheelchair" : nextTrip.companionRequired === "yes" ? "companion" : "standard"));
+      wrap.innerHTML = `
+        <div class="level19-flex"><div><div class="section-title" style="font-size:16px">Level 19 trip concierge</div><div class="level19-mini">Your next trip at a glance, with support and dispatch readiness.</div></div><div class="level19-chip">${escapeHtml(formatStatusLabel(nextTrip.status || 'pending'))}</div></div>
+        <div style="font-size:20px;font-weight:900;margin-top:10px">${escapeHtml(nextTrip.pickup || '')} → ${escapeHtml(nextTrip.destination || '')}</div>
+        <div class="level19-kpi-grid">
+          <div class="item"><div class="tiny">When</div><div>${escapeHtml(nextTrip.tripDate || '--')} ${escapeHtml(nextTrip.tripTime || '')}</div></div>
+          <div class="item"><div class="tiny">Ride</div><div>${escapeHtml(formatVehicleCategoryLabel(nextTrip.vehicleCategory || 'standard'))} • ${escapeHtml(formatVehicleSubtypeLabel(nextTrip.vehicleSubtype || 'standard_compact'))}</div></div>
+          <div class="item"><div class="tiny">Support</div><div>${escapeHtml(support)}</div></div>
+          <div class="item"><div class="tiny">Driver</div><div>${escapeHtml(nextTrip.assignedDriverName || 'Waiting for dispatch')}</div></div>
+        </div>`;
+    }
+
+    function renderLevel19OpsBoard() {
+      const wrap = $("level19OpsBoardContent");
+      if (!wrap || currentProfile?.role !== "admin") return;
+      const active = allBookings.filter(b => !["completed","cancelled"].includes(b.status));
+      const urgent = active.filter(b => b.priority === 'urgent').length;
+      const waitingAcceptance = active.filter(b => b.acceptanceStatus === 'pending_driver').length;
+      const onlineDrivers = allDrivers.filter(d => (d.availability || 'online') === 'online');
+      const topMatches = active.filter(b => b.status === 'pending').slice(0,3).map(booking => {
+        const ranked = getMatchingDriversForBooking(booking).map(d => ({driver:d, ...scoreDriverForBooking(booking,d)})).sort((a,b)=>b.score-a.score);
+        return {booking, best: ranked[0]};
+      });
+      wrap.innerHTML = `
+        <div class="level19-kpi-grid">
+          <div class="item"><div class="tiny">Active jobs</div><div>${active.length}</div></div>
+          <div class="item"><div class="tiny">Urgent jobs</div><div>${urgent}</div></div>
+          <div class="item"><div class="tiny">Awaiting driver response</div><div>${waitingAcceptance}</div></div>
+          <div class="item"><div class="tiny">Online drivers</div><div>${onlineDrivers.length}</div></div>
+        </div>
+        <div class="level19-match-list">${topMatches.length ? topMatches.map(({booking,best}) => `<div class="level19-match-item"><div class="level19-flex"><div><strong>${escapeHtml(booking.passengerName || 'Passenger')}</strong><div class="level19-mini">${escapeHtml(booking.pickup || '')} → ${escapeHtml(booking.destination || '')}</div></div><div class="smart-score">${best ? best.score : '--'}</div></div><div class="level19-mini" style="margin-top:6px">${best ? escapeHtml(best.driver.name || best.driver.email || 'Driver') : 'No match yet'}</div><div>${best ? best.reasons.slice(0,3).map(r => `<span class="level19-chip">${escapeHtml(r)}</span>`).join('') : `<span class="level19-chip">Manual review needed</span>`}</div></div>`).join('') : `<div class="empty">No pending jobs right now.</div>`}</div>`;
+    }
+
+    function renderLevel19DriverWorkflow() {
+      const wrap = $("level19DriverWorkflow");
+      if (!wrap || currentProfile?.role !== "driver") return;
+      const active = getActiveDriverBooking();
+      if (!active) {
+        wrap.innerHTML = `<div class="section-title" style="font-size:16px">Level 19 driver workflow</div><div class="level19-mini">No active trip yet. Accepted trips will show quick stage actions here.</div>`;
+        return;
+      }
+      wrap.innerHTML = `
+        <div class="level19-flex"><div><div class="section-title" style="font-size:16px">Level 19 driver workflow</div><div class="level19-mini">Move the trip through the key stages with one tap.</div></div><div class="level19-chip">${escapeHtml(formatPassengerStageLabel(active))}</div></div>
+        <div style="font-size:18px;font-weight:900;margin-top:10px">${escapeHtml(active.pickup || '')} → ${escapeHtml(active.destination || '')}</div>
+        <div class="level19-kpi-grid">
+          <div class="item"><div class="tiny">Passenger</div><div>${escapeHtml(active.passengerName || 'Passenger')}</div></div>
+          <div class="item"><div class="tiny">Ride</div><div>${escapeHtml(formatVehicleCategoryLabel(active.vehicleCategory || 'standard'))}</div></div>
+          <div class="item"><div class="tiny">ETA</div><div>${escapeHtml(getEtaLabel(active))}</div></div>
+          <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(active.paymentStatus || 'unpaid')}</div></div>
+        </div>
+        <div class="level19-action-grid">
+          <button class="level19-action-btn" onclick="window.updateDriverStage('${active.id}','started')">Start job</button>
+          <button class="level19-action-btn" onclick="window.updateDriverStage('${active.id}','routing')">En route</button>
+          <button class="level19-action-btn" onclick="window.updateDriverStage('${active.id}','in_progress')">Picked up</button>
+          <button class="level19-action-btn" onclick="window.completeBooking('${active.id}')">Complete</button>
+        </div>`;
+    }
+
     async function renderEverything() {
       renderStats();
       renderPassengerTrips();
@@ -2830,6 +2933,10 @@ function renderAdminCharts() {
       renderLevel17SmartDispatch();
       renderLevel18PassengerSnapshot();
       renderLevel18AdminAutomation();
+      renderLevel19HeaderBadges();
+      renderLevel19PassengerConcierge();
+      renderLevel19OpsBoard();
+      renderLevel19DriverWorkflow();
       syncDriverControls();
       await runLevel18AutoDispatch(false);
       if (currentProfile?.role === "passenger") {
