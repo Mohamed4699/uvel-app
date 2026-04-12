@@ -226,20 +226,18 @@
     .compact-mode .section-title{font-size:16px}
     .focus-hide{display:none !important}
     .lvl13-tag{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px}
-    .passenger-trip-card{padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03)}
-    .passenger-trip-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-    .passenger-trip-route{font-size:18px;font-weight:800;line-height:1.25;margin-top:4px}
-    .passenger-trip-summary{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-    .passenger-trip-pill{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:11px}
-    .passenger-trip-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-    .passenger-trip-grid .item{padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#061826;min-width:auto}
-    .passenger-trip-grid .item .tiny{font-size:10px;margin-bottom:2px}
-    .passenger-trip-grid .item div:last-child{font-size:12px;font-weight:700;line-height:1.2}
-    .passenger-trip-meta{margin-top:8px;color:var(--muted);font-size:12px}
-    .passenger-trip-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .trip-details-toggle{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:8px 12px;cursor:pointer;font-weight:700;list-style:none;font-size:13px}
+    .passenger-trip-card{padding:18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03)}
+    .passenger-trip-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+    .passenger-trip-route{font-size:24px;font-weight:900;line-height:1.2;margin-top:6px}
+    .passenger-trip-summary{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .passenger-trip-pill{display:inline-flex;align-items:center;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px}
+    .passenger-trip-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+    .passenger-trip-grid .item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .passenger-trip-meta{margin-top:12px;color:var(--muted);font-size:14px}
+    .passenger-trip-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}
+    .trip-details-toggle{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;font-weight:700;list-style:none}
     .trip-details-toggle::-webkit-details-marker{display:none}
-    .trip-details-panel{margin-top:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#061826}
+    .trip-details-panel{margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:14px;background:#061826}
     .trip-details-panel .detail-line{color:var(--muted);font-size:14px;line-height:1.6}
     .compact-passenger-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
     .collapsible-passenger{margin-top:18px}
@@ -292,8 +290,8 @@
     .booking-summary-box,.admin-recommend-box{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#061826}
     .booking-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
     .booking-summary-grid .item,.timeline-step{padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03)}
-    .timeline{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-    .timeline-step{font-size:11px;color:var(--muted);text-align:center;padding:4px 8px;border:1px solid var(--line);border-radius:999px;background:transparent;min-width:auto}
+    .timeline{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:14px}
+    .timeline-step{font-size:12px;color:var(--muted);text-align:center}
     .timeline-step.active{border-color:rgba(73,196,213,.65);background:rgba(73,196,213,.10);color:var(--text);font-weight:800}
     .timeline-step.done{border-color:rgba(87,208,139,.65);background:rgba(87,208,139,.10);color:var(--text);font-weight:800}
     .timeline-step.cancelled{border-color:rgba(239,109,109,.65);background:rgba(239,109,109,.12);color:#ffb1b1;font-weight:800}
@@ -578,9 +576,164 @@
       gap:14px;
     }
 
-  </style>
+  
+    .compact55 .container{max-width:1320px;padding:14px}
+    .compact55 .header{padding:14px 18px;margin-bottom:14px}
+    .compact55 .section{padding:14px}
+    .compact55 .card{border-radius:16px}
+    .compact55 .section-title{font-size:15px;margin-bottom:2px}
+    .compact55 .section-sub,.compact55 .tiny,.compact55 .note,.compact55 .footer-note,.compact55 label,.compact55 .ride-choice-help,.compact55 .compact-summary-sub{font-size:11px}
+    .compact55 .subtitle{font-size:12px}
+    .compact55 .btn, .compact55 button{padding:9px 12px;border-radius:12px;font-size:13px}
+    .compact55 .btn.small{padding:6px 10px;font-size:12px}
+    .compact55 .pill,.compact55 .smart-header-pill,.compact55 .history-tab-btn,.compact55 .passenger-trip-pill,.compact55 .driver-pill,.compact55 .status-chip,.compact55 .recommend-chip,.compact55 .level19-chip,.compact55 .level20-chip,.compact55 .level201-pill,.compact55 .level202-mini-pill,.compact55 .level203-chip,.compact55 .level204-chip{
+      padding:5px 9px;border-radius:999px;font-size:11px
+    }
+    .compact55 input, .compact55 select, .compact55 textarea{padding:10px 12px;border-radius:12px;font-size:13px}
+    .compact55 textarea{min-height:78px}
+    .compact55 .row,.compact55 .grid-2,.compact55 .grid-3,.compact55 .grid-4,.compact55 .eta-box,.compact55 .meta,.compact55 .stats,.compact55 .toolbar,.compact55 .compact-passenger-grid,.compact55 .driver-focus-grid,.compact55 .driver-current-grid,.compact55 .driver-status-strip,.compact55 .booking-summary-grid,.compact55 .compact-summary-grid{gap:10px}
+    .compact55 .top-gap{margin-top:12px}
+    .compact55 .line{margin:10px 0}
+    .compact55 .map{height:270px;border-radius:14px}
+    .compact55 .stat{padding:12px}
+    .compact55 .stat .k{font-size:20px}
+    .compact55 .stat .t{font-size:11px}
+    .compact55 .book-card,.compact55 .list-card,.compact55 .passenger-mini-card,.compact55 .driver-mini-card,.compact55 .driver-current-card,.compact55 .driver-upcoming-card,.compact55 .level17-panel,.compact55 .level19-passenger-concierge,.compact55 .level20-passenger-hero,.compact55 .level202-callout,.compact55 .level203-callout,.compact55 .level204-callout,.compact55 .booking-summary-box,.compact55 .level201-card,.compact55 .level202-card,.compact55 .level203-card,.compact55 .level204-card{
+      padding:12px;border-radius:14px
+    }
+    .compact55 .hero{padding:24px;min-height:420px}
+    .compact55 .hero h1{font-size:32px}
+    .compact55 .hero p{font-size:14px}
+    .compact55 .logo{width:44px;height:44px;border-radius:12px;font-size:24px}
+    .compact55 .booking-mode-banner{padding:10px 12px;border-radius:14px}
+    .compact55 .mode-badge{padding:6px 10px;font-size:11px}
+    .compact55 .vehicle-helper{margin-top:8px;padding:9px 11px;border-radius:12px;font-size:11px;line-height:1.4}
+    .compact55 .passenger-trip-card{
+      padding:12px 14px;border-radius:14px
+    }
+    .compact55 .passenger-trip-top{gap:10px}
+    .compact55 .passenger-trip-route{
+      font-size:18px;line-height:1.15;margin-top:2px
+    }
+    .compact55 .passenger-trip-summary{gap:6px;margin-top:8px}
+    .compact55 .passenger-trip-grid{
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:8px;
+      margin-top:10px
+    }
+    .compact55 .passenger-trip-grid .item{
+      padding:9px 10px;border-radius:12px
+    }
+    .compact55 .passenger-trip-grid .item div:last-child{
+      font-size:13px;font-weight:700;line-height:1.2
+    }
+    .compact55 .passenger-trip-actions{margin-top:10px;gap:8px}
+    .compact55 .trip-details-toggle{padding:10px 12px;border-radius:12px;font-size:13px}
+    .compact55 .trip-details-panel{padding:12px;border-radius:12px}
+    .compact55 .trip-details-panel .detail-line{font-size:12px;line-height:1.45}
+    .compact55 .timeline{
+      gap:6px;margin-top:10px;
+      grid-template-columns:repeat(6,max-content);
+      justify-content:start
+    }
+    .compact55 .timeline-step{
+      padding:4px 10px;border-radius:999px;font-size:11px;min-width:auto
+    }
+    .compact55 .badge{padding:5px 9px;font-size:11px}
+    .compact55 .more-travel-info summary{padding:0;font-size:14px}
+    .compact55 .more-travel-info-body{margin-top:12px;gap:10px}
+    @media (max-width:1100px){
+      .compact55 .passenger-trip-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .compact55 .timeline{grid-template-columns:repeat(3,max-content)}
+    }
+    @media (max-width:720px){
+      .compact55 .container{padding:10px}
+      .compact55 .header{padding:12px 14px}
+      .compact55 .passenger-trip-route{font-size:16px}
+      .compact55 .passenger-trip-grid{grid-template-columns:1fr 1fr}
+      .compact55 .timeline{grid-template-columns:repeat(2,max-content)}
+      .compact55 .map{height:220px}
+    }
+
+
+  
+
+    /* Level 21.1 compact two-column passenger trips */
+    #passengerTrips{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+      align-items:start;
+    }
+    .compact55 #passengerTrips{gap:12px}
+    #passengerTrips > *{min-width:0}
+    #passengerTrips .passenger-trip-card,
+    #passengerTrips .book-card,
+    #passengerTrips .trip-row{
+      height:100%;
+      padding:12px 14px;
+      border-radius:16px;
+    }
+    .compact55 #passengerTrips .passenger-trip-card,
+    .compact55 #passengerTrips .book-card,
+    .compact55 #passengerTrips .trip-row{
+      padding:10px 12px;
+      border-radius:14px;
+    }
+    #passengerTrips .passenger-trip-route{font-size:17px;line-height:1.18;margin-top:2px}
+    .compact55 #passengerTrips .passenger-trip-route{font-size:15px}
+    #passengerTrips .passenger-trip-summary{gap:6px;margin-top:8px}
+    #passengerTrips .passenger-trip-pill,
+    #passengerTrips .trip-pill,
+    #passengerTrips .badge{
+      padding:4px 8px;
+      font-size:11px;
+    }
+    #passengerTrips .passenger-trip-grid{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+      margin-top:10px;
+    }
+    #passengerTrips .passenger-trip-grid .item{
+      padding:8px 10px;
+      border-radius:12px;
+    }
+    #passengerTrips .passenger-trip-grid .item div:last-child{
+      font-size:12px;
+      line-height:1.2;
+      font-weight:700;
+    }
+    #passengerTrips .timeline{
+      grid-template-columns:repeat(3,max-content);
+      gap:6px;
+      margin-top:10px;
+      justify-content:start;
+    }
+    #passengerTrips .timeline-step{
+      padding:4px 8px;
+      font-size:10px;
+      border-radius:999px;
+    }
+    #passengerTrips .trip-details-toggle,
+    #passengerTrips .btn.small,
+    #passengerTrips button.btn.small{
+      padding:7px 10px;
+      font-size:12px;
+      border-radius:12px;
+    }
+    #passengerTrips .trip-details-panel{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+    }
+    #passengerTrips .trip-details-panel .detail-line{font-size:12px;line-height:1.45}
+    @media (max-width: 980px){
+      #passengerTrips{grid-template-columns:1fr}
+    }
+
+</style>
 </head>
-<body>
+<body class="compact55">
   <div class="container">
     <div id="authScreen" class="login-wrap">
       <div class="card hero">
@@ -3803,33 +3956,40 @@ function renderDriverTrips() {
         <div class="passenger-trip-card level202-passenger">
           <div class="passenger-trip-top">
             <div>
-              <div style="font-size:14px;font-weight:900">${escapeHtml(b.bookingCode || "Trip")}</div>
+              <div style="font-size:18px;font-weight:900">${escapeHtml(b.bookingCode || "Trip")}</div>
               <div class="passenger-trip-route">${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div>
               <div class="passenger-trip-summary">
                 <span class="passenger-trip-pill">${escapeHtml(b.rideType === "ndis" ? "NDIS" : "Normal")}</span>
                 <span class="passenger-trip-pill">${serviceLabel}</span>
                 <span class="passenger-trip-pill">${vehicleLabel}</span>
-                <span class="passenger-trip-pill">${escapeHtml(formatPassengerStageLabel(b))}</span>
-                <span class="passenger-trip-pill">${escapeHtml(getEtaLabel(b))}</span>
-                <span class="passenger-trip-pill">${Number(b.distanceKm || 0).toFixed(1)} km</span>
-                ${needsAttention ? `<span class="passenger-trip-pill">Needs follow-up</span>` : ``}
+              </div>
+              <div class="level202-trip-health">
+                <span class="level202-mini-pill">${escapeHtml(formatPassengerStageLabel(b))}</span>
+                <span class="level202-mini-pill">${escapeHtml(getEtaLabel(b))}</span>
+                <span class="level202-mini-pill">${Number(b.distanceKm || 0).toFixed(1)} km</span>
+                ${needsAttention ? `<span class="level202-mini-pill">Needs follow-up</span>` : `<span class="level202-mini-pill">On track</span>`}
               </div>
             </div>
             <span class="badge ${statusTone}">${escapeHtml(statusLabel)}</span>
           </div>
           <div class="passenger-trip-grid">
-            <div class="item"><div class="tiny">Time</div><div>${when || "--"}</div></div>
+            <div class="item"><div class="tiny">Date / Time</div><div>${when}</div></div>
             <div class="item"><div class="tiny">Driver</div><div>${summaryDriver}</div></div>
             <div class="item"><div class="tiny">Fare</div><div>$${Number(b.fare || 0).toFixed(2)}</div></div>
-            <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")} • ${paymentLabel}</div></div>
+            <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}<br/><span class="badge ${b.paymentStatus === "paid" ? "completed" : "pending"}">${paymentLabel}</span></div></div>
           </div>
-          ${getTimelineHTML(b).replace('Driver Start','Start').replace('In Progress','Ongoing')}
+          ${getTimelineHTML(b)}
           <details class="top-gap">
-            <summary class="trip-details-toggle">View</summary>
+            <summary class="trip-details-toggle">View details</summary>
             <div class="trip-details-panel">
               <div class="detail-line">Support: ${supportLabel}${b.returnTrip === "yes" ? ` • Return ${escapeHtml(b.returnTime || "scheduled")}` : ""}${b.pickupWindow ? ` • Window ${escapeHtml(b.pickupWindow)}` : ""}</div>
-              <div class="detail-line">Ride: ${escapeHtml(formatVehicleCategoryLabel(b.vehicleCategory || "standard"))} • ${escapeHtml(formatVehicleSubtypeLabel(b.vehicleSubtype || "standard_compact"))}${b.vehiclePreference && b.vehiclePreference !== "none" ? ` • ${escapeHtml(b.vehiclePreference)}` : ""}</div>
+              <div class="detail-line">Ride choice: ${escapeHtml(formatVehicleCategoryLabel(b.vehicleCategory || "standard"))} • ${escapeHtml(formatVehicleSubtypeLabel(b.vehicleSubtype || "standard_compact"))}${b.vehiclePreference && b.vehiclePreference !== "none" ? ` • ${escapeHtml(b.vehiclePreference)}` : ""}</div>
+              <div class="detail-line">Referral: ${escapeHtml(b.referralSource || "self")}${b.referralEmail ? ` • ${escapeHtml(b.referralEmail)}` : ""}${b.recurringPattern && b.recurringPattern !== "once" ? ` • ${escapeHtml(b.recurringPattern)}` : ""}</div>
+              <div class="detail-line">Trip support:${b.wheelchairRequired === "yes" ? ` Wheelchair` : " None"}${b.companionRequired === "yes" ? ` • Companion` : ""}${b.extraStop ? ` • Extra stop ${escapeHtml(b.extraStop)}` : ""}${Number(b.waitMinutes || 0) > 0 ? ` • Wait ${escapeHtml(String(b.waitMinutes))} min` : ""}</div>
               ${b.notes ? `<div class="detail-line">Notes: ${escapeHtml(b.notes)}</div>` : ""}
+              ${b.driverLat ? `<div class="detail-line">Live tracking: on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}</div>` : `<div class="detail-line">Live tracking: off</div>`}
+              ${b.pickupOtp || b.dropoffOtp ? `<div class="detail-line">Trip security: pickup ${escapeHtml(b.pickupOtp || "----")} • drop-off ${escapeHtml(b.dropoffOtp || "----")}</div>` : ""}
+              ${b.cancellationReason ? `<div class="detail-line">Cancellation: ${escapeHtml(b.cancellationReason)}</div>` : ""}
             </div>
           </details>
         </div>
