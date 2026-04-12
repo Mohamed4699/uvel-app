@@ -808,58 +808,58 @@
                   </select>
                 </div>
               </div>
-              <div class="row top-gap ride-choice-grid">
-                <div>
-                  <label>Ride category</label>
-                  <select id="vehicleCategory">
-                    <option value="standard">Standard</option>
-                    <option value="comfort">Comfort</option>
-                    <option value="premium">Premium</option>
-                    <option value="xl">XL / Group</option>
-                    <option value="van">Van</option>
-                    <option value="assisted">Assisted</option>
-                    <option value="wheelchair">Wheelchair Accessible</option>
-                  </select>
-                  <div class="ride-choice-help">Choose the main ride type for this trip.</div>
-                </div>
-                <div>
-                  <label>Ride option</label>
-                  <select id="vehicleSubtype"></select>
-                  <div class="ride-choice-help">Choose the exact option inside the selected category.</div>
-                </div>
-              </div>
-
-              <div class="ride-dropdown-only-note">
-                Simple booking: choose one ride category, then one ride option. The card section has been removed to keep booking faster and clearer for passengers.
-              </div>
-
-              <div class="top-gap ride-choice-display">
-                <label>Choose your ride</label>
-                <div id="rideCategoryCards" class="ride-card-grid"></div>
-                <div id="rideSubtypeCards" class="ride-card-grid top-gap"></div>
-              </div>
-              <div class="row top-gap">
-                <div>
-                  <label>Ride preference</label>
-                  <select id="vehiclePreference">
-                    <option value="none">No special preference</option>
-                    <option value="eco">Eco ride (Hybrid / Electric)</option>
-                    <option value="quiet">Quiet ride</option>
-                    <option value="space">Extra space</option>
-                    <option value="newer">Newer vehicle</option>
-                  </select>
-                </div>
-                <div>
-                  <label>Vehicle preference note</label>
-                  <input id="vehiclePreferenceNote" placeholder="Optional vehicle note" />
-                </div>
-              </div>
-              <input type="hidden" id="vehicleType" value="standard" />
-              <div class="vehicle-helper" id="vehicleSelectionSummary">Standard • Standard Compact • mapped to Standard Car for dispatch.</div>
               <div class="top-gap">
                 <label>Return time (optional)</label>
                 <input type="time" id="returnTime" />
               </div>
+              </div>
+
+              <div class="booking-scope" id="sharedRideFields">
+                <div class="row top-gap ride-choice-grid">
+                  <div>
+                    <label>Ride category</label>
+                    <select id="vehicleCategory">
+                      <option value="standard">Standard</option>
+                      <option value="comfort">Comfort</option>
+                      <option value="premium">Premium</option>
+                      <option value="xl">XL / Group</option>
+                      <option value="van">Van</option>
+                      <option value="assisted">Assisted</option>
+                      <option value="wheelchair">Wheelchair Accessible</option>
+                    </select>
+                    <div class="ride-choice-help">Choose the main ride type for this trip.</div>
+                  </div>
+                  <div>
+                    <label>Ride option</label>
+                    <select id="vehicleSubtype"></select>
+                    <div class="ride-choice-help">Choose the exact option inside the selected category.</div>
+                  </div>
+                </div>
+
+                <div class="top-gap ride-choice-display">
+                  <label>Choose your ride</label>
+                  <div id="rideCategoryCards" class="ride-card-grid"></div>
+                  <div id="rideSubtypeCards" class="ride-card-grid top-gap"></div>
+                </div>
+
+                <div class="row top-gap">
+                  <div>
+                    <label>Ride preference</label>
+                    <select id="vehiclePreference">
+                      <option value="none">No special preference</option>
+                      <option value="eco">Eco ride (Hybrid / Electric)</option>
+                      <option value="quiet">Quiet ride</option>
+                      <option value="space">Extra space</option>
+                      <option value="newer">Newer vehicle</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Vehicle preference note</label>
+                    <input id="vehiclePreferenceNote" placeholder="Optional vehicle note" />
+                  </div>
+                </div>
+                <input type="hidden" id="vehicleType" value="standard" />
+                <div class="vehicle-helper" id="vehicleSelectionSummary">Standard • Standard Compact • mapped to Standard Car for dispatch.</div>
               </div>
 
               <div class="booking-scope" id="ndisBookingFields">
