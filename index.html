@@ -290,10 +290,10 @@
     .booking-summary-box,.admin-recommend-box{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#061826}
     .booking-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
     .booking-summary-grid .item,.timeline-step{padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03)}
-    .timeline{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;align-items:center}
-    .timeline-step{padding:6px 10px;border-radius:999px;background:transparent;font-size:11px;line-height:1.2;color:var(--muted);text-align:center;min-width:auto;white-space:nowrap}
-    .timeline-step.active{border-color:rgba(73,196,213,.7);background:rgba(73,196,213,.14);color:var(--text);font-weight:800}
-    .timeline-step.done{border-color:rgba(87,208,139,.6);background:rgba(87,208,139,.10);color:var(--text);font-weight:700}
+    .timeline{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:14px}
+    .timeline-step{font-size:12px;color:var(--muted);text-align:center}
+    .timeline-step.active{border-color:rgba(73,196,213,.65);background:rgba(73,196,213,.10);color:var(--text);font-weight:800}
+    .timeline-step.done{border-color:rgba(87,208,139,.65);background:rgba(87,208,139,.10);color:var(--text);font-weight:800}
     .timeline-step.cancelled{border-color:rgba(239,109,109,.65);background:rgba(239,109,109,.12);color:#ffb1b1;font-weight:800}
     .booking-confirm-note{margin-top:10px;font-size:12px;color:var(--muted)}
     .recommend-chip{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px;margin:6px 6px 0 0}
@@ -576,9 +576,89 @@
       gap:14px;
     }
 
+  
+    .compact55 .container{max-width:1320px;padding:14px}
+    .compact55 .header{padding:14px 18px;margin-bottom:14px}
+    .compact55 .section{padding:14px}
+    .compact55 .card{border-radius:16px}
+    .compact55 .section-title{font-size:15px;margin-bottom:2px}
+    .compact55 .section-sub,.compact55 .tiny,.compact55 .note,.compact55 .footer-note,.compact55 label,.compact55 .ride-choice-help,.compact55 .compact-summary-sub{font-size:11px}
+    .compact55 .subtitle{font-size:12px}
+    .compact55 .btn, .compact55 button{padding:9px 12px;border-radius:12px;font-size:13px}
+    .compact55 .btn.small{padding:6px 10px;font-size:12px}
+    .compact55 .pill,.compact55 .smart-header-pill,.compact55 .history-tab-btn,.compact55 .passenger-trip-pill,.compact55 .driver-pill,.compact55 .status-chip,.compact55 .recommend-chip,.compact55 .level19-chip,.compact55 .level20-chip,.compact55 .level201-pill,.compact55 .level202-mini-pill,.compact55 .level203-chip,.compact55 .level204-chip{
+      padding:5px 9px;border-radius:999px;font-size:11px
+    }
+    .compact55 input, .compact55 select, .compact55 textarea{padding:10px 12px;border-radius:12px;font-size:13px}
+    .compact55 textarea{min-height:78px}
+    .compact55 .row,.compact55 .grid-2,.compact55 .grid-3,.compact55 .grid-4,.compact55 .eta-box,.compact55 .meta,.compact55 .stats,.compact55 .toolbar,.compact55 .compact-passenger-grid,.compact55 .driver-focus-grid,.compact55 .driver-current-grid,.compact55 .driver-status-strip,.compact55 .booking-summary-grid,.compact55 .compact-summary-grid{gap:10px}
+    .compact55 .top-gap{margin-top:12px}
+    .compact55 .line{margin:10px 0}
+    .compact55 .map{height:270px;border-radius:14px}
+    .compact55 .stat{padding:12px}
+    .compact55 .stat .k{font-size:20px}
+    .compact55 .stat .t{font-size:11px}
+    .compact55 .book-card,.compact55 .list-card,.compact55 .passenger-mini-card,.compact55 .driver-mini-card,.compact55 .driver-current-card,.compact55 .driver-upcoming-card,.compact55 .level17-panel,.compact55 .level19-passenger-concierge,.compact55 .level20-passenger-hero,.compact55 .level202-callout,.compact55 .level203-callout,.compact55 .level204-callout,.compact55 .booking-summary-box,.compact55 .level201-card,.compact55 .level202-card,.compact55 .level203-card,.compact55 .level204-card{
+      padding:12px;border-radius:14px
+    }
+    .compact55 .hero{padding:24px;min-height:420px}
+    .compact55 .hero h1{font-size:32px}
+    .compact55 .hero p{font-size:14px}
+    .compact55 .logo{width:44px;height:44px;border-radius:12px;font-size:24px}
+    .compact55 .booking-mode-banner{padding:10px 12px;border-radius:14px}
+    .compact55 .mode-badge{padding:6px 10px;font-size:11px}
+    .compact55 .vehicle-helper{margin-top:8px;padding:9px 11px;border-radius:12px;font-size:11px;line-height:1.4}
+    .compact55 .passenger-trip-card{
+      padding:12px 14px;border-radius:14px
+    }
+    .compact55 .passenger-trip-top{gap:10px}
+    .compact55 .passenger-trip-route{
+      font-size:18px;line-height:1.15;margin-top:2px
+    }
+    .compact55 .passenger-trip-summary{gap:6px;margin-top:8px}
+    .compact55 .passenger-trip-grid{
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:8px;
+      margin-top:10px
+    }
+    .compact55 .passenger-trip-grid .item{
+      padding:9px 10px;border-radius:12px
+    }
+    .compact55 .passenger-trip-grid .item div:last-child{
+      font-size:13px;font-weight:700;line-height:1.2
+    }
+    .compact55 .passenger-trip-actions{margin-top:10px;gap:8px}
+    .compact55 .trip-details-toggle{padding:10px 12px;border-radius:12px;font-size:13px}
+    .compact55 .trip-details-panel{padding:12px;border-radius:12px}
+    .compact55 .trip-details-panel .detail-line{font-size:12px;line-height:1.45}
+    .compact55 .timeline{
+      gap:6px;margin-top:10px;
+      grid-template-columns:repeat(6,max-content);
+      justify-content:start
+    }
+    .compact55 .timeline-step{
+      padding:4px 10px;border-radius:999px;font-size:11px;min-width:auto
+    }
+    .compact55 .badge{padding:5px 9px;font-size:11px}
+    .compact55 .more-travel-info summary{padding:0;font-size:14px}
+    .compact55 .more-travel-info-body{margin-top:12px;gap:10px}
+    @media (max-width:1100px){
+      .compact55 .passenger-trip-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .compact55 .timeline{grid-template-columns:repeat(3,max-content)}
+    }
+    @media (max-width:720px){
+      .compact55 .container{padding:10px}
+      .compact55 .header{padding:12px 14px}
+      .compact55 .passenger-trip-route{font-size:16px}
+      .compact55 .passenger-trip-grid{grid-template-columns:1fr 1fr}
+      .compact55 .timeline{grid-template-columns:repeat(2,max-content)}
+      .compact55 .map{height:220px}
+    }
+
+
   </style>
 </head>
-<body>
+<body class="compact55">
   <div class="container">
     <div id="authScreen" class="login-wrap">
       <div class="card hero">
@@ -2378,7 +2458,7 @@ if (!user) {
     }
 
     function getTimelineHTML(b) {
-      const stages = ['Requested','Assigned','Start','En route','Ongoing','Completed'];
+      const stages = ['Requested','Assigned','Driver Start','En Route','In Progress','Completed'];
       if (b?.status === 'cancelled') {
         return `<div class="timeline">${stages.map((s,i) => `<div class="timeline-step ${i === 0 ? 'done' : ''}">${s}</div>`).join('')}<div class="timeline-step cancelled">Cancelled</div></div>`;
       }
