@@ -928,9 +928,88 @@
       font-weight:700;
     }
 
+
+    /* Level 22 production UI */
+    .production22{
+      --radius:18px;
+      background:
+        radial-gradient(circle at top left, rgba(73,196,213,.10), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(47,164,169,.08), transparent 20%),
+        linear-gradient(180deg,#04101a 0%,#061623 100%);
+    }
+    .production22 .container{max-width:1360px;padding:16px;}
+    .production22 .card{
+      background:linear-gradient(180deg, rgba(10,35,55,.98), rgba(7,22,35,.98));
+      border:1px solid rgba(105,182,218,.18);
+      box-shadow:0 14px 38px rgba(0,0,0,.22);
+    }
+    .production22 .header{
+      padding:14px 18px;
+      margin-bottom:16px;
+      border-radius:18px;
+      background:linear-gradient(180deg, rgba(10,35,55,.94), rgba(8,26,40,.97));
+    }
+    .production22 .section{padding:16px;}
+    .production22 .section-title{font-size:16px;margin-bottom:2px;}
+    .production22 .section-sub,.production22 .tiny,.production22 .note,.production22 .footer-note{font-size:11px;line-height:1.4;}
+    .production22 .stats{gap:10px;margin-bottom:14px;}
+    .production22 .stat{padding:12px 14px;border-radius:16px;}
+    .production22 .stat .k{font-size:22px;line-height:1.1;}
+    .production22 .stat .t{font-size:11px;}
+    .production22 .btn, .production22 button{
+      padding:9px 12px;
+      border-radius:12px;
+      font-size:12px;
+      font-weight:800;
+    }
+    .production22 .btn.small{padding:6px 9px;font-size:11px;border-radius:10px;}
+    .production22 .pill,.production22 .smart-header-pill,.production22 .badge,.production22 .status-chip,.production22 .mode-badge,.production22 .history-tab-btn{
+      padding:5px 9px;
+      font-size:11px;
+      border-radius:999px;
+    }
+    .production22 .tabs{gap:8px;margin-bottom:12px;}
+    .production22 input,.production22 select,.production22 textarea{
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:13px;
+      border-color:rgba(97,166,196,.20);
+      background:#071725;
+    }
+    .production22 textarea{min-height:84px;}
+    .production22 .row,.production22 .grid-2,.production22 .grid-3,.production22 .grid-4,.production22 .eta-box,.production22 .meta,.production22 .toolbar{gap:10px;}
+    .production22 .top-gap{margin-top:12px;}
+    .production22 .line{margin:10px 0;height:1px;background:rgba(105,182,218,.14);}
+    .production22 .map{height:250px;border-radius:14px;}
+    .production22 .book-card,.production22 .list-card,.production22 .booking-summary-box,.production22 .passenger-mini-card,.production22 .driver-mini-card,.production22 .driver-current-card,.production22 .driver-upcoming-card,.production22 .otp-box,.production22 .proof-item,.production22 .level17-panel,.production22 .level19-driver-workflow,.production22 .level19-passenger-concierge,.production22 .level20-panel,.production22 .level201-card,.production22 .level202-card,.production22 .level203-card,.production22 .level204-card{
+      padding:12px;
+      border-radius:14px;
+    }
+    .production22 .hero{padding:24px;min-height:400px;}
+    .production22 .hero h1{font-size:34px;margin-bottom:10px;}
+    .production22 .hero p{font-size:14px;}
+    .production22 .logo{width:46px;height:46px;border-radius:12px;font-size:25px;}
+    .production22 .subtitle{font-size:12px;}
+    .production22 #lvl13Controls,.production22 #lvl13HeroStrip{display:none !important;}
+    .production22 .toggle-chip{padding:8px 10px;font-size:12px;}
+    .production22 .booking-mode-banner{padding:10px 12px;border-radius:14px;margin-bottom:10px;}
+    .production22 .vehicle-helper{padding:9px 10px;border-radius:12px;font-size:11px;}
+    .production22 .trip-details-toggle{padding:9px 11px;font-size:12px;border-radius:12px;}
+    .production22 .trip-details-panel{padding:10px 12px;border-radius:12px;}
+    .production22 .timeline{gap:6px;}
+    .production22 .timeline-step{padding:4px 8px;font-size:10px;border-radius:999px;}
+    .production22 .driver-today-strip{margin-top:8px;}
+    .production22 .more-travel-info summary{font-size:14px;}
+    .production22 .empty{padding:14px;border-radius:14px;}
+    @media (max-width: 980px){
+      .production22 .container{padding:12px;}
+      .production22 .header{padding:12px 14px;}
+      .production22 .map{height:220px;}
+    }
+
 </style>
 </head>
-<body class="compact55">
+<body class="compact55 production22">
   <div class="container">
     <div id="authScreen" class="login-wrap">
       <div class="card hero">
@@ -938,7 +1017,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 20 mission control build</div>
+            <div class="subtitle">Firebase production build</div>
           </div>
         </div>
         <h1>Transport platform for admin, driver, and passenger.</h1>
@@ -1019,7 +1098,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 20.5 • smart header • dropdown ride selection • mission control • compact mode • executive focus • spotlight maps</div>
+            <div class="subtitle">Level 22 • production UI • smart header • dropdown ride selection • mission control</div>
           </div>
         </div>
         <div class="userbox">
