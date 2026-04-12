@@ -732,31 +732,104 @@
     }
 
 
-    /* Level 21.3 simplified driver sections */
-    .driver-simple-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .driver-simple-card{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
-    .driver-simple-card strong{display:block;margin-bottom:4px}
-    .driver-simple-meta{font-size:12px;color:var(--muted);line-height:1.45}
-    .driver-mini-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-    .driver-mini-actions .btn.small{padding:6px 10px;font-size:12px}
-    .driver-compact-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
-    .driver-compact-actions .btn{padding:8px 10px;font-size:12px;border-radius:12px}
-    .driver-checks-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-    .driver-check-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
-    .driver-check-item strong{display:block;margin-bottom:6px}
-    .driver-check-item .tiny{margin-bottom:8px}
-    .driver-check-item .mini-input{margin-bottom:8px;width:100%}
-    .driver-today-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px}
-    .driver-today-grid .item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
-    .driver-today-grid .k{font-size:22px;font-weight:900;margin-top:4px}
-    .compact55 .driver-simple-card,.compact55 .driver-check-item,.compact55 .driver-today-grid .item{padding:10px;border-radius:12px}
-    .compact55 .driver-compact-actions{gap:6px}
-    .compact55 .driver-simple-meta{font-size:11px}
-    .compact55 .driver-today-grid .k{font-size:18px}
-    @media (max-width: 980px){
-      .driver-simple-grid,.driver-checks-grid,.driver-today-grid,.driver-compact-actions{grid-template-columns:1fr}
-    }
 
+    /* Level 21.4 compact driver dashboard */
+    #driverView .line, #driverView hr {display:none !important;}
+    #driverView .driver-focus-grid{gap:12px;}
+    #driverView .driver-mini-card,
+    #driverView .driver-current-card,
+    #driverView .level19-driver-workflow,
+    #driverView .level20-panel,
+    #driverView .level202-callout,
+    #driverView .level203-callout,
+    #driverView .level204-callout{
+      padding:12px;
+      border-radius:14px;
+    }
+    #driverView .section-title{font-size:14px;margin-bottom:2px;}
+    #driverView .section-sub, #driverView .tiny{font-size:11px;}
+    #driverView .driver-upcoming-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+    #driverView .driver-upcoming-card{padding:10px 12px;border-radius:14px;}
+    #driverView .driver-upcoming-title{font-size:14px;line-height:1.25;}
+    #driverView .driver-upcoming-card .tiny{font-size:11px;line-height:1.35;}
+    #driverView .driver-upcoming-actions{gap:6px;margin-top:8px;}
+    #driverView .driver-upcoming-actions .btn,
+    #driverView .driver-upcoming-actions button,
+    #driverView .mini-actions .btn,
+    #driverView .mini-actions button,
+    #driverView .driver-current-actions .btn,
+    #driverView .driver-current-actions button,
+    #driverView .level201-actions .btn,
+    #driverView .level203-actions .btn,
+    #driverView .level204-actions .btn{
+      padding:7px 10px;
+      border-radius:11px;
+      font-size:12px;
+    }
+    #driverView .driver-current-grid,
+    #driverView .driver-status-strip,
+    #driverView .level202-kpis,
+    #driverView .level203-kpis,
+    #driverView .level204-kpis,
+    #driverView .level19-kpi-grid{gap:8px;}
+    #driverView .driver-current-grid .item,
+    #driverView .driver-status-strip .item,
+    #driverView .level202-kpis .item,
+    #driverView .level203-kpis .item,
+    #driverView .level204-kpis .item,
+    #driverView .level19-kpi-grid .item,
+    #driverView .level201-item,
+    #driverView .level202-item,
+    #driverView .level203-item,
+    #driverView .level204-item,
+    #driverView .notify-item,
+    #driverView .ops-item,
+    #driverView .proof-item,
+    #driverView .otp-box{
+      padding:9px 10px;
+      border-radius:12px;
+    }
+    #driverView .driver-current-route,
+    #driverView .route{font-size:18px;line-height:1.2;margin-top:2px;}
+    #driverView .driver-pill,
+    #driverView .level19-chip,
+    #driverView .level20-chip,
+    #driverView .level201-pill,
+    #driverView .level202-mini-pill,
+    #driverView .level203-chip,
+    #driverView .level204-chip{
+      padding:4px 8px;
+      font-size:10px;
+    }
+    #driverView .notice-list{gap:8px;}
+    #driverView .mini-input,
+    #driverView input,
+    #driverView select,
+    #driverView textarea{
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:13px;
+    }
+    #driverView textarea{min-height:78px;}
+    #driverView .top-gap{margin-top:12px;}
+    #driverView .level19-flex{gap:10px;}
+    #driverView .driver-detail-collapsible,
+    #driverView .driver-detail-content,
+    #driverView .focus-advanced{display:none !important;}
+    #driverView #level202DriverBoard,
+    #driverView #level203DriverBoard,
+    #driverView #level204DriverBoard{margin-top:10px;}
+    #driverView #level202DriverBoard:empty,
+    #driverView #level203DriverBoard:empty,
+    #driverView #level204DriverBoard:empty,
+    #driverView #level20DriverMission:empty,
+    #driverView #level19DriverWorkflow:empty{display:none !important;}
+    @media (max-width: 980px){
+      #driverView .driver-upcoming-list{grid-template-columns:1fr;}
+      #driverView .driver-focus-grid,
+      #driverView .driver-current-grid,
+      #driverView .driver-status-strip{grid-template-columns:1fr;}
+    }
 
 </style>
 </head>
@@ -1524,7 +1597,7 @@
         <div class="driver-focus-grid">
           <div class="card section">
             <div class="section-title">Current trip</div>
-            <div class="section-sub">Simple list and current trip first.</div>
+            <div class="section-sub">The driver sees the main trip first, with clear actions and less clutter.</div>
             <div class="driver-status-strip">
               <div class="item"><div class="tiny">Today earnings</div><div id="driverTodayEarnings">$0.00</div></div>
               <div class="item"><div class="tiny">Total earnings</div><div id="driverTotalEarnings">$0.00</div></div>
@@ -1545,7 +1618,7 @@
           </div>
           <div class="card section">
             <div class="trip-head"><div><div class="section-title">Driver map</div>
-            <div class="section-sub">Live route and tracking controls.</div></div><div class="seg"><span id="driverTrackingState" class="pill tracking-off">Tracking: off</span><button class="btn small brand" id="startTrackingBtn">Start live tracking</button><button class="btn small" id="stopTrackingBtn">Stop tracking</button><button class="btn small" id="driverRecenterBtn">My location</button><button class="btn small" id="driverFitRouteBtn">Fit route</button></div></div>
+            <div class="section-sub">Live route for the current trip with tracking controls.</div></div><div class="seg"><span id="driverTrackingState" class="pill tracking-off">Tracking: off</span><button class="btn small brand" id="startTrackingBtn">Start live tracking</button><button class="btn small" id="stopTrackingBtn">Stop tracking</button><button class="btn small" id="driverRecenterBtn">My location</button><button class="btn small" id="driverFitRouteBtn">Fit route</button></div></div>
             <div id="driverMap" class="map"></div>
             <div class="eta-box"><div class="item"><div class="tiny">Live ETA</div><div id="driverLiveEta">--</div></div><div class="item"><div class="tiny">Remaining km</div><div id="driverRemainingKm">--</div></div><div class="item"><div class="tiny">Current speed</div><div id="driverSpeedLabel">--</div></div><div class="item"><div class="tiny">Route mode</div><div id="driverRouteMode">OSRM route</div></div></div>
           </div>
@@ -1596,7 +1669,7 @@
 
           <div class="driver-mini-card">
             <div class="section-title">Next jobs</div>
-            <div class="section-sub">Simple list of the next trips.</div>
+            <div class="section-sub">Upcoming assigned work and new decisions in one place.</div>
             <div id="driverAcceptanceBoard" class="driver-upcoming-list"></div>
           </div>
         </div>
@@ -1605,13 +1678,13 @@
 
         <div class="driver-focus-grid top-gap">
           <div class="driver-mini-card">
-            <div class="section-title">Trip checks</div>
-            <div class="section-sub">Verify OTP and finish the trip.</div>
+            <div class="section-title">Trip security</div>
+            <div class="section-sub">OTP is shown only for the current trip.</div>
             <div id="driverOtpPanel" class="notice-list"></div>
           </div>
           <div class="driver-mini-card">
-            <div class="section-title">Completion note</div>
-            <div class="section-sub">Save the final note or link.</div>
+            <div class="section-title">Proof of completion</div>
+            <div class="section-sub">Save a completion note or link for the current trip.</div>
             <div id="driverProofPanel" class="notice-list"></div>
           </div>
         </div>
@@ -3312,23 +3385,23 @@ function renderAdminCharts() {
       if (!wrap || currentProfile?.role !== "driver") return;
       const active = getActiveDriverBooking();
       if (!active) {
-        wrap.innerHTML = `<div class="section-title" style="font-size:16px">Current trip actions</div><div class="level19-mini">No active trip yet.</div>`;
+        wrap.innerHTML = `<div class="section-title" style="font-size:16px"> driver workflow</div><div class="level19-mini">No active trip yet. Accepted trips will show quick stage actions here.</div>`;
         return;
       }
       wrap.innerHTML = `
-        <div class="level19-flex"><div><div class="section-title" style="font-size:16px">Current trip actions</div><div class="level19-mini">Main trip and stage buttons.</div></div><div class="level19-chip">${escapeHtml(formatPassengerStageLabel(active))}</div></div>
-        <div style="font-size:18px;font-weight:900;margin-top:8px">${escapeHtml(active.pickup || '')} → ${escapeHtml(active.destination || '')}</div>
-        <div class="driver-simple-grid" style="margin-top:10px">
-          <div class="driver-simple-card"><strong>Passenger</strong><div class="driver-simple-meta">${escapeHtml(active.passengerName || 'Passenger')}</div></div>
-          <div class="driver-simple-card"><strong>Ride</strong><div class="driver-simple-meta">${escapeHtml(formatVehicleCategoryLabel(active.vehicleCategory || 'standard'))}</div></div>
-          <div class="driver-simple-card"><strong>ETA</strong><div class="driver-simple-meta">${escapeHtml(getEtaLabel(active))}</div></div>
-          <div class="driver-simple-card"><strong>Payment</strong><div class="driver-simple-meta">${escapeHtml(active.paymentStatus || 'unpaid')}</div></div>
+        <div class="level19-flex"><div><div class="section-title" style="font-size:16px"> driver workflow</div><div class="level19-mini">Move the trip through the key stages with one tap.</div></div><div class="level19-chip">${escapeHtml(formatPassengerStageLabel(active))}</div></div>
+        <div style="font-size:18px;font-weight:900;margin-top:10px">${escapeHtml(active.pickup || '')} → ${escapeHtml(active.destination || '')}</div>
+        <div class="level19-kpi-grid">
+          <div class="item"><div class="tiny">Passenger</div><div>${escapeHtml(active.passengerName || 'Passenger')}</div></div>
+          <div class="item"><div class="tiny">Ride</div><div>${escapeHtml(formatVehicleCategoryLabel(active.vehicleCategory || 'standard'))}</div></div>
+          <div class="item"><div class="tiny">ETA</div><div>${escapeHtml(getEtaLabel(active))}</div></div>
+          <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(active.paymentStatus || 'unpaid')}</div></div>
         </div>
-        <div class="driver-compact-actions">
-          <button class="btn" onclick="window.updateDriverStage('${active.id}','started')">Start</button>
-          <button class="btn" onclick="window.updateDriverStage('${active.id}','routing')">En route</button>
-          <button class="btn" onclick="window.updateDriverStage('${active.id}','in_progress')">Picked up</button>
-          <button class="btn brand" onclick="window.completeBooking('${active.id}')">Complete</button>
+        <div class="level19-action-grid">
+          <button class="level19-action-btn" onclick="window.updateDriverStage('${active.id}','started')">Start job</button>
+          <button class="level19-action-btn" onclick="window.updateDriverStage('${active.id}','routing')">En route</button>
+          <button class="level19-action-btn" onclick="window.updateDriverStage('${active.id}','in_progress')">Picked up</button>
+          <button class="level19-action-btn" onclick="window.completeBooking('${active.id}')">Complete</button>
         </div>`;
     }
 
@@ -3482,16 +3555,38 @@ function renderAdminCharts() {
       const accepted = mine.filter(b => String(b.acceptanceStatus||"") === "accepted").length;
       const unread = getUnreadNotificationCount("driver");
       const todayEarnings = mine.filter(b => String(b.status||"") === "completed").reduce((sum,b) => sum + Number(getDriverEarningsAmount ? getDriverEarningsAmount(b) : 0), 0);
+      const stage = String(active?.driverStage || active?.status || "assigned");
+      const steps = [["assigned","Assigned"],["en_route","En Route"],["picked_up","Picked Up"],["completed","Completed"]];
+      const stageOrder = {assigned:0,en_route:1,picked_up:2,completed:3};
+      const currentIdx = stageOrder[stage] ?? 0;
       wrap.innerHTML = `
-        <div class="level20-kicker">driver</div>
-        <div class="section-title" style="font-size:20px">Today</div>
-        <div class="driver-today-grid">
-          <div class="item"><div class="tiny">Accepted</div><div class="k">${accepted}</div></div>
-          <div class="item"><div class="tiny">Completed</div><div class="k">${completed}</div></div>
-          <div class="item"><div class="tiny">Earnings</div><div class="k">$${todayEarnings.toFixed(2)}</div></div>
-          <div class="item"><div class="tiny">Unread</div><div class="k">${unread}</div></div>
+        <div class="level20-kicker"> driver mission</div>
+        <div class="section-title" style="font-size:20px">Focused workflow</div>
+        <div class="section-sub" style="margin:6px 0 0">Cleaner mission-style panel for active ride, progress, earnings, and job acceptance.</div>
+        <div class="level20-premium-bar">
+          <div class="item"><div class="tiny">Current rider</div><div>${escapeHtml(active?.passengerName || "No active rider")}</div></div>
+          <div class="item"><div class="tiny">Current route</div><div>${escapeHtml(active ? ((active.pickup || "Pickup") + ' → ' + (active.destination || "Destination")) : "Waiting for assignment")}</div></div>
+          <div class="item"><div class="tiny">Completed</div><div>${completed}</div></div>
+          <div class="item"><div class="tiny">Unread updates</div><div>${unread}</div></div>
         </div>
-        ${active ? `<div class="level201-row" style="margin-top:10px"><span class="level201-pill">Current trip active</span><span class="level201-pill">${escapeHtml(currentProfile?.availability || 'online')}</span></div>` : ``}`;
+        <div class="level20-driver-steps">
+          ${steps.map(([key,label], idx) => `<div class="level20-driver-step ${idx < currentIdx ? 'done' : idx === currentIdx ? 'active' : ''}"><div class="tiny">Stage</div><div>${label}</div></div>`).join('')}
+        </div>
+        <div class="level201-grid">
+          <div class="level201-card ${active ? "level201-good" : ""}">
+            <div class="section-title" style="font-size:16px">Mission status</div>
+            <div class="level201-note">${active ? 'You have an active job. Follow the stage controls below and keep passenger updates accurate.' : 'No active job right now. Stay online to receive the next trip.'}</div>
+            <div class="level201-row">
+              <span class="level201-pill">Acceptance ${accepted}</span>
+              <span class="level201-pill">Today earnings $${todayEarnings.toFixed(2)}</span>
+              <span class="level201-pill">Availability ${escapeHtml(currentProfile?.availability || 'online')}</span>
+            </div>
+          </div>
+          <div class="level201-split">
+            <div class="level201-card"><div class="tiny">Today earnings</div><div class="level201-kpi">$${todayEarnings.toFixed(2)}</div></div>
+            <div class="level201-card"><div class="tiny">Accepted jobs</div><div class="level201-kpi">${accepted}</div></div>
+          </div>
+        </div>`;
     }
 
 
@@ -4924,29 +5019,27 @@ function renderDriverAcceptanceBoard() {
   if (currentProfile?.role !== "driver") return;
   const wrap = $("driverAcceptanceBoard");
   if (!wrap) return;
-  const source = bookingViewState.driver.scope === "upcoming"
-    ? getScopedBookingsForRole("driver")
-    : allBookings.filter(b => b.assignedDriverUid === currentUser.uid && !["completed","cancelled"].includes(b.status || ""));
+  const source = bookingViewState.driver.scope === "upcoming" ? getScopedBookingsForRole("driver") : allBookings.filter(b => b.assignedDriverUid === currentUser.uid && !["completed","cancelled"].includes(b.status || ""));
   const rows = source
     .filter(b => b.id !== getActiveDriverBooking()?.id)
     .slice()
     .sort((a,b) => bookingDateTimeValue(a) - bookingDateTimeValue(b))
-    .slice(0, 6);
+    .slice(0, 8)
+    .map(b => ({
+      title: `${b.bookingCode || "Trip"} • ${b.pickup} → ${b.destination}`,
+      body: `${b.passengerName || "Passenger"} • ${formatStatusLabel(b.acceptanceStatus || "pending_driver")}`,
+      meta: [b.tripDate, b.tripTime, b.rideType === "ndis" ? "NDIS" : "Normal"].filter(Boolean).join(" • "),
+      actions: `
+        ${b.acceptanceStatus !== "accepted" ? `<button class="btn small brand" onclick="window.driverRespondBooking('${b.id}','accepted')">Accept</button>` : ``}
+        ${b.acceptanceStatus !== "declined" && b.acceptanceStatus !== "accepted" ? `<button class="btn small danger" onclick="window.driverRespondBooking('${b.id}','declined')">Decline</button>` : ``}
+        <button class="btn small" onclick="window.updateDriverStage('${b.id}','started')">Start</button>
+      `
+    }));
   if (!rows.length) {
     wrap.innerHTML = `<div class="empty">No upcoming jobs.</div>`;
     return;
   }
-  wrap.innerHTML = `<div class="driver-simple-grid">${rows.map(b => `
-    <div class="driver-simple-card">
-      <strong>${escapeHtml(b.bookingCode || "Trip")}</strong>
-      <div class="driver-simple-meta">${escapeHtml(b.pickup || "Pickup")} → ${escapeHtml(b.destination || "Destination")}</div>
-      <div class="driver-simple-meta">${escapeHtml(b.tripDate || "--")} ${escapeHtml(b.tripTime || "")} • ${escapeHtml(b.rideType === "ndis" ? "NDIS" : "Normal")}</div>
-      <div class="driver-mini-actions">
-        ${b.acceptanceStatus !== "accepted" ? `<button class="btn small brand" onclick="window.driverRespondBooking('${b.id}','accepted')">Accept</button>` : ``}
-        ${b.acceptanceStatus !== "declined" && b.acceptanceStatus !== "accepted" ? `<button class="btn small danger" onclick="window.driverRespondBooking('${b.id}','declined')">Decline</button>` : ``}
-        <button class="btn small" onclick="window.updateDriverStage('${b.id}','started')">Start</button>
-      </div>
-    </div>`).join("")}</div>`;
+  wrap.innerHTML = rows.map(r => `<div class="driver-upcoming-card"><div class="driver-upcoming-title">${escapeHtml(r.title)}</div><div class="footer-note">${escapeHtml(r.body)}</div><div class="tiny" style="margin-top:8px">${escapeHtml(r.meta)}</div><div class="driver-upcoming-actions">${r.actions}</div></div>`).join("");
 }
 
 
@@ -5004,19 +5097,24 @@ function renderDriverAcceptanceBoard() {
       if (!wrap || currentProfile?.role !== "driver") return;
       const active = bookingViewState.driver.scope === "history" ? null : getActiveDriverBooking();
       if (!active) {
-        renderSimpleNoticeList("driverOtpPanel", [], "No current trip.");
+        renderSimpleNoticeList("driverOtpPanel", [], "No current trip for OTP.");
         return;
       }
-      wrap.innerHTML = `
-        <div class="driver-check-item">
+      const rows = [`
+        <div class="otp-box">
           <strong>${escapeHtml(active.bookingCode || "Trip")}</strong>
-          <div class="tiny">Pickup OTP ${active.pickupOtpVerified ? "verified" : "pending"}</div>
-          <input class="mini-input" id="pickup-otp-input-${active.id}" placeholder="Pickup OTP" />
-          <button class="btn small" onclick="window.verifyPickupOtp('${active.id}')">Verify pickup</button>
-          <div class="tiny" style="margin-top:10px">Drop-off OTP ${active.dropoffOtpVerified ? "verified" : "pending"}</div>
-          <input class="mini-input" id="dropoff-otp-input-${active.id}" placeholder="Drop-off OTP" />
-          <button class="btn small" onclick="window.verifyDropoffOtp('${active.id}')">Verify drop-off</button>
-        </div>`;
+          <div class="tiny">${escapeHtml(active.pickup)} → ${escapeHtml(active.destination)}</div>
+          <div class="otp-code">${escapeHtml(active.pickupOtp || "----")} / ${escapeHtml(active.dropoffOtp || "----")}</div>
+          <div class="tiny">Pickup ${active.pickupOtpVerified ? "verified" : "pending"} • Drop-off ${active.dropoffOtpVerified ? "verified" : "pending"}</div>
+          <div class="driver-current-actions">
+            <input class="mini-input" id="pickup-otp-input-${active.id}" placeholder="Enter pickup OTP" />
+            <button class="btn small" onclick="window.verifyPickupOtp('${active.id}')">Verify pickup</button>
+            <input class="mini-input" id="dropoff-otp-input-${active.id}" placeholder="Enter drop-off OTP" />
+            <button class="btn small" onclick="window.verifyDropoffOtp('${active.id}')">Verify drop-off</button>
+          </div>
+        </div>
+      `];
+      renderSimpleNoticeList("driverOtpPanel", rows, "No OTP trips assigned.");
     }
 
     function renderDriverProofPanel() {
@@ -5024,17 +5122,22 @@ function renderDriverAcceptanceBoard() {
       if (!wrap || currentProfile?.role !== "driver") return;
       const active = bookingViewState.driver.scope === "history" ? null : getActiveDriverBooking();
       if (!active) {
-        renderSimpleNoticeList("driverProofPanel", [], "No current trip.");
+        renderSimpleNoticeList("driverProofPanel", [], "No current trip for proof.");
         return;
       }
-      wrap.innerHTML = `
-        <div class="driver-check-item">
+      const rows = [`
+        <div class="proof-item">
           <strong>${escapeHtml(active.bookingCode || "Trip")}</strong>
-          <div class="tiny">${escapeHtml(active.completionProofNote || "Add a short completion note.")}</div>
-          <input class="mini-input" id="proof-note-${active.id}" value="${escapeHtml(active.completionProofNote || "")}" placeholder="Completion note" />
-          <input class="mini-input" id="proof-link-${active.id}" value="${escapeHtml(active.completionProofLink || "")}" placeholder="Photo / document link" />
-          <button class="btn small brand" onclick="window.saveCompletionProof('${active.id}')">Save</button>
-        </div>`;
+          <div class="tiny">${escapeHtml(active.completionProofNote || "No proof note saved yet.")}</div>
+          ${active.completionProofLink ? `<div class="tiny">${escapeHtml(active.completionProofLink)}</div>` : ""}
+          <div class="driver-current-actions">
+            <input class="mini-input" id="proof-note-${active.id}" value="${escapeHtml(active.completionProofNote || "")}" placeholder="Completion note" />
+            <input class="mini-input" id="proof-link-${active.id}" value="${escapeHtml(active.completionProofLink || "")}" placeholder="Photo / document link" />
+            <button class="btn small brand" onclick="window.saveCompletionProof('${active.id}')">Save proof</button>
+          </div>
+        </div>
+      `];
+      renderSimpleNoticeList("driverProofPanel", rows, "No completion proof yet.");
     }
 
 
@@ -5770,6 +5873,30 @@ function renderDriverAcceptanceBoard() {
     }
   
 
+</script>
+
+<script>
+(function(){
+  function hideEmptyDriverBits(){
+    const ids=['level202DriverBoard','level203DriverBoard','level204DriverBoard','level20DriverMission','level19DriverWorkflow'];
+    ids.forEach(id=>{
+      const el=document.getElementById(id);
+      if(el && !el.textContent.trim()) el.style.display='none';
+    });
+    const driverView=document.getElementById('driverView');
+    if(!driverView) return;
+    driverView.querySelectorAll('.line, hr').forEach(el=>el.style.display='none');
+  }
+  document.addEventListener('DOMContentLoaded', hideEmptyDriverBits);
+  window.addEventListener('load', hideEmptyDriverBits);
+  const oldSetTimeout=window.setTimeout;
+  window.setTimeout=function(fn,delay,...args){
+    return oldSetTimeout(function(){
+      if(typeof fn==='function') fn(...args); else eval(fn);
+      hideEmptyDriverBits();
+    },delay);
+  };
+})();
 </script>
 </body>
 </html>
