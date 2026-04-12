@@ -548,13 +548,32 @@
 
 
 
-    /* Passenger booking focus: hide advanced passenger insight boards */
-    #level19PassengerConcierge,
-    #level20PassengerHero,
-    #level202PassengerBoard,
-    #level203PassengerBoard,
-    #level204PassengerBoard{
-      display:none !important;
+    .more-travel-info{
+      margin-top:18px;
+    }
+    .more-travel-info summary{
+      list-style:none;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      font-weight:800;
+    }
+    .more-travel-info summary::-webkit-details-marker{display:none}
+    .more-travel-info summary::after{
+      content:'+';
+      font-size:22px;
+      line-height:1;
+      color:var(--brand);
+    }
+    .more-travel-info[open] summary::after{
+      content:'−';
+    }
+    .more-travel-info-body{
+      margin-top:16px;
+      display:grid;
+      gap:14px;
     }
 
   </style>
@@ -713,11 +732,6 @@
 
       <div id="passengerView" class="hidden">
         <div id="level18PassengerSnapshot" class="level18-mobile-snapshot"></div>
-        <div id="level19PassengerConcierge" class="level19-passenger-concierge"></div>
-        <div id="level20PassengerHero" class="level20-passenger-hero"></div>
-        <div id="level202PassengerBoard" class="level202-callout"></div>
-        <div id="level203PassengerBoard" class="level203-callout"></div>
-        <div id="level204PassengerBoard" class="level204-callout"></div>
         <div class="grid-2">
           <div class="card section">
             <div class="section-title">Passenger booking</div>
@@ -982,6 +996,17 @@
             </div>
           </div>
         </div>
+
+        <details class="card section more-travel-info">
+          <summary>More travel info</summary>
+          <div class="more-travel-info-body">
+            <div id="level19PassengerConcierge" class="level19-passenger-concierge"></div>
+            <div id="level20PassengerHero" class="level20-passenger-hero"></div>
+            <div id="level202PassengerBoard" class="level202-callout"></div>
+            <div id="level203PassengerBoard" class="level203-callout"></div>
+            <div id="level204PassengerBoard" class="level204-callout"></div>
+          </div>
+        </details>
 
         <div class="card section top-gap">
           <div class="trip-head">
