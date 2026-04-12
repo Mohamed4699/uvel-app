@@ -405,6 +405,21 @@
     .level201-good{border-color:rgba(87,208,139,.35);box-shadow:0 0 0 1px rgba(87,208,139,.08) inset}
     @media (max-width:1100px){.level201-grid,.level201-split{grid-template-columns:1fr}}
 
+    .level202-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px}
+    .level202-card{padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.04)}
+    .level202-title{font-size:16px;font-weight:900;margin-bottom:6px}
+    .level202-list{display:grid;gap:10px;margin-top:10px}
+    .level202-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .level202-item strong{display:block;margin-bottom:4px}
+    .level202-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+    .level202-kpis .item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .level202-callout{margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(135deg, rgba(73,196,213,.12), rgba(255,255,255,.03))}
+    .level202-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .passenger-trip-card.level202-passenger{background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));box-shadow:0 10px 24px rgba(0,0,0,.16)}
+    .passenger-trip-card.level202-passenger .passenger-trip-route{font-size:26px}
+    .level202-trip-health{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .level202-mini-pill{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px}
+    @media (max-width:1100px){.level202-grid,.level202-kpis{grid-template-columns:1fr}}
 
   </style>
 </head>
@@ -498,7 +513,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 20 • mission control • compact mode • executive focus • spotlight maps • operations pulse • priority lane</div>
+            <div class="subtitle">Full Level 20.2 • mission control • compact mode • executive focus • spotlight maps • operations pulse • priority lane</div>
           </div>
         </div>
         <div class="userbox">
@@ -548,6 +563,7 @@
         <div id="level18PassengerSnapshot" class="level18-mobile-snapshot"></div>
         <div id="level19PassengerConcierge" class="level19-passenger-concierge"></div>
         <div id="level20PassengerHero" class="level20-passenger-hero"></div>
+        <div id="level202PassengerBoard" class="level202-callout"></div>
         <div class="grid-2">
           <div class="card section">
             <div class="section-title">Passenger booking</div>
@@ -948,6 +964,7 @@
               </div>
             </div>
             <div id="level20AdminCommand" class="level20-panel top-gap"></div>
+            <div id="level202AdminBoard" class="level202-callout"></div>
             <div class="toolbar">
               <input id="adminSearch" placeholder="Search passenger, pickup, destination" />
               <select id="statusFilter">
@@ -1232,6 +1249,7 @@
           </div>
         </div>
         <div id="level20DriverMission" class="level20-panel top-gap"></div>
+        <div id="level202DriverBoard" class="level202-callout"></div>
 
         <details class="driver-detail-collapsible focus-advanced">
           <summary>More driver info</summary>
@@ -2987,7 +3005,7 @@ function renderAdminCharts() {
         </div>
         <div class="level201-card">
           <div class="section-title" style="font-size:16px">Ready to request</div>
-          <div class="level201-note">This Level 20.1 version keeps your auth exactly the same and upgrades only the live app experience around it.</div>
+          <div class="level201-note">This Level 20.2 version keeps your auth exactly the same and upgrades only the live app experience around it.</div>
         </div>
       `;
     }
@@ -3125,6 +3143,94 @@ function renderAdminCharts() {
     }
 
 
+    function renderLevel202PassengerBoard() {
+      const wrap = $("level202PassengerBoard");
+      if (!wrap || currentProfile?.role !== "passenger") return;
+      const trips = getPassengerBookings().slice().sort((a,b) => bookingDateTimeValue(a) - bookingDateTimeValue(b));
+      const nextTrip = trips.find(b => ["pending","assigned"].includes(b.status));
+      const completed = trips.filter(b => b.status === "completed").length;
+      const paid = trips.filter(b => b.paymentStatus === "paid").length;
+      wrap.innerHTML = `
+        <div class="level202-title">Level 20.2 passenger board</div>
+        <div class="level202-note">Cleaner trip visibility, quick progress view, and better follow-up without changing auth.</div>
+        <div class="level202-kpis">
+          <div class="item"><div class="tiny">Upcoming</div><div class="level201-kpi">${trips.filter(b => ["pending","assigned"].includes(b.status)).length}</div></div>
+          <div class="item"><div class="tiny">Completed</div><div class="level201-kpi">${completed}</div></div>
+          <div class="item"><div class="tiny">Paid trips</div><div class="level201-kpi">${paid}</div></div>
+          <div class="item"><div class="tiny">Readiness</div><div class="level201-kpi">${nextTrip ? "Live" : "Clear"}</div></div>
+        </div>
+        <div class="level202-actions">
+          <span class="level201-pill">Next trip ${escapeHtml(nextTrip?.tripDate || "Not scheduled")}</span>
+          <span class="level201-pill">Driver ${escapeHtml(nextTrip?.assignedDriverName || "Pending")}</span>
+          <span class="level201-pill">Status ${escapeHtml(formatStatusLabel(nextTrip?.status || "pending"))}</span>
+        </div>`;
+    }
+
+    function renderLevel202AdminBoard() {
+      const wrap = $("level202AdminBoard");
+      if (!wrap || currentProfile?.role !== "admin") return;
+      const active = allBookings.filter(b => ["pending","assigned"].includes(b.status));
+      const urgent = active.filter(b => String(b.priority || "") === "urgent");
+      const unpaid = allBookings.filter(b => b.paymentStatus !== "paid");
+      const unassigned = active.filter(b => !b.assignedDriverUid);
+      const assignable = getAutoAssignableBookings().slice(0,3);
+      wrap.innerHTML = `
+        <div class="level202-title">Level 20.2 admin board</div>
+        <div class="level202-note">Cleaner command cards, stronger smart assignment visibility, and faster follow-up actions.</div>
+        <div class="level202-kpis">
+          <div class="item"><div class="tiny">Active jobs</div><div class="level201-kpi">${active.length}</div></div>
+          <div class="item"><div class="tiny">Unassigned</div><div class="level201-kpi">${unassigned.length}</div></div>
+          <div class="item"><div class="tiny">Urgent</div><div class="level201-kpi">${urgent.length}</div></div>
+          <div class="item"><div class="tiny">Unpaid</div><div class="level201-kpi">${unpaid.length}</div></div>
+        </div>
+        <div class="level202-grid">
+          <div class="level202-card">
+            <div class="level202-title">Best smart matches</div>
+            <div class="level202-list">${assignable.map(b => {
+              const top = getSmartDriverRecommendation(b);
+              return `<div class="level202-item"><strong>${escapeHtml(b.passengerName || b.bookingCode || "Booking")}</strong><div class="level20-meta">${escapeHtml(b.pickup || "Pickup")} → ${escapeHtml(b.destination || "Destination")}</div><div class="level20-meta">${top?.best ? `${escapeHtml(top.best.driver.name || top.best.driver.email || "Driver")} • score ${top.best.score}` : "No match yet"}</div></div>`;
+            }).join("") || '<div class="empty">No assignable jobs right now.</div>'}</div>
+          </div>
+          <div class="level202-card">
+            <div class="level202-title">Due soon</div>
+            <div class="level202-list">${getJobsDueSoon(120).slice(0,3).map(b => `<div class="level202-item"><strong>${escapeHtml(b.passengerName || b.bookingCode || "Booking")}</strong><div class="level20-meta">${escapeHtml(b.tripDate || "--")} ${escapeHtml(b.tripTime || "--")}</div><div class="level20-meta">${escapeHtml(b.pickup || "Pickup")}</div></div>`).join("") || '<div class="empty">No jobs due soon.</div>'}</div>
+          </div>
+          <div class="level202-card">
+            <div class="level202-title">Collections watch</div>
+            <div class="level202-list">
+              <div class="level202-item"><strong>Collection rate</strong><div class="level20-meta">${allBookings.length ? Math.round((allBookings.filter(b => b.paymentStatus === "paid").length / allBookings.length) * 100) : 0}% paid</div></div>
+              <div class="level202-item"><strong>Completion rate</strong><div class="level20-meta">${allBookings.length ? Math.round((allBookings.filter(b => b.status === "completed").length / allBookings.length) * 100) : 0}% completed</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="level202-actions"><button class="btn brand small" id="level202AssignFromBoardBtn" type="button">Auto assign best now</button><button class="btn small" id="level202RefreshBoardBtn" type="button">Refresh board</button></div>`;
+      $("level202AssignFromBoardBtn")?.addEventListener("click", () => $("autoAssignTopBtn")?.click(), { once:true });
+      $("level202RefreshBoardBtn")?.addEventListener("click", () => renderEverything(), { once:true });
+    }
+
+    function renderLevel202DriverBoard() {
+      const wrap = $("level202DriverBoard");
+      if (!wrap || currentProfile?.role !== "driver") return;
+      const trips = allBookings.filter(b => b.assignedDriverUid === currentUser.uid);
+      const active = trips.find(b => ["assigned","in_progress","arrived","picked_up"].includes(b.status) || ["accepted","en_route_pickup","arrived_pickup","passenger_onboard","en_route_destination"].includes(b.driverStage));
+      const upcoming = trips.filter(b => ["pending","assigned"].includes(b.status)).length;
+      const completed = trips.filter(b => b.status === "completed").length;
+      wrap.innerHTML = `
+        <div class="level202-title">Level 20.2 driver board</div>
+        <div class="level202-note">Cleaner mission view with shift focus, current job clarity, and next-step visibility.</div>
+        <div class="level202-kpis">
+          <div class="item"><div class="tiny">Active now</div><div class="level201-kpi">${active ? "1" : "0"}</div></div>
+          <div class="item"><div class="tiny">Upcoming</div><div class="level201-kpi">${upcoming}</div></div>
+          <div class="item"><div class="tiny">Completed</div><div class="level201-kpi">${completed}</div></div>
+          <div class="item"><div class="tiny">Availability</div><div class="level201-kpi">${escapeHtml(currentProfile?.availability || "online")}</div></div>
+        </div>
+        <div class="level202-actions">
+          <span class="level201-pill">Current trip ${escapeHtml(active?.pickup || "Waiting")}</span>
+          <span class="level201-pill">Stage ${escapeHtml(active ? formatDriverStageLabel(active.driverStage || active.status || "assigned") : "Ready")}</span>
+          <span class="level201-pill">Vehicle ${escapeHtml(currentProfile?.vehicle || "Not set")}</span>
+        </div>`;
+    }
+
     async function renderEverything() {
       renderStats();
       renderPassengerTrips();
@@ -3167,6 +3273,9 @@ function renderAdminCharts() {
       renderLevel20PassengerHero();
       renderLevel20AdminCommand();
       renderLevel20DriverMission();
+      renderLevel202PassengerBoard();
+      renderLevel202AdminBoard();
+      renderLevel202DriverBoard();
       syncDriverControls();
       await runLevel18AutoDispatch(false);
       if (currentProfile?.role === "passenger") {
@@ -3490,8 +3599,10 @@ function renderDriverTrips() {
       const vehicleLabel = escapeHtml(`${formatVehicleCategoryLabel(b.vehicleCategory || "standard")} • ${formatVehicleSubtypeLabel(b.vehicleSubtype || "standard_compact")}`);
       const paymentLabel = escapeHtml(b.paymentStatus || "unpaid");
       const supportLabel = escapeHtml(formatSupportLevelLabel(b.supportLevel || (b.wheelchairRequired === "yes" ? "wheelchair" : b.companionRequired === "yes" ? "companion" : "standard")));
+      const statusTone = b.status === "completed" ? "completed" : b.status === "assigned" ? "assigned" : b.status === "cancelled" ? "cancelled" : "pending";
+      const needsAttention = b.status === "pending" || b.paymentStatus !== "paid";
       return `
-        <div class="passenger-trip-card">
+        <div class="passenger-trip-card level202-passenger">
           <div class="passenger-trip-top">
             <div>
               <div style="font-size:18px;font-weight:900">${escapeHtml(b.bookingCode || "Trip")}</div>
@@ -3501,8 +3612,14 @@ function renderDriverTrips() {
                 <span class="passenger-trip-pill">${serviceLabel}</span>
                 <span class="passenger-trip-pill">${vehicleLabel}</span>
               </div>
+              <div class="level202-trip-health">
+                <span class="level202-mini-pill">${escapeHtml(formatPassengerStageLabel(b))}</span>
+                <span class="level202-mini-pill">${escapeHtml(getEtaLabel(b))}</span>
+                <span class="level202-mini-pill">${Number(b.distanceKm || 0).toFixed(1)} km</span>
+                ${needsAttention ? `<span class="level202-mini-pill">Needs follow-up</span>` : `<span class="level202-mini-pill">On track</span>`}
+              </div>
             </div>
-            <span class="badge ${escapeHtml(b.status || "pending")}">${escapeHtml(statusLabel)}</span>
+            <span class="badge ${statusTone}">${escapeHtml(statusLabel)}</span>
           </div>
           <div class="passenger-trip-grid">
             <div class="item"><div class="tiny">Date / Time</div><div>${when}</div></div>
@@ -3510,7 +3627,6 @@ function renderDriverTrips() {
             <div class="item"><div class="tiny">Fare</div><div>$${Number(b.fare || 0).toFixed(2)}</div></div>
             <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}<br/><span class="badge ${b.paymentStatus === "paid" ? "completed" : "pending"}">${paymentLabel}</span></div></div>
           </div>
-          <div class="passenger-trip-meta">${escapeHtml(formatPassengerStageLabel(b))} • ${escapeHtml(getEtaLabel(b))} • ${Number(b.distanceKm || 0).toFixed(1)} km</div>
           ${getTimelineHTML(b)}
           <details class="top-gap">
             <summary class="trip-details-toggle">View details</summary>
