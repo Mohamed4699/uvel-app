@@ -556,15 +556,15 @@
         <div class="grid-3 top-gap">
           <div class="list-card">
             <div class="section-title">Live bookings</div>
-            <div class="note">Passenger requests save to Firestore and update in real time.</div>
+            
           </div>
           <div class="list-card">
             <div class="section-title">Role-based dashboards</div>
-            <div class="note">Admin, Driver, and Passenger see only the tools they need.</div>
+            
           </div>
           <div class="list-card">
             <div class="section-title">NDIS-ready invoicing</div>
-            <div class="note">Generate a clean invoice PDF with provider details and fare lines.</div>
+            
           </div>
         </div>
       </div>
@@ -577,7 +577,7 @@
 
         <form id="loginForm">
           <div class="section-title">Welcome back</div>
-          <div class="section-sub">Sign in with your real Firebase user account.</div>
+          
           <label>Email</label>
           <input type="email" id="loginEmail" placeholder="admin@uvel.com.au" required />
           <label class="top-gap">Password</label>
@@ -590,7 +590,7 @@
 
         <form id="signupForm" class="hidden">
           <div class="section-title">Create account</div>
-          <div class="section-sub">New users are saved to Firestore with their role profile.</div>
+          
           <label>Full name</label>
           <input type="text" id="signupName" placeholder="Mohamed Khamis" required />
           <label class="top-gap">Email</label>
@@ -700,7 +700,7 @@
         <div class="grid-2">
           <div class="card section">
             <div class="section-title">Passenger booking</div>
-            <div class="section-sub">Create a trip request that admin can see in another browser instantly.</div>
+            
             <form id="bookingForm">
               <div class="booking-mode-banner">
                 <div>
@@ -827,12 +827,12 @@
                       <option value="assisted">Assisted</option>
                       <option value="wheelchair">Wheelchair Accessible</option>
                     </select>
-                    <div class="ride-choice-help">Choose the main ride type for this trip.</div>
+                    
                   </div>
                   <div>
                     <label>Ride option</label>
                     <select id="vehicleSubtype"></select>
-                    <div class="ride-choice-help">Choose the exact option inside the selected category.</div>
+                    
                   </div>
                 </div>
 
@@ -915,7 +915,7 @@
 
               <div id="bookingSummaryBox" class="booking-summary-box compact-booking-summary">
                 <div class="section-title" style="font-size:15px">Booking summary</div>
-                <div class="section-sub compact-summary-sub">Short preview for both Normal and NDIS bookings.</div>
+                
                 <div id="bookingSummaryContent" class="booking-summary-grid compact-summary-grid"></div>
               </div>
 
@@ -935,7 +935,7 @@
 
           <div class="card section">
             <div class="section-title">Live route map</div>
-            <div class="section-sub">Preview the selected booking route.</div>
+            
             <div id="passengerMap" class="map"></div>
             <div class="grid-2 top-gap">
               <div class="list-card">
@@ -966,7 +966,7 @@
           <div class="trip-head">
             <div>
               <div class="trip-head"><div><div class="section-title">My trips</div>
-              <div class="section-sub">See your trips, status, driver, and payment at a glance.</div></div>              <div class="seg"><button class="btn small" id="rebookLatestBtn">Rebook latest</button><button class="btn small danger" id="passengerCancelBtn">Cancel latest trip</button></div></div>
+              </div>              <div class="seg"><button class="btn small" id="rebookLatestBtn">Rebook latest</button><button class="btn small danger" id="passengerCancelBtn">Cancel latest trip</button></div></div>
             </div>
           </div>
           <div class="history-tabs" id="passengerBookingTabs">
@@ -985,7 +985,7 @@
         <div class="compact-passenger-grid top-gap focus-advanced">
           <div class="passenger-mini-card">
             <div class="section-title">Saved places</div>
-            <div class="section-sub">Save common addresses for faster booking.</div>
+            
             <div class="row">
               <div><input id="savedPlaceLabel" placeholder="Place label e.g. Home" /></div>
               <div><input id="savedPlaceAddress" placeholder="Full address" /></div>
@@ -999,7 +999,7 @@
 
           <div class="passenger-mini-card">
             <div class="section-title">Trip updates</div>
-            <div class="section-sub">Latest updates for your trips.</div>
+            
             <div class="level18-read-actions"><button class="btn small" id="markPassengerNotificationsReadBtn">Mark read</button></div>
             <div id="passengerNotifications" class="notice-list"></div>
           </div>
