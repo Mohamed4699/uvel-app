@@ -387,14 +387,6 @@
     .level20-kicker{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
     @media (max-width:1100px){.level20-premium-bar,.level20-driver-steps,.level20-grid{grid-template-columns:1fr}}
 
-    .smart-header-bell{display:inline-flex;align-items:center;gap:10px}
-    .smart-header-count{min-width:24px;height:24px;padding:0 8px;border-radius:999px;display:inline-grid;place-items:center;background:rgba(73,196,213,.16);font-weight:900}
-    .level201-admin-quick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
-    .level201-admin-quick .item{padding:16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02))}
-    .level201-admin-quick .k{font-size:28px;font-weight:900}
-    .level201-admin-quick .t{color:var(--muted);font-size:13px}
-    @media (max-width:1100px){.level201-admin-quick{grid-template-columns:1fr}}
-
   </style>
 </head>
 <body>
@@ -405,7 +397,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 20.1 mission control build</div>
+            <div class="subtitle">Firebase Level 20 mission control build</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -487,21 +479,25 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 20.1 • mission control • compact mode • executive focus • spotlight maps • operations pulse • priority lane</div>
+            <div class="subtitle">Full Level 20 • mission control • compact mode • executive focus • spotlight maps • operations pulse • priority lane</div>
           </div>
         </div>
         <div class="userbox">
           <div class="pill" id="whoAmI">Signed in</div>
-          <button id="roleNotificationsBtn" class="btn smart-header-bell" type="button">
-            <span id="roleNotificationLabel">Updates</span>
-            <span class="smart-header-count" id="roleNotificationCount">0</span>
-          </button>
+          <div class="level18-badge-row">
+            <div class="level18-badge">Passenger updates <span class="level18-dot" id="level18PassengerUnread">0</span></div>
+            <div class="level18-badge">Driver updates <span class="level18-dot" id="level18DriverUnread">0</span></div>
+            <div class="level18-badge">Admin updates <span class="level18-dot" id="level18AdminUnread">0</span></div>
+          </div>
+          <div class="level19-badge-row">
+            <div class="level19-badge">Urgent queue <span class="level19-dot" id="level19UrgentCount">0</span></div>
+            <div class="level19-badge">Online drivers <span class="level19-dot" id="level19OnlineDrivers">0</span></div>
+            <div class="level19-badge">My unread <span class="level19-dot" id="level19RoleUnread">0</span></div>
+          </div>
           <button id="seedDriversBtn" class="btn">Seed demo drivers</button>
           <button id="logoutBtn" class="btn brand">Logout</button>
         </div>
       </div>
-
-      <div id="level201AdminQuick" class="level201-admin-quick hidden"></div>
 
       <div class="stats" id="statsBar">
         <div class="card stat"><div class="k" id="statTotal">0</div><div class="t">Total bookings</div></div>
@@ -674,7 +670,7 @@
                 <div class="section-title" style="font-size:16px">Booking summary</div>
                 <div class="section-sub" style="margin-bottom:10px">Review the trip before you send it to dispatch.</div>
                 <div id="bookingSummaryContent" class="booking-summary-grid"></div>
-                <div class="booking-confirm-note">Login, sign up, and reset password stay exactly the same in this Level 20.1 version.</div>
+                <div class="booking-confirm-note">Login, sign up, and reset password stay exactly the same in this Level 20 version.</div>
               </div>
               <div class="row top-gap">
                 <div>
@@ -916,7 +912,7 @@
               <button class="btn" id="exportCompletedBtn">Export completed CSV</button>
             </div>
             <div id="adminSmartDispatchBox" class="admin-recommend-box">
-              <div class="section-title" style="font-size:16px">Level 20.1 smart dispatch</div>
+              <div class="section-title" style="font-size:16px">Level 20 smart dispatch</div>
               <div class="section-sub" style="margin-bottom:10px">Best next booking, best driver, and live match reasons.</div>
               <div id="adminSmartDispatchContent"></div>
               <div class="mini-actions top-gap">
@@ -924,7 +920,7 @@
               </div>
             </div>
             <div id="level18AdminAutomation" class="level18-admin-strip">
-              <div class="section-title" style="font-size:16px">Level 20.1 auto-dispatch</div>
+              <div class="section-title" style="font-size:16px">Level 20 auto-dispatch</div>
               <div class="section-sub" style="margin-bottom:10px">Optionally auto-assign urgent top matches and keep an eye on unread ops updates.</div>
               <div id="level18AdminAutomationSummary"></div>
               <div class="level18-admin-actions">
@@ -2476,11 +2472,14 @@ if (!user) {
     function markRoleNotificationsRead(role) {
       level18State.read[role] = getNotificationRoleList(role).length;
       renderLevel18NotificationBadges();
-    renderLevel201Header();
+    renderLevel19HeaderBadges();
     }
 
     function renderLevel18NotificationBadges() {
-      renderLevel201Header();
+      if ($("level18PassengerUnread")) $("level18PassengerUnread").textContent = String(getUnreadNotificationCount("passenger"));
+      if ($("level18DriverUnread")) $("level18DriverUnread").textContent = String(getUnreadNotificationCount("driver"));
+      if ($("level18AdminUnread")) $("level18AdminUnread").textContent = String(getUnreadNotificationCount("admin"));
+      renderLevel19HeaderBadges();
     }
 
     function renderLevel18PassengerSnapshot() {
@@ -2847,21 +2846,13 @@ function renderAdminCharts() {
     }
 
 
-    function renderLevel201Header() {
+    function renderLevel19HeaderBadges() {
+      const urgent = allBookings.filter(b => b.status === "pending" && (b.priority === "urgent" || b.priority === "high")).length;
+      const onlineDrivers = allDrivers.filter(d => (d.availability || "online") === "online").length;
       const role = currentProfile?.role || "passenger";
-      const roleLabel = role === "admin" ? "Admin updates" : role === "driver" ? "Driver updates" : "Passenger updates";
-      const unread = getUnreadNotificationCount(role);
-      const btn = $("roleNotificationsBtn");
-      if ($("roleNotificationLabel")) $("roleNotificationLabel").textContent = roleLabel;
-      if ($("roleNotificationCount")) $("roleNotificationCount").textContent = String(unread);
-      if ($("seedDriversBtn")) $("seedDriversBtn").classList.toggle("hidden", role !== "admin");
-      if (btn) {
-        btn.onclick = () => {
-          const targetId = role === "admin" ? "adminNotifications" : role === "driver" ? "driverNotifications" : "passengerNotifications";
-          const target = $(targetId);
-          if (target?.scrollIntoView) target.scrollIntoView({ behavior: "smooth", block: "start" });
-        };
-      }
+      if ($("level19UrgentCount")) $("level19UrgentCount").textContent = String(urgent);
+      if ($("level19OnlineDrivers")) $("level19OnlineDrivers").textContent = String(onlineDrivers);
+      if ($("level19RoleUnread")) $("level19RoleUnread").textContent = String(getUnreadNotificationCount(role));
     }
 
     function renderLevel19PassengerConcierge() {
@@ -2956,28 +2947,6 @@ function renderAdminCharts() {
           <div class="item"><div class="tiny">Support</div><div>${escapeHtml(formatSupportLevelLabel($("supportLevel")?.value || "standard"))}</div></div>
           <div class="item"><div class="tiny">Booking mode</div><div>${escapeHtml($("rideType")?.value === "ndis" ? "NDIS" : "Normal")}</div></div>
         </div>
-      `;
-    }
-
-    function renderLevel201AdminQuick() {
-      const wrap = $("level201AdminQuick");
-      if (!wrap) return;
-      if (currentProfile?.role !== "admin") {
-        wrap.classList.add("hidden");
-        wrap.innerHTML = "";
-        return;
-      }
-      const pending = allBookings.filter(b => String(b.status || "") === "pending");
-      const assigned = allBookings.filter(b => String(b.status || "") === "assigned");
-      const urgent = pending.filter(b => ["urgent","high"].includes(String(b.priority || "standard")));
-      const awaiting = assigned.filter(b => String(b.acceptanceStatus || "") === "pending_driver");
-      const onlineDrivers = allDrivers.filter(d => (d.availability || "online") === "online").length;
-      wrap.classList.remove("hidden");
-      wrap.innerHTML = `
-        <div class="item"><div class="k">${urgent.length}</div><div class="t">Urgent / High</div></div>
-        <div class="item"><div class="k">${assigned.length}</div><div class="t">Active trips</div></div>
-        <div class="item"><div class="k">${awaiting.length}</div><div class="t">Awaiting driver</div></div>
-        <div class="item"><div class="k">${onlineDrivers}</div><div class="t">Online drivers</div></div>
       `;
     }
 
@@ -3100,12 +3069,11 @@ function renderAdminCharts() {
       renderLevel17SmartDispatch();
       renderLevel18PassengerSnapshot();
       renderLevel18AdminAutomation();
-      renderLevel201Header();
+      renderLevel19HeaderBadges();
       renderLevel19PassengerConcierge();
       renderLevel19OpsBoard();
       renderLevel19DriverWorkflow();
       renderLevel20PassengerHero();
-      renderLevel201AdminQuick();
       renderLevel20AdminCommand();
       renderLevel20DriverMission();
       syncDriverControls();
