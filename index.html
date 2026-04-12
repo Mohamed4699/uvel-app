@@ -546,6 +546,17 @@
       display:none !important;
     }
 
+
+
+    /* Passenger booking focus: hide advanced passenger insight boards */
+    #level19PassengerConcierge,
+    #level20PassengerHero,
+    #level202PassengerBoard,
+    #level203PassengerBoard,
+    #level204PassengerBoard{
+      display:none !important;
+    }
+
   </style>
 </head>
 <body>
@@ -2741,7 +2752,7 @@ if (!user) {
       });
       level18State.lastAutoDispatchAt = new Date().toISOString();
       level18State.lastAutoDispatchMessage = `${best.driver.name || best.driver.email || "Driver"} was auto-assigned to ${booking.passengerName || "the booking"}.`;
-      pushLevel17Notification("admin", "Level 20.3 auto-dispatch", level18State.lastAutoDispatchMessage, "success");
+      pushLevel17Notification("admin", " auto-dispatch", level18State.lastAutoDispatchMessage, "success");
       renderLevel18AdminAutomation();
     }
 
@@ -3053,12 +3064,12 @@ function renderAdminCharts() {
       if (!wrap || currentProfile?.role !== "passenger") return;
       const nextTrip = getPassengerBookings().filter(b => !["completed","cancelled"].includes(b.status)).sort((a,b) => bookingDateTimeValue(a)-bookingDateTimeValue(b))[0];
       if (!nextTrip) {
-        wrap.innerHTML = `<div class="section-title" style="font-size:16px">Level 19 trip concierge</div><div class="level19-mini">No upcoming trip yet. Once you book, your next ride, support type, and live readiness will show here.</div>`;
+        wrap.innerHTML = `<div class="section-title" style="font-size:16px"> trip concierge</div><div class="level19-mini">No upcoming trip yet. Once you book, your next ride, support type, and live readiness will show here.</div>`;
         return;
       }
       const support = formatSupportLevelLabel(nextTrip.supportLevel || (nextTrip.wheelchairRequired === "yes" ? "wheelchair" : nextTrip.companionRequired === "yes" ? "companion" : "standard"));
       wrap.innerHTML = `
-        <div class="level19-flex"><div><div class="section-title" style="font-size:16px">Level 19 trip concierge</div><div class="level19-mini">Your next trip at a glance, with support and dispatch readiness.</div></div><div class="level19-chip">${escapeHtml(formatStatusLabel(nextTrip.status || 'pending'))}</div></div>
+        <div class="level19-flex"><div><div class="section-title" style="font-size:16px"> trip concierge</div><div class="level19-mini"></div></div><div class="level19-chip">${escapeHtml(formatStatusLabel(nextTrip.status || 'pending'))}</div></div>
         <div style="font-size:20px;font-weight:900;margin-top:10px">${escapeHtml(nextTrip.pickup || '')} → ${escapeHtml(nextTrip.destination || '')}</div>
         <div class="level19-kpi-grid">
           <div class="item"><div class="tiny">When</div><div>${escapeHtml(nextTrip.tripDate || '--')} ${escapeHtml(nextTrip.tripTime || '')}</div></div>
@@ -3094,11 +3105,11 @@ function renderAdminCharts() {
       if (!wrap || currentProfile?.role !== "driver") return;
       const active = getActiveDriverBooking();
       if (!active) {
-        wrap.innerHTML = `<div class="section-title" style="font-size:16px">Level 19 driver workflow</div><div class="level19-mini">No active trip yet. Accepted trips will show quick stage actions here.</div>`;
+        wrap.innerHTML = `<div class="section-title" style="font-size:16px"> driver workflow</div><div class="level19-mini">No active trip yet. Accepted trips will show quick stage actions here.</div>`;
         return;
       }
       wrap.innerHTML = `
-        <div class="level19-flex"><div><div class="section-title" style="font-size:16px">Level 19 driver workflow</div><div class="level19-mini">Move the trip through the key stages with one tap.</div></div><div class="level19-chip">${escapeHtml(formatPassengerStageLabel(active))}</div></div>
+        <div class="level19-flex"><div><div class="section-title" style="font-size:16px"> driver workflow</div><div class="level19-mini">Move the trip through the key stages with one tap.</div></div><div class="level19-chip">${escapeHtml(formatPassengerStageLabel(active))}</div></div>
         <div style="font-size:18px;font-weight:900;margin-top:10px">${escapeHtml(active.pickup || '')} → ${escapeHtml(active.destination || '')}</div>
         <div class="level19-kpi-grid">
           <div class="item"><div class="tiny">Passenger</div><div>${escapeHtml(active.passengerName || 'Passenger')}</div></div>
@@ -3125,7 +3136,7 @@ function renderAdminCharts() {
       const ndisTrips = mine.filter(b => String(b.rideType||"normal") === "ndis").length;
       const latestFare = active?.estimatedFare || active?.fare || 0;
       wrap.innerHTML = active ? `
-        <div class="level20-kicker">Level 20.1 passenger concierge</div>
+        <div class="level20-kicker"> passenger concierge</div>
         <div class="big">${escapeHtml(active.pickup || "Pickup")} → ${escapeHtml(active.destination || "Destination")}</div>
         <div class="section-sub" style="margin:8px 0 0">${escapeHtml(active.tripDate || "--")} • ${escapeHtml(active.tripTime || "--")} • ${escapeHtml(formatStatusLabel(active.driverStage || active.status || "pending"))}</div>
         <div class="level20-premium-bar">
@@ -3137,7 +3148,7 @@ function renderAdminCharts() {
         <div class="level201-grid">
           <div class="level201-card level201-good">
             <div class="section-title" style="font-size:16px">Next best action</div>
-            <div class="level201-note">Your next ride is already in focus. Keep the booking details checked and watch for driver updates.</div>
+            <div class="level201-note"></div>
             <div class="level201-row">
               <span class="level201-pill">Payment ${escapeHtml(active.paymentStatus || "unpaid")}</span>
               <span class="level201-pill">Support ${escapeHtml(formatSupportLevelLabel(active.supportLevel || "standard"))}</span>
@@ -3150,7 +3161,7 @@ function renderAdminCharts() {
           </div>
         </div>
       ` : `
-        <div class="level20-kicker">Level 20.1 passenger concierge</div>
+        <div class="level20-kicker"> passenger concierge</div>
         <div class="big">No active trip yet</div>
         <div class="section-sub" style="margin:8px 0 0">Create a booking to see your next ride, assigned driver, fare, and readiness in one clean area.</div>
         <div class="level20-premium-bar">
@@ -3161,7 +3172,7 @@ function renderAdminCharts() {
         </div>
         <div class="level201-card">
           <div class="section-title" style="font-size:16px">Ready to request</div>
-          <div class="level201-note">This Level 20.2 version keeps your auth exactly the same and upgrades only the live app experience around it.</div>
+          <div class="level201-note">This  version keeps your auth exactly the same and upgrades only the live app experience around it.</div>
         </div>
       `;
     }
@@ -3194,7 +3205,7 @@ function renderAdminCharts() {
       wrap.innerHTML = `
         <div class="level20-admin-head">
           <div>
-            <div class="level20-kicker">Level 20.1 premium command center</div>
+            <div class="level20-kicker"> premium command center</div>
             <div class="section-title" style="font-size:20px">Operations snapshot</div>
             <div class="section-sub" style="margin:6px 0 0">Cleaner admin visibility for queue pressure, smart dispatch, payment collection, and jobs due soon.</div>
           </div>
@@ -3269,7 +3280,7 @@ function renderAdminCharts() {
       const stageOrder = {assigned:0,en_route:1,picked_up:2,completed:3};
       const currentIdx = stageOrder[stage] ?? 0;
       wrap.innerHTML = `
-        <div class="level20-kicker">Level 20.1 driver mission</div>
+        <div class="level20-kicker"> driver mission</div>
         <div class="section-title" style="font-size:20px">Focused workflow</div>
         <div class="section-sub" style="margin:6px 0 0">Cleaner mission-style panel for active ride, progress, earnings, and job acceptance.</div>
         <div class="level20-premium-bar">
@@ -3307,7 +3318,7 @@ function renderAdminCharts() {
       const completed = trips.filter(b => b.status === "completed").length;
       const paid = trips.filter(b => b.paymentStatus === "paid").length;
       wrap.innerHTML = `
-        <div class="level202-title">Level 20.2 passenger board</div>
+        <div class="level202-title"> passenger board</div>
         <div class="level202-note">Cleaner trip visibility, quick progress view, and better follow-up without changing auth.</div>
         <div class="level202-kpis">
           <div class="item"><div class="tiny">Upcoming</div><div class="level201-kpi">${trips.filter(b => ["pending","assigned"].includes(b.status)).length}</div></div>
@@ -3331,7 +3342,7 @@ function renderAdminCharts() {
       const unassigned = active.filter(b => !b.assignedDriverUid);
       const assignable = getAutoAssignableBookings().slice(0,3);
       wrap.innerHTML = `
-        <div class="level202-title">Level 20.2 admin board</div>
+        <div class="level202-title"> admin board</div>
         <div class="level202-note">Cleaner command cards, stronger smart assignment visibility, and faster follow-up actions.</div>
         <div class="level202-kpis">
           <div class="item"><div class="tiny">Active jobs</div><div class="level201-kpi">${active.length}</div></div>
@@ -3372,7 +3383,7 @@ function renderAdminCharts() {
       const upcoming = trips.filter(b => ["pending","assigned"].includes(b.status)).length;
       const completed = trips.filter(b => b.status === "completed").length;
       wrap.innerHTML = `
-        <div class="level202-title">Level 20.2 driver board</div>
+        <div class="level202-title"> driver board</div>
         <div class="level202-note">Cleaner mission view with shift focus, current job clarity, and next-step visibility.</div>
         <div class="level202-kpis">
           <div class="item"><div class="tiny">Active now</div><div class="level201-kpi">${active ? "1" : "0"}</div></div>
@@ -5277,8 +5288,8 @@ function renderDriverAcceptanceBoard() {
       const nextTrip = upcoming[0];
       const unpaid = trips.filter(b => b.paymentStatus !== "paid");
       wrap.innerHTML = `
-        <div class="level203-title">Level 20.3 passenger board</div>
-        <div class="level203-note">Cleaner next-trip focus, payment follow-up, and clearer journey confidence.</div>
+        <div class="level203-title"> passenger board</div>
+        <div class="level203-note"></div>
         <div class="level203-kpis">
           <div class="item"><div class="tiny">Upcoming</div><div class="level201-kpi">${upcoming.length}</div></div>
           <div class="item"><div class="tiny">Completed</div><div class="level201-kpi">${trips.filter(b => b.status === "completed").length}</div></div>
@@ -5296,7 +5307,7 @@ function renderDriverAcceptanceBoard() {
           </div>
           <div class="level203-card">
             <div class="level203-title">Quick actions</div>
-            <div class="level203-note">Use the same flow, with clearer follow-up when your next trip is close.</div>
+            <div class="level203-note"></div>
             <div class="level203-actions">
               <button class="btn small" onclick="window.rebookLatestTrip?.()">Rebook latest</button>
               <button class="btn small" onclick="document.getElementById('estimateFareBtn')?.click()">Estimate fare</button>
@@ -5313,7 +5324,7 @@ function renderDriverAcceptanceBoard() {
       const overduePayments = allBookings.filter(b => b.paymentStatus !== "paid" && ["completed","assigned"].includes(b.status || "")).slice(0,4);
       const top = queue[0] ? getLevel203SmartRecommendation(queue[0]) : null;
       wrap.innerHTML = `
-        <div class="level203-title">Level 20.3 admin board</div>
+        <div class="level203-title"> admin board</div>
         <div class="level203-note">Cleaner booking cards, stronger dispatch ranking, and faster action for due-soon jobs.</div>
         <div class="level203-kpis">
           <div class="item"><div class="tiny">Dispatch queue</div><div class="level201-kpi">${queue.length}</div></div>
@@ -5346,7 +5357,7 @@ function renderDriverAcceptanceBoard() {
       const active = getActiveDriverBooking();
       const next = mine.filter(b => !["completed","cancelled"].includes(b.status || "") && b.id !== active?.id).sort((a,b) => bookingDateTimeValue(a)-bookingDateTimeValue(b))[0];
       wrap.innerHTML = `
-        <div class="level203-title">Level 20.3 driver board</div>
+        <div class="level203-title"> driver board</div>
         <div class="level203-note">Better acceptance flow, clearer current mission, and faster next-step decisions.</div>
         <div class="level203-kpis">
           <div class="item"><div class="tiny">Need response</div><div class="level201-kpi">${needsResponse.length}</div></div>
