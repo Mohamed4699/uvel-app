@@ -387,17 +387,13 @@
     .level20-kicker{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
     @media (max-width:1100px){.level20-premium-bar,.level20-driver-steps,.level20-grid{grid-template-columns:1fr}}
 
-    .smart-role-header{align-items:flex-start}
-    .smart-header-tools{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
-    .smart-bell{display:inline-flex;align-items:center;gap:10px;padding:12px 14px}
-    .smart-bell-icon{font-size:16px;line-height:1}
-    .legacy-counter-store{display:none!important}
-    @media (max-width:1100px){
-      .smart-role-header{align-items:stretch}
-      .smart-header-tools{width:100%;justify-content:flex-start}
-      .smart-header-tools #seedDriversBtn{order:3}
-    }
-
+    .smart-header-bell{display:inline-flex;align-items:center;gap:10px}
+    .smart-header-count{min-width:24px;height:24px;padding:0 8px;border-radius:999px;display:inline-grid;place-items:center;background:rgba(73,196,213,.16);font-weight:900}
+    .level201-admin-quick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+    .level201-admin-quick .item{padding:16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02))}
+    .level201-admin-quick .k{font-size:28px;font-weight:900}
+    .level201-admin-quick .t{color:var(--muted);font-size:13px}
+    @media (max-width:1100px){.level201-admin-quick{grid-template-columns:1fr}}
 
   </style>
 </head>
@@ -409,7 +405,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 20 mission control build</div>
+            <div class="subtitle">Firebase Level 20.1 mission control build</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -486,32 +482,26 @@
     </div>
 
     <div id="appScreen" class="hidden">
-      <div class="card header smart-role-header">
+      <div class="card header">
         <div class="brand">
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 20 • mission control • compact mode • executive focus • spotlight maps • operations pulse • priority lane</div>
+            <div class="subtitle">Full Level 20.1 • mission control • compact mode • executive focus • spotlight maps • operations pulse • priority lane</div>
           </div>
         </div>
-        <div class="userbox smart-header-tools">
+        <div class="userbox">
           <div class="pill" id="whoAmI">Signed in</div>
-          <button id="smartRoleBell" class="btn smart-bell" type="button" title="Open notifications">
-            <span class="smart-bell-icon">🔔</span>
-            <span id="smartRoleLabel">Updates</span>
-            <span class="level19-dot" id="level19RoleUnread">0</span>
+          <button id="roleNotificationsBtn" class="btn smart-header-bell" type="button">
+            <span id="roleNotificationLabel">Updates</span>
+            <span class="smart-header-count" id="roleNotificationCount">0</span>
           </button>
           <button id="seedDriversBtn" class="btn">Seed demo drivers</button>
           <button id="logoutBtn" class="btn brand">Logout</button>
         </div>
-        <div class="legacy-counter-store hidden" aria-hidden="true">
-          <span id="level18PassengerUnread">0</span>
-          <span id="level18DriverUnread">0</span>
-          <span id="level18AdminUnread">0</span>
-          <span id="level19UrgentCount">0</span>
-          <span id="level19OnlineDrivers">0</span>
-        </div>
       </div>
+
+      <div id="level201AdminQuick" class="level201-admin-quick hidden"></div>
 
       <div class="stats" id="statsBar">
         <div class="card stat"><div class="k" id="statTotal">0</div><div class="t">Total bookings</div></div>
@@ -684,7 +674,7 @@
                 <div class="section-title" style="font-size:16px">Booking summary</div>
                 <div class="section-sub" style="margin-bottom:10px">Review the trip before you send it to dispatch.</div>
                 <div id="bookingSummaryContent" class="booking-summary-grid"></div>
-                <div class="booking-confirm-note">Login, sign up, and reset password stay exactly the same in this Level 20 version.</div>
+                <div class="booking-confirm-note">Login, sign up, and reset password stay exactly the same in this Level 20.1 version.</div>
               </div>
               <div class="row top-gap">
                 <div>
@@ -926,7 +916,7 @@
               <button class="btn" id="exportCompletedBtn">Export completed CSV</button>
             </div>
             <div id="adminSmartDispatchBox" class="admin-recommend-box">
-              <div class="section-title" style="font-size:16px">Level 20 smart dispatch</div>
+              <div class="section-title" style="font-size:16px">Level 20.1 smart dispatch</div>
               <div class="section-sub" style="margin-bottom:10px">Best next booking, best driver, and live match reasons.</div>
               <div id="adminSmartDispatchContent"></div>
               <div class="mini-actions top-gap">
@@ -934,7 +924,7 @@
               </div>
             </div>
             <div id="level18AdminAutomation" class="level18-admin-strip">
-              <div class="section-title" style="font-size:16px">Level 20 auto-dispatch</div>
+              <div class="section-title" style="font-size:16px">Level 20.1 auto-dispatch</div>
               <div class="section-sub" style="margin-bottom:10px">Optionally auto-assign urgent top matches and keep an eye on unread ops updates.</div>
               <div id="level18AdminAutomationSummary"></div>
               <div class="level18-admin-actions">
@@ -2486,14 +2476,11 @@ if (!user) {
     function markRoleNotificationsRead(role) {
       level18State.read[role] = getNotificationRoleList(role).length;
       renderLevel18NotificationBadges();
-    renderLevel19HeaderBadges();
+    renderLevel201Header();
     }
 
     function renderLevel18NotificationBadges() {
-      if ($("level18PassengerUnread")) $("level18PassengerUnread").textContent = String(getUnreadNotificationCount("passenger"));
-      if ($("level18DriverUnread")) $("level18DriverUnread").textContent = String(getUnreadNotificationCount("driver"));
-      if ($("level18AdminUnread")) $("level18AdminUnread").textContent = String(getUnreadNotificationCount("admin"));
-      renderLevel19HeaderBadges();
+      renderLevel201Header();
     }
 
     function renderLevel18PassengerSnapshot() {
@@ -2860,13 +2847,21 @@ function renderAdminCharts() {
     }
 
 
-    function renderLevel19HeaderBadges() {
-      const urgent = allBookings.filter(b => b.status === "pending" && (b.priority === "urgent" || b.priority === "high")).length;
-      const onlineDrivers = allDrivers.filter(d => (d.availability || "online") === "online").length;
+    function renderLevel201Header() {
       const role = currentProfile?.role || "passenger";
-      if ($("level19UrgentCount")) $("level19UrgentCount").textContent = String(urgent);
-      if ($("level19OnlineDrivers")) $("level19OnlineDrivers").textContent = String(onlineDrivers);
-      if ($("level19RoleUnread")) $("level19RoleUnread").textContent = String(getUnreadNotificationCount(role));
+      const roleLabel = role === "admin" ? "Admin updates" : role === "driver" ? "Driver updates" : "Passenger updates";
+      const unread = getUnreadNotificationCount(role);
+      const btn = $("roleNotificationsBtn");
+      if ($("roleNotificationLabel")) $("roleNotificationLabel").textContent = roleLabel;
+      if ($("roleNotificationCount")) $("roleNotificationCount").textContent = String(unread);
+      if ($("seedDriversBtn")) $("seedDriversBtn").classList.toggle("hidden", role !== "admin");
+      if (btn) {
+        btn.onclick = () => {
+          const targetId = role === "admin" ? "adminNotifications" : role === "driver" ? "driverNotifications" : "passengerNotifications";
+          const target = $(targetId);
+          if (target?.scrollIntoView) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        };
+      }
     }
 
     function renderLevel19PassengerConcierge() {
@@ -2961,6 +2956,28 @@ function renderAdminCharts() {
           <div class="item"><div class="tiny">Support</div><div>${escapeHtml(formatSupportLevelLabel($("supportLevel")?.value || "standard"))}</div></div>
           <div class="item"><div class="tiny">Booking mode</div><div>${escapeHtml($("rideType")?.value === "ndis" ? "NDIS" : "Normal")}</div></div>
         </div>
+      `;
+    }
+
+    function renderLevel201AdminQuick() {
+      const wrap = $("level201AdminQuick");
+      if (!wrap) return;
+      if (currentProfile?.role !== "admin") {
+        wrap.classList.add("hidden");
+        wrap.innerHTML = "";
+        return;
+      }
+      const pending = allBookings.filter(b => String(b.status || "") === "pending");
+      const assigned = allBookings.filter(b => String(b.status || "") === "assigned");
+      const urgent = pending.filter(b => ["urgent","high"].includes(String(b.priority || "standard")));
+      const awaiting = assigned.filter(b => String(b.acceptanceStatus || "") === "pending_driver");
+      const onlineDrivers = allDrivers.filter(d => (d.availability || "online") === "online").length;
+      wrap.classList.remove("hidden");
+      wrap.innerHTML = `
+        <div class="item"><div class="k">${urgent.length}</div><div class="t">Urgent / High</div></div>
+        <div class="item"><div class="k">${assigned.length}</div><div class="t">Active trips</div></div>
+        <div class="item"><div class="k">${awaiting.length}</div><div class="t">Awaiting driver</div></div>
+        <div class="item"><div class="k">${onlineDrivers}</div><div class="t">Online drivers</div></div>
       `;
     }
 
@@ -3083,11 +3100,12 @@ function renderAdminCharts() {
       renderLevel17SmartDispatch();
       renderLevel18PassengerSnapshot();
       renderLevel18AdminAutomation();
-      renderLevel19HeaderBadges();
+      renderLevel201Header();
       renderLevel19PassengerConcierge();
       renderLevel19OpsBoard();
       renderLevel19DriverWorkflow();
       renderLevel20PassengerHero();
+      renderLevel201AdminQuick();
       renderLevel20AdminCommand();
       renderLevel20DriverMission();
       syncDriverControls();
@@ -4839,46 +4857,6 @@ function renderDriverAcceptanceBoard() {
   
 
 </script>
-
-<script>
-(function(){
-  function updateSmartRoleHeader(){
-    var who=document.getElementById('whoAmI');
-    var label=document.getElementById('smartRoleLabel');
-    var seed=document.getElementById('seedDriversBtn');
-    if(!who||!label) return;
-    var txt=(who.textContent||'').toLowerCase();
-    var role='updates';
-    if(txt.includes('passenger')) role='Passenger updates';
-    else if(txt.includes('driver')) role='Driver updates';
-    else if(txt.includes('admin')) role='Admin updates';
-    label.textContent=role;
-    if(seed) seed.style.display = txt.includes('admin') ? '' : 'none';
-  }
-  function scrollToRoleNotifications(){
-    var who=document.getElementById('whoAmI');
-    if(!who) return;
-    var txt=(who.textContent||'').toLowerCase();
-    var target=null;
-    if(txt.includes('passenger')) target=document.getElementById('passengerNotifications');
-    else if(txt.includes('driver')) target=document.getElementById('driverNotifications');
-    else if(txt.includes('admin')) target=document.getElementById('adminNotifications');
-    if(target && target.scrollIntoView) target.scrollIntoView({behavior:'smooth', block:'start'});
-  }
-  document.addEventListener('DOMContentLoaded', function(){
-    updateSmartRoleHeader();
-    var bell=document.getElementById('smartRoleBell');
-    if(bell) bell.addEventListener('click', scrollToRoleNotifications);
-    var who=document.getElementById('whoAmI');
-    if(who && window.MutationObserver){
-      new MutationObserver(updateSmartRoleHeader).observe(who,{childList:true,subtree:true,characterData:true});
-    }
-    setTimeout(updateSmartRoleHeader, 1200);
-    setTimeout(updateSmartRoleHeader, 3000);
-  });
-})();
-</script>
-
 </body>
 </html>${getTimelineHTML(b)}
           
