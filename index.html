@@ -334,6 +334,22 @@
     }
 
 
+    .level18-badge-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .level18-badge{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px;font-weight:800}
+    .level18-dot{min-width:22px;height:22px;padding:0 7px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:rgba(73,196,213,.16);color:var(--text);font-size:11px}
+    .level18-admin-strip,.level18-mobile-snapshot{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#061826}
+    .level18-admin-actions,.level18-read-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .level18-mobile-snapshot{display:none}
+    .level18-kpi-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+    .level18-kpi-grid .item{padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03)}
+    .level18-urgent{border-color:rgba(239,109,109,.45)!important;box-shadow:0 0 0 1px rgba(239,109,109,.12) inset}
+    @media (max-width:820px){
+      .level18-mobile-snapshot{display:block;position:sticky;top:10px;z-index:18}
+      .level18-kpi-grid{grid-template-columns:1fr}
+      .level18-badge-row{width:100%;justify-content:flex-start}
+    }
+
+
   </style>
 </head>
 <body>
@@ -344,7 +360,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:34px;font-weight:900">UVEL</div>
-            <div class="subtitle">Firebase Level 17 mission control build</div>
+            <div class="subtitle">Firebase Level 18 mission control build</div>
           </div>
         </div>
         <h1>Real-time transport platform for admin, driver, and passenger.</h1>
@@ -426,11 +442,16 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Full Level 17 • mission control • compact mode • executive focus • spotlight maps • operations pulse • priority lane</div>
+            <div class="subtitle">Full Level 18 • mission control • compact mode • executive focus • spotlight maps • operations pulse • priority lane</div>
           </div>
         </div>
         <div class="userbox">
           <div class="pill" id="whoAmI">Signed in</div>
+          <div class="level18-badge-row">
+            <div class="level18-badge">Passenger updates <span class="level18-dot" id="level18PassengerUnread">0</span></div>
+            <div class="level18-badge">Driver updates <span class="level18-dot" id="level18DriverUnread">0</span></div>
+            <div class="level18-badge">Admin updates <span class="level18-dot" id="level18AdminUnread">0</span></div>
+          </div>
           <button id="seedDriversBtn" class="btn">Seed demo drivers</button>
           <button id="logoutBtn" class="btn brand">Logout</button>
         </div>
@@ -463,6 +484,7 @@
       </div>
 
       <div id="passengerView" class="hidden">
+        <div id="level18PassengerSnapshot" class="level18-mobile-snapshot"></div>
         <div class="grid-2">
           <div class="card section">
             <div class="section-title">Passenger booking</div>
@@ -604,7 +626,7 @@
                 <div class="section-title" style="font-size:16px">Booking summary</div>
                 <div class="section-sub" style="margin-bottom:10px">Review the trip before you send it to dispatch.</div>
                 <div id="bookingSummaryContent" class="booking-summary-grid"></div>
-                <div class="booking-confirm-note">Login, sign up, and reset password stay exactly the same in this Level 17 version.</div>
+                <div class="booking-confirm-note">Login, sign up, and reset password stay exactly the same in this Level 18 version.</div>
               </div>
               <div class="row top-gap">
                 <div>
@@ -762,6 +784,7 @@
           <div class="passenger-mini-card">
             <div class="section-title">Trip updates</div>
             <div class="section-sub">Latest updates for your trips.</div>
+            <div class="level18-read-actions"><button class="btn small" id="markPassengerNotificationsReadBtn">Mark read</button></div>
             <div id="passengerNotifications" class="notice-list"></div>
           </div>
         </div>
@@ -845,11 +868,20 @@
               <button class="btn" id="exportCompletedBtn">Export completed CSV</button>
             </div>
             <div id="adminSmartDispatchBox" class="admin-recommend-box">
-              <div class="section-title" style="font-size:16px">Level 17 smart dispatch</div>
+              <div class="section-title" style="font-size:16px">Level 18 smart dispatch</div>
               <div class="section-sub" style="margin-bottom:10px">Best next booking, best driver, and live match reasons.</div>
               <div id="adminSmartDispatchContent"></div>
               <div class="mini-actions top-gap">
                 <button class="btn brand small" id="autoAssignTopBtn">Auto assign top match</button>
+              </div>
+            </div>
+            <div id="level18AdminAutomation" class="level18-admin-strip">
+              <div class="section-title" style="font-size:16px">Level 18 auto-dispatch</div>
+              <div class="section-sub" style="margin-bottom:10px">Optionally auto-assign urgent top matches and keep an eye on unread ops updates.</div>
+              <div id="level18AdminAutomationSummary"></div>
+              <div class="level18-admin-actions">
+                <button class="btn brand small" id="toggleLevel18AutoDispatchBtn">Enable auto-dispatch</button>
+                <button class="btn small" id="runLevel18DispatchNowBtn">Run now</button>
               </div>
             </div>
             <div class="toolbar">
@@ -906,6 +938,7 @@
           <div class="card section">
             <div class="section-title">Dispatch watch</div>
             <div class="section-sub">Priority queue, service alerts, and urgent incidents.</div>
+            <div class="level18-read-actions"><button class="btn small" id="markAdminNotificationsReadBtn">Mark read</button></div>
             <div id="dispatchBoard" class="notice-list"></div>
             <div class="line"></div>
             <div id="adminNotifications" class="notice-list"></div>
@@ -1140,6 +1173,7 @@
               <div class="card section">
                 <div class="section-title">Driver notifications</div>
                 <div class="section-sub">Assignments and completion reminders.</div>
+                <div class="level18-read-actions"><button class="btn small" id="markDriverNotificationsReadBtn">Mark read</button></div>
                 <div id="driverNotifications" class="notice-list"></div>
               </div>
               <div class="card section">
@@ -2371,6 +2405,102 @@ if (!user) {
 
     const level17Notifications = [];
     const level17BookingSnapshot = new Map();
+    const level18State = {
+      read: { passenger: 0, driver: 0, admin: 0 },
+      autoDispatchEnabled: false,
+      lastAutoDispatchAt: "",
+      lastAutoDispatchMessage: "Auto-dispatch is off."
+    };
+
+
+    function getNotificationRoleList(role) {
+      return level17Notifications.filter(n => n.role === "all" || n.role === role);
+    }
+
+    function getUnreadNotificationCount(role) {
+      return Math.max(0, getNotificationRoleList(role).length - (level18State.read[role] || 0));
+    }
+
+    function markRoleNotificationsRead(role) {
+      level18State.read[role] = getNotificationRoleList(role).length;
+      renderLevel18NotificationBadges();
+    }
+
+    function renderLevel18NotificationBadges() {
+      if ($("level18PassengerUnread")) $("level18PassengerUnread").textContent = String(getUnreadNotificationCount("passenger"));
+      if ($("level18DriverUnread")) $("level18DriverUnread").textContent = String(getUnreadNotificationCount("driver"));
+      if ($("level18AdminUnread")) $("level18AdminUnread").textContent = String(getUnreadNotificationCount("admin"));
+    }
+
+    function renderLevel18PassengerSnapshot() {
+      const wrap = $("level18PassengerSnapshot");
+      if (!wrap || currentProfile?.role !== "passenger") return;
+      const nextTrip = getPassengerBookings().filter(b => !["completed","cancelled"].includes(b.status)).sort((a,b) => bookingDateTimeValue(a)-bookingDateTimeValue(b))[0];
+      if (!nextTrip) {
+        wrap.innerHTML = `<div class="section-title" style="font-size:16px">Mobile snapshot</div><div class="tiny">No upcoming trip yet.</div>`;
+        return;
+      }
+      wrap.innerHTML = `
+        <div class="section-title" style="font-size:16px">Next trip snapshot</div>
+        <div style="font-weight:900;font-size:18px;margin-top:6px">${escapeHtml(nextTrip.pickup || "")} → ${escapeHtml(nextTrip.destination || "")}</div>
+        <div class="level18-kpi-grid">
+          <div class="item"><div class="tiny">Status</div><div>${escapeHtml(nextTrip.status || "pending")}</div></div>
+          <div class="item"><div class="tiny">Driver</div><div>${escapeHtml(nextTrip.assignedDriverName || "Waiting")}</div></div>
+          <div class="item"><div class="tiny">Ride</div><div>${escapeHtml(formatVehicleCategoryLabel(nextTrip.vehicleCategory || "standard"))}</div></div>
+        </div>`;
+    }
+
+    function renderLevel18AdminAutomation() {
+      const wrap = $("level18AdminAutomationSummary");
+      if (!wrap || currentProfile?.role !== "admin") return;
+      const top = getTopSmartDispatchMatch();
+      wrap.innerHTML = `
+        <div class="level18-kpi-grid">
+          <div class="item"><div class="tiny">Mode</div><div>${level18State.autoDispatchEnabled ? "Auto-dispatch enabled" : "Manual dispatch"}</div></div>
+          <div class="item"><div class="tiny">Unread admin updates</div><div>${getUnreadNotificationCount("admin")}</div></div>
+          <div class="item"><div class="tiny">Top urgent match</div><div>${top?.best ? escapeHtml(top.best.driver.name || top.best.driver.email || "Driver") : "No urgent match"}</div></div>
+        </div>
+        <div class="top-gap tiny">${escapeHtml(level18State.lastAutoDispatchMessage || "Auto-dispatch is off.")}</div>`;
+      const btn = $("toggleLevel18AutoDispatchBtn");
+      if (btn) btn.textContent = level18State.autoDispatchEnabled ? "Disable auto-dispatch" : "Enable auto-dispatch";
+    }
+
+    async function runLevel18AutoDispatch(force = false) {
+      if (!currentProfile || currentProfile.role !== "admin") return;
+      if (!force && !level18State.autoDispatchEnabled) return;
+      const urgent = allBookings
+        .filter(b => b.status === "pending" && (b.priority === "urgent" || b.priority === "high"))
+        .sort((a,b) => bookingPriorityRank(b.priority) - bookingPriorityRank(a.priority) || bookingDateTimeValue(a) - bookingDateTimeValue(b));
+      const booking = urgent[0];
+      if (!booking) {
+        level18State.lastAutoDispatchMessage = "No urgent or high-priority booking needs automatic dispatch.";
+        renderLevel18AdminAutomation();
+        return;
+      }
+      const ranked = getMatchingDriversForBooking(booking).map(d => ({ driver: d, ...scoreDriverForBooking(booking, d) })).sort((a,b) => b.score - a.score);
+      const best = ranked[0];
+      if (!best) {
+        level18State.lastAutoDispatchMessage = `No suitable driver found for ${booking.passengerName || "the urgent booking"}.`;
+        renderLevel18AdminAutomation();
+        return;
+      }
+      await updateDoc(doc(db, "bookings", booking.id), {
+        assignedDriverUid: best.driver.uid,
+        assignedDriverName: best.driver.name || best.driver.email,
+        status: "assigned",
+        acceptanceStatus: "pending_driver",
+        driverStage: "assigned",
+        dispatchAssignedAt: new Date().toISOString(),
+        dispatchScore: best.score,
+        dispatchReasons: best.reasons,
+        dispatchMode: "level18_auto",
+        updatedAt: serverTimestamp()
+      });
+      level18State.lastAutoDispatchAt = new Date().toISOString();
+      level18State.lastAutoDispatchMessage = `${best.driver.name || best.driver.email || "Driver"} was auto-assigned to ${booking.passengerName || "the urgent booking"}.`;
+      pushLevel17Notification("admin", "Level 18 auto-dispatch", level18State.lastAutoDispatchMessage, "success");
+      renderLevel18AdminAutomation();
+    }
 
     function showLevel17Toast(title, message, type = "info") {
       const wrap = $("level17ToastWrap");
@@ -2392,6 +2522,7 @@ if (!user) {
       while (level17Notifications.length > 40) level17Notifications.pop();
       const shouldToast = currentProfile && (role === "all" || role === currentProfile.role);
       if (shouldToast) showLevel17Toast(title, message, type);
+      renderLevel18NotificationBadges();
     }
 
     function detectLevel17BookingChanges() {
@@ -2430,6 +2561,7 @@ if (!user) {
       if (adminWrap) adminWrap.innerHTML = mk("admin");
       if (passengerWrap) passengerWrap.innerHTML = mk("passenger");
       if (driverWrap) driverWrap.innerHTML = mk("driver");
+      renderLevel18NotificationBadges();
     }
 
     function scoreDriverForBooking(booking, driver) {
@@ -2696,7 +2828,10 @@ function renderAdminCharts() {
       detectLevel17BookingChanges();
       renderRoleNotifications();
       renderLevel17SmartDispatch();
+      renderLevel18PassengerSnapshot();
+      renderLevel18AdminAutomation();
       syncDriverControls();
+      await runLevel18AutoDispatch(false);
       if (currentProfile?.role === "passenger") {
         await renderSavedPlaces();
         await renderRideTemplates();
@@ -4143,6 +4278,7 @@ function renderDriverAcceptanceBoard() {
     renderRideCategoryCards();
     renderRideSubtypeCards();
     updateBookingSummaryPanel();
+    renderLevel18NotificationBadges();
 
     window.assignDriver = assignDriver;
     window.completeBooking = completeBooking;
@@ -4214,6 +4350,18 @@ function renderDriverAcceptanceBoard() {
     };
 
     $("mobileEstimateBtn").onclick = () => $("estimateFareBtn").click();
+
+    if ($("toggleLevel18AutoDispatchBtn")) {
+      $("toggleLevel18AutoDispatchBtn").onclick = () => {
+        level18State.autoDispatchEnabled = !level18State.autoDispatchEnabled;
+        level18State.lastAutoDispatchMessage = level18State.autoDispatchEnabled ? "Auto-dispatch enabled for urgent and high-priority bookings." : "Auto-dispatch disabled. Manual control restored.";
+        renderLevel18AdminAutomation();
+      };
+    }
+    if ($("runLevel18DispatchNowBtn")) $("runLevel18DispatchNowBtn").onclick = () => runLevel18AutoDispatch(true);
+    if ($("markPassengerNotificationsReadBtn")) $("markPassengerNotificationsReadBtn").onclick = () => markRoleNotificationsRead("passenger");
+    if ($("markDriverNotificationsReadBtn")) $("markDriverNotificationsReadBtn").onclick = () => markRoleNotificationsRead("driver");
+    if ($("markAdminNotificationsReadBtn")) $("markAdminNotificationsReadBtn").onclick = () => markRoleNotificationsRead("admin");
 
     $("exportActiveBtn").onclick = () => exportCSV(allBookings.filter(b => b.status !== "completed"), "uvel_active_bookings.csv");
     $("exportCompletedBtn").onclick = () => exportCSV(allBookings.filter(b => b.status === "completed"), "uvel_completed_bookings.csv");
