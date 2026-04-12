@@ -387,6 +387,25 @@
     .level20-kicker{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
     @media (max-width:1100px){.level20-premium-bar,.level20-driver-steps,.level20-grid{grid-template-columns:1fr}}
 
+  
+
+    .level201-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:14px}
+    .level201-stack{display:grid;gap:10px}
+    .level201-card{padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.035)}
+    .level201-kpi{font-size:28px;font-weight:900;margin-top:6px}
+    .level201-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .level201-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px}
+    .level201-list{display:grid;gap:10px;margin-top:10px}
+    .level201-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#061826}
+    .level201-item strong{display:block;margin-bottom:6px}
+    .level201-split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .level201-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .level201-note{font-size:12px;color:var(--muted);line-height:1.55}
+    .level201-alert{border-color:rgba(239,109,109,.35);box-shadow:0 0 0 1px rgba(239,109,109,.08) inset}
+    .level201-good{border-color:rgba(87,208,139,.35);box-shadow:0 0 0 1px rgba(87,208,139,.08) inset}
+    @media (max-width:1100px){.level201-grid,.level201-split{grid-template-columns:1fr}}
+
+
   </style>
 </head>
 <body>
@@ -2925,27 +2944,50 @@ function renderAdminCharts() {
     function renderLevel20PassengerHero() {
       const wrap = $("level20PassengerHero");
       if (!wrap || currentProfile?.role !== "passenger") return;
-      const upcoming = getScopedBookingsForRole("passenger").find(b => !["completed","cancelled"].includes(String(b.status||""))) || null;
-      const totalUnread = getUnreadNotificationCount("passenger");
-      wrap.innerHTML = upcoming ? `
-        <div class="level20-kicker">Level 20 passenger concierge</div>
-        <div class="big">${escapeHtml(upcoming.pickup || "Pickup")} → ${escapeHtml(upcoming.destination || "Destination")}</div>
-        <div class="section-sub" style="margin:8px 0 0">${escapeHtml(upcoming.tripDate || "--")} • ${escapeHtml(upcoming.tripTime || "--")} • ${escapeHtml(formatStatusLabel(upcoming.driverStage || upcoming.status || "pending"))}</div>
+      const active = getScopedBookingsForRole("passenger").find(b => !["completed","cancelled"].includes(String(b.status||""))) || null;
+      const mine = getPassengerBookings ? getPassengerBookings() : [];
+      const completed = mine.filter(b => String(b.status||"") === "completed").length;
+      const unread = getUnreadNotificationCount("passenger");
+      const ndisTrips = mine.filter(b => String(b.rideType||"normal") === "ndis").length;
+      const latestFare = active?.estimatedFare || active?.fare || 0;
+      wrap.innerHTML = active ? `
+        <div class="level20-kicker">Level 20.1 passenger concierge</div>
+        <div class="big">${escapeHtml(active.pickup || "Pickup")} → ${escapeHtml(active.destination || "Destination")}</div>
+        <div class="section-sub" style="margin:8px 0 0">${escapeHtml(active.tripDate || "--")} • ${escapeHtml(active.tripTime || "--")} • ${escapeHtml(formatStatusLabel(active.driverStage || active.status || "pending"))}</div>
         <div class="level20-premium-bar">
-          <div class="item"><div class="tiny">Assigned driver</div><div>${escapeHtml(upcoming.assignedDriverName || "Waiting for dispatch")}</div></div>
-          <div class="item"><div class="tiny">Ride</div><div>${escapeHtml(formatVehicleCategoryLabel(upcoming.vehicleCategory || "standard"))}</div></div>
-          <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(upcoming.paymentStatus || "unpaid")}</div></div>
-          <div class="item"><div class="tiny">Unread updates</div><div>${totalUnread}</div></div>
+          <div class="item"><div class="tiny">Assigned driver</div><div>${escapeHtml(active.assignedDriverName || "Waiting for dispatch")}</div></div>
+          <div class="item"><div class="tiny">Ride type</div><div>${escapeHtml(formatVehicleCategoryLabel(active.vehicleCategory || "standard"))}</div></div>
+          <div class="item"><div class="tiny">Fare</div><div>$${Number(latestFare || 0).toFixed(2)}</div></div>
+          <div class="item"><div class="tiny">Unread updates</div><div>${unread}</div></div>
+        </div>
+        <div class="level201-grid">
+          <div class="level201-card level201-good">
+            <div class="section-title" style="font-size:16px">Next best action</div>
+            <div class="level201-note">Your next ride is already in focus. Keep the booking details checked and watch for driver updates.</div>
+            <div class="level201-row">
+              <span class="level201-pill">Payment ${escapeHtml(active.paymentStatus || "unpaid")}</span>
+              <span class="level201-pill">Support ${escapeHtml(formatSupportLevelLabel(active.supportLevel || "standard"))}</span>
+              <span class="level201-pill">Booking mode ${escapeHtml(active.rideType === "ndis" ? "NDIS" : "Normal")}</span>
+            </div>
+          </div>
+          <div class="level201-split">
+            <div class="level201-card"><div class="tiny">Completed rides</div><div class="level201-kpi">${completed}</div></div>
+            <div class="level201-card"><div class="tiny">NDIS rides</div><div class="level201-kpi">${ndisTrips}</div></div>
+          </div>
         </div>
       ` : `
-        <div class="level20-kicker">Level 20 passenger concierge</div>
+        <div class="level20-kicker">Level 20.1 passenger concierge</div>
         <div class="big">No active trip yet</div>
-        <div class="section-sub" style="margin:8px 0 0">Create a booking to see your next ride, assigned driver, and live trip readiness in one place.</div>
+        <div class="section-sub" style="margin:8px 0 0">Create a booking to see your next ride, assigned driver, fare, and readiness in one clean area.</div>
         <div class="level20-premium-bar">
-          <div class="item"><div class="tiny">Unread updates</div><div>${totalUnread}</div></div>
+          <div class="item"><div class="tiny">Unread updates</div><div>${unread}</div></div>
           <div class="item"><div class="tiny">Preferred ride</div><div>${escapeHtml(formatVehicleCategoryLabel($("vehicleCategory")?.value || "standard"))}</div></div>
           <div class="item"><div class="tiny">Support</div><div>${escapeHtml(formatSupportLevelLabel($("supportLevel")?.value || "standard"))}</div></div>
           <div class="item"><div class="tiny">Booking mode</div><div>${escapeHtml($("rideType")?.value === "ndis" ? "NDIS" : "Normal")}</div></div>
+        </div>
+        <div class="level201-card">
+          <div class="section-title" style="font-size:16px">Ready to request</div>
+          <div class="level201-note">This Level 20.1 version keeps your auth exactly the same and upgrades only the live app experience around it.</div>
         </div>
       `;
     }
@@ -2953,52 +2995,90 @@ function renderAdminCharts() {
     function renderLevel20AdminCommand() {
       const wrap = $("level20AdminCommand");
       if (!wrap || currentProfile?.role !== "admin") return;
-      const pending = allBookings.filter(b => b.status === "pending");
-      const assigned = allBookings.filter(b => b.status === "assigned");
+      const pending = allBookings.filter(b => String(b.status||"") === "pending");
+      const assigned = allBookings.filter(b => String(b.status||"") === "assigned");
+      const completed = allBookings.filter(b => String(b.status||"") === "completed");
       const urgent = pending.filter(b => ["urgent","high"].includes(String(b.priority||"standard")));
       const awaiting = assigned.filter(b => String(b.acceptanceStatus || "") === "pending_driver");
-      const top = getTopSmartDispatchMatch ? getTopSmartDispatchMatch() : null;
-      const topDrivers = allDrivers.slice().sort((a,b) => {
+      const paidCompleted = completed.filter(b => String(b.paymentStatus||"") === "paid");
+      const onlineDrivers = allDrivers.filter(d => (d.availability||"online") === "online");
+      const activeSupply = onlineDrivers.length;
+      const completionRate = allBookings.length ? Math.round((completed.length / allBookings.length) * 100) : 0;
+      const collectionRate = completed.length ? Math.round((paidCompleted.length / completed.length) * 100) : 0;
+      const top = typeof getTopSmartDispatchMatch === "function" ? getTopSmartDispatchMatch() : null;
+      const lowLoadDrivers = allDrivers.slice().sort((a,b) => {
         const ac = allBookings.filter(x => x.assignedDriverUid === a.uid && !["completed","cancelled"].includes(String(x.status||""))).length;
         const bc = allBookings.filter(x => x.assignedDriverUid === b.uid && !["completed","cancelled"].includes(String(x.status||""))).length;
-        return ac-bc;
+        return ac - bc;
+      }).slice(0,4);
+      const dueSoon = allBookings.filter(b => {
+        if (!b.tripDate || !b.tripTime) return false;
+        const dt = new Date(`${b.tripDate}T${b.tripTime}`);
+        const diff = (dt.getTime() - Date.now()) / 60000;
+        return diff >= 0 && diff <= 120 && !["completed","cancelled"].includes(String(b.status||""));
       }).slice(0,4);
       wrap.innerHTML = `
         <div class="level20-admin-head">
           <div>
-            <div class="level20-kicker">Level 20 premium command center</div>
+            <div class="level20-kicker">Level 20.1 premium command center</div>
             <div class="section-title" style="font-size:20px">Operations snapshot</div>
-            <div class="section-sub" style="margin:6px 0 0">Cleaner startup-style view for dispatch pressure, top matches, and online supply.</div>
+            <div class="section-sub" style="margin:6px 0 0">Cleaner admin visibility for queue pressure, smart dispatch, payment collection, and jobs due soon.</div>
           </div>
           <div>
             <span class="level20-chip">Unread admin updates ${getUnreadNotificationCount("admin")}</span>
-            <span class="level20-chip">Online drivers ${allDrivers.filter(d => (d.availability||"online") === "online").length}</span>
+            <span class="level20-chip">Online drivers ${activeSupply}</span>
+            <span class="level20-chip">Completion rate ${completionRate}%</span>
           </div>
         </div>
         <div class="level20-premium-bar">
           <div class="item"><div class="tiny">Pending</div><div>${pending.length}</div></div>
           <div class="item"><div class="tiny">Urgent / High</div><div>${urgent.length}</div></div>
           <div class="item"><div class="tiny">Awaiting driver</div><div>${awaiting.length}</div></div>
-          <div class="item"><div class="tiny">Assigned live jobs</div><div>${assigned.length}</div></div>
+          <div class="item"><div class="tiny">Collection rate</div><div>${collectionRate}%</div></div>
         </div>
-        <div class="level20-grid top-gap">
+        <div class="level201-grid">
           <div class="level20-panel">
             <div class="section-title" style="font-size:16px">Best dispatch opportunities</div>
-            <div class="level20-queue">
-              ${urgent.slice(0,4).map(b => `<div class="level20-queue-card"><strong>${escapeHtml(b.bookingCode || b.passengerName || "Booking")}</strong><div class="level20-meta">${escapeHtml(b.pickup || "Pickup")} → ${escapeHtml(b.destination || "Destination")}</div><div class="level20-meta">${escapeHtml(formatVehicleCategoryLabel(b.vehicleCategory || "standard"))} • ${escapeHtml(formatSupportLevelLabel(b.supportLevel || "standard"))} • ${escapeHtml(b.priority || "standard")}</div></div>`).join("") || '<div class="empty">No urgent items in the queue.</div>'}
+            <div class="level201-list">
+              ${urgent.slice(0,4).map(b => `<div class="level201-item ${String(b.priority||"")==="urgent" ? "level201-alert" : ""}"><strong>${escapeHtml(b.bookingCode || b.passengerName || "Booking")}</strong><div class="level20-meta">${escapeHtml(b.pickup || "Pickup")} → ${escapeHtml(b.destination || "Destination")}</div><div class="level20-meta">${escapeHtml(formatVehicleCategoryLabel(b.vehicleCategory || "standard"))} • ${escapeHtml(formatSupportLevelLabel(b.supportLevel || "standard"))} • ${escapeHtml(b.priority || "standard")}</div></div>`).join("") || '<div class="empty">No urgent items in the queue.</div>'}
             </div>
           </div>
-          <div class="level20-panel">
-            <div class="section-title" style="font-size:16px">Top low-load drivers</div>
-            <div class="level20-queue">
-              ${topDrivers.map(d => {
-                const active = allBookings.filter(x => x.assignedDriverUid === d.uid && !["completed","cancelled"].includes(String(x.status||""))).length;
-                return `<div class="level20-queue-card"><strong>${escapeHtml(d.name || d.email || "Driver")}</strong><div class="level20-meta">${escapeHtml(d.vehicle || "Vehicle not set")} • ${escapeHtml(formatVehicleTypeLabel(d.vehicleType || "standard"))}</div><div class="level20-meta">Availability: ${escapeHtml(d.availability || "online")} • Active load: ${active}</div></div>`;
-              }).join("") || '<div class="empty">No driver profiles available.</div>'}
-              ${top?.best ? `<div class="level20-queue-card"><strong>Top smart match</strong><div class="level20-meta">${escapeHtml(top.booking?.passengerName || top.booking?.bookingCode || "Booking")} → ${escapeHtml(top.best.driver.name || top.best.driver.email || "Driver")}</div><div class="level20-meta">Score ${top.best.score} • ${(top.best.reasons || []).map(r => escapeHtml(r)).join(' • ')}</div></div>` : ''}
+          <div class="level201-stack">
+            <div class="level201-card">
+              <div class="section-title" style="font-size:16px">Top smart match</div>
+              ${top?.best ? `<div class="level201-note">${escapeHtml(top.booking?.passengerName || top.booking?.bookingCode || "Booking")} → ${escapeHtml(top.best.driver.name || top.best.driver.email || "Driver")}</div><div class="level201-row"><span class="level201-pill">Score ${top.best.score}</span>${(top.best.reasons || []).slice(0,3).map(r => `<span class="level201-pill">${escapeHtml(r)}</span>`).join("")}</div>` : `<div class="level201-note">No smart match available yet.</div>`}
+              <div class="level201-actions">
+                <button class="btn brand small" id="level201AssignBestBtn" type="button">Assign best match</button>
+                <button class="btn small" id="level201RefreshOpsBtn" type="button">Refresh view</button>
+              </div>
             </div>
+            <div class="level201-card">
+              <div class="section-title" style="font-size:16px">Low-load drivers</div>
+              <div class="level201-list">
+                ${lowLoadDrivers.map(d => {
+                  const active = allBookings.filter(x => x.assignedDriverUid === d.uid && !["completed","cancelled"].includes(String(x.status||""))).length;
+                  return `<div class="level201-item"><strong>${escapeHtml(d.name || d.email || "Driver")}</strong><div class="level20-meta">${escapeHtml(d.vehicle || "Vehicle not set")} • ${escapeHtml(formatVehicleTypeLabel(d.vehicleType || "standard"))}</div><div class="level20-meta">Availability: ${escapeHtml(d.availability || "online")} • Active load: ${active}</div></div>`;
+                }).join("") || '<div class="empty">No driver profiles available.</div>'}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="level201-grid">
+          <div class="level201-card">
+            <div class="section-title" style="font-size:16px">Jobs due soon</div>
+            <div class="level201-list">
+              ${dueSoon.map(b => `<div class="level201-item"><strong>${escapeHtml(b.passengerName || b.bookingCode || "Booking")}</strong><div class="level20-meta">${escapeHtml(b.tripDate || "--")} ${escapeHtml(b.tripTime || "--")} • ${escapeHtml(b.pickup || "Pickup")}</div></div>`).join("") || '<div class="empty">No jobs due in the next 2 hours.</div>'}
+            </div>
+          </div>
+          <div class="level201-split">
+            <div class="level201-card"><div class="tiny">Completed jobs</div><div class="level201-kpi">${completed.length}</div></div>
+            <div class="level201-card"><div class="tiny">Active supply</div><div class="level201-kpi">${activeSupply}</div></div>
           </div>
         </div>`;
+      setTimeout(() => {
+        $("level201AssignBestBtn")?.addEventListener("click", () => $("autoAssignTopBtn")?.click(), { once: true });
+        $("level201RefreshOpsBtn")?.addEventListener("click", () => renderEverything(), { once: true });
+      }, 0);
     }
 
     function renderLevel20DriverMission() {
@@ -3007,30 +3087,41 @@ function renderAdminCharts() {
       const active = getActiveDriverBooking();
       const mine = getScopedBookingsForRole("driver");
       const completed = mine.filter(b => String(b.status||"") === "completed").length;
+      const accepted = mine.filter(b => String(b.acceptanceStatus||"") === "accepted").length;
       const unread = getUnreadNotificationCount("driver");
+      const todayEarnings = mine.filter(b => String(b.status||"") === "completed").reduce((sum,b) => sum + Number(getDriverEarningsAmount ? getDriverEarningsAmount(b) : 0), 0);
       const stage = String(active?.driverStage || active?.status || "assigned");
-      const steps = [
-        ["assigned","Assigned"],
-        ["en_route","En Route"],
-        ["picked_up","Picked Up"],
-        ["completed","Completed"]
-      ];
+      const steps = [["assigned","Assigned"],["en_route","En Route"],["picked_up","Picked Up"],["completed","Completed"]];
       const stageOrder = {assigned:0,en_route:1,picked_up:2,completed:3};
       const currentIdx = stageOrder[stage] ?? 0;
       wrap.innerHTML = `
-        <div class="level20-kicker">Level 20 driver mission</div>
+        <div class="level20-kicker">Level 20.1 driver mission</div>
         <div class="section-title" style="font-size:20px">Focused workflow</div>
-        <div class="section-sub" style="margin:6px 0 0">Cleaner mission-style panel for active ride, progress, and productivity.</div>
+        <div class="section-sub" style="margin:6px 0 0">Cleaner mission-style panel for active ride, progress, earnings, and job acceptance.</div>
         <div class="level20-premium-bar">
           <div class="item"><div class="tiny">Current rider</div><div>${escapeHtml(active?.passengerName || "No active rider")}</div></div>
           <div class="item"><div class="tiny">Current route</div><div>${escapeHtml(active ? ((active.pickup || "Pickup") + ' → ' + (active.destination || "Destination")) : "Waiting for assignment")}</div></div>
-          <div class="item"><div class="tiny">Completed today</div><div>${completed}</div></div>
+          <div class="item"><div class="tiny">Completed</div><div>${completed}</div></div>
           <div class="item"><div class="tiny">Unread updates</div><div>${unread}</div></div>
         </div>
         <div class="level20-driver-steps">
           ${steps.map(([key,label], idx) => `<div class="level20-driver-step ${idx < currentIdx ? 'done' : idx === currentIdx ? 'active' : ''}"><div class="tiny">Stage</div><div>${label}</div></div>`).join('')}
         </div>
-      `;
+        <div class="level201-grid">
+          <div class="level201-card ${active ? "level201-good" : ""}">
+            <div class="section-title" style="font-size:16px">Mission status</div>
+            <div class="level201-note">${active ? 'You have an active job. Follow the stage controls below and keep passenger updates accurate.' : 'No active job right now. Stay online to receive the next trip.'}</div>
+            <div class="level201-row">
+              <span class="level201-pill">Acceptance ${accepted}</span>
+              <span class="level201-pill">Today earnings $${todayEarnings.toFixed(2)}</span>
+              <span class="level201-pill">Availability ${escapeHtml(currentProfile?.availability || 'online')}</span>
+            </div>
+          </div>
+          <div class="level201-split">
+            <div class="level201-card"><div class="tiny">Today earnings</div><div class="level201-kpi">$${todayEarnings.toFixed(2)}</div></div>
+            <div class="level201-card"><div class="tiny">Accepted jobs</div><div class="level201-kpi">${accepted}</div></div>
+          </div>
+        </div>`;
     }
 
 
@@ -4826,5 +4917,4 @@ function renderDriverAcceptanceBoard() {
 
 </script>
 </body>
-</html>${getTimelineHTML(b)}
-          
+</html>
