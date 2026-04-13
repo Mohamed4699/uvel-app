@@ -1008,6 +1008,134 @@
     }
 
 </style>
+
+
+  <style id="level25CleanPatch">
+    /* Level 25 simple clean patch */
+    body.level25clean{
+      --radius:18px;
+      background:
+        radial-gradient(circle at top left, rgba(73,196,213,.10), transparent 22%),
+        radial-gradient(circle at bottom right, rgba(47,164,169,.08), transparent 20%),
+        linear-gradient(180deg,#04111b 0%,#061623 100%);
+    }
+    body.level25clean .container{max-width:1320px;padding:14px}
+    body.level25clean .header{padding:14px 18px;margin-bottom:14px}
+    body.level25clean .section{padding:14px}
+    body.level25clean .card{border-radius:18px;box-shadow:0 12px 34px rgba(0,0,0,.22)}
+    body.level25clean .section-title{font-size:16px;margin-bottom:2px}
+    body.level25clean .section-sub,
+    body.level25clean .tiny,
+    body.level25clean .note,
+    body.level25clean .footer-note,
+    body.level25clean label{font-size:11px;line-height:1.45}
+    body.level25clean .btn,
+    body.level25clean button{padding:9px 12px;border-radius:12px;font-size:12px}
+    body.level25clean .btn.small{padding:7px 10px;font-size:11px}
+    body.level25clean input,
+    body.level25clean select,
+    body.level25clean textarea{padding:10px 12px;border-radius:12px;font-size:13px}
+    body.level25clean textarea{min-height:84px}
+    body.level25clean .stats{gap:10px;margin-bottom:14px}
+    body.level25clean .stat{padding:12px 14px}
+    body.level25clean .stat .k{font-size:22px}
+    body.level25clean .stat .t{font-size:11px}
+    body.level25clean .map{height:250px;border-radius:14px}
+    body.level25clean .grid-2,
+    body.level25clean .grid-3,
+    body.level25clean .grid-4,
+    body.level25clean .split,
+    body.level25clean .row,
+    body.level25clean .eta-box,
+    body.level25clean .meta,
+    body.level25clean .toolbar,
+    body.level25clean .driver-focus-grid,
+    body.level25clean .compact-passenger-grid{gap:12px}
+    body.level25clean .line{margin:10px 0;background:rgba(105,182,218,.12)}
+    body.level25clean .pill,
+    body.level25clean .status-chip,
+    body.level25clean .history-tab-btn,
+    body.level25clean .badge{font-size:11px;padding:6px 9px}
+
+    .level25-banner{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+      padding:12px 14px;margin-bottom:14px;border:1px solid rgba(105,182,218,.18);
+      border-radius:16px;background:linear-gradient(135deg, rgba(73,196,213,.10), rgba(255,255,255,.03));
+    }
+    .level25-banner-title{font-size:15px;font-weight:800}
+    .level25-banner-copy{font-size:12px;color:var(--muted)}
+    .level25-badge{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:11px;font-weight:800;background:rgba(255,255,255,.04)}
+
+    body.level25clean #passengerView > .grid-2:first-of-type,
+    body.level25clean #adminView > .split:first-of-type,
+    body.level25clean #driverView > .driver-focus-grid:first-of-type{align-items:start}
+
+    body.level25clean #passengerView .compact-passenger-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    body.level25clean #driverView .driver-focus-grid{grid-template-columns:1fr 1fr}
+    body.level25clean #driverView .driver-upcoming-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+    body.level25clean #driverView .driver-status-strip,
+    body.level25clean #driverView .driver-current-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+    body.level25clean #passengerTrips{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    body.level25clean #passengerTrips .passenger-trip-card{padding:12px 14px;border-radius:14px}
+    body.level25clean #passengerTrips .passenger-trip-route{font-size:16px;line-height:1.2}
+    body.level25clean #passengerTrips .passenger-trip-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    body.level25clean #passengerTrips .passenger-trip-grid .item{padding:9px 10px;border-radius:12px}
+    body.level25clean #passengerTrips .timeline{grid-template-columns:repeat(3,max-content);gap:6px;justify-content:start}
+    body.level25clean #passengerTrips .timeline-step{padding:4px 8px;font-size:10px;border-radius:999px}
+
+    body.level25clean #driverView .driver-current-card,
+    body.level25clean #driverView .driver-mini-card,
+    body.level25clean #driverView .driver-upcoming-card,
+    body.level25clean #driverView .otp-box,
+    body.level25clean #driverView .proof-item{padding:12px;border-radius:14px}
+    body.level25clean #driverView .driver-current-route,
+    body.level25clean #driverView .driver-upcoming-title{font-size:16px;line-height:1.2}
+
+    body.level25clean .focus-advanced,
+    body.level25clean #level18PassengerSnapshot,
+    body.level25clean #level18AdminAutomation,
+    body.level25clean #level19PassengerConcierge,
+    body.level25clean #level19DriverWorkflow,
+    body.level25clean #level20PassengerHero,
+    body.level25clean #level20AdminCommand,
+    body.level25clean #level20DriverMission,
+    body.level25clean #level202PassengerBoard,
+    body.level25clean #level202AdminBoard,
+    body.level25clean #level202DriverBoard,
+    body.level25clean #level203PassengerBoard,
+    body.level25clean #level203AdminBoard,
+    body.level25clean #level203DriverBoard,
+    body.level25clean #level204PassengerBoard,
+    body.level25clean #level204AdminBoard,
+    body.level25clean #level204DriverBoard{
+      display:none !important;
+    }
+
+    body.level25clean #passengerView .more-travel-info,
+    body.level25clean #passengerView .collapsible-passenger,
+    body.level25clean #adminView details.driver-detail-collapsible,
+    body.level25clean #driverView details.driver-detail-collapsible{
+      display:none !important;
+    }
+
+    body.level25clean #adminView .grid-3.top-gap{grid-template-columns:repeat(3,minmax(0,1fr))}
+    body.level25clean #adminView .grid-3.top-gap > .card{min-height:100%}
+    body.level25clean .level25-stack{display:grid;gap:14px}
+    body.level25clean .level25-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    body.level25clean .level25-trip-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+    @media (max-width: 1100px){
+      body.level25clean #passengerTrips,
+      body.level25clean #driverView .driver-upcoming-list,
+      body.level25clean #driverView .driver-status-strip,
+      body.level25clean #driverView .driver-current-grid,
+      body.level25clean #adminView .grid-3.top-gap,
+      body.level25clean .level25-tools{grid-template-columns:1fr}
+      body.level25clean #passengerView .compact-passenger-grid,
+      body.level25clean #driverView .driver-focus-grid{grid-template-columns:1fr}
+    }
+  </style>
+
 </head>
 <body class="compact55 production22">
   <div class="container">
@@ -6031,6 +6159,98 @@ function renderDriverAcceptanceBoard() {
         .replace(/'/g, "&#039;");
     }
   
+
+
+
+    /* Level 25 simple clean patch */
+    function ensureLevel25Banner(viewId, title, copy, badge) {
+      const view = $(viewId);
+      if (!view || view.querySelector('.level25-banner')) return;
+      const banner = document.createElement('div');
+      banner.className = 'level25-banner';
+      banner.innerHTML = `
+        <div>
+          <div class="level25-banner-title">${escapeHtml(title)}</div>
+          <div class="level25-banner-copy">${escapeHtml(copy)}</div>
+        </div>
+        <div class="level25-badge">${escapeHtml(badge)}</div>`;
+      view.insertBefore(banner, view.firstChild);
+    }
+
+    function moveAfter(referenceNode, node) {
+      if (!referenceNode || !node || referenceNode === node) return;
+      referenceNode.parentNode.insertBefore(node, referenceNode.nextSibling);
+    }
+
+    function applyPassengerLevel25Layout() {
+      const view = $('passengerView');
+      if (!view || view.dataset.level25Passenger === 'done') return;
+      ensureLevel25Banner('passengerView', 'Passenger dashboard', 'Simple booking, live route, and clean trip history.', 'Level 25 clean');
+      const bookingGrid = view.querySelector('.grid-2');
+      const tripsCard = $('passengerTrips')?.closest('.card.section');
+      const savedCard = $('savedPlacesList')?.closest('.passenger-mini-card');
+      const updatesCard = $('passengerNotifications')?.closest('.passenger-mini-card');
+      const repeatCard = $('rideTemplatesList')?.closest('.passenger-mini-card');
+      const readinessCard = $('passengerReadiness')?.closest('.passenger-mini-card');
+      if (bookingGrid && tripsCard) moveAfter(bookingGrid, tripsCard);
+      const toolsWrap = document.createElement('div');
+      toolsWrap.className = 'level25-tools top-gap';
+      if (savedCard) toolsWrap.appendChild(savedCard);
+      if (updatesCard) toolsWrap.appendChild(updatesCard);
+      if (repeatCard) toolsWrap.appendChild(repeatCard);
+      if (readinessCard) toolsWrap.appendChild(readinessCard);
+      if (tripsCard && toolsWrap.children.length) moveAfter(tripsCard, toolsWrap);
+      view.dataset.level25Passenger = 'done';
+    }
+
+    function applyAdminLevel25Layout() {
+      const view = $('adminView');
+      if (!view || view.dataset.level25Admin === 'done') return;
+      ensureLevel25Banner('adminView', 'Admin dashboard', 'Dispatch first, route visibility, and finance overview in one clean layout.', 'Level 25 clean');
+      const split = view.querySelector('.split');
+      const analytics = $('revenueChart')?.closest('.card.section');
+      const opsGrid = $('dispatchBoard')?.closest('.grid-3.top-gap');
+      if (split && analytics) moveAfter(split, analytics);
+      if (analytics && opsGrid) moveAfter(analytics, opsGrid);
+      view.dataset.level25Admin = 'done';
+    }
+
+    function applyDriverLevel25Layout() {
+      const view = $('driverView');
+      if (!view || view.dataset.level25Driver === 'done') return;
+      ensureLevel25Banner('driverView', 'Driver dashboard', 'Current trip first, next jobs second, and only the controls that matter.', 'Level 25 clean');
+      const topGrid = view.querySelector('.driver-focus-grid');
+      const statusCard = $('driverAvailabilitySelect')?.closest('.driver-mini-card');
+      const nextJobsCard = $('driverAcceptanceBoard')?.closest('.driver-mini-card');
+      const otpCard = $('driverOtpPanel')?.closest('.driver-mini-card');
+      const proofCard = $('driverProofPanel')?.closest('.driver-mini-card');
+      const secondGrid = statusCard?.parentElement;
+      const thirdGrid = otpCard?.parentElement;
+      if (topGrid && secondGrid) moveAfter(topGrid, secondGrid);
+      if (secondGrid && thirdGrid) moveAfter(secondGrid, thirdGrid);
+      if (nextJobsCard) {
+        const title = nextJobsCard.querySelector('.section-title');
+        if (title) title.textContent = 'Next jobs';
+      }
+      view.dataset.level25Driver = 'done';
+    }
+
+    function applyLevel25CleanUI() {
+      document.body.classList.add('level25clean');
+      applyPassengerLevel25Layout();
+      applyAdminLevel25Layout();
+      applyDriverLevel25Layout();
+    }
+
+    const __uvelRenderEverything25 = renderEverything;
+    renderEverything = async function() {
+      await __uvelRenderEverything25();
+      applyLevel25CleanUI();
+    };
+
+    setTimeout(() => {
+      try { applyLevel25CleanUI(); } catch (e) { console.warn('Level 25 clean UI patch failed:', e); }
+    }, 0);
 
 </script>
 </body>
