@@ -1310,6 +1310,40 @@
   .level30 #passengerView .passenger-trip-grid{grid-template-columns:1fr}
 }
 
+
+
+/* ===== Level 30 polish fixes ===== */
+body.level30-fix #passengerTrips,
+body.level30-fix .trip-list,
+body.level30-fix .history-group .booking-list{
+  align-items:start !important;
+}
+body.level30-fix #passengerTrips > *,
+body.level30-fix .trip-list > *,
+body.level30-fix .history-group .booking-list > *{
+  height:auto !important;
+  min-height:0 !important;
+}
+body.level30-fix #passengerTrips .passenger-trip-card,
+body.level30-fix #passengerTrips .book-card,
+body.level30-fix #passengerTrips .trip-row,
+body.level30-fix .trip-list .trip-card,
+body.level30-fix .trip-list .book-card,
+body.level30-fix .trip-list .list-card{
+  height:auto !important;
+  min-height:0 !important;
+  padding-bottom:14px !important;
+}
+body.level30-fix #passengerTrips .trip-details-panel,
+body.level30-fix .trip-list .trip-details-panel{
+  max-height:none !important;
+}
+body.level30-fix .subtitle{letter-spacing:.2px;}
+body.level30-fix .level30-hero-title{font-size:30px !important;line-height:1.08 !important;}
+@media (max-width:980px){
+  body.level30-fix #passengerTrips{grid-template-columns:1fr !important;}
+}
+
 </style>
 
 
@@ -1440,7 +1474,7 @@
   </style>
 
 </head>
-<body class="compact55 level30">
+<body class="level30-fix" class="compact55 level30">
   <div class="container">
     <div id="authScreen" class="login-wrap">
       <div class="card hero">
@@ -1529,7 +1563,7 @@
           <div class="logo">U</div>
           <div>
             <div style="font-size:22px;font-weight:900">UVEL</div>
-            <div class="subtitle">Level 26 • real startup UI • passenger • driver • admin</div>
+            <div class="subtitle">Level 30 • premium UI • passenger • driver • admin</div>
           </div>
         </div>
         <div class="userbox">
@@ -6509,7 +6543,7 @@ function renderDriverAcceptanceBoard() {
     function applyPassengerLevel25Layout() {
       const view = $('passengerView');
       if (!view || view.dataset.level26Passenger === 'done') return;
-      ensureLevel25Banner('passengerView', 'Passenger dashboard', 'Simple booking, live route, and clean trip history.', 'Level 26 startup');
+      ensureLevel25Banner('passengerView', 'Passenger dashboard', 'Simple booking, live route, and clean trip history.', 'Level 30 premium');
       const bookingGrid = view.querySelector('.grid-2');
       const tripsCard = $('passengerTrips')?.closest('.card.section');
       const savedCard = $('savedPlacesList')?.closest('.passenger-mini-card');
@@ -6530,7 +6564,7 @@ function renderDriverAcceptanceBoard() {
     function applyAdminLevel25Layout() {
       const view = $('adminView');
       if (!view || view.dataset.level26Admin === 'done') return;
-      ensureLevel25Banner('adminView', 'Admin dashboard', 'Dispatch first, route visibility, and finance overview in one clean layout.', 'Level 26 startup');
+      ensureLevel25Banner('adminView', 'Admin dashboard', 'Dispatch first, route visibility, and finance overview in one clean layout.', 'Level 30 premium');
       const split = view.querySelector('.split');
       const analytics = $('revenueChart')?.closest('.card.section');
       const opsGrid = $('dispatchBoard')?.closest('.grid-3.top-gap');
@@ -6542,7 +6576,7 @@ function renderDriverAcceptanceBoard() {
     function applyDriverLevel25Layout() {
       const view = $('driverView');
       if (!view || view.dataset.level26Driver === 'done') return;
-      ensureLevel25Banner('driverView', 'Driver dashboard', 'Current trip first, next jobs second, and only the controls that matter.', 'Level 26 startup');
+      ensureLevel25Banner('driverView', 'Driver dashboard', 'Current trip first, next jobs second, and only the controls that matter.', 'Level 30 premium');
       const topGrid = view.querySelector('.driver-focus-grid');
       const statusCard = $('driverAvailabilitySelect')?.closest('.driver-mini-card');
       const nextJobsCard = $('driverAcceptanceBoard')?.closest('.driver-mini-card');
@@ -6573,7 +6607,7 @@ function renderDriverAcceptanceBoard() {
     };
 
     setTimeout(() => {
-      try { applyLevel25CleanUI(); } catch (e) { console.warn('Level 26 startup UI patch failed:', e); }
+      try { applyLevel25CleanUI(); } catch (e) { console.warn('Level 30 premium UI patch failed:', e); }
     }, 0);
 
 </script>
@@ -6584,7 +6618,7 @@ document.addEventListener('DOMContentLoaded', function(){
   body.classList.add('level26');
 
   const subtitle = document.querySelector('.subtitle');
-  if (subtitle) subtitle.textContent = 'Level 26 • real startup UI • passenger • driver • admin';
+  if (subtitle) subtitle.textContent = 'Level 30 • premium UI • passenger • driver • admin';
 
   document.querySelectorAll('.section-title').forEach(el => {
     const t = el.textContent.trim();
@@ -6608,8 +6642,8 @@ document.addEventListener('DOMContentLoaded', function(){
 
   document.querySelectorAll('button, .btn').forEach(btn => {
     const label = (btn.textContent || '').trim();
-    if (label === 'Level 26 startup') {
-      btn.textContent = 'Level 26 startup';
+    if (label === 'Level 30 premium') {
+      btn.textContent = 'Level 30 premium';
     }
   });
 });
