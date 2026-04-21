@@ -1122,6 +1122,194 @@
     .level26 #driverView .driver-upcoming-list{grid-template-columns:1fr !important;}
   }
 
+
+/* ===== Level 30 upgrade ===== */
+.level30{
+  --bg:#04111b;
+  --panel:#0b1e2d;
+  --panel2:#112739;
+  --line:rgba(125, 202, 224, 0.16);
+  --text:#edf7ff;
+  --muted:#9ab8c8;
+  --brand:#2fa4a9;
+  --brand2:#56d1de;
+  --shadow:0 22px 56px rgba(0,0,0,.32);
+  background:
+    radial-gradient(circle at top left, rgba(86,209,222,.10), transparent 22%),
+    radial-gradient(circle at bottom right, rgba(47,164,169,.08), transparent 18%),
+    linear-gradient(180deg,#04111b 0%, #071826 100%);
+}
+.level30 .container{max-width:1400px;padding:18px}
+.level30 .card{
+  background:linear-gradient(180deg, rgba(11,30,45,.97), rgba(8,22,33,.98));
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+}
+.level30 .header{
+  padding:16px 20px;
+  border-radius:22px;
+  background:linear-gradient(180deg, rgba(12,31,46,.94), rgba(8,22,33,.98));
+}
+.level30 .logo{
+  width:56px;height:56px;border-radius:18px;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  box-shadow:0 14px 30px rgba(47,164,169,.28);
+}
+.level30 .section{padding:18px}
+.level30 .section-title{font-size:17px;font-weight:900}
+.level30 .section-sub,.level30 .tiny,.level30 .note,.level30 .footer-note{font-size:12px;line-height:1.45}
+.level30 input,.level30 select,.level30 textarea{
+  background:#081725;
+  border-color:rgba(129, 196, 220, 0.20);
+  border-radius:14px;
+  padding:12px 13px;
+}
+.level30 textarea{min-height:86px}
+.level30 .btn, .level30 button{
+  border-radius:14px;
+  padding:10px 14px;
+  font-size:12px;
+  font-weight:800;
+}
+.level30 .btn.brand{background:linear-gradient(135deg,var(--brand),var(--brand2))}
+.level30 .btn.small{padding:7px 10px;border-radius:11px}
+.level30 .pill,.level30 .badge,.level30 .history-tab-btn,.level30 .status-chip,.level30 .mode-badge{
+  border-radius:999px;
+  font-size:11px;
+  padding:6px 10px;
+}
+.level30 .line{background:rgba(125, 202, 224, 0.12)}
+.level30 .list-card,.level30 .book-card,.level30 .passenger-mini-card,.level30 .booking-summary-box{
+  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.025));
+  border-radius:18px;
+}
+.level30 #authScreen .hero{
+  min-height:480px;
+  padding:28px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(86,209,222,.16), transparent 20%),
+    linear-gradient(180deg, rgba(10,29,43,.98), rgba(8,22,33,.98));
+}
+.level30 #authScreen .hero h1{font-size:44px;max-width:580px}
+.level30 #authScreen .auth-card{padding:26px}
+.level30 #passengerView .grid-2{grid-template-columns:1.08fr .92fr;gap:16px}
+.level30 #passengerView .line,
+.level30 #passengerView .stats,
+.level30 #passengerView .hero-strip{display:none !important}
+.level30 .level30-passenger-hero{
+  margin-bottom:16px;
+  padding:20px;
+  border-radius:24px;
+  background:
+    radial-gradient(circle at 80% 18%, rgba(86,209,222,.16), transparent 16%),
+    linear-gradient(135deg, rgba(47,164,169,.16), rgba(255,255,255,.03));
+  border:1px solid rgba(125, 202, 224, 0.18);
+}
+.level30 .level30-hero-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.level30 .level30-kicker{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:999px;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);
+  font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+}
+.level30 .level30-hero-title{font-size:34px;line-height:1.05;font-weight:900;max-width:620px;margin:10px 0 8px}
+.level30 .level30-hero-copy{font-size:14px;line-height:1.6;color:var(--muted);max-width:720px}
+.level30 .level30-hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+.level30 .level30-hero-stats{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px
+}
+.level30 .level30-stat{
+  padding:13px 14px;border-radius:18px;border:1px solid var(--line);
+  background:rgba(255,255,255,.035)
+}
+.level30 .level30-stat .k{font-size:11px;color:var(--muted)}
+.level30 .level30-stat .v{font-size:18px;font-weight:900;margin-top:5px}
+.level30 #passengerView .card.section:first-of-type{
+  position:relative;
+  overflow:hidden;
+}
+.level30 #passengerView .booking-mode-banner{
+  border-radius:18px;
+  background:linear-gradient(135deg, rgba(47,164,169,.12), rgba(255,255,255,.03));
+}
+.level30 #bookingSummaryBox{
+  position:sticky; top:94px;
+  border-radius:20px;
+  background:linear-gradient(180deg, rgba(9,25,37,.96), rgba(9,25,37,.94));
+  box-shadow:0 14px 34px rgba(0,0,0,.24);
+}
+.level30 #passengerMap{
+  height:290px;
+  border-radius:20px;
+  border-color:rgba(125, 202, 224, 0.18);
+}
+.level30 #passengerView .eta-box .item,
+.level30 #passengerView .meta .item,
+.level30 #passengerView .booking-summary-grid .item{
+  border-radius:16px;
+  background:rgba(255,255,255,.035);
+}
+.level30 #passengerTrips{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.level30 #passengerTrips > *{
+  min-width:0;
+  height:100%;
+  border-radius:20px;
+  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+  box-shadow:0 10px 24px rgba(0,0,0,.16);
+}
+.level30 .passenger-trip-route{font-size:22px}
+.level30 .passenger-trip-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.level30 .passenger-trip-grid .item{border-radius:14px}
+.level30 .passenger-trip-actions{gap:8px}
+.level30 #passengerView .history-tabs{gap:10px}
+.level30 #passengerView .history-tab-btn.active{
+  background:linear-gradient(135deg,var(--brand),var(--brand2));color:#06212d;border:none;
+}
+.level30 #passengerView .compact-passenger-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+}
+.level30 #passengerView .passenger-mini-card{
+  border-radius:20px;
+  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.025));
+}
+.level30 #adminView > .split > .card.section:first-child,
+.level30 #driverView > .driver-focus-grid > .card.section:first-child,
+.level30 #passengerView > .card.section:first-child{
+  background:linear-gradient(90deg, rgba(86,209,222,.11), rgba(255,255,255,.02), rgba(86,209,222,.04));
+}
+.level30 #adminView .toolbar,
+.level30 #adminView .line{display:none !important}
+.level30 #driverView .line,
+.level30 #driverView hr{display:none !important}
+.level30 #driverView .driver-focus-grid{gap:14px}
+.level30 #driverView .driver-current-card,
+.level30 #driverView .driver-mini-card,
+.level30 #driverView .driver-upcoming-card{border-radius:18px}
+@media (max-width: 1180px){
+  .level30 #passengerView .grid-2,
+  .level30 #driverView .driver-focus-grid,
+  .level30 #adminView .split{grid-template-columns:1fr}
+  .level30 #bookingSummaryBox{position:static}
+}
+@media (max-width: 980px){
+  .level30 #passengerTrips,
+  .level30 #passengerView .compact-passenger-grid,
+  .level30 .level30-hero-stats{grid-template-columns:1fr}
+  .level30 #passengerView .passenger-trip-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width: 720px){
+  .level30 .container{padding:12px}
+  .level30 .header{padding:14px}
+  .level30 #authScreen .hero h1,
+  .level30 .level30-hero-title{font-size:28px}
+  .level30 #passengerView .passenger-trip-grid{grid-template-columns:1fr}
+}
+
 </style>
 
 
@@ -1252,7 +1440,7 @@
   </style>
 
 </head>
-<body class="compact55 level25">
+<body class="compact55 level30">
   <div class="container">
     <div id="authScreen" class="login-wrap">
       <div class="card hero">
@@ -1406,6 +1594,27 @@
 
       <div id="passengerView" class="hidden">
         <div id="level18PassengerSnapshot" class="level18-mobile-snapshot"></div>
+
+        <div id="level30PassengerHeroBanner" class="card level30-passenger-hero">
+          <div class="level30-hero-top">
+            <div>
+              <div class="level30-kicker">Passenger experience</div>
+              <div class="level30-hero-title">Book support-friendly trips in a cleaner, faster Level 30 flow.</div>
+              <div class="level30-hero-copy">Smarter booking, clearer ride choice, stronger trip cards, and a more premium startup-style passenger experience without changing your auth flow.</div>
+            </div>
+            <div class="level30-hero-actions">
+              <button class="btn brand" type="button" id="level30QuickBookBtn">New booking</button>
+              <button class="btn" type="button" id="level30QuickTripsBtn">My trips</button>
+            </div>
+          </div>
+          <div class="level30-hero-stats">
+            <div class="level30-stat"><div class="k">Booking mode</div><div class="v" id="level30HeroMode">Standard</div></div>
+            <div class="level30-stat"><div class="k">Vehicle</div><div class="v" id="level30HeroVehicle">Standard</div></div>
+            <div class="level30-stat"><div class="k">Trip status</div><div class="v" id="level30HeroStatus">Ready</div></div>
+            <div class="level30-stat"><div class="k">Passenger view</div><div class="v">Level 30</div></div>
+          </div>
+        </div>
+
         <div class="grid-2">
           <div class="card section">
             <div class="section-title">Passenger booking</div>
@@ -6404,6 +6613,57 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   });
 });
+
+/* ===== Level 30 helpers ===== */
+(function(){
+  document.body.classList.remove('level25','level26','level26clean');
+  document.body.classList.add('level30');
+
+  const quickBook = document.getElementById('level30QuickBookBtn');
+  const quickTrips = document.getElementById('level30QuickTripsBtn');
+  quickBook?.addEventListener('click', () => {
+    document.getElementById('bookingForm')?.scrollIntoView({behavior:'smooth', block:'start'});
+    document.getElementById('pickup')?.focus();
+  });
+  quickTrips?.addEventListener('click', () => {
+    document.getElementById('passengerTrips')?.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  const syncHero = () => {
+    const mode = document.getElementById('rideType')?.value || 'normal';
+    const vehicle = document.getElementById('vehicleCategory')?.value || document.getElementById('vehicleType')?.value || 'standard';
+    const status = document.getElementById('passengerStatusLabel')?.textContent?.trim() || 'Ready';
+    const modeTarget = document.getElementById('level30HeroMode');
+    const vehicleTarget = document.getElementById('level30HeroVehicle');
+    const statusTarget = document.getElementById('level30HeroStatus');
+    if (modeTarget) modeTarget.textContent = mode === 'ndis' ? 'NDIS' : 'Standard';
+    if (vehicleTarget) vehicleTarget.textContent = String(vehicle).replaceAll('_',' ').replace(/\b\w/g, m => m.toUpperCase());
+    if (statusTarget) statusTarget.textContent = status === '--' ? 'Ready' : status;
+  };
+
+  ['rideType','vehicleCategory','vehicleSubtype','vehicleType'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', syncHero);
+  });
+
+  const oldUpdate = window.updateBookingModeUI;
+  if (typeof oldUpdate === 'function') {
+    window.updateBookingModeUI = function(...args){
+      const result = oldUpdate.apply(this,args);
+      syncHero();
+      return result;
+    }
+  }
+  const oldRenderPassenger = window.renderPassengerView;
+  if (typeof oldRenderPassenger === 'function') {
+    window.renderPassengerView = function(...args){
+      const result = oldRenderPassenger.apply(this,args);
+      syncHero();
+      return result;
+    }
+  }
+  setTimeout(syncHero, 500);
+})();
+
 </script>
 
 </body>
