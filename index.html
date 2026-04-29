@@ -1007,7 +1007,168 @@
       .level25 .map{height:220px;}
     }
 
-</style>
+
+    /* ===== UVEL Passenger Merge Upgrade - Level 35 ===== */
+    body.passenger-level35 #passengerView{
+      --p35-card: rgba(255,255,255,.045);
+      --p35-card2: #061826;
+    }
+    body.passenger-level35 #passengerView .level25-banner{
+      background:linear-gradient(135deg, rgba(73,196,213,.18), rgba(255,255,255,.04));
+      border:1px solid rgba(73,196,213,.28);
+      border-radius:22px;
+      padding:18px 20px;
+      margin-bottom:16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    body.passenger-level35 #passengerView .level25-banner-title{font-size:22px;font-weight:900}
+    body.passenger-level35 #passengerView .level25-banner-copy{color:var(--muted);margin-top:4px}
+    body.passenger-level35 #passengerView .level25-badge{
+      padding:9px 13px;
+      border-radius:999px;
+      background:rgba(73,196,213,.14);
+      border:1px solid rgba(73,196,213,.28);
+      font-weight:900;
+      white-space:nowrap;
+    }
+    body.passenger-level35 #passengerView .card.section{
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(10,35,55,.98), rgba(7,24,38,.99));
+    }
+    body.passenger-level35 #passengerView #bookingForm{
+      display:grid;
+      gap:12px;
+    }
+    body.passenger-level35 #passengerView #bookingForm .row{
+      gap:12px;
+    }
+    body.passenger-level35 #passengerView label{
+      font-weight:800;
+      letter-spacing:.01em;
+      color:#c6e2f2;
+    }
+    body.passenger-level35 #passengerView input,
+    body.passenger-level35 #passengerView select,
+    body.passenger-level35 #passengerView textarea{
+      border-radius:14px;
+      background:#061826;
+      border-color:rgba(105,182,218,.28);
+    }
+    body.passenger-level35 #passengerView select{
+      color:var(--text);
+      appearance:auto;
+    }
+    body.passenger-level35 #passengerView .booking-mode-banner{
+      background:linear-gradient(135deg, rgba(73,196,213,.13), rgba(255,255,255,.035));
+      border-radius:18px;
+    }
+    body.passenger-level35 #passengerView .right-actions .btn{
+      min-width:125px;
+    }
+    body.passenger-level35 #passengerTrips{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      align-items:start;
+    }
+    body.passenger-level35 .passenger-trip-card{
+      padding:14px;
+      border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.028));
+      border:1px solid rgba(105,182,218,.22);
+      box-shadow:0 14px 36px rgba(0,0,0,.18);
+    }
+    body.passenger-level35 .passenger-trip-card:hover{
+      border-color:rgba(73,196,213,.48);
+      transform:translateY(-1px);
+      transition:.18s ease;
+    }
+    body.passenger-level35 .passenger-trip-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+    body.passenger-level35 .passenger-trip-route{
+      font-size:18px;
+      line-height:1.22;
+      margin-top:4px;
+      font-weight:900;
+    }
+    body.passenger-level35 .passenger-trip-summary,
+    body.passenger-level35 .level35-trip-actions,
+    body.passenger-level35 .level35-trip-health{
+      display:flex;
+      flex-wrap:wrap;
+      gap:7px;
+      margin-top:10px;
+    }
+    body.passenger-level35 .passenger-trip-pill,
+    body.passenger-level35 .level35-mini-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 9px;
+      border-radius:999px;
+      border:1px solid rgba(105,182,218,.22);
+      background:rgba(255,255,255,.04);
+      font-size:11px;
+      color:#dff5ff;
+    }
+    body.passenger-level35 .passenger-trip-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:8px;
+      margin-top:12px;
+    }
+    body.passenger-level35 .passenger-trip-grid .item{
+      padding:9px 10px;
+      border-radius:13px;
+      background:#061826;
+      border:1px solid rgba(105,182,218,.20);
+      min-width:0;
+    }
+    body.passenger-level35 .passenger-trip-grid .item div:last-child{
+      font-size:13px;
+      font-weight:800;
+      line-height:1.25;
+      overflow-wrap:anywhere;
+    }
+    body.passenger-level35 .level35-trip-actions{
+      justify-content:flex-end;
+      margin-top:12px;
+    }
+    body.passenger-level35 .level35-trip-actions .btn{
+      padding:7px 10px;
+      border-radius:11px;
+      font-size:12px;
+    }
+    body.passenger-level35 .trip-details-toggle{
+      padding:9px 11px;
+      border-radius:12px;
+      font-size:12px;
+    }
+    body.passenger-level35 .trip-details-panel{
+      padding:11px;
+      border-radius:12px;
+      background:#061826;
+    }
+    body.passenger-level35 .level35-payment-due{
+      border-color:rgba(240,194,79,.42);
+      box-shadow:0 0 0 1px rgba(240,194,79,.10) inset;
+    }
+    body.passenger-level35 .level35-status-paid{color:#87ebb0}
+    body.passenger-level35 .level35-status-unpaid{color:#ffd76f}
+    @media (max-width:1100px){
+      body.passenger-level35 #passengerTrips,
+      body.passenger-level35 .passenger-trip-grid{grid-template-columns:1fr}
+      body.passenger-level35 #passengerView .level25-banner{align-items:flex-start;flex-direction:column}
+    }
+
+  </style>
 
 
   <style id="level25CleanPatch">
@@ -4335,26 +4496,31 @@ function renderDriverTrips() {
       const statusLabel = formatStatusLabel(b.status);
       const serviceLabel = escapeHtml(formatServiceTypeLabel(b.serviceType || b.tripCategory || "medical"));
       const vehicleLabel = escapeHtml(`${formatVehicleCategoryLabel(b.vehicleCategory || "standard")} • ${formatVehicleSubtypeLabel(b.vehicleSubtype || "standard_compact")}`);
-      const paymentLabel = escapeHtml(b.paymentStatus || "unpaid");
+      const paymentRaw = String(b.paymentStatus || "unpaid").toLowerCase();
+      const paymentLabel = escapeHtml(paymentRaw);
+      const isPaid = paymentRaw === "paid";
+      const isNormal = (b.rideType || "normal") === "normal";
       const supportLabel = escapeHtml(formatSupportLevelLabel(b.supportLevel || (b.wheelchairRequired === "yes" ? "wheelchair" : b.companionRequired === "yes" ? "companion" : "standard")));
       const statusTone = b.status === "completed" ? "completed" : b.status === "assigned" ? "assigned" : b.status === "cancelled" ? "cancelled" : "pending";
-      const needsAttention = b.status === "pending" || b.paymentStatus !== "paid";
+      const paymentDue = isNormal && !isPaid && b.status !== "cancelled";
+      const canRate = b.status === "completed";
       return `
-        <div class="passenger-trip-card level202-passenger">
+        <div class="passenger-trip-card level202-passenger ${paymentDue ? "level35-payment-due" : ""}" role="listitem">
           <div class="passenger-trip-top">
             <div>
-              <div style="font-size:18px;font-weight:900">${escapeHtml(b.bookingCode || "Trip")}</div>
+              <div style="font-size:15px;font-weight:900">${escapeHtml(b.bookingCode || "Trip")}</div>
               <div class="passenger-trip-route">${escapeHtml(b.pickup)} → ${escapeHtml(b.destination)}</div>
               <div class="passenger-trip-summary">
-                <span class="passenger-trip-pill">${escapeHtml(b.rideType === "ndis" ? "NDIS" : "Normal")}</span>
-                <span class="passenger-trip-pill">${serviceLabel}</span>
-                <span class="passenger-trip-pill">${vehicleLabel}</span>
+                <span class="passenger-trip-pill">${escapeHtml(b.rideType === "ndis" ? "NDIS booking" : "Normal booking")}</span>
+                <span class="passenger-trip-pill">Service: ${serviceLabel}</span>
+                <span class="passenger-trip-pill">Vehicle: ${vehicleLabel}</span>
+                <span class="passenger-trip-pill">Support Level: ${supportLabel}</span>
               </div>
-              <div class="level202-trip-health">
-                <span class="level202-mini-pill">${escapeHtml(formatPassengerStageLabel(b))}</span>
-                <span class="level202-mini-pill">${escapeHtml(getEtaLabel(b))}</span>
-                <span class="level202-mini-pill">${Number(b.distanceKm || 0).toFixed(1)} km</span>
-                ${needsAttention ? `<span class="level202-mini-pill">Needs follow-up</span>` : `<span class="level202-mini-pill">On track</span>`}
+              <div class="level35-trip-health">
+                <span class="level35-mini-pill">${escapeHtml(formatPassengerStageLabel(b))}</span>
+                <span class="level35-mini-pill">${escapeHtml(getEtaLabel(b))}</span>
+                <span class="level35-mini-pill">${Number(b.distanceKm || 0).toFixed(1)} km</span>
+                ${paymentDue ? `<span class="level35-mini-pill level35-status-unpaid">Payment required</span>` : `<span class="level35-mini-pill level35-status-paid">${isPaid ? "Paid" : "Invoice / referral"}</span>`}
               </div>
             </div>
             <span class="badge ${statusTone}">${escapeHtml(statusLabel)}</span>
@@ -4362,17 +4528,23 @@ function renderDriverTrips() {
           <div class="passenger-trip-grid">
             <div class="item"><div class="tiny">Date / Time</div><div>${when}</div></div>
             <div class="item"><div class="tiny">Driver</div><div>${summaryDriver}</div></div>
-            <div class="item"><div class="tiny">Fare</div><div>$${Number(b.fare || 0).toFixed(2)}</div></div>
-            <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || "--")}<br/><span class="badge ${b.paymentStatus === "paid" ? "completed" : "pending"}">${paymentLabel}</span></div></div>
+            <div class="item"><div class="tiny">Trip price</div><div>$${Number(b.fare || 0).toFixed(2)}</div></div>
+            <div class="item"><div class="tiny">Payment</div><div>${escapeHtml(b.paymentMethod || (isNormal ? "Card / Direct" : "Invoice / Referral"))}<br/><span class="badge ${isPaid ? "completed" : "pending"}">${paymentLabel}</span></div></div>
           </div>
           ${getTimelineHTML(b)}
+          <div class="level35-trip-actions">
+            ${paymentDue ? `<button class="btn brand small" type="button" onclick="window.startPassengerCardPayment('${escapeHtml(b.id)}')">💳 Pay Now</button>` : ""}
+            <button class="btn small" type="button" onclick="window.focusPassengerTripOnMap('${escapeHtml(b.id)}')">View route</button>
+            ${canRate ? `<button class="btn small" type="button" onclick="window.quickPassengerRating('${escapeHtml(b.id)}')">Rate trip</button>` : ""}
+            ${b.status !== "completed" && b.status !== "cancelled" ? `<button class="btn small danger" type="button" onclick="window.cancelBooking('${escapeHtml(b.id)}')">Cancel</button>` : ""}
+          </div>
           <details class="top-gap">
             <summary class="trip-details-toggle">View details</summary>
             <div class="trip-details-panel">
-              <div class="detail-line">Support: ${supportLabel}${b.returnTrip === "yes" ? ` • Return ${escapeHtml(b.returnTime || "scheduled")}` : ""}${b.pickupWindow ? ` • Window ${escapeHtml(b.pickupWindow)}` : ""}</div>
+              <div class="detail-line">Support Level: ${supportLabel}${b.returnTrip === "yes" ? ` • Return ${escapeHtml(b.returnTime || "scheduled")}` : ""}${b.pickupWindow ? ` • Window ${escapeHtml(b.pickupWindow)}` : ""}</div>
               <div class="detail-line">Ride choice: ${escapeHtml(formatVehicleCategoryLabel(b.vehicleCategory || "standard"))} • ${escapeHtml(formatVehicleSubtypeLabel(b.vehicleSubtype || "standard_compact"))}${b.vehiclePreference && b.vehiclePreference !== "none" ? ` • ${escapeHtml(b.vehiclePreference)}` : ""}</div>
               <div class="detail-line">Referral: ${escapeHtml(b.referralSource || "self")}${b.referralEmail ? ` • ${escapeHtml(b.referralEmail)}` : ""}${b.recurringPattern && b.recurringPattern !== "once" ? ` • ${escapeHtml(b.recurringPattern)}` : ""}</div>
-              <div class="detail-line">Trip support:${b.wheelchairRequired === "yes" ? ` Wheelchair` : " None"}${b.companionRequired === "yes" ? ` • Companion` : ""}${b.extraStop ? ` • Extra stop ${escapeHtml(b.extraStop)}` : ""}${Number(b.waitMinutes || 0) > 0 ? ` • Wait ${escapeHtml(String(b.waitMinutes))} min` : ""}</div>
+              <div class="detail-line">Trip support:${b.wheelchairRequired === "yes" ? ` Wheelchair` : " Standard"}${b.companionRequired === "yes" ? ` • Companion` : ""}${b.extraStop ? ` • Extra stop ${escapeHtml(b.extraStop)}` : ""}${Number(b.waitMinutes || 0) > 0 ? ` • Wait ${escapeHtml(String(b.waitMinutes))} min` : ""}</div>
               ${b.notes ? `<div class="detail-line">Notes: ${escapeHtml(b.notes)}</div>` : ""}
               ${b.driverLat ? `<div class="detail-line">Live tracking: on${b.driverSpeedKmh ? ` • ${Number(b.driverSpeedKmh).toFixed(0)} km/h` : ""}</div>` : `<div class="detail-line">Live tracking: off</div>`}
               ${b.pickupOtp || b.dropoffOtp ? `<div class="detail-line">Trip security: pickup ${escapeHtml(b.pickupOtp || "----")} • drop-off ${escapeHtml(b.dropoffOtp || "----")}</div>` : ""}
@@ -4383,6 +4555,7 @@ function renderDriverTrips() {
       `;
     }
 
+    
     function bookingCardHTML(b) {
       return `
         <div class="trip-head">
@@ -6250,6 +6423,110 @@ function renderDriverAcceptanceBoard() {
 
     setTimeout(() => {
       try { applyLevel25CleanUI(); } catch (e) { console.warn('Level 25 clean UI patch failed:', e); }
+    }, 0);
+
+
+    /* ===== UVEL Passenger Merge Upgrade - Level 35 logic ===== */
+    function applyPassengerLevel35Merge() {
+      document.body.classList.add("passenger-level35");
+      const view = $("passengerView");
+      if (!view) return;
+
+      ensureLevel25Banner('passengerView', 'Passenger dashboard', 'Book rides, view payment status, track trips, and manage Normal or NDIS trips in one clean view.', 'Level 35 merged');
+
+      const bookingTitle = view.querySelector('#bookingForm')?.closest('.card.section')?.querySelector('.section-title');
+      if (bookingTitle) bookingTitle.textContent = 'Book a Ride';
+
+      const bookingSub = view.querySelector('#bookingForm')?.closest('.card.section')?.querySelector('.section-sub');
+      if (bookingSub) bookingSub.textContent = 'Normal bookings can show Pay Now. NDIS bookings stay invoice/referral based.';
+
+      const rideType = $("rideType");
+      if (rideType) {
+        const normalText = rideType.querySelector('option[value="normal"]');
+        const ndisText = rideType.querySelector('option[value="ndis"]');
+        if (normalText) normalText.textContent = "Normal Booking";
+        if (ndisText) ndisText.textContent = "NDIS Booking";
+      }
+
+      const serviceLabel = $("serviceType")?.closest('div')?.querySelector('label');
+      if (serviceLabel) serviceLabel.textContent = "Service Type";
+
+      const supportLabel = $("supportLevel")?.closest('div')?.querySelector('label');
+      if (supportLabel) supportLabel.textContent = "Support Level";
+
+      const categoryLabel = $("vehicleCategory")?.closest('div')?.querySelector('label');
+      if (categoryLabel) categoryLabel.textContent = "Vehicle Type";
+
+      const subtypeLabel = $("vehicleSubtype")?.closest('div')?.querySelector('label');
+      if (subtypeLabel) subtypeLabel.textContent = "Vehicle Option";
+
+      const tripsTitle = $("passengerTrips")?.closest('.card.section')?.querySelector('.section-title');
+      if (tripsTitle) tripsTitle.textContent = "My Trips";
+
+      const tripsSub = $("passengerTrips")?.closest('.card.section')?.querySelector('.section-sub');
+      if (tripsSub) tripsSub.textContent = "Today, upcoming, and history with trip price and payment status.";
+
+      const latest = getLatestPassengerBooking?.();
+      const payBtn = $("payNowBtn");
+      if (payBtn) {
+        const canPay = latest && latest.rideType === "normal" && String(latest.paymentStatus || "unpaid").toLowerCase() !== "paid" && latest.status !== "cancelled";
+        payBtn.style.display = canPay ? "inline-block" : "none";
+        payBtn.textContent = "💳 Pay Now";
+      }
+    }
+
+    window.startPassengerCardPayment = async function(bookingId) {
+      const booking = allBookings.find(b => b.id === bookingId);
+      if (!booking) return alert("Booking not found.");
+      await startStripeCheckout(booking);
+    };
+
+    window.focusPassengerTripOnMap = function(bookingId) {
+      const booking = allBookings.find(b => b.id === bookingId);
+      if (!booking) return alert("Booking not found.");
+      try {
+        updateMapForBooking(passengerMap, passengerMapState, booking, "passenger");
+        $("passengerRouteLabel").textContent = `${booking.pickup} → ${booking.destination}`;
+        $("passengerStatusLabel").textContent = formatStatusLabel(booking.status);
+        $("passengerStageLabel").textContent = formatPassengerStageLabel(booking);
+        $("passengerEtaLabel").textContent = getEtaLabel(booking);
+        $("passengerKmLabel").textContent = `${Number(booking.distanceKm || 0).toFixed(1)} km`;
+        $("passengerMap")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      } catch (e) {
+        console.warn("Could not focus passenger trip on map", e);
+      }
+    };
+
+    window.quickPassengerRating = async function(bookingId) {
+      const booking = allBookings.find(b => b.id === bookingId);
+      if (!booking) return alert("Booking not found.");
+      const rating = window.prompt("Rate this trip from 1 to 5 stars:");
+      if (!rating) return;
+      const num = Number(rating);
+      if (!Number.isFinite(num) || num < 1 || num > 5) return alert("Please enter a number from 1 to 5.");
+      let reason = "";
+      if (num <= 3) {
+        reason = window.prompt("Please select/write a reason for low rating (late, behaviour, vehicle, unsafe driving, booking issue, payment issue, other):") || "";
+        if (!reason.trim()) return alert("A reason is required for 1–3 star ratings.");
+      }
+      const comment = window.prompt("Optional comment:") || "";
+      await updateDoc(doc(db, "bookings", bookingId), {
+        passengerRating: num,
+        passengerRatingReason: reason.trim(),
+        passengerRatingComment: comment.trim(),
+        updatedAt: serverTimestamp()
+      });
+      alert("Rating saved.");
+    };
+
+    const __uvelRenderEverything35PassengerMerge = renderEverything;
+    renderEverything = async function() {
+      await __uvelRenderEverything35PassengerMerge();
+      try { applyPassengerLevel35Merge(); } catch (e) { console.warn("Passenger Level 35 merge failed:", e); }
+    };
+
+    setTimeout(() => {
+      try { applyPassengerLevel35Merge(); } catch (e) { console.warn("Passenger Level 35 initial merge failed:", e); }
     }, 0);
 
 </script>
